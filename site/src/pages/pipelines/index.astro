@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const all = await getCollection('content');
+const pipelines = all
+  .filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived')
+  .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
+
+function phaseCount(phases: unknown): number {
+  return Array.isArray(phases) ? phases.length : 0;
+}
+---
+<Base title="Pipelines">
+  <h1 class="mb-4 text-2xl font-bold">Pipelines <span class="text-sm font-normal text-(--color-text-muted)">({pipelines.length})</span></h1>
+  <p class="mb-6 text-(--color-text-secondary)">Ordered Mold sequences composing a harness journey.</p>
+
+  <table class="data-table">
+    <thead><tr><th>Pipeline</th><th>Summary</th><th>Phases</th><th>Status</th></tr></thead>
+    <tbody>
+      {pipelines.map(p => {
+        const d = p.data as any;
+        return (
+          <tr>
+            <td><a href={`${base}/${p.id}/`}>{d.title}</a></td>
+            <td class="text-sm text-(--color-text-muted)">{d.summary}</td>
+            <td>{phaseCount(d.phases)}</td>
+            <td><span class={`badge badge-${d.status}`}>{d.status}</span></td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</Base>

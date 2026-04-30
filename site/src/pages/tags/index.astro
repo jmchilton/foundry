@@ -1,0 +1,51 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const allNotes = await getCollection('content');
+
+const tagCounts = new Map<string, number>();
+for (const note of allNotes) {
+  if (note.data.status === 'archived') continue;
+  for (const tag of note.data.tags) {
+    tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  }
+}
+
+const sorted = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+const noteTypeTags = sorted.filter(([t]) =>
+  ['mold', 'pattern', 'cli-reference', 'pipeline'].includes(t) || t.startsWith('research/')
+);
+const sourceTags = sorted.filter(([t]) => t.startsWith('source/'));
+const targetTags = sorted.filter(([t]) => t.startsWith('target/'));
+const toolTags = sorted.filter(([t]) => t.startsWith('tool/') || t.startsWith('cli/'));
+const seen = new Set([...noteTypeTags, ...sourceTags, ...targetTags, ...toolTags].map(([t]) => t));
+const otherTags = sorted.filter(([t]) => !seen.has(t));
+
+const groups = [
+  { label: 'Note Type', tags: noteTypeTags },
+  { label: 'Source', tags: sourceTags },
+  { label: 'Target', tags: targetTags },
+  { label: 'Tool / CLI', tags: toolTags },
+  { label: 'Other', tags: otherTags },
+];
+---
+<Base title="Tags">
+  <h1 class="mb-4 text-2xl font-bold">Tags</h1>
+
+  {groups.map(g => g.tags.length > 0 && (
+    <>
+      <h2 class="mt-8 mb-3 text-xl font-semibold border-b-2 border-(--color-accent)/20 pb-2">{g.label}</h2>
+      <ul class="list-none my-2 mb-6 p-0 flex flex-wrap gap-2">
+        {g.tags.map(([tag, count]) => (
+          <li class="flex items-center gap-1">
+            <a href={`${base}/tags/${tag}/`} class="no-underline"><span class="tag">{tag}</span></a>
+            <span class="text-xs text-(--color-text-secondary)">({count})</span>
+          </li>
+        ))}
+      </ul>
+    </>
+  ))}
+</Base>

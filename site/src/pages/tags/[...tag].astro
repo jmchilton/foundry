@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+export async function getStaticPaths() {
+  const allNotes = await getCollection('content');
+  const tags = new Set<string>();
+  for (const note of allNotes) {
+    for (const tag of note.data.tags) tags.add(tag);
+  }
+  return [...tags].map(tag => ({ params: { tag }, props: { tag } }));
+}
+
+const { tag } = Astro.props;
+const allNotes = await getCollection('content');
+
+const notes = allNotes
+  .filter(n => n.data.tags.includes(tag) && n.data.status !== 'archived')
+  .sort((a, b) => b.data.revised.getTime() - a.data.revised.getTime());
+
+const coCounts = new Map<string, number>();
+for (const n of allNotes) {
+  if (!n.data.tags.includes(tag)) continue;
+  for (const t of n.data.tags) {
+    if (t === tag) continue;
+    coCounts.set(t, (coCounts.get(t) ?? 0) + 1);
+  }
+}
+const coTags = [...coCounts.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .slice(0, 15);
+
+function formatDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function noteTitle(n: typeof allNotes[number]): string {
+  const data = n.data as any;
+  if (data.title) return data.title;
+  if (data.name) return data.name;
+  return n.id.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+---
+<Base title={`Tag: ${tag}`}>
+  <h1 class="mb-4 text-2xl font-bold">Tag: <span class="tag">{tag}</span></h1>
+  <p class="mb-4 text-(--color-text-secondary)">{notes.length} note{notes.length !== 1 ? 's' : ''}</p>
+
+  {coTags.length > 0 && (
+    <div class="mb-6 p-3 rounded-lg bg-(--color-surface-raised) border-l-4 border-(--color-accent)">
+      <h2 class="text-sm font-semibold mb-2 text-(--color-text-secondary) uppercase tracking-wide">Frequently co-occurs with</h2>
+      <div class="flex flex-wrap gap-2">
+        {coTags.map(([t, count]) => (
+          <a href={`${base}/tags/${t}/`} class="no-underline inline-flex items-baseline gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-(--color-surface) border border-(--color-border-subtle) text-(--color-link) hover:bg-(--color-surface-hover) transition-colors">
+            <span>{t}</span>
+            <span class="text-(--color-text-secondary)">×{count}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <table class="data-table">
+    <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Revised</th><th>Rev</th></tr></thead>
+    <tbody>
+      {notes.map(n => (
+        <tr>
+          <td><a href={`${base}/${n.id}/`}>{noteTitle(n)}</a></td>
+          <td><span class="text-xs">{n.data.type}</span></td>
+          <td><span class={`badge badge-${n.data.status}`}>{n.data.status}</span></td>
+          <td>{formatDate(n.data.revised)}</td>
+          <td>{n.data.revision}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</Base>

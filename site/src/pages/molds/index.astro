@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const all = await getCollection('content');
+const molds = all.filter(n => n.data.type === 'mold' && n.data.status !== 'archived');
+
+// Group by axis.
+const AXES = ['source-specific', 'target-specific', 'tool-specific', 'generic'] as const;
+const byAxis = new Map<string, typeof molds>();
+for (const m of molds) {
+  const ax = (m.data as any).axis;
+  const list = byAxis.get(ax) ?? [];
+  list.push(m);
+  byAxis.set(ax, list);
+}
+for (const [, list] of byAxis) list.sort((a, b) => (a.data as any).name.localeCompare((b.data as any).name));
+---
+<Base title="Molds">
+  <h1 class="mb-4 text-2xl font-bold">Molds <span class="text-sm font-normal text-(--color-text-muted)">({molds.length})</span></h1>
+  <p class="mb-6 text-(--color-text-secondary)">Source artifacts for casting. Grouped by axis.</p>
+
+  {AXES.map(axis => {
+    const list = byAxis.get(axis) ?? [];
+    if (list.length === 0) return null;
+    return (
+      <section class="mb-8">
+        <h2 class="text-xl font-bold border-b-2 border-(--color-accent)/20 pb-2 mb-3">
+          <span class="text-xs px-2 py-1 rounded bg-(--color-galaxy-primary) text-white font-mono align-middle">{axis}</span>
+          <span class="ml-2 text-sm font-normal text-(--color-text-muted)">({list.length})</span>
+        </h2>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Specifier</th><th>Summary</th><th>Status</th></tr></thead>
+          <tbody>
+            {list.map(m => {
+              const d = m.data as any;
+              const spec = d.source ?? d.target ?? d.tool ?? '—';
+              return (
+                <tr>
+                  <td><a href={`${base}/${m.id}/`} class="font-mono">{d.name}</a></td>
+                  <td class="font-mono text-sm">{spec}</td>
+                  <td class="text-sm text-(--color-text-muted)">{d.summary}</td>
+                  <td><span class={`badge badge-${d.status}`}>{d.status}</span></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </section>
+    );
+  })}
+</Base>

@@ -1,0 +1,41 @@
+---
+type: pipeline
+title: NEXTFLOW → GALAXY
+tags:
+  - pipeline
+  - source/nextflow
+  - target/galaxy
+status: draft
+created: 2026-04-30
+revised: 2026-04-30
+revision: 1
+ai_generated: true
+summary: "Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow."
+phases:
+  - mold: "[[summarize-nextflow]]"
+  - mold: "[[summary-to-galaxy-data-flow]]"
+  - mold: "[[summary-to-galaxy-template]]"
+  - mold: "[[compare-against-iwc-exemplar]]"
+  - branch: discover-or-author
+    loop: true
+    branches:
+      - "[[discover-shed-tool]]"
+      - fallthrough: "[[author-galaxy-tool-wrapper]]"
+  - mold: "[[summarize-galaxy-tool]]"
+    loop: true
+  - mold: "[[implement-galaxy-tool-step]]"
+    loop: true
+  - mold: "[[validate-with-gxwf]]"
+    loop: true
+  - mold: "[[nextflow-test-to-target-tests]]"
+  - mold: "[[implement-galaxy-workflow-test]]"
+  - mold: "[[validate-with-gxwf]]"
+  - mold: "[[run-workflow-test]]"
+  - mold: "[[debug-galaxy-workflow-output]]"
+---
+
+# NEXTFLOW → GALAXY
+
+Direct path. Lifted from `docs/HARNESS_PIPELINES.md` §"NEXTFLOW → GALAXY".
+
+Replaces the prior-art hand-authored `nf-to-galaxy` skill — same goal, decomposed into Molds, validation-driven (gxwf static schema replaces the prose caveat catalog).

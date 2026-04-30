@@ -1,0 +1,39 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  entry: CollectionEntry<'content'>;
+  pageTitle: string;
+  typeLabel: string;
+}
+
+const { entry, pageTitle, typeLabel } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const data = entry.data;
+---
+<header class="mb-6 border-l-2 border-(--color-accent) pl-4 sm:pl-5">
+  <a href={`${base}/`} class="inline-flex items-center gap-1 text-xs text-(--color-text-secondary) hover:text-(--color-link) no-underline transition-colors">
+    <span aria-hidden="true">&larr;</span> Dashboard
+  </a>
+  <div class="mt-1 flex items-baseline gap-2">
+    <span class="text-xs uppercase tracking-wider text-(--color-text-secondary)">{typeLabel}</span>
+  </div>
+  <h1 class="mt-1 text-3xl font-bold text-balance text-(--color-text-primary)" data-pagefind-meta="title">{pageTitle}</h1>
+  {data.summary && (
+    <p class="mt-2 text-base text-(--color-text-secondary) text-pretty" data-pagefind-weight="10" data-pagefind-meta="summary">{data.summary}</p>
+  )}
+  <div class="mt-3 flex flex-wrap gap-2 items-center">
+    <span class={`badge badge-${data.status}`}>{data.status}</span>
+    {data.tags.map(t => <a href={`${base}/tags/${t}/`} class="no-underline"><span class="tag">{t}</span></a>)}
+  </div>
+  <div class="mt-3 flex gap-2">
+    <a href={`${base}/raw/${entry.id}.md`}
+       class="text-xs px-2.5 py-1 rounded border border-(--color-border) text-(--color-text-secondary) no-underline hover:bg-(--color-surface-hover) hover:text-(--color-text-primary) transition-colors">
+      Raw
+    </a>
+    <button class="copy-raw text-xs px-2.5 py-1 rounded border border-(--color-border) text-(--color-text-secondary) cursor-pointer hover:bg-(--color-surface-hover) hover:text-(--color-text-primary) transition-colors"
+       data-url={`${base}/raw/${entry.id}.md`}>
+      Copy
+    </button>
+  </div>
+</header>

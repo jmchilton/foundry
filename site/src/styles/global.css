@@ -1,0 +1,240 @@
+@import "@fontsource/atkinson-hyperlegible/400.css";
+@import "@fontsource/atkinson-hyperlegible/700.css";
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Galaxy brand */
+  --color-galaxy-primary: #25537b;
+  --color-galaxy-dark: #2c3143;
+  --color-galaxy-gold: #ffd700;
+  --color-galaxy-gold-dark: #d0bd2a;
+  --color-galaxy-grey: #58585a;
+
+  /* Surfaces */
+  --color-surface: #ffffff;
+  --color-surface-raised: #f6f8fa;
+  --color-surface-hover: #edf4fa;
+  --color-surface-dark: #2c3143;
+  --color-surface-dark-medium: #3c435c;
+
+  /* Text */
+  --color-text-primary: #2c3143;
+  --color-text-secondary: #58585a;
+  --color-text-muted: #8b949e;
+  --color-text-on-dark: #f8f9fa;
+
+  /* Links */
+  --color-link: #25537b;
+  --color-link-hover: #ffd700;
+
+  /* Borders */
+  --color-border: #d1d5db;
+  --color-border-subtle: #e1e4e8;
+
+  /* Accent — slightly desaturated from pure #ffd700 for less screaming gold */
+  --color-accent: #e8c547;
+  --color-accent-hover: #f2d55a;
+
+  /* Badges */
+  --color-badge-draft-bg: #fff3cd;
+  --color-badge-draft-text: #856404;
+  --color-badge-reviewed-bg: #d4edda;
+  --color-badge-reviewed-text: #155724;
+  --color-badge-revised-bg: #cce5ff;
+  --color-badge-revised-text: #004085;
+  --color-badge-stale-bg: #f8d7da;
+  --color-badge-stale-text: #721c24;
+  --color-badge-archived-bg: #d6d8db;
+  --color-badge-archived-text: #383d41;
+
+  /* Tags */
+  --color-tag-bg: #edf4fa;
+  --color-tag-bg-hover: #cde0f0;
+
+  /* Fonts */
+  --font-sans: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: Monaco, Menlo, Consolas, 'Courier New', monospace;
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-surface: #0d1117;
+  --color-surface-raised: #161b22;
+  --color-surface-hover: #21262d;
+  --color-border: #30363d;
+  --color-border-subtle: #21262d;
+  --color-text-primary: #e6edf3;
+  --color-text-secondary: #8b949e;
+  --color-text-muted: #6e7681;
+  --color-link: #6fa5d4;
+  --color-link-hover: #ffd700;
+  --color-badge-draft-bg: #3d2e00;
+  --color-badge-draft-text: #f0c000;
+  --color-badge-reviewed-bg: #0f2d16;
+  --color-badge-reviewed-text: #56d364;
+  --color-badge-revised-bg: #0c2d6b;
+  --color-badge-revised-text: #79b8ff;
+  --color-badge-stale-bg: #3d1418;
+  --color-badge-stale-text: #f85149;
+  --color-badge-archived-bg: #21262d;
+  --color-badge-archived-text: #8b949e;
+  --color-tag-bg: #21262d;
+  --color-tag-bg-hover: #30363d;
+}
+
+/* --- Grid background --- */
+
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(37, 83, 123, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 83, 123, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.dark .bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* --- Component classes --- */
+
+.badge {
+  @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium;
+}
+.badge-draft     { background-color: var(--color-badge-draft-bg);    color: var(--color-badge-draft-text); }
+.badge-reviewed  { background-color: var(--color-badge-reviewed-bg); color: var(--color-badge-reviewed-text); }
+.badge-revised   { background-color: var(--color-badge-revised-bg);  color: var(--color-badge-revised-text); }
+.badge-stale     { background-color: var(--color-badge-stale-bg);    color: var(--color-badge-stale-text); }
+.badge-archived  { background-color: var(--color-badge-archived-bg); color: var(--color-badge-archived-text); }
+
+.tag {
+  @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-150;
+  background-color: var(--color-tag-bg);
+  color: var(--color-galaxy-primary);
+}
+a:hover .tag {
+  background-color: var(--color-accent);
+  color: var(--color-galaxy-dark);
+}
+
+.dangling {
+  color: var(--color-text-muted);
+  @apply italic;
+}
+
+/* --- Accessibility --- */
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  z-index: 100;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-galaxy-dark);
+  color: var(--color-text-on-dark);
+  border-radius: 0.25rem;
+  text-decoration: none;
+  transition: top 150ms ease;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* Active nav link in header */
+.nav-link-active {
+  color: var(--color-accent) !important;
+  opacity: 1 !important;
+}
+.nav-link-active::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: var(--color-accent);
+  margin-top: 2px;
+  border-radius: 1px;
+}
+
+.data-table {
+  @apply w-full border-collapse my-2 mb-6 text-sm;
+  font-variant-numeric: tabular-nums;
+}
+.data-table th {
+  @apply text-left px-3 py-2 font-semibold border-b text-white;
+  background-color: var(--color-galaxy-primary);
+  border-color: var(--color-border-subtle);
+}
+.data-table td {
+  @apply px-3 py-2 border-b;
+  border-color: var(--color-border-subtle);
+}
+.data-table tbody tr {
+  @apply transition-colors duration-100;
+}
+.data-table tbody tr:hover {
+  background-color: var(--color-surface-hover);
+}
+.data-table a {
+  color: var(--color-link);
+  @apply hover:underline;
+}
+
+.meta dt { @apply font-semibold inline; }
+.meta dd { @apply inline mr-4; }
+
+/* --- Prose overrides (Galaxy-aligned) --- */
+
+.prose :where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  color: var(--color-link);
+  text-decoration-color: color-mix(in srgb, var(--color-link) 40%, transparent);
+}
+.prose :where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)):hover {
+  color: var(--color-link-hover);
+  text-decoration-color: var(--color-link-hover);
+}
+.prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  color: var(--color-galaxy-dark);
+}
+.dark .prose :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  color: var(--color-text-primary);
+}
+.prose :where(h1, h2, h3):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  text-wrap: balance;
+}
+.prose :where(p, li):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  text-wrap: pretty;
+}
+.prose :where(h2):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  border-bottom: 2px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+  padding-bottom: 0.5rem;
+}
+.prose :where(blockquote):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  border-left-color: var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-accent) 4%, transparent);
+}
+.prose :where(code):not(:where(pre *, [class~="not-prose"],[class~="not-prose"] *)) {
+  background-color: var(--color-surface-hover);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+}
+.dark .prose :where(code):not(:where(pre *, [class~="not-prose"],[class~="not-prose"] *)) {
+  background-color: var(--color-surface-raised);
+}
+.prose :where(pre):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  background-color: var(--color-galaxy-dark);
+  border-radius: 0.5rem;
+}
+.prose :where(th):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  background-color: var(--color-galaxy-primary);
+  color: white;
+  padding: 0.5rem 0.75rem;
+}

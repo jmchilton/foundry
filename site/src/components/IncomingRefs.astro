@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { Backlink } from '../lib/wiki-links';
+
+interface Props {
+  incoming: (Backlink & { source: CollectionEntry<'content'> })[];
+}
+
+const { incoming } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const FIELD_LABELS: Record<string, string> = {
+  parent_pattern: 'parent pattern',
+  related_notes: 'related note',
+  related_patterns: 'related pattern',
+  related_molds: 'related mold',
+  patterns: 'pattern of mold',
+  cli_commands: 'cli command of mold',
+  prompts: 'prompt of mold',
+  phases: 'phase of pipeline',
+};
+
+function fileTitle(entry: CollectionEntry<'content'>): string {
+  const data = entry.data as any;
+  if (data.title) return data.title;
+  if (data.name) return data.name;
+  return entry.id.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+---
+{incoming.length > 0 && (
+  <section class="mt-8 pt-6 border-t border-(--color-border)">
+    <h2 class="text-lg font-semibold mb-3">Incoming References <span class="text-sm font-normal text-(--color-text-secondary)">({incoming.length})</span></h2>
+    <ul class="space-y-2 list-none pl-0">
+      {incoming.map(b => {
+        const s = b.source;
+        return (
+          <li class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+            <a href={`${base}/${s.id}/`} class="text-(--color-link) hover:underline font-medium">{fileTitle(s)}</a>
+            <span class="text-xs px-1.5 py-0.5 rounded bg-(--color-surface-raised) text-(--color-text-secondary) w-fit">{FIELD_LABELS[b.field] ?? b.field}</span>
+            {s.data.summary && <span class="text-sm text-(--color-text-secondary) italic">— {s.data.summary}</span>}
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+)}

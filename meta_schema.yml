@@ -1,0 +1,226 @@
+# meta_schema.yml — JSON Schema Draft 07 in YAML.
+# Frontmatter contract for all notes under content/.
+# The validator injects meta_tags.yml keys into tags.items.enum at runtime.
+# See INITIAL_ARCHITECTURE.md §5 for the full design.
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "Galaxy Workflow Foundry Frontmatter"
+type: object
+required: [type, tags, status, created, revised, revision, ai_generated, summary]
+
+properties:
+  type:
+    type: string
+    enum: [mold, pattern, cli-command, pipeline, research, schema]
+  tags:
+    type: array
+    items:
+      type: string
+      enum: []  # injected at runtime from meta_tags.yml
+    minItems: 1
+  status:
+    type: string
+    enum: [draft, reviewed, revised, stale, archived]
+  created:
+    type: string
+    format: date  # advisory; actual validation in custom code
+  revised:
+    type: string
+    format: date
+  revision:
+    type: integer
+    minimum: 1
+  ai_generated:
+    type: boolean
+  summary:
+    type: string
+    minLength: 20
+    maxLength: 160
+
+  # --- Common optional ---
+  title:
+    type: string
+  aliases:
+    type: array
+    items:
+      type: string
+  sources:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      minLength: 1
+
+  # --- Wiki-link fields (regex-checked) ---
+  parent_pattern:
+    type: string
+    pattern: "^\\[\\[.+\\]\\]$"
+  related_notes:
+    type: array
+    items:
+      type: string
+      pattern: "^\\[\\[.+\\]\\]$"
+  related_patterns:
+    type: array
+    items:
+      type: string
+      pattern: "^\\[\\[.+\\]\\]$"
+  related_molds:
+    type: array
+    items:
+      type: string
+      pattern: "^\\[\\[.+\\]\\]$"
+
+  # --- Mold fields ---
+  name:
+    type: string
+  axis:
+    type: string
+    enum: [source-specific, target-specific, tool-specific, generic]
+  source:
+    type: string
+    enum: [paper, nextflow, cwl]
+  target:
+    type: string
+    enum: [galaxy, cwl, web, generic]
+  tool:
+    type: string
+    enum: [gxwf, planemo]
+  patterns:
+    type: array
+    items:
+      type: string
+      pattern: "^\\[\\[.+\\]\\]$"
+  cli_commands:
+    type: array
+    items:
+      type: string
+      pattern: "^\\[\\[.+\\]\\]$"
+  prompts:
+    type: array
+    items:
+      type: string
+      pattern: "^\\[\\[.+\\]\\]$"
+  input_schemas:
+    type: array
+    items:
+      type: string
+  output_schemas:
+    type: array
+    items:
+      type: string
+  examples:
+    type: array
+    items:
+      type: string
+
+  # --- CLI command fields ---
+  command:
+    type: string
+
+  # --- Pipeline fields ---
+  # `phases` shape is sketch-level; locked in after lifting first 2-3 pipelines.
+  # Each phase is one of:
+  #   { mold: "[[<slug>]]", loop?: bool }                  — Mold-shaped
+  #   { branch: "<routing-pattern>", branches?: [...], chain?: [...] }  — [branch]
+  # Future kinds (e.g. { gate: ... }) coined when first surfaced inline.
+  phases:
+    type: array
+    minItems: 1
+    items:
+      type: object
+
+  # --- Research fields (narrowed to component / design-problem / design-spec) ---
+  subtype:
+    type: string
+  component:
+    type: string
+
+  # --- Schema (renderable JSON Schema reference) fields ---
+  package:
+    type: string
+    description: "npm or PyPI package the schema is vendored from (omit for Foundry-authored)"
+  upstream:
+    type: string
+    description: "URL to the source-of-truth schema upstream"
+
+allOf:
+  # mold requires name + axis
+  - if:
+      properties:
+        type: { const: mold }
+      required: [type]
+    then:
+      required: [name, axis]
+
+  # source-specific molds require source
+  - if:
+      properties:
+        type: { const: mold }
+        axis: { const: source-specific }
+      required: [type, axis]
+    then:
+      required: [source]
+
+  # target-specific molds require target
+  - if:
+      properties:
+        type: { const: mold }
+        axis: { const: target-specific }
+      required: [type, axis]
+    then:
+      required: [target]
+
+  # tool-specific molds require tool
+  - if:
+      properties:
+        type: { const: mold }
+        axis: { const: tool-specific }
+      required: [type, axis]
+    then:
+      required: [tool]
+
+  # pattern requires title
+  - if:
+      properties:
+        type: { const: pattern }
+      required: [type]
+    then:
+      required: [title]
+
+  # cli-command requires tool + command
+  - if:
+      properties:
+        type: { const: cli-command }
+      required: [type]
+    then:
+      required: [tool, command]
+
+  # pipeline requires title + phases
+  - if:
+      properties:
+        type: { const: pipeline }
+      required: [type]
+    then:
+      required: [title, phases]
+
+  # research requires subtype (narrowed enum)
+  - if:
+      properties:
+        type: { const: research }
+      required: [type]
+    then:
+      required: [subtype]
+      properties:
+        subtype:
+          enum: [component, design-problem, design-spec]
+
+  # schema requires name + title
+  - if:
+      properties:
+        type: { const: schema }
+      required: [type]
+    then:
+      required: [name, title]
+
+# Strict mode: unknown fields are rejected to catch typos and schema drift.
+additionalProperties: false

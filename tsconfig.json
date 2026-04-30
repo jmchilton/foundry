@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": false,
+    "noEmit": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@foundry/lib/*": ["scripts/lib/*"]
+    }
+  },
+  "include": ["scripts/**/*.ts", "tests/**/*.ts", "site/src/**/*.ts"],
+  "exclude": ["node_modules", "site/.astro", "site/dist", "casts"]
+}

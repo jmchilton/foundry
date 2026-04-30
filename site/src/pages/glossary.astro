@@ -1,0 +1,14 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { buildWikiLinkMap } from '../lib/wiki-links';
+import { renderContentDoc } from '../lib/render-vault-doc';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const allEntries = await getCollection('content');
+const linkMap = buildWikiLinkMap(allEntries);
+const html = renderContentDoc('glossary.md', linkMap, base);
+---
+<Base title="Glossary">
+  <article class="prose prose-slate max-w-none dark:prose-invert" set:html={html} />
+</Base>

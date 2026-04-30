@@ -1,0 +1,48 @@
+# meta_tags.yml — controlled tag vocabulary.
+# Validator injects keys into meta_schema.yml at runtime.
+# Hierarchy is purely textual (slash-delimited).
+# See INITIAL_ARCHITECTURE.md §4.
+
+# --- Note-type tags (every note carries exactly one) ---
+mold:
+  description: "Mold note (source artifact for casting)"
+pattern:
+  description: "Pattern reference page (Galaxy workflow construction patterns)"
+cli-command:
+  description: "CLI command reference page (one note per command/subcommand)"
+pipeline:
+  description: "Pipeline note — ordered Mold sequence composing a harness journey"
+research/component:
+  description: "Background synthesis on an external component or topic"
+research/design-problem:
+  description: "Identified design problem awaiting resolution"
+research/design-spec:
+  description: "Design specification for a Foundry component"
+schema:
+  description: "Schema note (renderable JSON Schema reference, vendored or Foundry-authored)"
+# --- CLI affiliation (for cli-command notes) ---
+cli/gxwf:
+  description: "gxwf CLI commands (design-time)"
+cli/planemo:
+  description: "Planemo CLI commands (runtime)"
+
+# --- Mold axis tags (provisional — may graduate to typed fields) ---
+source/paper:
+  description: "Mold consumes paper-shaped input"
+source/nextflow:
+  description: "Mold consumes Nextflow-shaped input"
+source/cwl:
+  description: "Mold consumes CWL-shaped input"
+target/galaxy:
+  description: "Mold targets Galaxy"
+target/cwl:
+  description: "Mold targets CWL"
+tool/gxwf:
+  description: "Mold wraps gxwf CLI surface"
+tool/planemo:
+  description: "Mold wraps Planemo CLI surface"
+
+# --- iwc/* (subject-area: IWC corpus categories) ---
+# Seeded once from top-level dirs of <iwc-clone>/workflows/.
+# See INITIAL_CORPUS_INGESTION.md.
+# Add iwc/<category> entries here as patterns and Molds reference them.

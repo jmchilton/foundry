@@ -1,0 +1,109 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+
+interface Props {
+  entry: CollectionEntry<'content'>;
+  linkMap: Map<string, WikiLinkTarget>;
+}
+
+const { entry, linkMap } = Astro.props;
+const data = entry.data as any;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+function formatDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function resolveAll(arr: string[] | undefined) {
+  if (!arr) return [];
+  return arr.map(wl => resolveWikiLink(wl, linkMap, base));
+}
+
+const parentPattern = data.parent_pattern ? resolveWikiLink(data.parent_pattern, linkMap, base) : null;
+const relatedNotes = resolveAll(data.related_notes);
+const relatedPatterns = resolveAll(data.related_patterns);
+const relatedMolds = resolveAll(data.related_molds);
+---
+<dl class="meta mb-6 p-3 rounded-lg bg-(--color-surface-raised) border-l-4 border-(--color-accent)">
+  <dt>Revised:</dt>
+  <dd>{formatDate(data.revised)}</dd>
+
+  <dt>Revision:</dt>
+  <dd>{data.revision}</dd>
+
+  {parentPattern && (
+    <>
+      <dt>Parent Pattern:</dt>
+      <dd>
+        {parentPattern.href
+          ? <a href={parentPattern.href} title={parentPattern.summary || undefined} class="text-(--color-link) hover:underline">{parentPattern.label}</a>
+          : <span class="dangling">{parentPattern.label}</span>}
+      </dd>
+    </>
+  )}
+
+  {data.sources && data.sources.length > 0 && (
+    <>
+      <dt>Sources:</dt>
+      <dd>
+        {data.sources.map((s: string, i: number) => (
+          <>
+            {/^https?:\/\//.test(s)
+              ? <a href={s} class="text-(--color-link) hover:underline break-all">{s}</a>
+              : <span class="break-all">{s}</span>}
+            {i < data.sources!.length - 1 ? <br /> : null}
+          </>
+        ))}
+      </dd>
+    </>
+  )}
+
+  {relatedPatterns.length > 0 && (
+    <>
+      <dt>Related Patterns:</dt>
+      <dd>
+        {relatedPatterns.map((l, i) => (
+          <>
+            {l.href
+              ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
+              : <span class="dangling">{l.label}</span>}
+            {i < relatedPatterns.length - 1 ? ', ' : ''}
+          </>
+        ))}
+      </dd>
+    </>
+  )}
+
+  {relatedMolds.length > 0 && (
+    <>
+      <dt>Related Molds:</dt>
+      <dd>
+        {relatedMolds.map((l, i) => (
+          <>
+            {l.href
+              ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
+              : <span class="dangling">{l.label}</span>}
+            {i < relatedMolds.length - 1 ? ', ' : ''}
+          </>
+        ))}
+      </dd>
+    </>
+  )}
+
+  {relatedNotes.length > 0 && (
+    <>
+      <dt>Related Notes:</dt>
+      <dd>
+        {relatedNotes.map((l, i) => (
+          <>
+            {l.href
+              ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
+              : <span class="dangling">{l.label}</span>}
+            {i < relatedNotes.length - 1 ? ', ' : ''}
+          </>
+        ))}
+      </dd>
+    </>
+  )}
+</dl>

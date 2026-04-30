@@ -1,0 +1,208 @@
+---
+import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+
+// Phase shape from frontmatter:
+//   { mold: "[[slug]]", loop?: bool }
+//   { branch: "label", loop?: bool, branches?: [...] | chain?: [...] }
+// branch/chain items are wiki-link strings, free-text strings, or { fallthrough: "[[slug]]" }.
+//
+// v1 visual: stacked boxes with downward arrows; branches render as side-by-side columns;
+// chain renders as a vertical sub-stack.
+// See issue #2 for the rich-sitemap redesign tracking this.
+
+interface Props {
+  phases: any[];
+  linkMap: Map<string, WikiLinkTarget>;
+}
+
+const { phases, linkMap } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+function moldBox(wl: string, loop = false) {
+  const r = resolveWikiLink(wl, linkMap, base);
+  return { kind: 'mold' as const, href: r.href, label: r.label, summary: r.summary, loop };
+}
+---
+
+<div class="phase-graph not-prose">
+  {phases.map((p, idx) => (
+    <>
+      {idx > 0 && <div class="phase-arrow" aria-hidden="true">↓</div>}
+      {p.mold ? (
+        (() => {
+          const m = moldBox(p.mold, !!p.loop);
+          return (
+            <div class:list={['phase-node phase-mold', m.loop && 'phase-loop']}>
+              {m.href ? (
+                <a href={m.href} title={m.summary || undefined} class="phase-link">{m.label}</a>
+              ) : (
+                <span class="dangling">{m.label}</span>
+              )}
+              {m.loop && <span class="phase-tag">loop</span>}
+            </div>
+          );
+        })()
+      ) : p.branch ? (
+        <div class:list={['phase-node phase-branch-wrap', p.loop && 'phase-loop']}>
+          <div class="phase-branch-label">
+            <span class="text-xs uppercase tracking-wider text-(--color-text-secondary)">branch</span>
+            <span class="font-mono text-sm">{p.branch}</span>
+            {p.loop && <span class="phase-tag">loop</span>}
+          </div>
+          {p.branches && (
+            <div class="phase-branches">
+              {p.branches.map((b: any) => (
+                <div class="phase-branch-col">
+                  {typeof b === 'string' ? (
+                    /^\[\[.+\]\]$/.test(b) ? (
+                      (() => {
+                        const r = resolveWikiLink(b, linkMap, base);
+                        return r.href
+                          ? <a href={r.href} title={r.summary || undefined} class="phase-leaf phase-link">{r.label}</a>
+                          : <span class="phase-leaf dangling">{r.label}</span>;
+                      })()
+                    ) : (
+                      <span class="phase-leaf phase-leaf-text">{b}</span>
+                    )
+                  ) : b.fallthrough ? (
+                    (() => {
+                      const r = resolveWikiLink(b.fallthrough, linkMap, base);
+                      return (
+                        <div class="phase-leaf phase-fallthrough">
+                          <span class="phase-tag">fallthrough</span>
+                          {r.href
+                            ? <a href={r.href} title={r.summary || undefined} class="phase-link">{r.label}</a>
+                            : <span class="dangling">{r.label}</span>}
+                        </div>
+                      );
+                    })()
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          )}
+          {p.chain && (
+            <div class="phase-chain">
+              {p.chain.map((c: any, i: number) => (
+                <>
+                  {i > 0 && <div class="phase-arrow phase-arrow-sub" aria-hidden="true">↓</div>}
+                  {typeof c === 'string' ? (
+                    /^\[\[.+\]\]$/.test(c) ? (
+                      (() => {
+                        const r = resolveWikiLink(c, linkMap, base);
+                        return r.href
+                          ? <a href={r.href} title={r.summary || undefined} class="phase-leaf phase-link">{r.label}</a>
+                          : <span class="phase-leaf dangling">{r.label}</span>;
+                      })()
+                    ) : (
+                      <span class="phase-leaf phase-leaf-text">{c}</span>
+                    )
+                  ) : c.fallthrough ? (
+                    <span class="phase-leaf">{c.fallthrough}</span>
+                  ) : null}
+                </>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : null}
+    </>
+  ))}
+</div>
+
+<style>
+  .phase-graph {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+    margin: 1rem 0 2rem;
+  }
+  .phase-node {
+    position: relative;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    background: var(--color-surface-raised);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .phase-mold {
+    border-left: 4px solid var(--color-galaxy-primary);
+  }
+  .phase-loop {
+    border-left-color: var(--color-accent);
+  }
+  .phase-link {
+    color: var(--color-link);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .phase-link:hover {
+    text-decoration: underline;
+  }
+  .phase-tag {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-accent);
+    color: var(--color-galaxy-dark);
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem;
+  }
+  .phase-arrow {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    line-height: 1;
+    margin: 0.125rem 0;
+  }
+  .phase-arrow-sub {
+    font-size: 0.875rem;
+  }
+  .phase-branch-wrap {
+    flex-direction: column;
+    align-items: stretch;
+    border-left: 4px solid var(--color-galaxy-grey);
+  }
+  .phase-branch-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .phase-branches {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 0.5rem;
+  }
+  .phase-branch-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .phase-chain {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.125rem;
+  }
+  .phase-leaf {
+    border: 1px dashed var(--color-border);
+    border-radius: 0.375rem;
+    padding: 0.4rem 0.6rem;
+    background: var(--color-surface);
+    font-size: 0.9rem;
+  }
+  .phase-leaf-text {
+    color: var(--color-text-secondary);
+    font-style: italic;
+  }
+  .phase-fallthrough {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+</style>

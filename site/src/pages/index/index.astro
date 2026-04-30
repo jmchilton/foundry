@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const allNotes = await getCollection('content');
+
+// Group by top-level directory.
+const byDir = new Map<string, typeof allNotes>();
+for (const n of allNotes) {
+  const dir = n.id.split('/')[0];
+  const list = byDir.get(dir) ?? [];
+  list.push(n);
+  byDir.set(dir, list);
+}
+const dirs = [...byDir.entries()]
+  .map(([dir, notes]) => ({
+    dir,
+    notes: notes.sort((a, b) => a.id.localeCompare(b.id)),
+  }))
+  .sort((a, b) => a.dir.localeCompare(b.dir));
+
+function noteTitle(n: typeof allNotes[number]): string {
+  const data = n.data as any;
+  if (data.title) return data.title;
+  if (data.name) return data.name;
+  if (data.command) return `${data.tool} ${data.command}`;
+  return n.id.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+---
+<Base title="Index">
+  <h1 class="mb-4 text-2xl font-bold">Index</h1>
+  <p class="mb-6 text-(--color-text-secondary)">Every note in the Foundry, grouped by directory.</p>
+
+  {dirs.map(d => (
+    <section class="mb-8">
+      <h2 class="text-xl font-bold border-b-2 border-(--color-accent)/20 pb-2 mb-3">
+        <code class="font-mono">{d.dir}/</code>
+        <span class="ml-2 text-sm font-normal text-(--color-text-muted)">({d.notes.length})</span>
+      </h2>
+      <ul class="list-none p-0 space-y-1">
+        {d.notes.map(n => (
+          <li class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
+            <a href={`${base}/${n.id}/`} class="text-(--color-link) hover:underline font-medium">{noteTitle(n)}</a>
+            <span class="text-xs px-1.5 py-0.5 rounded bg-(--color-surface-raised) text-(--color-text-secondary) w-fit">{n.data.type}</span>
+            <span class="text-sm text-(--color-text-muted) italic">{n.data.summary}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</Base>

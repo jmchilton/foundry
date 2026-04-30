@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.env
+.env.local
+site/.astro/
+site/dist/
+.cache/
+coverage/
+.tmp-test-vault*/

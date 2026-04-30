@@ -1,0 +1,17 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import type { WikiLinkTarget } from '../lib/wiki-links';
+import PhaseGraph from './PhaseGraph.astro';
+
+interface Props {
+  entry: CollectionEntry<'content'>;
+  linkMap: Map<string, WikiLinkTarget>;
+}
+
+const { entry, linkMap } = Astro.props;
+const data = entry.data as any;
+---
+<section class="mb-6">
+  <h2 class="text-lg font-semibold mb-2">Phases</h2>
+  <PhaseGraph phases={data.phases} linkMap={linkMap} />
+</section>

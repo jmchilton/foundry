@@ -1,0 +1,9 @@
+[
+  { "label": "Pipelines", "tag": "pipeline" },
+  { "label": "Molds", "tag": "mold" },
+  { "label": "Patterns", "tag": "pattern" },
+  { "label": "CLI Commands", "tag": "cli-command" },
+  { "label": "Schemas", "tag": "schema" },
+  { "label": "Component Research", "tag": "research/component" },
+  { "label": "Design Problems", "tag": "research/design-problem" }
+]

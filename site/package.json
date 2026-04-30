@@ -1,0 +1,27 @@
+{
+  "name": "foundry-site",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource/atkinson-hyperlegible": "^5.2.8",
+    "@galaxy-tool-util/schema": "^1.1.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.17.1",
+    "js-yaml": "^4.1.0",
+    "marked": "^18.0.2",
+    "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "astro-pagefind": "^1.8.6",
+    "pagefind": "^1.5.2"
+  }
+}
