@@ -1,0 +1,235 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://galaxyproject.org/foundry/schemas/summary-nextflow.schema.json",
+  "title": "Nextflow Pipeline Summary",
+  "description": "Structured per-source summary emitted by the summarize-nextflow Mold.\n\nPer-source schema by design — paper, Nextflow, and CWL each have their own summary shape; downstream Molds (data flow, templates, tool wrappers) consume any source's summary and handle the polymorphism.\n\nField names mirror gxy-sketches' SketchSource / ToolSpec / TestDataRef / ExpectedOutputRef where parity exists; see docs/GXY_SKETCHES_ALIGNMENT.md.",
+  "$ref": "#/$defs/Summary",
+  "$defs": {
+    "Summary": {
+      "title": "Summary",
+      "description": "Top-level shape. Every Nextflow summary is exactly this object.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "params", "profiles", "tools", "processes", "subworkflows", "workflow", "test_fixtures"],
+      "properties": {
+        "source":         { "$ref": "#/$defs/SourceRecord" },
+        "params":         { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "profiles":       { "type": "array", "items": { "type": "string" } },
+        "tools":          { "type": "array", "items": { "$ref": "#/$defs/Tool" } },
+        "processes":      { "type": "array", "items": { "$ref": "#/$defs/Process" } },
+        "subworkflows":   { "type": "array", "items": { "$ref": "#/$defs/Subworkflow" } },
+        "workflow":       { "$ref": "#/$defs/Workflow" },
+        "test_fixtures":  { "$ref": "#/$defs/TestFixtures" },
+        "warnings":       { "type": "array", "items": { "type": "string" }, "description": "Cast-skill-emitted advisory messages (e.g. DSL1 detected, meta.yml/script disagreement, lossy assertion summarization). Empty array on a clean run." }
+      }
+    },
+
+    "SourceRecord": {
+      "title": "SourceRecord",
+      "description": "Provenance block. Mirrors gxy-sketches SketchSource field names so a Foundry summary is structurally consumable by anyone using that shape.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ecosystem", "workflow", "url", "version", "slug"],
+      "properties": {
+        "ecosystem": {
+          "type": "string",
+          "enum": ["nf-core", "nextflow"],
+          "description": "Pipeline flavor. `nf-core` when `manifest.name` is `nf-core/<slug>` and the canonical layout is present; `nextflow` for ad-hoc DSL2 pipelines. Superset of gxy-sketches' enum (which adds `iwc`, `snakemake-workflows`, `wdl` for its other ingestors)."
+        },
+        "workflow": { "type": "string", "description": "Pipeline name (typically the part after `nf-core/`)." },
+        "url":      { "type": "string", "format": "uri", "description": "Git remote URL of the pipeline repository." },
+        "version":  { "type": "string", "description": "Tag, branch, or commit SHA the summary was derived from." },
+        "license":  { "type": ["string", "null"], "description": "SPDX license identifier when detectable from a LICENSE file." },
+        "slug":     { "type": "string", "description": "Kebab-case identifier; `<owner>-<repo>` for nf-core, repo basename otherwise." }
+      }
+    },
+
+    "Param": {
+      "title": "Param",
+      "description": "One pipeline parameter. Sourced from `nextflow.config`'s `params { ... }` block, augmented from `nextflow_schema.json` when present (nf-core).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "required"],
+      "properties": {
+        "name":        { "type": "string" },
+        "type":        { "type": "string", "description": "JSON Schema-style type when nextflow_schema.json supplies it (string, integer, number, boolean, path); free-form when inferred from a default value." },
+        "default":     { "description": "Default value verbatim from the source. May be null." },
+        "description": { "type": "string" },
+        "required":    { "type": "boolean" },
+        "enum":        { "type": "array", "items": {}, "description": "Allowed values when nextflow_schema.json declares them." }
+      }
+    },
+
+    "Tool": {
+      "title": "Tool",
+      "description": "One tool/dependency the pipeline runs. Mirrors gxy-sketches ToolSpec (name + version) and augments it with the resolved container/conda strings the bridge to author-galaxy-tool-wrapper needs.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name":         { "type": "string", "description": "Canonical tool name (e.g. `fastp`, `samtools`). Used as the foreign key from `processes[].tool`." },
+        "version":      { "type": "string" },
+        "biocontainer": { "type": ["string", "null"], "description": "Resolved `quay.io/biocontainers/<name>:<version>--<build>` image string when a biocontainer reference was found." },
+        "bioconda":     { "type": ["string", "null"], "description": "`bioconda::<name>=<version>` spec when a `conda` directive provides one." },
+        "docker":       { "type": ["string", "null"], "description": "Other Docker registry image string (non-biocontainer) when present." },
+        "singularity":  { "type": ["string", "null"], "description": "Singularity image reference when present." }
+      }
+    },
+
+    "ChannelIO": {
+      "title": "ChannelIO",
+      "description": "One declared input or output channel of a process. Channel shape is a string, not a structured type — `tuple(meta, [path,path])` is enough for downstream Molds and avoids a research project on NF channel typing.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "shape"],
+      "properties": {
+        "name":        { "type": "string" },
+        "shape":       { "type": "string", "description": "String-encoded channel shape, e.g. `tuple(meta, [path,path])`, `path`, `val(integer)`." },
+        "description": { "type": "string" }
+      }
+    },
+
+    "Process": {
+      "title": "Process",
+      "description": "One Nextflow `process { ... }` block.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "module_path", "inputs", "outputs"],
+      "properties": {
+        "name":            { "type": "string", "description": "Process name (uppercase NF convention)." },
+        "module_path":     { "type": "string", "description": "Relative path from the pipeline root to the file declaring the process." },
+        "tool":            { "type": ["string", "null"], "description": "Foreign key into `tools[].name` when the process runs a single recognizable tool; null for multi-tool or pure-Groovy processes." },
+        "container":       { "type": ["string", "null"], "description": "Resolved container image string verbatim from the process's `container` directive (or null)." },
+        "conda":           { "type": ["string", "null"], "description": "`conda` directive value verbatim (or null)." },
+        "inputs":          { "type": "array", "items": { "$ref": "#/$defs/ChannelIO" } },
+        "outputs":         { "type": "array", "items": { "$ref": "#/$defs/ChannelIO" } },
+        "when":            { "type": ["string", "null"], "description": "Verbatim `when:` guard expression, or null if absent." },
+        "script_summary":  { "type": "string", "description": "One-line LLM-derived summary of what the `script:` body does. Free text." },
+        "publish_dir":     { "type": ["string", "null"], "description": "`publishDir` value when the process publishes outputs (or null)." }
+      }
+    },
+
+    "Subworkflow": {
+      "title": "Subworkflow",
+      "description": "One `subworkflow { ... }` block.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "path", "calls"],
+      "properties": {
+        "name":    { "type": "string" },
+        "path":    { "type": "string", "description": "Relative path from the pipeline root." },
+        "calls":   { "type": "array", "items": { "type": "string" }, "description": "Names of processes and nested subworkflows this subworkflow invokes." },
+        "inputs":  { "type": "array", "items": { "$ref": "#/$defs/ChannelIO" } },
+        "outputs": { "type": "array", "items": { "$ref": "#/$defs/ChannelIO" } }
+      }
+    },
+
+    "Channel": {
+      "title": "Channel",
+      "description": "One top-level channel constructed in the workflow. Sources include `Channel.fromPath`, `Channel.fromFilePairs`, `Channel.fromSamplesheet`, and `params.*`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "source", "shape"],
+      "properties": {
+        "name":   { "type": "string" },
+        "source": { "type": "string", "description": "Verbatim channel-construction expression." },
+        "shape":  { "type": "string", "description": "String-encoded channel shape; same convention as ChannelIO." }
+      }
+    },
+
+    "Edge": {
+      "title": "Edge",
+      "description": "One edge in the workflow's call graph. The deterministic parser records the literal operator chain in `via`; reconciliation of the source and target shapes is the LLM step.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": { "type": "string", "description": "Channel name or `<PROCESS>.out.<chan>` reference." },
+        "to":   { "type": "string", "description": "Process or subworkflow name receiving this channel." },
+        "via":  { "type": "array", "items": { "type": "string" }, "description": "Operators on the path between source and target, in order (e.g. `[\"map\", \"join\", \"groupTuple\"]`). Empty for a direct edge." },
+        "notes": { "type": "string", "description": "LLM-emitted note when the reconciliation is low-confidence (e.g. deeply nested closures)." }
+      }
+    },
+
+    "Conditional": {
+      "title": "Conditional",
+      "description": "One workflow-level conditional that gates a subgraph.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guard", "branch", "affects"],
+      "properties": {
+        "guard":   { "type": "string", "description": "Verbatim guard expression, e.g. `params.skip_alignment`." },
+        "branch":  { "type": "string", "enum": ["default", "alternate"], "description": "Which side of the conditional this entry describes. `default` is the truthy branch; `alternate` is the else branch." },
+        "affects": { "type": "array", "items": { "type": "string" }, "description": "Process or subworkflow names whose execution is gated by this conditional." }
+      }
+    },
+
+    "Workflow": {
+      "title": "Workflow",
+      "description": "Top-level workflow: channel construction plus the call-graph DAG.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "channels", "edges"],
+      "properties": {
+        "name":         { "type": "string" },
+        "channels":     { "type": "array", "items": { "$ref": "#/$defs/Channel" } },
+        "edges":        { "type": "array", "items": { "$ref": "#/$defs/Edge" } },
+        "conditionals": { "type": "array", "items": { "$ref": "#/$defs/Conditional" } }
+      }
+    },
+
+    "TestDataRef": {
+      "title": "TestDataRef",
+      "description": "One test-fixture input. Field names mirror gxy-sketches' TestDataRef verbatim. The sketch-bundle constraint that `path` must live under `test_data/` is intentionally dropped; the Foundry summary describes fixtures as data, it does not bundle them.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role"],
+      "properties": {
+        "role":        { "type": "string", "description": "Logical role of the input (e.g. `samplesheet`, `reference_fasta`)." },
+        "path":        { "type": ["string", "null"], "description": "Repo-relative path when the fixture lives in-tree." },
+        "url":         { "type": ["string", "null"], "format": "uri" },
+        "sha1":        { "type": ["string", "null"], "description": "SHA-1 integrity hash when published alongside the fixture." },
+        "filetype":    { "type": ["string", "null"], "description": "File format, e.g. `fastq.gz`, `csv`." },
+        "description": { "type": ["string", "null"] }
+      },
+      "anyOf": [
+        { "required": ["path"] },
+        { "required": ["url"] }
+      ]
+    },
+
+    "ExpectedOutputRef": {
+      "title": "ExpectedOutputRef",
+      "description": "One expected output. Field names mirror gxy-sketches' ExpectedOutputRef verbatim. At least one of path / url / assertions is required.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role"],
+      "properties": {
+        "role":        { "type": "string" },
+        "path":        { "type": ["string", "null"] },
+        "url":         { "type": ["string", "null"], "format": "uri" },
+        "kind":        { "type": ["string", "null"], "description": "Coarse output kind: `report`, `tabular`, `image`, `archive`, `sequence`, `other`." },
+        "description": { "type": ["string", "null"] },
+        "assertions":  { "type": "array", "items": { "type": "string" }, "description": "Assertion strings. Simple equality / regex / contains-string checks are preserved verbatim; complex Groovy assertions are summarized to prose with a `warnings[]` flag in the parent Summary." }
+      },
+      "anyOf": [
+        { "required": ["path"] },
+        { "required": ["url"] },
+        { "required": ["assertions"] }
+      ]
+    },
+
+    "TestFixtures": {
+      "title": "TestFixtures",
+      "description": "Test fixtures derived from a `conf/<profile>.config` and any nf-test fixtures under `tests/`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "inputs", "outputs"],
+      "properties": {
+        "profile": { "type": "string", "description": "Which `conf/<profile>.config` produced these fixtures (typically `test`)." },
+        "inputs":  { "type": "array", "items": { "$ref": "#/$defs/TestDataRef" } },
+        "outputs": { "type": "array", "items": { "$ref": "#/$defs/ExpectedOutputRef" } }
+      }
+    }
+  }
+}
