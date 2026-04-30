@@ -9,3 +9,5 @@ site/dist/
 .cache/
 coverage/
 .tmp-test-vault*/
+.playwright-mcp/
+/*.png

@@ -53,11 +53,25 @@ function defaultTitle(): string {
 
 const pageTitle = defaultTitle();
 const typeLabel = TYPE_LABELS[data.type] ?? data.type;
+
+function pipelineEyebrow(): string | undefined {
+  if (data.type !== 'pipeline') return undefined;
+  const tags: string[] = data.tags ?? [];
+  const src = tags.find(t => t.startsWith('source/'))?.split('/')[1];
+  const tgt = tags.find(t => t.startsWith('target/'))?.split('/')[1];
+  if (!src || !tgt) return undefined;
+  return `pipeline · ${src} → ${tgt}`;
+}
+const eyebrow = pipelineEyebrow();
+
+const showActions = data.type === 'research';
+const showMeta = data.type !== 'pipeline';
+const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' : 'full';
 ---
 <Base title={pageTitle}>
   <div data-pagefind-body>
-    <NoteHeader entry={entry} pageTitle={pageTitle} typeLabel={typeLabel} />
-    <NoteMeta entry={entry} linkMap={linkMap} />
+    <NoteHeader entry={entry} pageTitle={pageTitle} typeLabel={typeLabel} eyebrow={eyebrow} showActions={showActions} />
+    {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
 
     {data.type === 'mold' && <MoldBody entry={entry} linkMap={linkMap} />}
     {data.type === 'pipeline' && <PipelineBody entry={entry} linkMap={linkMap} />}

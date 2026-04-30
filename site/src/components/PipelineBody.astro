@@ -10,8 +10,21 @@ interface Props {
 
 const { entry, linkMap } = Astro.props;
 const data = entry.data as any;
+const phaseCount = Array.isArray(data.phases) ? data.phases.length : 0;
 ---
-<section class="mb-6">
-  <h2 class="text-lg font-semibold mb-2">Phases</h2>
+<section class="pipeline-body">
+  <div class="section-rule">
+    <h2>Phases</h2>
+    <span class="section-tail">/ subway map</span>
+    <span class="ml-auto text-xs font-mono text-(--color-text-muted)">
+      {phaseCount} {phaseCount === 1 ? 'phase' : 'phases'}
+    </span>
+  </div>
   <PhaseGraph phases={data.phases} linkMap={linkMap} />
 </section>
+
+<style>
+  .pipeline-body {
+    margin-bottom: 1.5rem;
+  }
+</style>

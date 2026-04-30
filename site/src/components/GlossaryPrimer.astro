@@ -1,0 +1,69 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const TERMS: { term: string; gloss: string; anchor: string }[] = [
+  { term: 'Mold',     gloss: 'Abstract, structured template for one workflow-construction action. Cast into self-contained skills.', anchor: 'mold' },
+  { term: 'Pipeline', gloss: 'Ordered sequence of phases that compose a harness journey (e.g. paper-to-galaxy).', anchor: 'pipeline' },
+  { term: 'Phase',    gloss: 'One atomic unit of a Pipeline — Mold-shaped, [branch], or future [gate].', anchor: 'phase' },
+  { term: 'Branch',   gloss: 'A non-Mold phase encoding harness-level routing or fallback (e.g. discover-or-author).', anchor: 'branch' },
+  { term: 'Cast',     gloss: 'Produce a self-contained skill artifact from a Mold via the casting process.', anchor: 'cast' },
+  { term: 'Pattern',  gloss: 'Reference page describing a Galaxy workflow construction pattern. Referenced by Molds.', anchor: 'pattern-page' },
+  { term: 'Foundry',  gloss: 'The standalone knowledge base where Pipelines, Molds, patterns, and CLI manuals live.', anchor: 'foundry' },
+];
+---
+<section aria-labelledby="concept-primer-heading">
+  <div class="section-rule">
+    <h2 id="concept-primer-heading">Concept primer</h2>
+    <span class="section-tail">/ 7 core terms</span>
+    <a href={`${base}/glossary/`} class="ml-auto text-sm text-(--color-link) hover:text-(--color-link-hover)">
+      full glossary →
+    </a>
+  </div>
+
+  <dl class="primer-grid m-0">
+    {TERMS.map(t => (
+      <a href={`${base}/glossary/#${t.anchor}`} class="primer-row no-underline">
+        <dt class="primer-term">{t.term}</dt>
+        <dd class="primer-gloss">{t.gloss}</dd>
+      </a>
+    ))}
+  </dl>
+</section>
+
+<style>
+  .primer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 0;
+  }
+  .primer-row {
+    display: block;
+    padding: 0.7rem 0.9rem;
+    border-left: 2px solid var(--color-border-subtle);
+    color: inherit;
+    transition: border-color 0.15s ease, background 0.15s ease, padding-left 0.15s ease;
+  }
+  .primer-row:hover {
+    border-left-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+    padding-left: 1.1rem;
+  }
+  .primer-term {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    color: var(--color-link);
+    margin-bottom: 0.15rem;
+  }
+  .primer-row:hover .primer-term {
+    color: var(--color-accent);
+  }
+  .primer-gloss {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+</style>

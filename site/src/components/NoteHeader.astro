@@ -5,35 +5,116 @@ interface Props {
   entry: CollectionEntry<'content'>;
   pageTitle: string;
   typeLabel: string;
+  eyebrow?: string;
+  showActions?: boolean;
 }
 
-const { entry, pageTitle, typeLabel } = Astro.props;
+const { entry, pageTitle, typeLabel, eyebrow, showActions = false } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const data = entry.data;
 ---
-<header class="mb-6 border-l-2 border-(--color-accent) pl-4 sm:pl-5">
-  <a href={`${base}/`} class="inline-flex items-center gap-1 text-xs text-(--color-text-secondary) hover:text-(--color-link) no-underline transition-colors">
-    <span aria-hidden="true">&larr;</span> Dashboard
+<header class="note-header">
+  <a href={`${base}/`} class="note-back">
+    <span aria-hidden="true">&larr;</span> Home
   </a>
-  <div class="mt-1 flex items-baseline gap-2">
-    <span class="text-xs uppercase tracking-wider text-(--color-text-secondary)">{typeLabel}</span>
-  </div>
-  <h1 class="mt-1 text-3xl font-bold text-balance text-(--color-text-primary)" data-pagefind-meta="title">{pageTitle}</h1>
+  <span class="note-eyebrow">
+    <span class="note-eyebrow-rule" aria-hidden="true"></span>
+    <span>{eyebrow ?? typeLabel}</span>
+  </span>
+  <h1 class="note-title text-balance" data-pagefind-meta="title">{pageTitle}</h1>
   {data.summary && (
-    <p class="mt-2 text-base text-(--color-text-secondary) text-pretty" data-pagefind-weight="10" data-pagefind-meta="summary">{data.summary}</p>
+    <p class="note-summary text-pretty" data-pagefind-weight="10" data-pagefind-meta="summary">{data.summary}</p>
   )}
-  <div class="mt-3 flex flex-wrap gap-2 items-center">
+  <div class="note-tags">
     <span class={`badge badge-${data.status}`}>{data.status}</span>
     {data.tags.map(t => <a href={`${base}/tags/${t}/`} class="no-underline"><span class="tag">{t}</span></a>)}
   </div>
-  <div class="mt-3 flex gap-2">
-    <a href={`${base}/raw/${entry.id}.md`}
-       class="text-xs px-2.5 py-1 rounded border border-(--color-border) text-(--color-text-secondary) no-underline hover:bg-(--color-surface-hover) hover:text-(--color-text-primary) transition-colors">
-      Raw
-    </a>
-    <button class="copy-raw text-xs px-2.5 py-1 rounded border border-(--color-border) text-(--color-text-secondary) cursor-pointer hover:bg-(--color-surface-hover) hover:text-(--color-text-primary) transition-colors"
-       data-url={`${base}/raw/${entry.id}.md`}>
-      Copy
-    </button>
-  </div>
+  {showActions && (
+    <div class="note-actions">
+      <a href={`${base}/raw/${entry.id}.md`} class="note-action">Raw</a>
+      <button class="copy-raw note-action" data-url={`${base}/raw/${entry.id}.md`}>Copy</button>
+    </div>
+  )}
 </header>
+
+<style>
+  .note-header {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .note-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+  .note-back:hover {
+    color: var(--color-link);
+  }
+  .note-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+  .note-eyebrow-rule {
+    width: 1.5rem;
+    height: 2px;
+    background: var(--color-accent);
+  }
+  .note-title {
+    margin: 0.4rem 0 0;
+    font-size: clamp(1.85rem, 3.2vw + 0.5rem, 2.65rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+  .note-summary {
+    margin: 0.6rem 0 0;
+    max-width: 65ch;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+  .note-tags {
+    margin-top: 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  .note-actions {
+    margin-top: 0.85rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+  .note-action {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    background: transparent;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  .note-action:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+    border-color: var(--color-accent);
+  }
+</style>
