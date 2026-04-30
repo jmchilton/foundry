@@ -37,6 +37,10 @@
   --color-accent: #e8c547;
   --color-accent-hover: #f2d55a;
 
+  /* Rail / station colors for the subway-style phase graph; flip in dark. */
+  --color-rail: #25537b;
+  --color-rail-on: #e8c547;
+
   /* Badges */
   --color-badge-draft-bg: #fff3cd;
   --color-badge-draft-text: #856404;
@@ -66,8 +70,10 @@
   --color-border: #30363d;
   --color-border-subtle: #21262d;
   --color-text-primary: #e6edf3;
-  --color-text-secondary: #8b949e;
-  --color-text-muted: #6e7681;
+  --color-text-secondary: #b6bfca;
+  --color-text-muted: #8b94a0;
+  --color-rail: #6fa5d4;
+  --color-rail-on: #e8c547;
   --color-link: #6fa5d4;
   --color-link-hover: #ffd700;
   --color-badge-draft-bg: #3d2e00;
@@ -113,7 +119,10 @@
 .tag {
   @apply inline-block px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-150;
   background-color: var(--color-tag-bg);
-  color: var(--color-galaxy-primary);
+  color: var(--color-link);
+}
+.dark .tag {
+  color: #9bb8d6;
 }
 a:hover .tag {
   background-color: var(--color-accent);
@@ -237,4 +246,78 @@ a:hover .tag {
   background-color: var(--color-galaxy-primary);
   color: white;
   padding: 0.5rem 0.75rem;
+}
+
+/* --- Landing-only flourish --- */
+
+.bg-grain {
+  position: relative;
+}
+.bg-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.dark .bg-grain::after {
+  opacity: 0.06;
+  mix-blend-mode: screen;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.eyebrow::before {
+  content: "";
+  width: 1.5rem;
+  height: 2px;
+  background: var(--color-accent);
+}
+
+.section-rule {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 2.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+.section-rule h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.section-rule .section-tail {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.tinted-shadow {
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-galaxy-primary) 8%, transparent),
+              0 8px 24px -12px color-mix(in srgb, var(--color-galaxy-primary) 18%, transparent);
+}
+.tinted-shadow-hover:hover {
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--color-galaxy-primary) 12%, transparent),
+              0 16px 32px -10px color-mix(in srgb, var(--color-galaxy-primary) 28%, transparent);
+}
+
+/* Notes duplicate their title as the first body H1 (consistent across all
+ * note types). NoteHeader already renders the title, so suppress the prose
+ * duplicate. */
+.prose > h1:first-child {
+  display: none;
 }

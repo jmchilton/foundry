@@ -3,7 +3,7 @@ import Search from 'astro-pagefind/components/Search';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 const navLinks = [
-  { href: `${base}/`, label: 'Dashboard', match: (p: string) => p === (base || '') || p === '/' },
+  { href: `${base}/dashboard/`, label: 'Dashboard', match: (p: string) => p.startsWith(`${base}/dashboard`) },
   { href: `${base}/molds/`, label: 'Molds', match: (p: string) => p.startsWith(`${base}/molds`) },
   { href: `${base}/pipelines/`, label: 'Pipelines', match: (p: string) => p.startsWith(`${base}/pipelines`) && !p.includes('/molds') },
   { href: `${base}/index/`, label: 'Index', match: (p: string) => p.startsWith(`${base}/index`) },

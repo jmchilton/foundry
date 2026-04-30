@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import sections from '../../../../dashboard_sections.json';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const allNotes = await getCollection('content');
+
+const dashboardSections = sections.map(s => ({
+  label: s.label,
+  notes: allNotes
+    .filter(n => n.data.tags.includes(s.tag) && n.data.status !== 'archived')
+    .sort((a, b) => b.data.revised.getTime() - a.data.revised.getTime()),
+}));
+
+function formatDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function noteTitle(n: typeof allNotes[number]): string {
+  const data = n.data as any;
+  if (data.title) return data.title;
+  if (data.name) return data.name;
+  return n.id.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+---
+<Base title="Dashboard">
+  <h1 class="mb-4 text-2xl font-bold text-balance">Galaxy Workflow Foundry</h1>
+  <p class="mb-6 text-(--color-text-secondary)">Knowledge base + casting pipeline for Galaxy workflows.</p>
+
+  {dashboardSections.filter(s => s.notes.length > 0).map(section => (
+    <section aria-labelledby={`section-${section.label.replace(/\s+/g, '-').toLowerCase()}`}>
+      <h2
+        id={`section-${section.label.replace(/\s+/g, '-').toLowerCase()}`}
+        class="mt-8 mb-3 text-xl font-bold border-b-2 border-(--color-accent)/20 pb-2 text-balance"
+      >
+        {section.label}
+        <span class="ml-2 text-sm font-normal text-(--color-text-muted)">({section.notes.length})</span>
+      </h2>
+      <table class="data-table">
+        <thead><tr><th>Name</th><th>Summary</th><th>Status</th><th>Revised</th><th>Rev</th></tr></thead>
+        <tbody>
+          {section.notes.map(n => (
+            <tr>
+              <td><a href={`${base}/${n.id}/`}>{noteTitle(n)}</a></td>
+              <td class="text-sm text-(--color-text-muted)">{n.data.summary}</td>
+              <td><span class={`badge badge-${n.data.status}`}>{n.data.status}</span></td>
+              <td>{formatDate(n.data.revised)}</td>
+              <td>{n.data.revision}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ))}
+</Base>

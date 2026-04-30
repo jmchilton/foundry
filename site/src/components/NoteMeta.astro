@@ -5,9 +5,11 @@ import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 interface Props {
   entry: CollectionEntry<'content'>;
   linkMap: Map<string, WikiLinkTarget>;
+  mode?: 'full' | 'related-only';
 }
 
-const { entry, linkMap } = Astro.props;
+const { entry, linkMap, mode = 'full' } = Astro.props;
+const showRevision = mode === 'full';
 const data = entry.data as any;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -24,86 +26,148 @@ const parentPattern = data.parent_pattern ? resolveWikiLink(data.parent_pattern,
 const relatedNotes = resolveAll(data.related_notes);
 const relatedPatterns = resolveAll(data.related_patterns);
 const relatedMolds = resolveAll(data.related_molds);
+const hasSources = data.sources && data.sources.length > 0;
+const hasAnything =
+  showRevision ||
+  parentPattern ||
+  (showRevision && hasSources) ||
+  relatedPatterns.length > 0 ||
+  relatedMolds.length > 0 ||
+  relatedNotes.length > 0;
 ---
-<dl class="meta mb-6 p-3 rounded-lg bg-(--color-surface-raised) border-l-4 border-(--color-accent)">
-  <dt>Revised:</dt>
-  <dd>{formatDate(data.revised)}</dd>
-
-  <dt>Revision:</dt>
-  <dd>{data.revision}</dd>
-
-  {parentPattern && (
+{hasAnything && (
+<dl class="note-meta">
+  {showRevision && (
     <>
-      <dt>Parent Pattern:</dt>
-      <dd>
-        {parentPattern.href
-          ? <a href={parentPattern.href} title={parentPattern.summary || undefined} class="text-(--color-link) hover:underline">{parentPattern.label}</a>
-          : <span class="dangling">{parentPattern.label}</span>}
-      </dd>
+      <div class="meta-pair">
+        <dt>Revised</dt>
+        <dd>{formatDate(data.revised)}</dd>
+      </div>
+      <div class="meta-pair">
+        <dt>Rev</dt>
+        <dd>{data.revision}</dd>
+      </div>
     </>
   )}
 
-  {data.sources && data.sources.length > 0 && (
-    <>
-      <dt>Sources:</dt>
+  {parentPattern && (
+    <div class="meta-pair">
+      <dt>Parent</dt>
+      <dd>
+        {parentPattern.href
+          ? <a href={parentPattern.href} title={parentPattern.summary || undefined}>{parentPattern.label}</a>
+          : <span class="dangling">{parentPattern.label}</span>}
+      </dd>
+    </div>
+  )}
+
+  {showRevision && hasSources && (
+    <div class="meta-pair meta-pair-block">
+      <dt>Sources</dt>
       <dd>
         {data.sources.map((s: string, i: number) => (
           <>
             {/^https?:\/\//.test(s)
-              ? <a href={s} class="text-(--color-link) hover:underline break-all">{s}</a>
+              ? <a href={s} class="break-all">{s}</a>
               : <span class="break-all">{s}</span>}
             {i < data.sources!.length - 1 ? <br /> : null}
           </>
         ))}
       </dd>
-    </>
+    </div>
   )}
 
   {relatedPatterns.length > 0 && (
-    <>
-      <dt>Related Patterns:</dt>
+    <div class="meta-pair">
+      <dt>Patterns</dt>
       <dd>
         {relatedPatterns.map((l, i) => (
           <>
             {l.href
-              ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
+              ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
               : <span class="dangling">{l.label}</span>}
             {i < relatedPatterns.length - 1 ? ', ' : ''}
           </>
         ))}
       </dd>
-    </>
+    </div>
   )}
 
   {relatedMolds.length > 0 && (
-    <>
-      <dt>Related Molds:</dt>
+    <div class="meta-pair">
+      <dt>Molds</dt>
       <dd>
         {relatedMolds.map((l, i) => (
           <>
             {l.href
-              ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
+              ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
               : <span class="dangling">{l.label}</span>}
             {i < relatedMolds.length - 1 ? ', ' : ''}
           </>
         ))}
       </dd>
-    </>
+    </div>
   )}
 
   {relatedNotes.length > 0 && (
-    <>
-      <dt>Related Notes:</dt>
+    <div class="meta-pair">
+      <dt>Related</dt>
       <dd>
         {relatedNotes.map((l, i) => (
           <>
             {l.href
-              ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
+              ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
               : <span class="dangling">{l.label}</span>}
             {i < relatedNotes.length - 1 ? ', ' : ''}
           </>
         ))}
       </dd>
-    </>
+    </div>
   )}
 </dl>
+)}
+
+<style>
+  .note-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0 0 1.75rem;
+    padding: 0;
+  }
+  .meta-pair {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .meta-pair-block {
+    flex-basis: 100%;
+    align-items: flex-start;
+  }
+  .meta-pair dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .meta-pair dd {
+    margin: 0;
+  }
+  .meta-pair a {
+    color: var(--color-link);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-link) 30%, transparent);
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .meta-pair a:hover {
+    color: var(--color-link-hover);
+    border-color: var(--color-accent);
+  }
+</style>

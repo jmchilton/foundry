@@ -1,56 +1,187 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import sections from '../../../dashboard_sections.json';
+import PipelineMatrix from '../components/PipelineMatrix.astro';
+import GlossaryPrimer from '../components/GlossaryPrimer.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const allNotes = await getCollection('content');
 
-const dashboardSections = sections.map(s => ({
-  label: s.label,
-  notes: allNotes
-    .filter(n => n.data.tags.includes(s.tag) && n.data.status !== 'archived')
-    .sort((a, b) => b.data.revised.getTime() - a.data.revised.getTime()),
-}));
-
-function formatDate(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
-function noteTitle(n: typeof allNotes[number]): string {
-  const data = n.data as any;
-  if (data.title) return data.title;
-  if (data.name) return data.name;
-  return n.id.split('/').pop()!.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
+const navCards = [
+  { href: `${base}/dashboard/`, label: 'Dashboard', desc: 'Sectioned tables of every active note.', kbd: 'D' },
+  { href: `${base}/molds/`, label: 'Molds', desc: 'Abstract templates grouped by axis.', kbd: 'M' },
+  { href: `${base}/pipelines/`, label: 'Pipelines', desc: 'Flat list of all pipelines.', kbd: 'P' },
+  { href: `${base}/glossary/`, label: 'Glossary', desc: 'Pinned definitions for Foundry terminology.', kbd: 'G' },
+  { href: `${base}/log/`, label: 'Log', desc: 'Append-only project log.', kbd: 'L' },
+];
 ---
-<Base title="Dashboard">
-  <h1 class="mb-4 text-2xl font-bold text-balance">Galaxy Workflow Foundry</h1>
-  <p class="mb-6 text-(--color-text-secondary)">Knowledge base + casting pipeline for Galaxy workflows.</p>
+<Base title="Galaxy Workflow Foundry">
+  <section class="hero relative bg-grain mb-10" aria-labelledby="hero-heading">
+    <span class="eyebrow mb-4">Galaxy Workflow Foundry</span>
+    <h1
+      id="hero-heading"
+      class="hero-title text-balance text-(--color-galaxy-dark) dark:text-(--color-text-primary)"
+    >
+      Build Galaxy workflows<br />
+      <span class="hero-title-accent">from anything.</span>
+    </h1>
+    <p class="hero-lede max-w-3xl text-(--color-text-secondary) text-pretty">
+      Convert workflows authored in other systems — papers, Nextflow pipelines, CWL workflows —
+      into validated Galaxy workflows in the <code class="font-mono">gxformat2</code> format.
+      The Foundry decomposes that conversion into atomic, schema-validated steps an LLM agent
+      can execute reliably, grounded in <code class="font-mono">gxwf</code>'s static validation.
+    </p>
+    <div class="hero-meta">
+      <a href={`${base}/pipelines/`} class="hero-cta">
+        Browse pipelines
+        <span aria-hidden="true">→</span>
+      </a>
+      <span class="hero-meta-sep" aria-hidden="true">·</span>
+      <a href={`${base}/glossary/`} class="hero-cta-secondary">
+        Read the glossary
+      </a>
+    </div>
+  </section>
 
-  {dashboardSections.filter(s => s.notes.length > 0).map(section => (
-    <section aria-labelledby={`section-${section.label.replace(/\s+/g, '-').toLowerCase()}`}>
-      <h2
-        id={`section-${section.label.replace(/\s+/g, '-').toLowerCase()}`}
-        class="mt-8 mb-3 text-xl font-bold border-b-2 border-(--color-accent)/20 pb-2 text-balance"
-      >
-        {section.label}
-        <span class="ml-2 text-sm font-normal text-(--color-text-muted)">({section.notes.length})</span>
-      </h2>
-      <table class="data-table">
-        <thead><tr><th>Name</th><th>Summary</th><th>Status</th><th>Revised</th><th>Rev</th></tr></thead>
-        <tbody>
-          {section.notes.map(n => (
-            <tr>
-              <td><a href={`${base}/${n.id}/`}>{noteTitle(n)}</a></td>
-              <td class="text-sm text-(--color-text-muted)">{n.data.summary}</td>
-              <td><span class={`badge badge-${n.data.status}`}>{n.data.status}</span></td>
-              <td>{formatDate(n.data.revised)}</td>
-              <td>{n.data.revision}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
-  ))}
+  <PipelineMatrix />
+  <GlossaryPrimer />
+
+  <section aria-labelledby="nav-cards-heading">
+    <div class="section-rule">
+      <h2 id="nav-cards-heading">Browse</h2>
+      <span class="section-tail">/ everything else</span>
+    </div>
+    <ul class="nav-list list-none p-0 m-0">
+      {navCards.map((c, i) => (
+        <li>
+          <a href={c.href} class="nav-row no-underline">
+            <span class="nav-row-num font-mono">0{i + 1}</span>
+            <span class="nav-row-label">{c.label}</span>
+            <span class="nav-row-desc">{c.desc}</span>
+            <span class="nav-row-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
 </Base>
+
+<style>
+  .hero {
+    padding: 1.5rem 0 2.5rem;
+  }
+  .hero-title {
+    font-size: clamp(2.25rem, 5vw + 0.5rem, 3.75rem);
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin: 0 0 1.25rem;
+  }
+  .hero-title-accent {
+    color: var(--color-link);
+    font-style: italic;
+    position: relative;
+  }
+  .hero-title-accent::after {
+    content: "";
+    display: inline-block;
+    width: 0.55ch;
+    height: 0.55ch;
+    margin-left: 0.2ch;
+    background: var(--color-accent);
+    transform: translateY(-0.05em);
+  }
+  .hero-lede {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    margin: 0 0 1.5rem;
+  }
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+  }
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    background: var(--color-galaxy-dark);
+    color: var(--color-text-on-dark);
+    border-radius: 0.375rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .hero-cta:hover {
+    background: var(--color-galaxy-primary);
+    transform: translateX(2px);
+  }
+  .hero-cta:active {
+    transform: translateX(2px) scale(0.98);
+  }
+  .hero-cta-secondary {
+    color: var(--color-link);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-link) 35%, transparent);
+    padding-bottom: 1px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .hero-cta-secondary:hover {
+    color: var(--color-link-hover);
+    border-color: var(--color-accent);
+  }
+  .hero-meta-sep {
+    color: var(--color-text-muted);
+  }
+
+  .nav-list {
+    border-top: 1px solid var(--color-border-subtle);
+  }
+  .nav-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.9rem 0.25rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+    color: inherit;
+    transition: background 0.15s ease, padding-left 0.15s ease;
+  }
+  .nav-row:hover {
+    background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+    padding-left: 0.75rem;
+  }
+  .nav-row-num {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.08em;
+  }
+  .nav-row-label {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--color-text-primary);
+    min-width: 7rem;
+  }
+  .nav-row-desc {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+  .nav-row-arrow {
+    color: var(--color-text-muted);
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+  .nav-row:hover .nav-row-arrow {
+    color: var(--color-accent);
+    transform: translateX(4px);
+  }
+  @media (max-width: 640px) {
+    .nav-row {
+      grid-template-columns: auto 1fr auto;
+    }
+    .nav-row-desc {
+      grid-column: 2 / 4;
+      font-size: 0.85rem;
+    }
+  }
+</style>

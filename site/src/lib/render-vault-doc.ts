@@ -19,5 +19,27 @@ export function renderContentDoc(
     const { href, label } = resolveWikiLink(`[[${inner}]]`, linkMap, base);
     return href ? `[${label}](${href})` : `**${label}**`;
   });
-  return marked.parse(withLinks, { async: false }) as string;
+  const html = marked.parse(withLinks, { async: false }) as string;
+  return addBoldTermAnchors(html);
+}
+
+function slugifyTerm(term: string): string {
+  return term
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
+// Glossary entries are paragraphs starting with **Term**. Inject an id on the
+// containing <p> so that #term anchor links from the landing page resolve.
+function addBoldTermAnchors(html: string): string {
+  return html.replace(
+    /<p>(\s*)<strong>([^<]+)<\/strong>/g,
+    (match, ws, term) => {
+      const id = slugifyTerm(term);
+      if (!id) return match;
+      return `<p id="${id}">${ws}<strong>${term}</strong>`;
+    }
+  );
 }
