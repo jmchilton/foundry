@@ -10,6 +10,16 @@ function slugifyPath(entry: string): string {
 
 const wikiLink = z.string().regex(/^\[\[.+\]\]$/, { message: 'must be a [[wiki-link]]' });
 
+const typedReference = z.object({
+  kind: z.enum(['pattern', 'cli-command', 'schema', 'prompt', 'example', 'research']),
+  ref: z.string().min(1),
+  used_at: z.enum(['cast-time', 'runtime', 'both']),
+  load: z.enum(['upfront', 'on-demand']),
+  mode: z.enum(['verbatim', 'condense', 'sidecar', 'copy']),
+  purpose: z.string().min(1).optional(),
+  trigger: z.string().min(1).optional(),
+}).strict();
+
 const baseFields = {
   tags: z.array(z.string()).min(1),
   status: z.enum(['draft', 'reviewed', 'revised', 'stale', 'archived']),
@@ -64,6 +74,7 @@ const moldSchema = z.object({
   input_schemas: z.array(z.string()).optional(),
   output_schemas: z.array(z.string()).optional(),
   examples: z.array(z.string()).optional(),
+  references: z.array(typedReference).optional(),
   ...baseFields,
 }).strict();
 

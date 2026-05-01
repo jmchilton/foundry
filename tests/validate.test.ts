@@ -82,6 +82,53 @@ describe("validateData (per-file)", () => {
     expect(r.errors.some((e) => /source/.test(e))).toBe(true);
   });
 
+  it("accepts typed references metadata", () => {
+    const r = validateData(
+      baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "x",
+        axis: "generic",
+        references: [
+          {
+            kind: "research",
+            ref: "[[component-x]]",
+            used_at: "runtime",
+            load: "on-demand",
+            mode: "condense",
+            purpose: "Explain when to load this reference.",
+            trigger: "When the runtime task needs component details.",
+          },
+        ],
+      }),
+      schema,
+    );
+    expect(r.errors).toEqual([]);
+  });
+
+  it("rejects unknown typed reference fields", () => {
+    const r = validateData(
+      baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "x",
+        axis: "generic",
+        references: [
+          {
+            kind: "research",
+            ref: "[[component-x]]",
+            used_at: "runtime",
+            load: "on-demand",
+            mode: "verbatim",
+            bogus: "x",
+          },
+        ],
+      }),
+      schema,
+    );
+    expect(r.errors.some((e) => /bogus/.test(e))).toBe(true);
+  });
+
   it("rejects bad date format", () => {
     const r = validateData(baseRequired({ created: "not-a-date" }), schema);
     expect(r.errors.length).toBeGreaterThan(0);
@@ -196,5 +243,60 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBe(0);
+  });
+
+  it("validates typed reference targets", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+        references: [
+          { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim" },
+          { kind: "pattern", ref: "[[pattern-x]]", used_at: "cast-time", load: "upfront", mode: "condense" },
+          { kind: "schema", ref: "content/schemas/x.schema.json", used_at: "both", load: "upfront", mode: "verbatim" },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "research/component-x.md"), {
+      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
+    });
+    writeFm(path.join(dir, "patterns/pattern-x.md"), {
+      ...baseRequired({ type: "pattern", tags: ["pattern"], title: "Pattern X" }),
+    });
+    mkdirSync(path.join(dir, "schemas"), { recursive: true });
+    writeFileSync(path.join(dir, "schemas/x.schema.json"), "{}");
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+  });
+
+  it("rejects typed references that resolve to the wrong type", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+        references: [
+          { kind: "research", ref: "[[not-research]]", used_at: "runtime", load: "on-demand", mode: "verbatim" },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "patterns/not-research.md"), {
+      ...baseRequired({ type: "pattern", tags: ["pattern"], title: "Not Research" }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 });

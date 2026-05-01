@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+import ReferenceContract from './ReferenceContract.astro';
 
 interface Props {
   entry: CollectionEntry<'content'>;
@@ -28,6 +29,8 @@ const specifier = data.source ?? data.target ?? data.tool ?? null;
   {specifier && <span class="text-xs px-2 py-1 rounded border border-(--color-border) font-mono">{specifier}</span>}
   <span class="text-xs text-(--color-text-secondary) font-mono">{data.name}</span>
 </div>
+
+<ReferenceContract references={data.references} linkMap={linkMap} />
 
 {(patterns.length + cliCommands.length + prompts.length) > 0 && (
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">

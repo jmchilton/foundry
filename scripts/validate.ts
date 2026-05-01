@@ -107,6 +107,20 @@ function validateWikiLinks(data: Frontmatter): ValidationResult {
       }
     });
   }
+  const refs = data.references;
+  if (Array.isArray(refs)) {
+    refs.forEach((ref, i) => {
+      if (typeof ref !== "object" || ref === null || Array.isArray(ref)) return;
+      const value = (ref as Record<string, unknown>).ref;
+      if (typeof value !== "string") return;
+      const m = WIKI_LINK_RE.exec(value);
+      if (!m) return;
+      const inner = m[1];
+      if (inner !== undefined && inner.trim() === "") {
+        result.errors.push(`references[${i}].ref: wiki link has whitespace-only inner text: '${value}'`);
+      }
+    });
+  }
   return result;
 }
 
@@ -182,6 +196,7 @@ function validateMoldRefs(
   files: FileMeta[],
   slugMap: Map<string, string>,
   metaByPath: Map<string, Frontmatter>,
+  contentRoot: string,
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const checks: Array<{ field: string; expected: string }> = [
@@ -215,8 +230,117 @@ function validateMoldRefs(
         }
       }
     }
+    const typedRefs = f.meta.references;
+    if (Array.isArray(typedRefs)) {
+      typedRefs.forEach((ref, i) => {
+        validateTypedReference(ref, i, f.path, contentRoot, slugMap, metaByPath, findings);
+      });
+    }
   }
   return findings;
+}
+
+function validateTypedReference(
+  raw: unknown,
+  index: number,
+  filePath: string,
+  contentRoot: string,
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+  findings: CrossFileFinding[],
+): void {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return;
+  const ref = raw as Record<string, unknown>;
+  if (typeof ref.kind !== "string" || typeof ref.ref !== "string") return;
+
+  const expectedTypes: Record<string, string> = {
+    pattern: "pattern",
+    "cli-command": "cli-command",
+    prompt: "prompt",
+    research: "research",
+  };
+
+  if (ref.kind === "schema") {
+    validatePathReference(ref.ref, index, filePath, contentRoot, findings, "content/schemas/", true);
+    return;
+  }
+  if (ref.kind === "example") {
+    validatePathReference(ref.ref, index, filePath, contentRoot, findings, "content/", false);
+    return;
+  }
+
+  const expected = expectedTypes[ref.kind];
+  if (!expected) return;
+  const tp = resolveWikiLink(ref.ref, slugMap);
+  if (!tp) {
+    findings.push({
+      path: filePath,
+      severity: "error",
+      message: `references[${index}]: ${ref.kind} ref ${ref.ref} did not resolve`,
+    });
+    return;
+  }
+  const targetType = metaByPath.get(tp)?.type;
+  if (targetType !== expected) {
+    findings.push({
+      path: filePath,
+      severity: "error",
+      message: `references[${index}]: ${ref.kind} ref ${ref.ref} resolves to type=${targetType ?? "(none)"}, expected ${expected}`,
+    });
+  }
+}
+
+function validatePathReference(
+  ref: string,
+  index: number,
+  filePath: string,
+  contentRoot: string,
+  findings: CrossFileFinding[],
+  requiredPrefix: string,
+  requireJson: boolean,
+): void {
+  if (WIKI_LINK_RE.test(ref)) {
+    findings.push({
+      path: filePath,
+      severity: "error",
+      message: `references[${index}]: path reference must not be a wiki link: ${ref}`,
+    });
+    return;
+  }
+  if (!ref.startsWith(requiredPrefix)) {
+    findings.push({
+      path: filePath,
+      severity: "error",
+      message: `references[${index}]: path reference must start with ${requiredPrefix}: ${ref}`,
+    });
+    return;
+  }
+  const repoRelativeAbs = path.resolve(process.cwd(), ref);
+  const contentRelativeAbs = path.resolve(contentRoot, ref.replace(/^content\//, ""));
+  const abs = existsSync(repoRelativeAbs) ? repoRelativeAbs : contentRelativeAbs;
+  if (!existsSync(abs)) {
+    findings.push({
+      path: filePath,
+      severity: "error",
+      message: `references[${index}]: path reference does not exist: ${ref}`,
+    });
+    return;
+  }
+  if (!statSync(abs).isFile()) {
+    findings.push({
+      path: filePath,
+      severity: "error",
+      message: `references[${index}]: path reference is not a file: ${ref}`,
+    });
+    return;
+  }
+  if (requireJson && !ref.endsWith(".schema.json")) {
+    findings.push({
+      path: filePath,
+      severity: "error",
+      message: `references[${index}]: schema reference must end with .schema.json: ${ref}`,
+    });
+  }
 }
 
 interface PhaseRefs {
@@ -429,7 +553,7 @@ export function validateDirectory(opts: ValidateOptions): {
 
   const crossFindings: CrossFileFinding[] = [];
   crossFindings.push(...validateBidirectionalRelatedNotes(validFiles, slugMap));
-  crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath));
+  crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
 
   for (const f of crossFindings) {
