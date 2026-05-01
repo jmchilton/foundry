@@ -10,6 +10,9 @@ created: 2026-04-30
 revised: 2026-04-30
 revision: 1
 ai_generated: false
+related_notes:
+  - "[[galaxy-collection-tools]]"
+  - "[[galaxy-apply-rules-dsl]]"
 sources:
   - "https://github.com/galaxyproject/galaxy/blob/0683385f5da57c6065c5408f033fdcafd66a27b6/lib/galaxy/model/dataset_collections/types/collection_semantics.yml"
 summary: "Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references."
