@@ -8,12 +8,7 @@
 import path from "node:path";
 import { visit, SKIP } from "unist-util-visit";
 import type { Root, InlineCode, PhrasingContent } from "mdast";
-import {
-  loadCommonPaths,
-  parseCitation,
-  citationGithubUrl,
-  type CommonPaths,
-} from "../../../scripts/lib/common-paths.ts";
+import { loadCommonPaths, parseCitation, citationGithubUrl, type CommonPaths } from "./common-paths";
 
 interface Options {
   repoRoot: string;

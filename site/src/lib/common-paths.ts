@@ -1,26 +1,12 @@
-// Loads `common_paths.yml` (or falls back to `common_paths.yml.sample`),
-// expands ~ in paths, and exposes citation-resolving helpers.
-//
-// Citation form (inside inline code in note bodies):
-//   $NAME/relative/path:LINE
-//   $NAME/relative/path:LINE-LINE
-//   $NAME/relative/path
+// Loads `common_paths.yml` from the repo root and exposes citation helpers.
 
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import yaml from "js-yaml";
-import { builtinPaths, type CommonPathEntry, type CommonPaths } from "./common-paths-core";
+import { builtinPaths, type CommonPathEntry, type CommonPaths } from "../../../scripts/lib/common-paths-core";
 
-export {
-  CITATION_RE,
-  citationGithubUrl,
-  citationLocalPath,
-  parseCitation,
-  type Citation,
-  type CommonPathEntry,
-  type CommonPaths,
-} from "./common-paths-core";
+export { CITATION_RE, citationGithubUrl, parseCitation, type Citation, type CommonPaths } from "../../../scripts/lib/common-paths-core";
 
 function expandHome(p: string): string {
   if (p.startsWith("~/")) return path.join(os.homedir(), p.slice(2));
