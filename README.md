@@ -2,6 +2,8 @@
 
 Knowledge base + casting pipeline for building Galaxy workflows with `gxwf`.
 
+Site: <https://jmchilton.github.io/foundry/>
+
 ## Goal
 
 Convert workflows authored in other systems — papers describing computational analyses, Nextflow pipelines, CWL workflows — into validated Galaxy workflows in the `gxformat2` format. The Foundry decomposes that conversion into atomic, schema-validated steps that an LLM agent can execute reliably, grounded in `gxwf`'s static validation of `gxformat2` and tool steps.
