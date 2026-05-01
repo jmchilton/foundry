@@ -1,0 +1,2752 @@
+{
+  "source": {
+    "ecosystem": "nf-core",
+    "workflow": "bacass",
+    "url": "https://github.com/nf-core/bacass.git",
+    "version": "76e4b12cacdc242891ea57e723c5e273f4ac71b4",
+    "license": "MIT",
+    "slug": "nf-core-bacass"
+  },
+  "params": [
+    {
+      "name": "input",
+      "type": "string",
+      "default": null,
+      "description": "Path to a 5-column samplesheet TSV (id, fastq_1, fastq_2, long_fastq, fast5).",
+      "required": true
+    },
+    {
+      "name": "outdir",
+      "type": "string",
+      "default": null,
+      "description": "Output directory.",
+      "required": true
+    },
+    {
+      "name": "assembly_type",
+      "type": "string",
+      "default": "short",
+      "description": "One of short / long / hybrid. Selects which input reads feed assembly.",
+      "required": false,
+      "enum": [
+        "short",
+        "long",
+        "hybrid"
+      ]
+    },
+    {
+      "name": "assembler",
+      "type": "string",
+      "default": "unicycler",
+      "description": "Assembler to use.",
+      "required": false,
+      "enum": [
+        "unicycler",
+        "canu",
+        "miniasm",
+        "dragonflye"
+      ]
+    },
+    {
+      "name": "annotation_tool",
+      "type": "string",
+      "default": "prokka",
+      "description": "Annotation tool.",
+      "required": false,
+      "enum": [
+        "prokka",
+        "bakta",
+        "dfast",
+        "liftoff"
+      ]
+    },
+    {
+      "name": "polish_method",
+      "type": "string",
+      "default": "medaka",
+      "description": "Long-read polishing method.",
+      "required": false,
+      "enum": [
+        "medaka",
+        "nanopolish"
+      ]
+    },
+    {
+      "name": "long_reads_filtering",
+      "type": "string",
+      "default": "filtlong",
+      "description": "Long-reads filtering tool.",
+      "required": false,
+      "enum": [
+        "filtlong",
+        "porechop"
+      ]
+    },
+    {
+      "name": "skip_pycoqc",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip pycoQC.",
+      "required": false
+    },
+    {
+      "name": "skip_kraken2",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip Kraken2.",
+      "required": false
+    },
+    {
+      "name": "skip_kmerfinder",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip kmerfinder.",
+      "required": false
+    },
+    {
+      "name": "skip_nanoplot",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip Nanoplot.",
+      "required": false
+    },
+    {
+      "name": "skip_toulligqc",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip ToulligQC.",
+      "required": false
+    },
+    {
+      "name": "skip_polish",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip long-read polishing.",
+      "required": false
+    },
+    {
+      "name": "skip_fastp",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip fastp adapter trimming.",
+      "required": false
+    },
+    {
+      "name": "skip_fastqc",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip FastQC.",
+      "required": false
+    },
+    {
+      "name": "skip_busco",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip BUSCO.",
+      "required": false
+    },
+    {
+      "name": "skip_annotation",
+      "type": "boolean",
+      "default": false,
+      "description": "Skip gene annotation.",
+      "required": false
+    },
+    {
+      "name": "save_trimmed_fail",
+      "type": "boolean",
+      "default": false,
+      "description": "Save fastp-failed trimmed reads.",
+      "required": false
+    },
+    {
+      "name": "discard_trimmed_pass",
+      "type": "boolean",
+      "default": false,
+      "description": "Discard fastp-passed trimmed reads.",
+      "required": false
+    },
+    {
+      "name": "kraken2db",
+      "type": "string",
+      "default": null,
+      "description": "Path to a Kraken2 database tarball.",
+      "required": false
+    },
+    {
+      "name": "baktadb",
+      "type": "string",
+      "default": null,
+      "description": "Path to a Bakta database directory.",
+      "required": false
+    },
+    {
+      "name": "baktadb_download",
+      "type": "boolean",
+      "default": false,
+      "description": "Download Bakta DB at runtime.",
+      "required": false
+    },
+    {
+      "name": "dfast_config",
+      "type": "string",
+      "default": null,
+      "description": "DFAST config file path.",
+      "required": false
+    },
+    {
+      "name": "prokka_args",
+      "type": "string",
+      "default": null,
+      "description": "Extra args passed to prokka.",
+      "required": false
+    },
+    {
+      "name": "prokka_proteins",
+      "type": "string",
+      "default": null,
+      "description": "Optional proteins FASTA for prokka.",
+      "required": false
+    },
+    {
+      "name": "reference_fasta",
+      "type": "string",
+      "default": null,
+      "description": "Reference FASTA (for QUAST / liftoff).",
+      "required": false
+    },
+    {
+      "name": "reference_gff",
+      "type": "string",
+      "default": null,
+      "description": "Reference GFF (for liftoff / QUAST_BYREFSEQID).",
+      "required": false
+    },
+    {
+      "name": "liftoff_ref_from_kmerfinder",
+      "type": "boolean",
+      "default": false,
+      "description": "Source liftoff reference from kmerfinder hit.",
+      "required": false
+    },
+    {
+      "name": "busco_mode",
+      "type": "string",
+      "default": "genome",
+      "description": "BUSCO run mode.",
+      "required": false
+    },
+    {
+      "name": "busco_lineage",
+      "type": "string",
+      "default": "auto",
+      "description": "BUSCO lineage.",
+      "required": false
+    },
+    {
+      "name": "busco_db_path",
+      "type": "string",
+      "default": null,
+      "description": "Pre-downloaded BUSCO DB path.",
+      "required": false
+    },
+    {
+      "name": "busco_config_file",
+      "type": "string",
+      "default": null,
+      "description": "BUSCO config file.",
+      "required": false
+    },
+    {
+      "name": "busco_clean_intermediates",
+      "type": "boolean",
+      "default": false,
+      "description": "Clean BUSCO intermediates.",
+      "required": false
+    },
+    {
+      "name": "canu_mode",
+      "type": "string",
+      "default": "-nanopore-raw",
+      "description": "Canu read-type flag.",
+      "required": false
+    },
+    {
+      "name": "pipelines_testdata_base_path",
+      "type": "string",
+      "default": "https://raw.githubusercontent.com/nf-core/test-datasets/bacass/",
+      "description": "Base URL for pipeline test data.",
+      "required": false
+    }
+  ],
+  "profiles": [
+    "debug",
+    "conda",
+    "mamba",
+    "docker",
+    "arm",
+    "singularity",
+    "podman",
+    "shifter",
+    "charliecloud",
+    "apptainer",
+    "wave",
+    "gitpod",
+    "gpu",
+    "test",
+    "test_dfast",
+    "test_liftoff",
+    "test_hybrid",
+    "test_hybrid_dragonflye",
+    "test_long",
+    "test_long_miniasm",
+    "test_long_miniasm_prokka",
+    "test_long_dragonflye",
+    "test_full"
+  ],
+  "tools": [
+    {
+      "name": "fastqc",
+      "version": "0.12.1",
+      "biocontainer": "biocontainers/fastqc:0.12.1--hdfd78af_0",
+      "bioconda": "bioconda::fastqc=0.12.1",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0",
+      "wave": null
+    },
+    {
+      "name": "fastp",
+      "version": "0.24.0",
+      "biocontainer": "biocontainers/fastp:0.24.0--heae3180_1",
+      "bioconda": "bioconda::fastp=0.24.0",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/fastp:0.24.0--heae3180_1",
+      "wave": null
+    },
+    {
+      "name": "porechop",
+      "version": "0.2.4",
+      "biocontainer": "biocontainers/porechop:0.2.4--py39hc16433a_3",
+      "bioconda": "bioconda::porechop=0.2.4",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/porechop:0.2.4--py39hc16433a_3",
+      "wave": null
+    },
+    {
+      "name": "filtlong",
+      "version": "0.2.1",
+      "biocontainer": "biocontainers/filtlong:0.2.1--hd03093a_5",
+      "bioconda": "bioconda::filtlong=0.2.1",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/filtlong:0.2.1--hd03093a_5",
+      "wave": null
+    },
+    {
+      "name": "unicycler",
+      "version": "0.5.1",
+      "biocontainer": "biocontainers/unicycler:0.5.1--py310h6cc9453_3",
+      "bioconda": "bioconda::unicycler=0.5.1",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/unicycler:0.5.1--py310h6cc9453_3",
+      "wave": null
+    },
+    {
+      "name": "canu",
+      "version": "2.2",
+      "biocontainer": "biocontainers/canu:2.2--ha47f30e_0",
+      "bioconda": "bioconda::canu=2.2",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/canu:2.2--ha47f30e_0",
+      "wave": null
+    },
+    {
+      "name": "miniasm",
+      "version": "0.3_r179",
+      "biocontainer": "biocontainers/miniasm:0.3_r179--h7132678_3",
+      "bioconda": "bioconda::miniasm=0.3_r179",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/miniasm:0.3_r179--h7132678_3",
+      "wave": null
+    },
+    {
+      "name": "dragonflye",
+      "version": "1.2.1",
+      "biocontainer": "biocontainers/dragonflye:1.2.1--hdfd78af_0",
+      "bioconda": "bioconda::dragonflye=1.2.1",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/dragonflye:1.2.1--hdfd78af_0",
+      "wave": null
+    },
+    {
+      "name": "racon",
+      "version": "1.4.20",
+      "biocontainer": "biocontainers/racon:1.4.20--h9a82719_1",
+      "bioconda": "bioconda::racon=1.4.20",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/racon:1.4.20--h9a82719_1",
+      "wave": null
+    },
+    {
+      "name": "minimap2_mulled",
+      "version": "2.24+samtools1.18",
+      "biocontainer": "biocontainers/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:365b17b986c1a60c1b82c6066a9345f38317b763-0",
+      "bioconda": "bioconda::minimap2=2.24 + bioconda::samtools=1.18 + bioconda::htslib=1.18",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:365b17b986c1a60c1b82c6066a9345f38317b763-0",
+      "wave": null
+    },
+    {
+      "name": "samtools",
+      "version": "1.19.2",
+      "biocontainer": "biocontainers/samtools:1.19.2--h50ea8bc_0",
+      "bioconda": "bioconda::samtools=1.19.2 + bioconda::htslib=1.19.1",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/samtools:1.19.2--h50ea8bc_0",
+      "wave": null
+    },
+    {
+      "name": "kraken2",
+      "version": "2.1.2",
+      "biocontainer": "biocontainers/kraken2:2.1.2--pl5321hd92ed6f_4",
+      "bioconda": "bioconda::kraken2=2.1.2",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/kraken2:2.1.2--pl5321hd92ed6f_4",
+      "wave": null
+    },
+    {
+      "name": "kmerfinder",
+      "version": "3.0.2",
+      "biocontainer": "biocontainers/kmerfinder:3.0.2--hdfd78af_0",
+      "bioconda": "bioconda::kmerfinder=3.0.2",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/kmerfinder:3.0.2--hdfd78af_0",
+      "wave": null
+    },
+    {
+      "name": "quast",
+      "version": "5.2.0",
+      "biocontainer": "biocontainers/quast:5.2.0--py39pl5321h2add14b_1",
+      "bioconda": "bioconda::quast=5.2.0",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/quast:5.2.0--py39pl5321h2add14b_1",
+      "wave": null
+    },
+    {
+      "name": "busco_mulled",
+      "version": "5.8.3+sepp4.5.5",
+      "biocontainer": "biocontainers/mulled-v2-<digest-busco-sepp>:<rev>",
+      "bioconda": "bioconda::busco=5.8.3 + bioconda::sepp=4.5.5",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/mulled-v2-<digest-busco-sepp>:<rev>",
+      "wave": null
+    },
+    {
+      "name": "prokka",
+      "version": "1.14.6",
+      "biocontainer": "biocontainers/prokka:1.14.6--pl5321hdfd78af_4",
+      "bioconda": "bioconda::prokka=1.14.6",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/prokka:1.14.6--pl5321hdfd78af_4",
+      "wave": null
+    },
+    {
+      "name": "bakta",
+      "version": "1.9.3",
+      "biocontainer": "biocontainers/bakta:1.9.3--pyhdfd78af_0",
+      "bioconda": "bioconda::bakta=1.9.3",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/bakta:1.9.3--pyhdfd78af_0",
+      "wave": null
+    },
+    {
+      "name": "dfast",
+      "version": "1.3.2",
+      "biocontainer": "biocontainers/dfast:1.3.2--h7b50bb2_0",
+      "bioconda": "bioconda::dfast=1.3.2",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/dfast:1.3.2--h7b50bb2_0",
+      "wave": null
+    },
+    {
+      "name": "liftoff",
+      "version": "1.6.3",
+      "biocontainer": "biocontainers/liftoff:1.6.3--pyhdfd78af_0",
+      "bioconda": "bioconda::liftoff=1.6.3",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/liftoff:1.6.3--pyhdfd78af_0",
+      "wave": null
+    },
+    {
+      "name": "nanoplot",
+      "version": "1.46.1",
+      "biocontainer": "biocontainers/nanoplot:1.46.1--pyhdfd78af_0",
+      "bioconda": "bioconda::nanoplot=1.46.1",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/nanoplot:1.46.1--pyhdfd78af_0",
+      "wave": null
+    },
+    {
+      "name": "toulligqc",
+      "version": "2.7.1",
+      "biocontainer": "biocontainers/toulligqc:2.7.1--pyhdfd78af_0",
+      "bioconda": "bioconda::toulligqc=2.7.1",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/toulligqc:2.7.1--pyhdfd78af_0",
+      "wave": null
+    },
+    {
+      "name": "pycoqc",
+      "version": "2.5.2",
+      "biocontainer": "biocontainers/pycoqc:2.5.2--py_0",
+      "bioconda": "bioconda::pycoqc=2.5.2",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/pycoqc:2.5.2--py_0",
+      "wave": null
+    },
+    {
+      "name": "medaka",
+      "version": "1.4.3",
+      "biocontainer": "biocontainers/medaka:1.4.3--py38h130def0_0",
+      "bioconda": "bioconda::medaka=1.4.3",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/medaka:1.4.3--py38h130def0_0",
+      "wave": null
+    },
+    {
+      "name": "nanopolish",
+      "version": "0.14.0",
+      "biocontainer": "biocontainers/nanopolish:0.14.0--he3b275e_2",
+      "bioconda": "bioconda::nanopolish=0.14.0",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/nanopolish:0.14.0--he3b275e_2",
+      "wave": null
+    },
+    {
+      "name": "multiqc",
+      "version": "1.27",
+      "biocontainer": "biocontainers/multiqc:1.27--pyhdfd78af_0",
+      "bioconda": "bioconda::multiqc=1.27",
+      "docker": null,
+      "singularity": "https://depot.galaxyproject.org/singularity/multiqc:1.27--pyhdfd78af_0",
+      "wave": null
+    },
+    {
+      "name": "cat_fastq",
+      "version": "shell",
+      "biocontainer": null,
+      "bioconda": null,
+      "docker": null,
+      "singularity": null,
+      "wave": null
+    },
+    {
+      "name": "untar",
+      "version": "shell",
+      "biocontainer": null,
+      "bioconda": null,
+      "docker": null,
+      "singularity": null,
+      "wave": null
+    },
+    {
+      "name": "gunzip",
+      "version": "shell",
+      "biocontainer": null,
+      "bioconda": null,
+      "docker": null,
+      "singularity": null,
+      "wave": null
+    }
+  ],
+  "processes": [
+    {
+      "name": "FASTQC",
+      "module_path": "modules/nf-core/fastqc/main.nf",
+      "tool": "fastqc",
+      "container": "<ternary: depot.galaxyproject.org/singularity/fastqc:0.12.1--hdfd78af_0 | biocontainers/fastqc:0.12.1--hdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "html",
+          "shape": "tuple(val(meta), path(\"*.html\"))",
+          "topic": null
+        },
+        {
+          "name": "zip",
+          "shape": "tuple(val(meta), path(\"*.zip\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": [
+        "FASTQC_RAW",
+        "FASTQC_TRIM"
+      ]
+    },
+    {
+      "name": "FASTP",
+      "module_path": "modules/nf-core/fastp/main.nf",
+      "tool": "fastp",
+      "container": "<ternary: fastp:0.24.0--heae3180_1>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        },
+        {
+          "name": "adapter_fasta",
+          "shape": "path(adapter_fasta)",
+          "topic": null
+        },
+        {
+          "name": "discard_trimmed_pass",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "save_trimmed_fail",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "save_merged",
+          "shape": "val(boolean)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(\"*.fastp.fastq.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "json",
+          "shape": "tuple(val(meta), path(\"*.json\"))",
+          "topic": null
+        },
+        {
+          "name": "html",
+          "shape": "tuple(val(meta), path(\"*.html\"))",
+          "topic": null
+        },
+        {
+          "name": "log",
+          "shape": "tuple(val(meta), path(\"*.log\"))",
+          "topic": null
+        },
+        {
+          "name": "reads_fail",
+          "shape": "tuple(val(meta), path(\"*.fail.fastq.gz\")) optional",
+          "topic": null
+        },
+        {
+          "name": "reads_merged",
+          "shape": "tuple(val(meta), path(\"*.merged.fastq.gz\")) optional",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "CAT_FASTQ",
+      "module_path": "modules/nf-core/cat/fastq/main.nf",
+      "tool": "cat_fastq",
+      "container": "<ternary: ubuntu:22.04>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads, stageAs:\"input*/*\"))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(\"*.merged.fastq.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": [
+        "CAT_FASTQ_SHORT",
+        "CAT_FASTQ_LONG"
+      ]
+    },
+    {
+      "name": "PORECHOP_PORECHOP",
+      "module_path": "modules/nf-core/porechop/porechop/main.nf",
+      "tool": "porechop",
+      "container": "<ternary: porechop:0.2.4--py39hc16433a_3>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(\"*.fastq.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "log",
+          "shape": "tuple(val(meta), path(\"*.log\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "FILTLONG",
+      "module_path": "modules/nf-core/filtlong/main.nf",
+      "tool": "filtlong",
+      "container": "<ternary: filtlong:0.2.1--hd03093a_5>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "shortreads_longreads",
+          "shape": "tuple(val(meta), path(shortreads), path(longreads))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(\"*_lr_filtlong.fastq.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "log",
+          "shape": "tuple(val(meta), path(\"*.log\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "UNICYCLER",
+      "module_path": "modules/nf-core/unicycler/main.nf",
+      "tool": "unicycler",
+      "container": "<ternary: unicycler:0.5.1--py310h6cc9453_3>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(short1), path(short2), path(long))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "scaffolds",
+          "shape": "tuple(val(meta), path(\"*.scaffolds.fa.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "assembly_graph",
+          "shape": "tuple(val(meta), path(\"*.assembly.gfa.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "log",
+          "shape": "tuple(val(meta), path(\"*.unicycler.log\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "CANU",
+      "module_path": "modules/nf-core/canu/main.nf",
+      "tool": "canu",
+      "container": "<ternary: canu:2.2--ha47f30e_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        },
+        {
+          "name": "mode",
+          "shape": "val(mode)",
+          "topic": null
+        },
+        {
+          "name": "genomesize",
+          "shape": "val(genome_size)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "assembly",
+          "shape": "tuple(val(meta), path(\"*.contigs.fasta.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "report",
+          "shape": "tuple(val(meta), path(\"*.report\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "MINIMAP2_ALIGN",
+      "module_path": "modules/nf-core/minimap2/align/main.nf",
+      "tool": "minimap2_mulled",
+      "container": "<ternary: mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:365b17b986c1a60c1b82c6066a9345f38317b763-0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        },
+        {
+          "name": "reference",
+          "shape": "tuple(val(meta2), path(reference))",
+          "topic": null
+        },
+        {
+          "name": "bam_format",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "bam_index_extension",
+          "shape": "val(string)",
+          "topic": null
+        },
+        {
+          "name": "cigar_paf_format",
+          "shape": "val(boolean)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "paf",
+          "shape": "tuple(val(meta), path(\"*.paf\")) optional",
+          "topic": null
+        },
+        {
+          "name": "bam",
+          "shape": "tuple(val(meta), path(\"*.bam\")) optional",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": [
+        "MINIMAP2_CONSENSUS",
+        "MINIMAP2_POLISH"
+      ]
+    },
+    {
+      "name": "MINIASM",
+      "module_path": "modules/nf-core/miniasm/main.nf",
+      "tool": "miniasm",
+      "container": "<ternary: miniasm:0.3_r179--h7132678_3>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads_paf",
+          "shape": "tuple(val(meta), path(reads), path(paf))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "assembly",
+          "shape": "tuple(val(meta), path(\"*.fa.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "DRAGONFLYE",
+      "module_path": "modules/nf-core/dragonflye/main.nf",
+      "tool": "dragonflye",
+      "container": "<ternary: dragonflye:1.2.1--hdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(short1), path(short2), path(long))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "contigs",
+          "shape": "tuple(val(meta), path(\"*.contigs.fa\"))",
+          "topic": null
+        },
+        {
+          "name": "log",
+          "shape": "tuple(val(meta), path(\"*.log\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "RACON",
+      "module_path": "modules/nf-core/racon/main.nf",
+      "tool": "racon",
+      "container": "<ternary: racon:1.4.20--h9a82719_1>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "input",
+          "shape": "tuple(val(meta), path(reads), path(assembly), path(paf))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "improved_assembly",
+          "shape": "tuple(val(meta), path(\"*_assembly_consensus.fasta.gz\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "SAMTOOLS_SORT",
+      "module_path": "modules/nf-core/samtools/sort/main.nf",
+      "tool": "samtools",
+      "container": "<ternary: samtools:1.19.2--h50ea8bc_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "input",
+          "shape": "tuple(val(meta), path(input))",
+          "topic": null
+        },
+        {
+          "name": "fasta",
+          "shape": "tuple(val(meta), path(fasta))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bam",
+          "shape": "tuple(val(meta), path(\"*.bam\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "SAMTOOLS_INDEX",
+      "module_path": "modules/nf-core/samtools/index/main.nf",
+      "tool": "samtools",
+      "container": "<ternary: samtools:1.19.2--h50ea8bc_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "input",
+          "shape": "tuple(val(meta), path(input))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bai",
+          "shape": "tuple(val(meta), path(\"*.bai\")) optional",
+          "topic": null
+        },
+        {
+          "name": "csi",
+          "shape": "tuple(val(meta), path(\"*.csi\")) optional",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "KRAKEN2_KRAKEN2",
+      "module_path": "modules/nf-core/kraken2/kraken2/main.nf",
+      "tool": "kraken2",
+      "container": "<ternary: kraken2:2.1.2--pl5321hd92ed6f_4>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        },
+        {
+          "name": "db",
+          "shape": "path(db)",
+          "topic": null
+        },
+        {
+          "name": "save_output_fastqs",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "save_reads_assignment",
+          "shape": "val(boolean)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "shape": "tuple(val(meta), path(\"*.report.txt\"))",
+          "topic": null
+        },
+        {
+          "name": "classified_reads_assignment",
+          "shape": "tuple(val(meta), path(\"*.classifiedreads.txt\")) optional",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": [
+        "KRAKEN2",
+        "KRAKEN2_LONG"
+      ]
+    },
+    {
+      "name": "QUAST",
+      "module_path": "modules/nf-core/quast/main.nf",
+      "tool": "quast",
+      "container": "<ternary: quast:5.2.0--py39pl5321h2add14b_1>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "consensus",
+          "shape": "tuple(val(meta), path(consensus))",
+          "topic": null
+        },
+        {
+          "name": "fasta",
+          "shape": "tuple(val(meta2), path(fasta))",
+          "topic": null
+        },
+        {
+          "name": "gff",
+          "shape": "tuple(val(meta3), path(gff))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "results",
+          "shape": "tuple(val(meta), path(\"<prefix>\"))",
+          "topic": null
+        },
+        {
+          "name": "tsv",
+          "shape": "tuple(val(meta), path(\"<prefix>.tsv\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": [
+        "QUAST_BYREFSEQID"
+      ]
+    },
+    {
+      "name": "BUSCO_BUSCO",
+      "module_path": "modules/nf-core/busco/busco/main.nf",
+      "tool": "busco_mulled",
+      "container": "<ternary: busco:5.8.3--pyhdfd78af_0 (mulled with sepp 4.5.5)>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "fasta",
+          "shape": "tuple(val(meta), path(fasta))",
+          "topic": null
+        },
+        {
+          "name": "mode",
+          "shape": "val(mode)",
+          "topic": null
+        },
+        {
+          "name": "lineage",
+          "shape": "val(lineage)",
+          "topic": null
+        },
+        {
+          "name": "lineages_path",
+          "shape": "path(busco_lineages_path)",
+          "topic": null
+        },
+        {
+          "name": "config_file",
+          "shape": "path(config_file) optional",
+          "topic": null
+        },
+        {
+          "name": "clean_intermediates",
+          "shape": "val(boolean)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "short_summaries_txt",
+          "shape": "tuple(val(meta), path(\"short_summary*.txt\"))",
+          "topic": null
+        },
+        {
+          "name": "short_summaries_json",
+          "shape": "tuple(val(meta), path(\"short_summary*.json\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "GUNZIP",
+      "module_path": "modules/nf-core/gunzip/main.nf",
+      "tool": "gunzip",
+      "container": "<ternary: ubuntu:22.04>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "archive",
+          "shape": "tuple(val(meta), path(archive))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "gunzip",
+          "shape": "tuple(val(meta), path(\"<unzipped>\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "PROKKA",
+      "module_path": "modules/nf-core/prokka/main.nf",
+      "tool": "prokka",
+      "container": "<ternary: prokka:1.14.6--pl5321hdfd78af_4>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "fasta",
+          "shape": "tuple(val(meta), path(fasta))",
+          "topic": null
+        },
+        {
+          "name": "proteins",
+          "shape": "path(proteins)",
+          "topic": null
+        },
+        {
+          "name": "prodigal_tf",
+          "shape": "path(prodigal_tf)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "txt",
+          "shape": "tuple(val(meta), path(\"*.txt\"))",
+          "topic": null
+        },
+        {
+          "name": "gff",
+          "shape": "tuple(val(meta), path(\"*.gff\"))",
+          "topic": null
+        },
+        {
+          "name": "fna",
+          "shape": "tuple(val(meta), path(\"*.fna\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "BAKTA_BAKTA",
+      "module_path": "modules/nf-core/bakta/bakta/main.nf",
+      "tool": "bakta",
+      "container": "<ternary: bakta:1.9.3--pyhdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "fasta",
+          "shape": "tuple(val(meta), path(fasta))",
+          "topic": null
+        },
+        {
+          "name": "db",
+          "shape": "path(db)",
+          "topic": null
+        },
+        {
+          "name": "proteins",
+          "shape": "path(proteins) optional",
+          "topic": null
+        },
+        {
+          "name": "prodigal_tf",
+          "shape": "path(prodigal_tf) optional",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "txt",
+          "shape": "tuple(val(meta), path(\"*.txt\"))",
+          "topic": null
+        },
+        {
+          "name": "gff",
+          "shape": "tuple(val(meta), path(\"*.gff3\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "BAKTA_BAKTADBDOWNLOAD",
+      "module_path": "modules/nf-core/bakta/baktadbdownload/main.nf",
+      "tool": "bakta",
+      "container": "<ternary: bakta:1.9.3--pyhdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "db",
+          "shape": "path(\"db\")",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "DFAST",
+      "module_path": "modules/local/dfast.nf",
+      "tool": "dfast",
+      "container": "<ternary: dfast:1.3.2--h7b50bb2_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "assembly",
+          "shape": "tuple(val(meta), path(assembly))",
+          "topic": null
+        },
+        {
+          "name": "config",
+          "shape": "val(config)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "annotation",
+          "shape": "tuple(val(meta), path(\"<dir>\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "LIFTOFF",
+      "module_path": "modules/nf-core/liftoff/main.nf",
+      "tool": "liftoff",
+      "container": "<ternary: liftoff:1.6.3--pyhdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "fasta",
+          "shape": "tuple(val(meta), path(fasta))",
+          "topic": null
+        },
+        {
+          "name": "ref_fasta",
+          "shape": "path(ref_fasta)",
+          "topic": null
+        },
+        {
+          "name": "ref_gff",
+          "shape": "path(ref_gff)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "polished_gff",
+          "shape": "tuple(val(meta), path(\"*.polished.gff3\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "NANOPLOT",
+      "module_path": "modules/nf-core/nanoplot/main.nf",
+      "tool": "nanoplot",
+      "container": "<ternary: nanoplot:1.46.1--pyhdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "ontfile",
+          "shape": "tuple(val(meta), path(ontfile))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "html",
+          "shape": "tuple(val(meta), path(\"*.html\"))",
+          "topic": null
+        },
+        {
+          "name": "txt",
+          "shape": "tuple(val(meta), path(\"*.txt\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "TOULLIGQC",
+      "module_path": "modules/nf-core/toulligqc/main.nf",
+      "tool": "toulligqc",
+      "container": "<ternary: toulligqc:2.7.1--pyhdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "ontfile",
+          "shape": "tuple(val(meta), path(ontfile))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report_data",
+          "shape": "tuple(val(meta), path(\"<dir>\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "PYCOQC",
+      "module_path": "modules/local/pycoqc.nf",
+      "tool": "pycoqc",
+      "container": "<ternary: pycoqc:2.5.2--py_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "fast5",
+          "shape": "tuple(val(meta), path(fast5))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "json",
+          "shape": "tuple(val(meta), path(\"*.json\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "MEDAKA",
+      "module_path": "modules/local/medaka.nf",
+      "tool": "medaka",
+      "container": "<ternary: medaka:1.4.3--py38h130def0_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "long_assembly",
+          "shape": "tuple(val(meta), path(longreads), path(assembly))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "assembly",
+          "shape": "tuple(val(meta), path(\"*_polished_genome.fa\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "NANOPOLISH",
+      "module_path": "modules/local/nanopolish.nf",
+      "tool": "nanopolish",
+      "container": "<ternary: nanopolish:0.14.0--he3b275e_2>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "input",
+          "shape": "tuple(val(meta), val(reads), path(longreads), path(assembly), path(bam), path(bai), path(fast5))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "assembly",
+          "shape": "tuple(val(meta), path(\"*_polished_genome.fa\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "KRAKEN2_DB_PREPARATION",
+      "module_path": "modules/local/kraken2/db_preparation.nf",
+      "tool": "untar",
+      "container": "<ternary: ubuntu:22.04>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "db",
+          "shape": "path(db)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "db",
+          "shape": "tuple(val(name), path(\"<dir>\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "KMERFINDER_KMERFINDER",
+      "module_path": "modules/local/kmerfinder/kmerfinder.nf",
+      "tool": "kmerfinder",
+      "container": "<ternary: kmerfinder:3.0.2--hdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        },
+        {
+          "name": "kmerfinder_db",
+          "shape": "path(kmerfinder_db)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "shape": "tuple(val(meta), path(\"*.txt\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "KMERFINDER_SUMMARY",
+      "module_path": "modules/local/kmerfinder/summary.nf",
+      "tool": "multiqc",
+      "container": "<ternary: multiqc:1.19--pyhdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "reports",
+          "shape": "path(reports)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "summary_yaml",
+          "shape": "path(\"*.yaml\")",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "KMERFINDER_DOWNLOAD_REFERENCE",
+      "module_path": "modules/local/kmerfinder/download_reference.nf",
+      "tool": "kmerfinder",
+      "container": "<ternary: kmerfinder:3.0.2--hdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "summary",
+          "shape": "tuple(val(meta), path(summary))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "consensus_byrefseq",
+          "shape": "tuple(val(refmeta), val(meta), path(consensus), path(ref_fna), path(ref_gff))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "CUSTOM_MULTIQC",
+      "module_path": "modules/local/custom/multiqc.nf",
+      "tool": "multiqc",
+      "container": "<ternary: multiqc:1.19--pyhdfd78af_0>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "multiqc_files",
+          "shape": "path(multiqc_files)",
+          "topic": null
+        },
+        {
+          "name": "multiqc_config",
+          "shape": "path(multiqc_config)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "report",
+          "shape": "path(\"*.html\")",
+          "topic": null
+        },
+        {
+          "name": "data",
+          "shape": "path(\"*_data\")",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    },
+    {
+      "name": "UNTAR",
+      "module_path": "modules/nf-core/untar/main.nf",
+      "tool": "untar",
+      "container": "<ternary: ubuntu:22.04>",
+      "conda": "${moduleDir}/environment.yml",
+      "inputs": [
+        {
+          "name": "archive",
+          "shape": "tuple(val(meta), path(archive))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "untar",
+          "shape": "tuple(val(meta), path(\"<dir>\"))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path(\"versions.yml\")",
+          "topic": null
+        }
+      ],
+      "aliases": []
+    }
+  ],
+  "subworkflows": [
+    {
+      "name": "FASTQ_TRIM_FASTP_FASTQC",
+      "path": "subworkflows/nf-core/fastq_trim_fastp_fastqc/main.nf",
+      "kind": "pipeline",
+      "calls": [
+        "FASTQC",
+        "FASTQC",
+        "FASTP"
+      ],
+      "inputs": [
+        {
+          "name": "ch_reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        },
+        {
+          "name": "ch_adapter_fasta",
+          "shape": "path(fasta) (often empty list literal)",
+          "topic": null
+        },
+        {
+          "name": "val_save_trimmed_fail",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "val_discard_trimmed_pass",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "val_save_merged",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "val_skip_fastp",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "val_skip_fastqc",
+          "shape": "val(boolean)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        },
+        {
+          "name": "fastqc_raw_zip",
+          "shape": "tuple(val(meta), path(zip))",
+          "topic": null
+        },
+        {
+          "name": "fastqc_trim_zip",
+          "shape": "tuple(val(meta), path(zip))",
+          "topic": null
+        },
+        {
+          "name": "trim_json",
+          "shape": "tuple(val(meta), path(json))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path",
+          "topic": null
+        }
+      ]
+    },
+    {
+      "name": "QC_NANOPLOT_TOULLIGQC",
+      "path": "subworkflows/local/qc_nanoplot_toulliqc/main.nf",
+      "kind": "pipeline",
+      "calls": [
+        "NANOPLOT",
+        "TOULLIGQC"
+      ],
+      "inputs": [
+        {
+          "name": "ch_longreads",
+          "shape": "tuple(val(meta), path(longreads))",
+          "topic": null
+        },
+        {
+          "name": "skip_nanoplot",
+          "shape": "val(boolean)",
+          "topic": null
+        },
+        {
+          "name": "skip_toulligqc",
+          "shape": "val(boolean)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "nanoplot_txt",
+          "shape": "tuple(val(meta), path(txt))",
+          "topic": null
+        },
+        {
+          "name": "nanoplot_version",
+          "shape": "path",
+          "topic": null
+        },
+        {
+          "name": "toulligqc_version",
+          "shape": "path",
+          "topic": null
+        }
+      ]
+    },
+    {
+      "name": "KMERFINDER_SUMMARY_DOWNLOAD",
+      "path": "subworkflows/local/kmerfinder_summary_download/main.nf",
+      "kind": "pipeline",
+      "calls": [
+        "UNTAR",
+        "KMERFINDER_KMERFINDER",
+        "KMERFINDER_SUMMARY",
+        "KMERFINDER_DOWNLOAD_REFERENCE"
+      ],
+      "inputs": [
+        {
+          "name": "ch_reads",
+          "shape": "tuple(val(meta), path(reads))",
+          "topic": null
+        },
+        {
+          "name": "ch_assembly",
+          "shape": "tuple(val(meta), path(fasta))",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "summary_yaml",
+          "shape": "path",
+          "topic": null
+        },
+        {
+          "name": "consensus_byrefseq",
+          "shape": "tuple(val(refmeta), val(meta), path(consensus), path(ref_fna), path(ref_gff))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path",
+          "topic": null
+        }
+      ]
+    },
+    {
+      "name": "BAKTA_DBDOWNLOAD_RUN",
+      "path": "subworkflows/local/bakta_dbdownload_run/main.nf",
+      "kind": "pipeline",
+      "calls": [
+        "BAKTA_BAKTADBDOWNLOAD",
+        "UNTAR",
+        "BAKTA_BAKTA"
+      ],
+      "inputs": [
+        {
+          "name": "ch_assembly",
+          "shape": "tuple(val(meta), path(fasta))",
+          "topic": null
+        },
+        {
+          "name": "baktadb",
+          "shape": "val(string)",
+          "topic": null
+        },
+        {
+          "name": "baktadb_download",
+          "shape": "val(boolean)",
+          "topic": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "bakta_txt_multiqc",
+          "shape": "tuple(val(meta), path(txt))",
+          "topic": null
+        },
+        {
+          "name": "versions",
+          "shape": "path",
+          "topic": null
+        }
+      ]
+    },
+    {
+      "name": "PIPELINE_INITIALISATION",
+      "path": "subworkflows/local/utils_nfcore_bacass_pipeline/main.nf",
+      "kind": "utility",
+      "calls": [],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "samplesheet",
+          "shape": "tuple(val(meta), path(fastq_1), path(fastq_2), path(long_fastq), path(fast5))",
+          "description": "5-column TSV samplesheet validated via samplesheetToList.",
+          "topic": null
+        }
+      ]
+    },
+    {
+      "name": "PIPELINE_COMPLETION",
+      "path": "subworkflows/local/utils_nfcore_bacass_pipeline/main.nf",
+      "kind": "utility",
+      "calls": [],
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "name": "NFCORE_BACASS",
+      "path": "main.nf",
+      "kind": "pipeline",
+      "calls": [
+        "BACASS"
+      ],
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "multiqc_report",
+          "shape": "path",
+          "topic": null
+        }
+      ]
+    }
+  ],
+  "workflow": {
+    "name": "BACASS",
+    "channels": [
+      {
+        "name": "ch_samplesheet",
+        "source": "PIPELINE_INITIALISATION.out.samplesheet",
+        "shape": "tuple(val(meta), path(fastq_1), path(fastq_2), path(long_fastq), path(fast5))"
+      },
+      {
+        "name": "ch_input",
+        "source": "ch_samplesheet.multiMap(criteria) — splits into named branches: shortreads / longreads / fast5",
+        "shape": "multimap(shortreads: tuple(meta, fastqs), longreads: tuple(meta, lr), fast5: tuple(meta, fast5))"
+      },
+      {
+        "name": "ch_shortreads",
+        "source": "ch_input.shortreads.filter{ it != null }",
+        "shape": "tuple(val(meta), path(fastqs))"
+      },
+      {
+        "name": "ch_longreads",
+        "source": "ch_input.longreads.filter{ it != null }",
+        "shape": "tuple(val(meta), path(longreads))"
+      },
+      {
+        "name": "ch_fast5",
+        "source": "ch_input.fast5.filter{ it != null }",
+        "shape": "tuple(val(meta), path(fast5))"
+      },
+      {
+        "name": "ch_proteins",
+        "source": "params.prokka_proteins ? Channel.fromPath(params.prokka_proteins) : []",
+        "shape": "path | empty list literal"
+      },
+      {
+        "name": "ch_versions",
+        "source": "Channel.empty() then accumulated via .mix(<every-process>.out.versions)",
+        "shape": "path"
+      },
+      {
+        "name": "ch_multiqc_files",
+        "source": "Channel.empty() then accumulated across QC outputs",
+        "shape": "path"
+      },
+      {
+        "name": "ch_for_assembly",
+        "source": "conditional on params.assembly_type — built from FASTQ_TRIM_FASTP_FASTQC.out.reads, filtered_long_reads via .cross/.map",
+        "shape": "tuple(val(meta), path(short_or_empty), path(long_or_empty))"
+      },
+      {
+        "name": "ch_assembly",
+        "source": "Channel.empty() then accumulated from UNICYCLER/CANU/MINIASM/RACON/DRAGONFLYE/MEDAKA/NANOPOLISH (one wins by params.assembler+polish)",
+        "shape": "tuple(val(meta), path(fasta))"
+      },
+      {
+        "name": "ch_to_quast",
+        "source": "ch_assembly.collect{it[1]}.map{ consensus -> tuple([id:'report'], consensus) }",
+        "shape": "tuple(val(meta), path(consensi))"
+      },
+      {
+        "name": "ch_assembly_for_gunzip",
+        "source": "ch_assembly.branch{ meta, fasta -> gzip: fasta.name.endsWith('.gz'); skip: true }",
+        "shape": "branch(gzip, skip)"
+      }
+    ],
+    "edges": [
+      {
+        "from": "ch_samplesheet",
+        "to": "BACASS",
+        "via": [
+          "multiMap",
+          "filter"
+        ],
+        "notes": "Channel splits into shortreads/longreads/fast5 named branches via multiMap(criteria) closure."
+      },
+      {
+        "from": "ch_shortreads",
+        "to": "CAT_FASTQ_SHORT",
+        "via": [
+          "branch:multiple"
+        ],
+        "notes": "Only multiple-fastq samples reach CAT_FASTQ_SHORT; single-fastq samples bypass via branch:single."
+      },
+      {
+        "from": "ch_longreads",
+        "to": "CAT_FASTQ_LONG",
+        "via": [
+          "map",
+          "branch:multiple"
+        ],
+        "notes": "meta is mutated to single_end:true via map closure before branching."
+      },
+      {
+        "from": "CAT_FASTQ_SHORT.out.reads",
+        "to": "FASTQ_TRIM_FASTP_FASTQC",
+        "via": [
+          "mix"
+        ],
+        "notes": "Mixed with bypass-branch:single; routed when assembly_type != long."
+      },
+      {
+        "from": "ch_fast5",
+        "to": "PYCOQC",
+        "via": [],
+        "notes": "Gated by !skip_pycoqc."
+      },
+      {
+        "from": "ch_longreads_concat",
+        "to": "PORECHOP_PORECHOP",
+        "via": [],
+        "notes": "Gated by long_reads_filtering=='porechop'."
+      },
+      {
+        "from": "FASTQ_TRIM_FASTP_FASTQC.out.reads",
+        "to": "FILTLONG",
+        "via": [
+          "join"
+        ],
+        "notes": "Joined with ch_longreads_concat. Gated by long_reads_filtering=='filtlong'. In long mode short side is empty list."
+      },
+      {
+        "from": "FASTQ_TRIM_FASTP_FASTQC.out.reads",
+        "to": "ch_for_assembly",
+        "via": [
+          "cross",
+          "map"
+        ],
+        "notes": "cross by meta.id with filtered_long_reads then map into (meta, sr, lr) triple. Hybrid path."
+      },
+      {
+        "from": "ch_for_assembly",
+        "to": "UNICYCLER",
+        "via": [],
+        "notes": "Gated by assembler=='unicycler'."
+      },
+      {
+        "from": "ch_for_assembly",
+        "to": "CANU",
+        "via": [
+          "map",
+          "map"
+        ],
+        "notes": "Gated by assembler=='canu'. Two map closures pull lr and meta.gsize."
+      },
+      {
+        "from": "ch_for_assembly",
+        "to": "MINIMAP2_ALIGN",
+        "via": [
+          "map"
+        ],
+        "notes": "Aliased call. miniasm assembler path: map to (meta, lr) before alignment."
+      },
+      {
+        "from": "MINIMAP2_ALIGN.out.paf",
+        "to": "MINIASM",
+        "via": [
+          "join",
+          "map"
+        ],
+        "notes": "Joined with ch_for_assembly into (meta, lr, paf)."
+      },
+      {
+        "from": "MINIASM.out.assembly",
+        "to": "MINIMAP2_CONSENSUS",
+        "via": [],
+        "notes": "Aliased call; reuses MINIMAP2_ALIGN process."
+      },
+      {
+        "from": "MINIMAP2_CONSENSUS.out.paf",
+        "to": "RACON",
+        "via": [
+          "join",
+          "join",
+          "map"
+        ],
+        "notes": "Triple-joined into (meta, lr, assembly, paf)."
+      },
+      {
+        "from": "ch_for_assembly",
+        "to": "DRAGONFLYE",
+        "via": [],
+        "notes": "Gated by assembler=='dragonflye'."
+      },
+      {
+        "from": "ch_assembly",
+        "to": "MEDAKA",
+        "via": [
+          "join",
+          "map"
+        ],
+        "notes": "Gated by polish_method=='medaka'. ch_polish_long shape (meta, lr, fasta)."
+      },
+      {
+        "from": "MEDAKA.out.assembly",
+        "to": "ch_assembly",
+        "via": [
+          "assignment"
+        ],
+        "notes": "ch_assembly is reassigned (not mixed) — overrides earlier value."
+      },
+      {
+        "from": "ch_for_assembly",
+        "to": "MINIMAP2_POLISH",
+        "via": [
+          "map"
+        ],
+        "notes": "Aliased call; nanopolish path."
+      },
+      {
+        "from": "MINIMAP2_POLISH.out.bam",
+        "to": "SAMTOOLS_INDEX",
+        "via": [],
+        "notes": ""
+      },
+      {
+        "from": "SAMTOOLS_INDEX.out.bai",
+        "to": "NANOPOLISH",
+        "via": [
+          "join",
+          "join",
+          "join"
+        ],
+        "notes": "Quad-joined: ch_polish_long + bam + bai + fast5."
+      },
+      {
+        "from": "ch_for_kraken2_short",
+        "to": "KRAKEN2",
+        "via": [
+          "dump"
+        ],
+        "notes": "Aliased KRAKEN2_KRAKEN2 call. Gated by !skip_kraken2."
+      },
+      {
+        "from": "ch_for_kraken2_long",
+        "to": "KRAKEN2_LONG",
+        "via": [
+          "map",
+          "dump"
+        ],
+        "notes": "Aliased call. Map mutates meta to single_end:true."
+      },
+      {
+        "from": "ch_assembly",
+        "to": "KMERFINDER_SUMMARY_DOWNLOAD",
+        "via": [],
+        "notes": "Subworkflow call. Gated by !skip_kmerfinder."
+      },
+      {
+        "from": "ch_assembly",
+        "to": "BUSCO_BUSCO",
+        "via": [],
+        "notes": "Gated by !skip_busco."
+      },
+      {
+        "from": "ch_to_quast",
+        "to": "QUAST",
+        "via": [],
+        "notes": "Gated by skip_kmerfinder OR (!skip_kmerfinder takes alternate path through QUAST_BYREFSEQID)."
+      },
+      {
+        "from": "ch_to_quast_byrefseq",
+        "to": "QUAST_BYREFSEQID",
+        "via": [
+          "map",
+          "map",
+          "map"
+        ],
+        "notes": "Aliased QUAST call. Three map closures split a 5-tuple into three 2-tuples."
+      },
+      {
+        "from": "ch_assembly_for_gunzip.gzip",
+        "to": "GUNZIP",
+        "via": [],
+        "notes": ""
+      },
+      {
+        "from": "GUNZIP.out.gunzip",
+        "to": "PROKKA",
+        "via": [
+          "mix",
+          "filter"
+        ],
+        "notes": "Mixed with ch_assembly_for_gunzip.skip; filtered for non-empty fasta. Gated by annotation_tool=='prokka'."
+      },
+      {
+        "from": "GUNZIP.out.gunzip",
+        "to": "BAKTA_DBDOWNLOAD_RUN",
+        "via": [
+          "mix",
+          "filter"
+        ],
+        "notes": "Subworkflow call. Gated by annotation_tool=='bakta'."
+      },
+      {
+        "from": "ch_assembly",
+        "to": "DFAST",
+        "via": [],
+        "notes": "Gated by annotation_tool=='dfast'."
+      },
+      {
+        "from": "ch_assembly",
+        "to": "LIFTOFF",
+        "via": [],
+        "notes": "Gated by annotation_tool=='liftoff'. log.error fires when reference fasta/gff missing."
+      }
+    ],
+    "conditionals": [
+      {
+        "guard": "params.assembly_type in ['short','hybrid']",
+        "branch": "default",
+        "affects": [
+          "CAT_FASTQ_SHORT",
+          "FASTQ_TRIM_FASTP_FASTQC"
+        ]
+      },
+      {
+        "guard": "params.assembly_type in ['long','hybrid']",
+        "branch": "default",
+        "affects": [
+          "CAT_FASTQ_LONG"
+        ]
+      },
+      {
+        "guard": "params.assembly_type != 'long'",
+        "branch": "default",
+        "affects": [
+          "FASTQ_TRIM_FASTP_FASTQC"
+        ]
+      },
+      {
+        "guard": "!params.skip_pycoqc",
+        "branch": "default",
+        "affects": [
+          "PYCOQC"
+        ]
+      },
+      {
+        "guard": "params.long_reads_filtering == 'porechop'",
+        "branch": "default",
+        "affects": [
+          "PORECHOP_PORECHOP"
+        ]
+      },
+      {
+        "guard": "params.long_reads_filtering == 'filtlong'",
+        "branch": "default",
+        "affects": [
+          "FILTLONG"
+        ]
+      },
+      {
+        "guard": "params.assembler == 'unicycler'",
+        "branch": "default",
+        "affects": [
+          "UNICYCLER"
+        ]
+      },
+      {
+        "guard": "params.assembler == 'canu'",
+        "branch": "default",
+        "affects": [
+          "CANU"
+        ]
+      },
+      {
+        "guard": "params.assembler == 'miniasm'",
+        "branch": "default",
+        "affects": [
+          "MINIMAP2_ALIGN",
+          "MINIASM",
+          "MINIMAP2_CONSENSUS",
+          "RACON"
+        ]
+      },
+      {
+        "guard": "params.assembler == 'dragonflye'",
+        "branch": "default",
+        "affects": [
+          "DRAGONFLYE"
+        ]
+      },
+      {
+        "guard": "params.polish_method == 'medaka'",
+        "branch": "default",
+        "affects": [
+          "MEDAKA"
+        ]
+      },
+      {
+        "guard": "params.polish_method == 'nanopolish'",
+        "branch": "default",
+        "affects": [
+          "MINIMAP2_POLISH",
+          "SAMTOOLS_INDEX",
+          "NANOPOLISH"
+        ]
+      },
+      {
+        "guard": "!params.skip_kraken2",
+        "branch": "default",
+        "affects": [
+          "KRAKEN2_DB_PREPARATION",
+          "KRAKEN2",
+          "KRAKEN2_LONG"
+        ]
+      },
+      {
+        "guard": "!params.skip_kmerfinder",
+        "branch": "default",
+        "affects": [
+          "KMERFINDER_SUMMARY_DOWNLOAD",
+          "QUAST_BYREFSEQID"
+        ]
+      },
+      {
+        "guard": "params.skip_kmerfinder",
+        "branch": "default",
+        "affects": [
+          "QUAST"
+        ]
+      },
+      {
+        "guard": "!params.skip_busco",
+        "branch": "default",
+        "affects": [
+          "BUSCO_BUSCO"
+        ]
+      },
+      {
+        "guard": "params.annotation_tool == 'prokka' && !params.skip_annotation",
+        "branch": "default",
+        "affects": [
+          "GUNZIP",
+          "PROKKA"
+        ]
+      },
+      {
+        "guard": "params.annotation_tool == 'bakta' && !params.skip_annotation",
+        "branch": "default",
+        "affects": [
+          "GUNZIP",
+          "BAKTA_DBDOWNLOAD_RUN"
+        ]
+      },
+      {
+        "guard": "params.annotation_tool == 'dfast' && !params.skip_annotation",
+        "branch": "default",
+        "affects": [
+          "DFAST"
+        ]
+      },
+      {
+        "guard": "params.annotation_tool == 'liftoff' && !params.skip_annotation",
+        "branch": "default",
+        "affects": [
+          "LIFTOFF"
+        ]
+      }
+    ]
+  },
+  "test_fixtures": {
+    "profile": "test",
+    "inputs": [
+      {
+        "role": "samplesheet",
+        "path": null,
+        "url": "https://raw.githubusercontent.com/nf-core/test-datasets/bacass/bacass_short_reseq.tsv",
+        "sha1": null,
+        "filetype": "tsv",
+        "description": "Short-read resequencing samplesheet (5-column TSV). URL is a runtime concatenation of params.pipelines_testdata_base_path and 'bacass_short_reseq.tsv'."
+      }
+    ],
+    "outputs": [
+      {
+        "role": "pipeline_outputs",
+        "path": null,
+        "url": null,
+        "kind": "other",
+        "description": "nf-test snapshot match against ${params.outdir}: succeeded-task count + versions.yml (Nextflow-version-stripped) + stable file names + stable file contents (excluding tests/.nftignore_files_entirely entirely and tests/.nftignore by content). Snapshot at tests/default.nf.test.snap.",
+        "assertions": [
+          "workflow.success",
+          "snapshot(workflow.trace.succeeded().size(), removeNextflowVersion(versions.yml), stable_name, stable_path).match() — lossy summary of the nf-test snapshot fixture (helpers: getAllFilesFromDir, removeNextflowVersion, ignoreFile=tests/.nftignore, ignoreFile-entirely=tests/.nftignore_files_entirely)."
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "MINIMAP2_ALIGN and BUSCO_BUSCO use mulled-v2 multi-package containers (e.g. mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:...). The container name is opaque (digest of constituent recipes); tools[].name uses synthetic '<tool>_mulled' to avoid collision, and the bioconda field carries a multi-package spec joined with ' + '. The schema treats this as a single Tool entry; a per-mulled constituent breakdown is not modeled.",
+    "Several module environment.yml files contain multiple bioconda dependencies (samtools+htslib, minimap2+samtools+htslib, busco+sepp). Resolved to a synthetic '+'-joined bioconda string; tools[].name picks the canonical tool of the module by convention.",
+    "modules/nf-core/racon/environment.yml contains an unrelated bioconda::multiqc=1.27 dependency alongside racon=1.4.20. Likely an upstream module bug; the racon container image only ships racon. Tools[] records racon and ignores the spurious multiqc entry.",
+    "Local modules (modules/local/{pycoqc,nanopolish,medaka,dfast,kmerfinder/*,kraken2/db_preparation,custom/multiqc}) lack meta.yml. IO and descriptions inferred from the script: block.",
+    "Channel constructions use multiMap (named-branch fan-out: shortreads/longreads/fast5) and .branch{} (single/multiple, gzip/skip). The schema's Channel.source is a single string; named-branch outputs are noted in shape descriptors but not first-class.",
+    ".cross() operator (Cartesian-product join by key) and meta-mutation closures (def new_meta = meta + [single_end: true]) appear in the workflow; via[] arrays record operator names but cannot capture the meta-shape transformations.",
+    "ch_assembly uses BOTH .mix() accumulation (from assemblers) AND direct reassignment (from MEDAKA/NANOPOLISH polishing) — its 'source' string lists initial+major contributors only.",
+    ".dump(tag: 'X') is pervasive (debug operator, no semantic effect on data flow). Recorded in via[] when present; question whether to filter it.",
+    "FASTQ_TRIM_FASTP_FASTQC subworkflow takes 7 typed inputs (channels + boolean values + path); Subworkflow.inputs[] uses ChannelIO with shape strings indicating value-vs-channel distinction.",
+    "ch_for_assembly, ch_for_kraken2_short, ch_for_kraken2_long are constructed inside if/else if branches on params.assembly_type — channel.source is the *one* expression that ran given assembly_type='short' for the test profile; alternate-branch sources are dropped.",
+    "Process count: 33 processes enumerated. script_summary omitted (optional field) — trivially derivable from each module's meta.yml description for nf-core modules and from the script: body for local modules; not material to schema-shape testing on this pipeline."
+  ],
+  "nf_tests": [
+    {
+      "name": "-profile test",
+      "path": "tests/default.nf.test",
+      "profiles": [
+        "test"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [],
+        "snap_path": "tests/default.nf.test.snap"
+      },
+      "prose_assertions": []
+    },
+    {
+      "name": "-profile test_dfast",
+      "path": "tests/dfast.nf.test",
+      "profiles": [
+        "test_dfast"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [],
+        "snap_path": "tests/dfast.nf.test.snap"
+      },
+      "prose_assertions": []
+    },
+    {
+      "name": "-profile test_hybrid",
+      "path": "tests/hybrid.nf.test",
+      "profiles": [
+        "test_hybrid"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [
+          "Prokka/**"
+        ],
+        "snap_path": "tests/hybrid.nf.test.snap"
+      },
+      "prose_assertions": []
+    },
+    {
+      "name": "-profile test_hybrid_dragonflye",
+      "path": "tests/hybrid_dragonflye.nf.test",
+      "profiles": [
+        "test_hybrid_dragonflye"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [
+          "Prokka/**"
+        ],
+        "snap_path": "tests/hybrid_dragonflye.nf.test.snap"
+      },
+      "prose_assertions": []
+    },
+    {
+      "name": "-profile test_long",
+      "path": "tests/long.nf.test",
+      "profiles": [
+        "test_long"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [
+          "Prokka/**"
+        ],
+        "snap_path": "tests/long.nf.test.snap"
+      },
+      "prose_assertions": []
+    },
+    {
+      "name": "-profile test_long_dragonflye",
+      "path": "tests/long_dragonflye.nf.test",
+      "profiles": [
+        "test_long_dragonflye"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [
+          "Prokka/**",
+          "**/mqc_quast_num_contigs_1.yaml",
+          "**/multiqc_busco.yaml",
+          "**/multiqc_quast.yaml",
+          "**/mqc_busco_plot_*.yaml"
+        ],
+        "snap_path": "tests/long_dragonflye.nf.test.snap"
+      },
+      "prose_assertions": []
+    },
+    {
+      "name": "-profile test_long_liftoff",
+      "path": "tests/long_liftoff.nf.test",
+      "profiles": [
+        "test_long_liftoff"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [
+          "Prokka/**"
+        ],
+        "snap_path": "tests/long_liftoff.nf.test.snap"
+      },
+      "prose_assertions": []
+    },
+    {
+      "name": "-profile test_long_miniasm",
+      "path": "tests/long_miniasm.nf.test",
+      "profiles": [
+        "test_long_miniasm"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [
+          "Prokka/**"
+        ],
+        "snap_path": "tests/long_miniasm.nf.test.snap"
+      },
+      "prose_assertions": []
+    },
+    {
+      "name": "-profile test_long_miniasm_prokka",
+      "path": "tests/long_miniasm_prokka.nf.test",
+      "profiles": [
+        "test_long_miniasm_prokka"
+      ],
+      "params_overrides": {
+        "outdir": "$outputDir"
+      },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures": [
+          "succeeded_task_count",
+          "versions_yml",
+          "stable_names",
+          "stable_paths"
+        ],
+        "helpers": [
+          "getAllFilesFromDir",
+          "removeNextflowVersion"
+        ],
+        "ignore_files": [
+          "tests/.nftignore",
+          "tests/.nftignore_files_entirely"
+        ],
+        "ignore_globs": [
+          "Prokka/**"
+        ],
+        "snap_path": "tests/long_miniasm_prokka.nf.test.snap"
+      },
+      "prose_assertions": []
+    }
+  ]
+}
