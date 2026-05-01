@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { testsSchema } from '@galaxy-tool-util/schema';
+import summaryNextflowSchema from '../../../content/schemas/summary-nextflow.schema.json';
 
 // Read versions directly from node_modules — the published package's `exports`
 // field doesn't expose `package.json`, and lockfile-pinning means the on-disk
@@ -40,5 +41,9 @@ export const schemaRegistry: Record<string, SchemaEntry> = {
   'tests-format': {
     schema: testsSchema as unknown as Record<string, unknown>,
     version: readVendoredPackageVersion('@galaxy-tool-util/schema'),
+  },
+  'summary-nextflow': {
+    schema: summaryNextflowSchema as unknown as Record<string, unknown>,
+    version: '',
   },
 };

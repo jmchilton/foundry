@@ -33,7 +33,7 @@ Pydantic types worth knowing (`src/gxy_sketches/schema.py`):
 |---|---|---|
 | Question answered | "Which analysis class do I pick for this user request?" | "How do I build this Galaxy/CWL workflow from this source?" |
 | Consumer | gxy3 agent at routing time | Harnesses doing source→target translation, validation, debug |
-| Per-workflow unit | One `SKETCH.md` (frontmatter + decision-aid prose) | `summarize-<source>` Mold output (structured JSON per `schemas/summary-<source>.schema.json`) |
+| Per-workflow unit | One `SKETCH.md` (frontmatter + decision-aid prose) | `summarize-<source>` Mold output (structured JSON per `content/schemas/summary-<source>.schema.json`) |
 | Source coverage | nf-core, IWC (v1) | paper, nextflow, cwl. **No IWC ingest** — IWC cited by URL in pattern bodies (see `CORPUS_INGESTION.md`) |
 | Output shape | Markdown + YAML frontmatter | JSON Schema-validated structured data |
 | Test fixtures | Bundled into the sketch dir, capped at 5 MB total | Referenced as data; no bundling, no size cap |

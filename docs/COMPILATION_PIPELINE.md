@@ -12,7 +12,7 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 |---|---|---|---|
 | `pattern` | `content/patterns/*.md` | LLM-condensed, mixed verbatim + summarization | inlined into `SKILL.md` (or `references/patterns/` for large pages) |
 | `cli-command` | `content/cli/<tool>/<cmd>.md` | Cast to structured JSON sidecar | `references/cli/<tool>/<cmd>.json` |
-| `schema` | `schemas/*.schema.json` (Foundry-authored) **or** vendored from an upstream npm/PyPI package (canonical case: `@galaxy-tool-util/schema` for the workflow test-format) | Verbatim copy | `references/schemas/<name>.schema.json` |
+| `schema` | `content/schemas/<name>.schema.json` (Foundry-authored, paired with a `<name>.md` schema note) **or** vendored from an upstream npm/PyPI package and registered in `site/src/lib/schema-registry.ts` (canonical case: `@galaxy-tool-util/schema` for the workflow test-format) | Verbatim copy | `references/schemas/<name>.schema.json` |
 | `prompt` | `content/prompts/*.md` | Inlined verbatim, no LLM rewrite | inlined into `SKILL.md` or `references/prompts/` |
 | `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` |
 | `eval` | `content/molds/<slug>/eval.md` | **Never packaged** | — (Foundry-only) |
@@ -40,7 +40,7 @@ To cast a Mold, the casting process consumes:
 - **All typed references declared in the manifest**, resolved by kind:
   - `patterns` — wiki links into `content/patterns/`.
   - `cli_commands` — wiki links into `content/cli/<tool>/<cmd>.md`.
-  - `input_schemas` / `output_schemas` — paths into `schemas/`.
+  - `input_schemas` / `output_schemas` — paths into `content/schemas/`.
   - `prompts` — wiki links into `content/prompts/` (when the Mold needs them).
   - `examples` — paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
@@ -121,7 +121,7 @@ Casting policy for upstream-package schemas:
 Other schemas that fall under this policy as they land:
 
 - **`gxformat2`** — workflow source format. Schema-Salad-derived; vendored similarly.
-- **Mold IO summary schemas** (`summarize-paper`, `summarize-nextflow`, `summarize-cwl` outputs) — Foundry-authored under `schemas/`, but cast and site-rendered through the same machinery so consumers see one consistent surface.
+- **Mold IO summary schemas** (`summarize-paper`, `summarize-nextflow`, `summarize-cwl` outputs) — Foundry-authored under `content/schemas/`, but cast and site-rendered through the same machinery so consumers see one consistent surface.
 
 The reference-kind `schema` does not distinguish between Foundry-authored and upstream-vendored at cast time — both are verbatim copies. The distinction matters only for sync/update flow: upstream schemas update via package bumps, Foundry-authored schemas update via direct edits.
 
@@ -182,7 +182,7 @@ We do not guarantee that re-casting produces byte-identical output. We do guaran
 
 ## What casting does *not* do
 
-- **Does not write to the Foundry.** Casting is read-only against `content/molds/`, `content/patterns/`, `content/cli/`, `content/prompts/`, `content/examples/`, and `schemas/`. All writes go to `casts/`.
+- **Does not write to the Foundry.** Casting is read-only against `content/molds/`, `content/patterns/`, `content/cli/`, `content/prompts/`, `content/examples/`, and `content/schemas/`. All writes go to `casts/`.
 - **Does not invoke gxwf or Planemo.** Those are the cast skill's responsibility at runtime, not casting time. (Validation tooling does invoke schemas, but that's distinct.)
 - **Does not update Molds.** If casting reveals a Mold is wrong, that's a hand edit by the maintainer.
 - **Does not touch eval plans.** `eval.md` is Foundry-only; never read by casting.

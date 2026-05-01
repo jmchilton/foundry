@@ -16,8 +16,8 @@ Foundry-internal (in the `foundry/` repo):
 - **CLI manual pages** — per-command/subcommand reference content for the CLIs Molds wrap (`gxwf`, `planemo`, …). Hand-authored or seeded from `--help` then humanized. Wiki-linked from per-action Molds (e.g., `validate-with-gxwf` → `cli/gxwf/validate`) and aggregated by whole-CLI Molds (`gxwf-cli`, `planemo-cli`). Cast to JSON sidecars, not inlined as prose.
 - **Research / reference notes** — background syntheses (e.g., Nextflow testing, CWL conformance) that aren't actions and aren't Galaxy patterns.
 - **Molds** — directory-per-Mold (`molds/<name>/`), with `index.md` source artifact, `eval.md` evaluation plan, optional companions. Authored as **typed reference manifests** (frontmatter declares typed references to patterns, manpages, schemas, prompts, examples) with a procedural body skeleton.
-- **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Lives in `schemas/` as a non-content artifact tree (not vault notes). Per-source summary schemas are one family inside it; over time, every Mold that has structured IO will contribute schemas here.
-- **Frontmatter schema** — `meta_schema.yml`, JSON Schema Draft 07 in YAML, contract for content notes. Distinct from `schemas/` (Mold IO).
+- **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Live under `content/schemas/`, paired with a `type: schema` content note. Two flavors: **Foundry-authored** (the JSON lives next to the note as `<name>.schema.json`, e.g. `content/schemas/summary-nextflow.schema.json`) and **vendored** (the JSON is imported from an upstream npm package, e.g. `tests-format` from `@galaxy-tool-util/schema`). Per-source summary schemas (`summary-paper`, `summary-nextflow`, `summary-cwl`) are one family; over time, every Mold with structured IO contributes a schema here.
+- **Frontmatter schema** — `meta_schema.yml`, JSON Schema Draft 07 in YAML, contract for content notes. Distinct from the Mold IO schemas under `content/schemas/`.
 - **Tag registry** — `meta_tags.yml`, controlled vocabulary injected into the schema at validate time.
 - **Cast skills** — produced by casting from Molds. Per-target output layout under `casts/<target>/<name>/`.
 - **Tooling** — TypeScript scripts run via `tsx` (or compiled): validation, ingestion, casting, generators. One `package.json`; no Python in the toolchain.
@@ -155,7 +155,7 @@ Coherence check (`TYPE_TAG_MAP` + `validate_tag_coherence`) emits a *warning* (n
 
 - `patterns` — wiki links into `content/patterns/`. Cast: LLM-condensed.
 - `cli_commands` — wiki links into `content/cli/<tool>/`. Cast: cast to JSON sidecar by per-action Molds; or rolled up wholesale by whole-CLI Molds (`gxwf-cli`).
-- `input_schemas` / `output_schemas` — typed *path* arrays (not wiki links) into `schemas/*.schema.json`. Cast: copied verbatim into the cast bundle's `references/schemas/`.
+- `input_schemas` / `output_schemas` — typed *path* arrays (not wiki links) into `content/schemas/<name>.schema.json` for Foundry-authored schemas. (Vendored schemas have no on-disk JSON path inside the repo; their schema notes are referenced via `related_notes` wiki-links instead.) Cast: copied verbatim into the cast bundle's `references/schemas/`.
 - `prompts` — wiki links into `content/prompts/` (new; deferred until first Mold needs it). Cast: inlined verbatim, no LLM rewrite.
 - `examples` — typed path arrays into `content/molds/<slug>/examples/` or shared `content/examples/`. Cast: copied verbatim.
 
@@ -185,7 +185,7 @@ Layered validation (`validateData` orchestrates):
 7. **`validateIwcTags`** — every `iwc/<category>` tag used in a note is declared in `meta_tags.yml`. Same enforcement as the existing tag pipeline; no separate mechanism.
 8. **`validateMoldRefs`** — every Mold's typed references resolve, per kind:
    - `patterns`, `cli_commands`, `prompts` — slug resolves to a content note of the expected type.
-   - `input_schemas` / `output_schemas` — file exists in `schemas/`, parses as JSON Schema Draft 07.
+   - `input_schemas` / `output_schemas` — file exists under `content/schemas/`, parses as JSON Schema Draft 07.
    - `examples` — path exists.
    Failures error. The per-kind dispatch here is the static-validation analog of casting's per-kind dispatch.
 9. **`validatePipelinePhases`** — every `pipeline` note's `phases` items resolve:
@@ -338,7 +338,7 @@ Deployment: minimal two-job GitHub Actions on push to `main` (`withastro/action@
 
 One ingestion spine — Mold casting. There is no IWC ingestion (see `CORPUS_INGESTION.md`).
 
-**Mold casting** (`scripts/cast-mold.ts`, driven by `/cast`). Covered in `COMPILATION_PIPELINE.md`. Reads from `molds/`, `patterns/`, `schemas/`; writes only to `casts/<target>/<name>/`.
+**Mold casting** (`scripts/cast-mold.ts`, driven by `/cast`). Covered in `COMPILATION_PIPELINE.md`. Reads from `content/molds/`, `content/patterns/`, `content/schemas/`; writes only to `casts/<target>/<name>/`.
 
 **`content/log.md`** — append-only, excluded from validator and Astro collections, Obsidian-visible. Reserved entry types: `cast`, planned `lint` and `query`. Format:
 
@@ -402,18 +402,21 @@ foundry/
 │   ├── CORPUS_INGESTION.md
 │   ├── GXY_SKETCHES_ALIGNMENT.md
 │   └── COMPONENT_ARCHON.md
-├── schemas/                              # Mold IO schemas (the schema library)
-│   ├── summary-paper.schema.json         # per-source summary outputs
-│   ├── summary-nextflow.schema.json
-│   ├── summary-cwl.schema.json
-│   ├── galaxy-tool-summary.schema.json   # output of summarize-galaxy-tool
-│   └── …                                 # one or more per Mold with structured IO
 ├── content/
 │   ├── Dashboard.md                      # generated; --check
 │   ├── Index.md                          # generated; --check
 │   ├── iwc-overview.md                   # generated; --check
 │   ├── log.md                            # append-only operations journal
 │   ├── glossary.md                       # hand-curated terminology; skipped by validator
+│   ├── schemas/                          # Mold IO schemas (the schema library)
+│   │   ├── tests-format.md               # vendored from @galaxy-tool-util/schema
+│   │   ├── summary-nextflow.md           # Foundry-authored schema note
+│   │   ├── summary-nextflow.schema.json  # Foundry-authored JSON Schema (rides alongside)
+│   │   ├── summary-paper.md
+│   │   ├── summary-paper.schema.json
+│   │   ├── summary-cwl.md
+│   │   ├── summary-cwl.schema.json
+│   │   └── …                             # one .md note + (for Foundry-authored) one .schema.json per Mold IO
 │   ├── molds/
 │   │   ├── implement-galaxy-tool-step/
 │   │   │   ├── index.md                  # frontmatter + body (the "mold.md")
@@ -501,7 +504,7 @@ foundry/
 Key decisions reflected in the layout:
 - **`content/` content root** — Astro idiom. Reads accurately to a new contributor; the Foundry isn't an Obsidian vault by intent.
 - **`content/molds/<slug>/index.md` as directory note** — one validator rule (`DIR_NOTE_TYPES`) covers it.
-- **`schemas/` separate from `meta_schema.yml`** — `meta_schema.yml` is the frontmatter contract for content notes; `schemas/` is the **Mold IO schema library** (per-source summary outputs *and* every other structured input/output a Mold declares). Different audiences, different lifecycle. Schemas under `schemas/` are referenced by Molds via typed-path frontmatter fields and copied verbatim into cast bundles.
+- **`content/schemas/` separate from `meta_schema.yml`** — `meta_schema.yml` is the frontmatter contract for content notes; `content/schemas/` is the **Mold IO schema library** (per-source summary outputs *and* every other structured input/output a Mold declares). Different audiences, different lifecycle. Schemas live as content notes (renderable via `SchemaBody.astro`) so they show up in the dashboard, in the Index, and in tag/backlink browses; the actual JSON Schema is paired with the note (Foundry-authored: alongside in the same directory; vendored: imported from an upstream package and registered in `site/src/lib/schema-registry.ts`). Molds reference schemas via typed-path frontmatter fields (`input_schemas`, `output_schemas`); casting copies the JSON verbatim into cast bundles.
 - **`content/cli/<tool>/<cmd>.md` flat per tool** — CLI manual pages are organized two-deep for browsing, but each command is a single flat file; not directory-note semantics.
 - **`casts/` outside `content/`** — casts are not foundry notes. They have their own provenance shape and target-specific layouts; collapsing them into `content/` would muddy the validator and the site.
 - **`docs/` for Foundry-meta** — long-form design docs (architecture, MOLD_SPEC) live here, not as content notes.
