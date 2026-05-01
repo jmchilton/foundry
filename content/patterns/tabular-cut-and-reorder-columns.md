@@ -34,7 +34,7 @@ For project + compute fused, see [[tabular-sql-query]] or [[tabular-compute-new-
 ## Parameters
 
 - `columnList`: a single comma-separated string of `cN` references — e.g. `c4,c6,c7`. **Order matters**: the output column order is the list order, so listing columns out of input order *reorders* them.
-- `delimiter`: enum; `T` for tab (the dominant value across the corpus), `C` for comma, `Sp` for space, `Dt` for dot, `U` for underscore, `Pi` for pipe. Default `T`.
+- `delimiter`: enum; `T` for tab (the dominant value across the corpus), `C` for comma, `Sp` for whitespace (collapses runs of spaces/tabs), `Dt` for dot, `U` for underscore, `Pi` for pipe. Tab is the corpus-default; always set explicitly.
 - The connected `input` port is the tabular dataset.
 
 ## Idiomatic shapes
@@ -62,8 +62,8 @@ Cited at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-re
 ## Pitfalls
 
 - **No range syntax.** `c4-c10` is not parsed; expand the list explicitly. The corpus uses long enumerations, not ranges.
-- **Header row is preserved.** `Cut1` operates per-line and doesn't special-case headers; if the input has a header, columns under the same `cN` indices in the header are reordered alongside the data, which is the desired behavior.
-- **`delimiter` must match the input.** If the input is comma-separated and `delimiter: T` is used (the default), the whole row is treated as one column and the cut returns the first column or empty results.
+- **No header awareness.** The header row is cut and reordered identically to data rows. Usually what you want; flagging only because `Filter1` / `Grouping1` *do* take `header_lines`.
+- **`delimiter` must match the input.** Mismatched delimiter (e.g. `delimiter: T` on comma-separated input) treats each line as a single field — `c1` echoes the whole row, `c2…` produce empty output. Silent.
 - **Reorder-then-rename** is *not* `Cut1`'s job. Renaming columns means rewriting the header row — handle that with [[tabular-compute-new-column]] or with a `tp_replace_in_line` pass.
 - **Adding a constant column** belongs to [[tabular-compute-new-column]] (`column_maker/Add_a_column1`), not `Cut1` + `Paste1`. The latter is legacy.
 

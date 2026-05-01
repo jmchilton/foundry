@@ -330,14 +330,17 @@ Resolved via `AskUserQuestion` after this survey landed. Pinned here so the next
 - **Grep1 vs tp_grep_tool (Q1).** Recommend `tp_grep_tool`. Demote `Grep1` to a "legacy alternative" footnote. Consistency with the rest of the `tp_*` family wins over slight corpus-frequency edge of `Grep1`.
 - **Format-conversion gap (Q5).** Skip. Corpus-first principle: no exemplar = no page. The §2m gap note in this survey stands as the only record.
 - **`auto_col_types` (Q3).** The `tabular-compute-new-column` page prescribes a **strict structured rule**:
-  - **Always** set `fail_on_non_existent_columns: true` and `non_computable.action: --fail-on-non-computable` (51/51 corpus instances).
+  - **Always** set `fail_on_non_existent_columns: true` (51/51 corpus instances).
+  - `non_computable.action: --fail-on-non-computable` is the dominant choice (49/51); the two `--skip-non-computable` exceptions (`consensus-from-variation.gxwf.yml:364`, `:402`) are intentional, for BED-coordinate arithmetic where some rows are legitimately non-numeric.
   - **`auto_col_types`** is per-expression-kind:
     | Expression kind | `auto_col_types` |
     |---|---|
-    | Arithmetic (`+`, `*`, `round()`, `int()`, …) | `true` |
+    | Arithmetic on raw `cN` (`(c18+c19)/c6`, `round(...)`) | `true` |
     | Pure string concat (`c5 + '>' + c6`) | `false` |
+    | Arithmetic with explicit casts (`int(cN)`, `float(cN)`) | `false` |
     | Mixed | split into two `expressions:` entries with different settings |
-  - Cite `variation-reporting.gxwf.yml:316-329` (true, arithmetic) and `:454-477` (false, string concat) as the canonical pair.
+  - Corpus distribution: 48 `true` / 3 `false`. Cite `variation-reporting.gxwf.yml:307-329` (true, raw-`cN` arithmetic), `:438-475` (false, string concat), and `consensus-from-variation.gxwf.yml:343-378` (false, explicit-cast arithmetic) as the canonical triple.
+  - Note on YAML shape: `expressions:` is nested under `tool_state.ops.expressions` (with `header_lines_select: yes|no` as sibling). `error_handling` is a top-level sibling of `ops`, not nested inside it. The pattern page must show this shape; flat `expressions:` does not roundtrip.
 - **Legacy tool IDs (Q6).** Pages name the modern tool primarily; include a short "Legacy alternative" footnote pointing to the old ID (`Grouping1`, `cat1`, `addValue/1.0.1`, `Remove beginning1`, `Paste1`, `sort1`). Reading old IWC workflows must remain possible.
 - **`query_tabular` (Q4).** Leaf in this tabular hierarchy as `tabular-sql-query`. Scope narrowly to "when SQL is the right reach" — window functions, multi-table JOINs, project+compute fused. Cross-link from filter / join / compute leaves; do not evangelize.
 - **Tabular-source cross-ref (Q7).** Deferred. If a Mold (e.g. `summarize-galaxy-tool`) later needs to point to multiqc/tooldistillator-as-tabular-source context, write the page then.

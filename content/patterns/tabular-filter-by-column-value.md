@@ -33,8 +33,8 @@ If the predicate needs join/sort/grouping semantics, switch to [[tabular-sql-que
 
 ## Parameters
 
-- `cond`: Python expression. Columns referenced as `cN` (1-indexed). Comparison and boolean operators only — `==`, `!=`, `<`, `>`, `<=`, `>=`, `and`, `or`, `not`, `in`. Strings quoted.
-- `header_lines`: integer (string-typed in YAML). **Set to `"1"` whenever the input has a header row** — `Filter1` evaluates `cond` against the first row otherwise and silently drops it on type mismatch.
+- `cond`: any Python expression that returns truthy/falsy, with column references `c1, c2, …` (1-indexed). Comparison and boolean operators are the common case; arithmetic, `in` / `not in`, and function calls (e.g. `len`) also work. Quote string literals.
+- `header_lines`: integer-as-string. **Set to `"1"` whenever the input has a header row.** Filter1 evaluates `cond` per row and silently drops rows whose evaluation raises (e.g. when a header row coerces badly under a numeric comparison); leaving `header_lines: "0"` on a headered input often produces a silent off-by-one.
 - The connected `input` port is the tabular dataset.
 
 ## Idiomatic shapes
@@ -50,31 +50,33 @@ tool_state:
 
 Cited at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545`.
 
-Predicate produced upstream and wired in via `ConnectedValue` (lets a workflow author parameterize the threshold without a runtime parameter):
+Predicate produced upstream and wired in via `ConnectedValue` (lets a workflow author parameterize the predicate without a runtime parameter). Note that this corpus example has `header_lines: "0"` because the upstream rule already accounts for the header — the `header_lines` setting is independent of the `cond` source:
 
 ```yaml
 tool_id: Filter1
 tool_state:
   cond: { __class__: ConnectedValue }   # from a prior "generate filter rule" step
-  header_lines: '1'
+  header_lines: '0'
 ```
 
 Cited at `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336`.
 
 ## Pitfalls
 
-- **Forgetting `header_lines`.** The default is `"0"`. With a header row present and a numeric comparison in `cond`, the header row evaluates to `False` and is dropped; with a string comparison, the header may pass through. Either way, off-by-one assertions downstream.
+- **Forgetting `header_lines`.** Default `"0"`. With a header row present, the header is evaluated like any other row; rows whose evaluation raises (typical on a header under a numeric comparison) are silently dropped, while a string-comparison header may pass through. Either way, off-by-one assertions downstream.
 - **String quoting.** `cond: c4==PASS` parses as a name lookup on `PASS`, not a string comparison. Always quote literal strings.
-- **No `cN` arithmetic.** `Filter1` is a *filter*; new computed columns belong in [[tabular-compute-new-column]].
-- **Column-type coercion is implicit.** `cN` values are coerced from the underlying string to int/float when the operator demands it; rows where the coercion fails are dropped *without warning*. If silent drops are unacceptable, pre-clean upstream or use `query_tabular`.
+- **No new columns.** `Filter1` is a *filter*; new or computed columns belong in [[tabular-compute-new-column]].
+- **Implicit column-type coercion.** `cN` values are strings until an operator forces int/float; coercion failures drop the row silently. If silent drops are unacceptable, pre-clean upstream or use [[tabular-sql-query]].
 
 ## Exemplars (IWC)
 
 All paths relative to `<iwc-format2>/`:
 
-- `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545` — `c4=='PASS' or c4=='.'`, header-aware.
-- `sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:276` — same shape, different predicate.
-- `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336` — `cond` wired from upstream `ConnectedValue`.
+- `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545` — literal predicate `c4=='PASS' or c4=='.'`, `header_lines: "1"`.
+- `sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:276` — `ConnectedValue` predicate, `header_lines: "0"` (rule generated upstream).
+- `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336` — `ConnectedValue` predicate, `header_lines: "0"`.
+
+All three corpus filters are equality / disjunction over a string column, or a `ConnectedValue` rule. Numeric-range predicates are unattested — if you reach for `cN > X`, you're slightly off the corpus path; verify behavior on a sample.
 
 ## Legacy alternative
 
