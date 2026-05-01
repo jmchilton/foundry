@@ -1,0 +1,85 @@
+# Nextflow fixture corpus for review-nextflow / gxwf skill research.
+#
+# Each entry pins a pipeline at a specific commit SHA so research results
+# are reproducible. Update `tag` + `sha` together when bumping.
+#
+# Tiers:
+#   tiny    - minimal, fast to fully review; bootstrap / smoke tests
+#   small   - mostly linear, few branches; clean params/containers/test patterns
+#   large   - many profiles, complex modules.config; stresses edge cases
+
+pipelines:
+  - name: nf-core/demo
+    tier: tiny
+    repo: https://github.com/nf-core/demo.git
+    tag: 1.1.0
+    sha: 45904cb9d12db3d89900e6c479fe604ef71b297b
+    notes: >
+      Minimal nf-core template pipeline (FastQC + MultiQC). Good for
+      bootstrapping the review skill and regression-testing output format.
+
+  - name: nf-core/fetchngs
+    tier: small
+    repo: https://github.com/nf-core/fetchngs.git
+    tag: 1.12.0
+    sha: 8ec2d934f9301c818d961b1e4fdf7fc79610bdc5
+    notes: >
+      SRA/ENA/GEO/DDBJ metadata + FASTQ fetcher. Small, mostly linear,
+      exercises remote data handling and param surface.
+
+  - name: nf-core/rnaseq
+    tier: large
+    repo: https://github.com/nf-core/rnaseq.git
+    tag: 3.24.0
+    sha: 47b3b0d3daad69e99d45c9e2dd8db19ee28307a1
+    notes: >
+      Flagship RNA-seq pipeline. Multiple aligners/quantifiers, heavy
+      modules.config, many profiles. Hard mode for the review skill.
+
+  - name: nf-core/bacass
+    tier: small
+    repo: https://github.com/nf-core/bacass.git
+    tag: 2.5.0
+    sha: 76e4b12cacdc242891ea57e723c5e273f4ac71b4
+    notes: >
+      Bacterial assembly + annotation. Modest size, clean process
+      structure, good mid-tier example between demo and rnaseq.
+
+  - name: nf-core/hlatyping
+    tier: small
+    repo: https://github.com/nf-core/hlatyping.git
+    tag: 2.2.0
+    sha: 3237d20e7e611d8bbf8c37e637202dfe8a23e996
+    notes: >
+      HLA typing (OptiType). Small, focused, single-purpose — useful
+      for exercising param surface + container mapping without branching.
+
+  - name: nf-core/sarek
+    tier: large
+    repo: https://github.com/nf-core/sarek.git
+    tag: 3.8.1
+    sha: 4bd2948f98c5bf7b785c91cf6708fffccab25467
+    notes: >
+      Variant calling (germline/somatic). Many toggleable callers +
+      aligners, heavy config, distinct flavor from rnaseq hard-mode.
+
+  - name: nf-core/taxprofiler
+    tier: large
+    repo: https://github.com/nf-core/taxprofiler.git
+    tag: 2.0.0
+    sha: fa1aab03875c090c0594af7c2bbe22ada6c12391
+    notes: >
+      Metagenomic taxonomic profiling across many profilers. Heavy
+      branching, different domain from rnaseq/sarek — stresses the
+      incompatibility report on parallel-tool patterns.
+
+# IWC corpus — single rolling repo, no tag. Pin SHA from main.
+# Materialized into iwc-src/ then cleaned + converted to format2 under iwc-format2/
+# by scripts/build-iwc.sh (uses gxwf via @galaxy-tool-util/cli).
+iwc:
+  repo: https://github.com/galaxyproject/iwc.git
+  ref: main
+  sha: deafc4876f2c778aaf075e48bd8e95f3604ccc92
+  notes: >
+    galaxyproject/iwc — Intergalactic Workflow Commission curated Galaxy
+    workflows (.ga). Cleaned + converted to format2 for fixture use.

@@ -1,0 +1,209 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const all = await getCollection('content');
+const patterns = all
+  .filter(n => n.data.type === 'pattern' && n.data.status !== 'archived')
+  .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
+
+const groups = new Map<string, typeof patterns>();
+for (const pattern of patterns) {
+  const title = (pattern.data as any).title as string;
+  const group = title.includes(':') ? title.split(':')[0] : 'General';
+  const list = groups.get(group) ?? [];
+  list.push(pattern);
+  groups.set(group, list);
+}
+
+const groupedPatterns = [...groups.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+function formatDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+---
+<Base title="Patterns">
+  <section class="patterns-hero bg-grain" aria-labelledby="patterns-heading">
+    <span class="eyebrow mb-3">Pattern Library</span>
+    <div class="patterns-hero-grid">
+      <div>
+        <h1 id="patterns-heading" class="patterns-title text-balance">
+          IWC-grounded workflow construction recipes.
+        </h1>
+        <p class="patterns-lede text-pretty">
+          Pattern pages capture reusable Galaxy authoring moves that Molds can reference and casts can condense.
+          They are operation-anchored, corpus-backed, and separate from action Molds.
+        </p>
+      </div>
+      <dl class="patterns-stats" aria-label="Pattern library stats">
+        <div>
+          <dt>Total</dt>
+          <dd>{patterns.length}</dd>
+        </div>
+        <div>
+          <dt>Groups</dt>
+          <dd>{groupedPatterns.length}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  {groupedPatterns.map(([group, list]) => (
+    <section class="pattern-group" aria-labelledby={`patterns-${group.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
+      <div class="section-rule">
+        <h2 id={`patterns-${group.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{group}</h2>
+        <span class="section-tail">/ {list.length} {list.length === 1 ? 'pattern' : 'patterns'}</span>
+      </div>
+      <div class="pattern-grid">
+        {list.map(pattern => {
+          const data = pattern.data as any;
+          const subjectTags = (data.tags as string[]).filter(t => t !== 'pattern');
+          return (
+            <article class="pattern-card tinted-shadow tinted-shadow-hover">
+              <div class="pattern-card-top">
+                <span class={`badge badge-${data.status}`}>{data.status}</span>
+                <span class="pattern-date font-mono">rev {data.revision} · {formatDate(data.revised)}</span>
+              </div>
+              <h3 class="pattern-card-title">
+                <a href={`${base}/${pattern.id}/`}>{data.title}</a>
+              </h3>
+              <p class="pattern-summary">{data.summary}</p>
+              {subjectTags.length > 0 && (
+                <div class="pattern-tags" aria-label="Tags">
+                  {subjectTags.map(tag => <span class="tag">{tag}</span>)}
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  ))}
+</Base>
+
+<style>
+  .patterns-hero {
+    padding: 1.25rem 0 1.75rem;
+    margin-bottom: 1rem;
+  }
+  .patterns-hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.5rem;
+    align-items: end;
+  }
+  .patterns-title {
+    margin: 0 0 0.9rem;
+    color: var(--color-text-primary);
+    font-size: clamp(2rem, 4vw + 0.25rem, 3.25rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+  }
+  .patterns-lede {
+    max-width: 48rem;
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+  .patterns-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(5.5rem, auto));
+    gap: 0.75rem;
+    margin: 0;
+  }
+  .patterns-stats div {
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.5rem;
+    background: var(--color-surface-raised);
+  }
+  .patterns-stats dt {
+    margin: 0 0 0.2rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .patterns-stats dd {
+    margin: 0;
+    color: var(--color-galaxy-primary);
+    font-size: 1.65rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .dark .patterns-stats dd {
+    color: var(--color-link);
+  }
+  .pattern-group {
+    margin-bottom: 2rem;
+  }
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+  .pattern-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 13rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.65rem;
+    background: var(--color-surface-raised);
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .pattern-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .pattern-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .pattern-date {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+  .pattern-card-title {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .pattern-card-title a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+  .pattern-card-title a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+  .pattern-summary {
+    flex: 1;
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+  .pattern-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  @media (max-width: 700px) {
+    .patterns-hero-grid {
+      grid-template-columns: 1fr;
+    }
+    .patterns-stats {
+      width: 100%;
+    }
+  }
+</style>

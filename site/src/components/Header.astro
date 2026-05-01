@@ -5,6 +5,7 @@ const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
 const navLinks = [
   { href: `${base}/dashboard/`, label: 'Dashboard', match: (p: string) => p.startsWith(`${base}/dashboard`) },
   { href: `${base}/molds/`, label: 'Molds', match: (p: string) => p.startsWith(`${base}/molds`) },
+  { href: `${base}/patterns/`, label: 'Patterns', match: (p: string) => p.startsWith(`${base}/patterns`) },
   { href: `${base}/pipelines/`, label: 'Pipelines', match: (p: string) => p.startsWith(`${base}/pipelines`) && !p.includes('/molds') },
   { href: `${base}/index/`, label: 'Index', match: (p: string) => p.startsWith(`${base}/index`) },
   { href: `${base}/tags/`, label: 'Tags', match: (p: string) => p.startsWith(`${base}/tags`) },

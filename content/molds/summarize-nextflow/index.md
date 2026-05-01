@@ -8,8 +8,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 2
+revised: 2026-05-01
+revision: 4
 ai_generated: true
 output_schemas:
   - "content/schemas/summary-nextflow.schema.json"
@@ -57,28 +57,39 @@ A single JSON document conforming to [[summary-nextflow]] (`content/schemas/summ
   "profiles": ["test", "test_full", "docker", "singularity", "conda"],
   "tools": [                                   // mirrors gxy-sketches ToolSpec, augmented
     { "name": "fastp", "version": "0.23.4",
-      "biocontainer": "quay.io/biocontainers/fastp:0.23.4--h5f740d0_0",
-      "bioconda": "bioconda::fastp=0.23.4",
-      "docker": null, "singularity": null }
+      "biocontainer": "biocontainers/fastp:0.23.4--h5f740d0_0",   // accepts quay.io/ or docker.io biocontainers/ alias
+      "bioconda":     "bioconda::fastp=0.23.4",
+      "docker":       null,
+      "singularity":  "https://depot.galaxyproject.org/singularity/fastp:0.23.4--h5f740d0_0",
+      "wave":         null }                                        // Seqera Wave / community-cr registry
   ],
   "processes": [
-    { "name": "FASTP",
-      "module_path": "modules/nf-core/fastp/main.nf",
-      "tool": "fastp",                         // FK into tools[].name
-      "container": "quay.io/biocontainers/fastp:0.23.4--h5f740d0_0",
-      "inputs":  [ { "name": "reads", "shape": "tuple(meta, [path,path])",
-                     "description": "..." } ],
-      "outputs": [ { "name": "json", "shape": "tuple(meta, path)",
-                     "description": "..." } ],
+    { "name": "MINIMAP2_ALIGN",                               // canonical name
+      "aliases": ["MINIMAP2_CONSENSUS", "MINIMAP2_POLISH"],   // re-imported under multiple names; edges reference the alias
+      "module_path": "modules/nf-core/minimap2/align/main.nf",
+      "tool": "minimap2_mulled",                              // FK into tools[].name
+      "container": "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ? '<sing-uri>' : '<other-uri>' }",  // verbatim directive
+      "conda":     "${moduleDir}/environment.yml",                                                                                                  // verbatim directive
+      "inputs":  [ { "name": "reads", "shape": "tuple(val(meta), path(reads))", "description": "...", "topic": null } ],
+      "outputs": [ { "name": "paf",      "shape": "tuple(val(meta), path(\"*.paf\")) optional", "description": "...", "topic": null },
+                   { "name": "versions", "shape": "path(\"versions.yml\")",                     "description": "tool versions YAML", "topic": null } ],
       "when": null,
-      "script_summary": "trim adapters and filter reads by quality",
-      "publish_dir": "fastp" }
+      "script_summary": "Align reads against reference, emit PAF or BAM.",
+      "publish_dir": null }
   ],
   "subworkflows": [
     { "name": "FASTQ_TRIM_FASTP_FASTQC",
       "path": "subworkflows/nf-core/fastq_trim_fastp_fastqc/main.nf",
+      "kind": "pipeline",
       "calls": ["FASTP", "FASTQC_RAW", "FASTQC_TRIM"],
-      "inputs": [], "outputs": [] }
+      "inputs": [], "outputs": [] },
+    { "name": "PIPELINE_INITIALISATION",
+      "path": "subworkflows/local/utils_nfcore_<name>_pipeline/main.nf",
+      "kind": "utility",                       // composes free functions, no process invocations
+      "calls": [],
+      "inputs": [], "outputs": [
+        { "name": "samplesheet", "shape": "tuple(meta, path)", "description": "validated --input", "topic": null }
+      ] }
   ],
   "workflow": {
     "name": "RNASEQ",
@@ -101,7 +112,22 @@ A single JSON document conforming to [[summary-nextflow]] (`content/schemas/summ
     "profile": "test",
     "inputs":  [ /* TestDataRef-shaped */ ],
     "outputs": [ /* ExpectedOutputRef-shaped */ ]
-  }
+  },
+  "nf_tests": [
+    { "name": "-profile test_dfast",
+      "path": "tests/dfast.nf.test",
+      "profiles": ["test_dfast"],
+      "params_overrides": { "outdir": "$outputDir" },
+      "assert_workflow_success": true,
+      "snapshot": {
+        "captures":     ["succeeded_task_count", "versions_yml", "stable_names", "stable_paths"],
+        "helpers":      ["getAllFilesFromDir", "removeNextflowVersion"],
+        "ignore_files": ["tests/.nftignore", "tests/.nftignore_files_entirely"],
+        "ignore_globs": [],
+        "snap_path":    "tests/dfast.nf.test.snap"
+      },
+      "prose_assertions": [] }
+  ]
 }
 ```
 
@@ -123,6 +149,8 @@ Branch shallow on layout:
 - ad-hoc DSL2: no `nextflow_schema.json`, no module `meta.yml`. Falls back to `script:`-block IO inference.
 - DSL1: rare; emit the `source` block and exit early with a `warnings[]` entry. Out of scope for v1.
 
+Real pipelines have **multiple named workflow blocks** — typically an anonymous `workflow {}` entrypoint in `main.nf` that wires `PIPELINE_INITIALISATION → NFCORE_<NAME> → PIPELINE_COMPLETION`, plus a substantive named workflow under `workflows/<name>.nf`. Selection rule for the primary `workflow`: pick the named workflow that invokes the most pipeline processes. The anonymous `workflow {}` glue and the `NFCORE_<NAME>` wrapper land in `subworkflows[]`, marked `kind: utility` and `kind: pipeline` respectively.
+
 ### 2. Capture provenance
 
 Populate `source` from `git remote get-url`, `git rev-parse HEAD` (or the user-supplied pin), `manifest.name` / `manifest.homePage` / `manifest.version` in `nextflow.config`, and `LICENSE` filename detection. `slug` is kebab of `<owner>-<repo>` for nf-core, kebab of repo basename otherwise.
@@ -134,20 +162,27 @@ Read `nextflow.config` `params { ... }` block for defaults. When `nextflow_schem
 ### 4. Enumerate processes
 
 For each `process <NAME> { ... }` in `main.nf`, `workflows/`, `modules/**`, `subworkflows/**`:
-- Pull `container`, `conda`, `publishDir`, `when:` directives verbatim.
+- Pull `container`, `conda`, `publishDir`, `when:` directives **verbatim** into `processes[].container` / `processes[].conda`. Modern nf-core directives are ternary expressions (`workflow.containerEngine == 'singularity' ? <sing-uri> : <docker-uri>`) and file references (`${moduleDir}/environment.yml`); keep the directive text intact and resolve into `tools[]` separately (§5).
 - Tokenize the `input:` and `output:` blocks for declared channel names and shapes — typed channels (`tuple val(meta), path(reads)`) become shape strings (`"tuple(meta, [path])"`); arity is preserved as a string, not structured.
+- Sweep `include { ... }` statements across the pipeline (`main.nf`, `workflows/`, `subworkflows/**`) to populate `processes[].aliases`. `include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS }` adds `MINIMAP2_CONSENSUS` to the `MINIMAP2_ALIGN` process's `aliases[]`. The same module can be re-imported under multiple aliases (bacass aliases `MINIMAP2_ALIGN` three times). Edges reference the alias name; the canonical `name` is the FK target.
+- Detect `topic: <name>` annotations on outputs (Nextflow 24+ channel topics — nf-core templates emit `tuple(val("${task.process}"), val('toolname'), eval(...)) topic: versions` for version aggregation). Record the topic name in `ChannelIO.topic`.
 - Where `meta.yml` exists, **use it** for `description` and IO documentation rather than parsing the `script:` block.
 - LLM call (one per process, batchable): summarize the `script:` body in one line. Pass the script verbatim plus the declared IO; ask only for what the tool *does*.
 
 ### 5. Build the tool registry
 
-Walk the per-process `container` and `conda` directives. Resolve in priority order:
-1. `quay.io/biocontainers/<name>:<version>--<build>` → split into `name`, `version`, biocontainer image string.
-2. Other Docker registry refs → keep verbatim in `docker`.
-3. Singularity image refs → keep verbatim in `singularity`.
-4. `bioconda::<name>=<version>` → `bioconda` field.
+Walk per-process `container` and `conda` directives. **Container directives are usually ternary** — extract both branches:
 
-Deduplicate by `(name, version)` across processes; one entry per tool. `processes[].tool` is a foreign key into `tools[].name`. This block is the bridge to `[[author-galaxy-tool-wrapper]]` — it consumes container/conda info to translate into Galaxy `<requirements>`.
+- The `singularity ?` branch typically yields an `https://depot.galaxyproject.org/singularity/<name>:<version>--<build>` URL → `tools[].singularity`.
+- The fallthrough branch typically yields one of:
+  - `quay.io/biocontainers/<name>:<version>--<build>` → `tools[].biocontainer`.
+  - `biocontainers/<name>:<version>--<build>` (docker.io alias for the same biocontainer image) → `tools[].biocontainer` (same field; both forms are biocontainer images).
+  - `community.wave.seqera.io/library/<name>:<version>--<digest>` or `https://community-cr-prod.seqera.io/.../sha256/<digest>/data` → `tools[].wave`.
+  - Anything else → `tools[].docker`.
+
+**Conda directives are usually file references** to `${moduleDir}/environment.yml`; read the file and extract its `dependencies:` list. When the list contains a single `bioconda::<name>=<version>` entry, that string becomes `tools[].bioconda`. Legacy literal-string directives (`conda "bioconda::<name>=<version>"`) feed the same field.
+
+Tool name and version are typically derivable from any of the resolved fields. Deduplicate by `(name, version)` across processes; one entry per tool. `processes[].tool` is a foreign key into `tools[].name`. This block is the bridge to `[[author-galaxy-tool-wrapper]]` — it consumes container/conda info to translate into Galaxy `<requirements>`.
 
 ### 6. Reconcile the workflow DAG
 
@@ -155,17 +190,47 @@ Enumerate the top-level workflow's `include` statements and channel construction
 
 Workflow-level conditionals (`if (params.skip_alignment) { ... }`) emit `conditionals[]` entries with the guard, the branch (`alternate` vs `default`), and the set of processes affected.
 
-### 7. Surface test fixtures
+Subworkflows split into two kinds:
+- `kind: pipeline` — invokes pipeline processes (data-flow contributor). The `NFCORE_<NAME>` wrapper and any nested `subworkflows/local/` that calls processes.
+- `kind: utility` — composes free-function calls only (`paramsHelp`, `samplesheetToList`, `completionEmail`). nf-core template subworkflows like `PIPELINE_INITIALISATION` and `PIPELINE_COMPLETION`. `Subworkflow.calls` is empty for utilities; their job is to produce channels (e.g. the validated samplesheet) the primary workflow consumes.
 
-Read `conf/<profile>.config` (default `conf/test.config`) for `params.input` (samplesheet URL) and any other URL-shaped params. For nf-core pipelines, follow the samplesheet URL into the `nf-core/test-datasets` repo if a single fetch is enough to enumerate the file paths it references; otherwise emit the samplesheet URL alone as the input.
+Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVersionsToYAML`, `methodsDescriptionText`) are not modeled as processes or subworkflows. Their channel outputs flow into the primary workflow's `channels[]`; the function names are nf-core template idiom, not pipeline-specific signal.
+
+### 7. Surface test fixtures and nf-tests
+
+**Two artifacts come out of this step:** `test_fixtures` (data shape of the selected profile's input) and `nf_tests[]` (every `tests/*.nf.test` file).
+
+**`test_fixtures`** — read `conf/<profile>.config` (default `conf/test.config`) for `params.input` (samplesheet URL) and any other URL-shaped params. For nf-core pipelines, follow the samplesheet URL into the `nf-core/test-datasets` repo if a single fetch is enough to enumerate the file paths it references; otherwise emit the samplesheet URL alone as the input. The samplesheet URL may be a runtime concatenation (`params.pipelines_testdata_base_path + 'foo.csv'`); resolve at config-load semantics and record the resolved URL.
 
 Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field names verbatim. The `path` vs `url` rules from gxy-sketches' `TestDataRef` carry over; the "must be under `test_data/`" constraint does **not** — see [[GXY_SKETCHES_ALIGNMENT]] §1.
 
-If `tests/` contains nf-test fixtures, surface those too; assertion shapes go into `outputs[].assertions[]` if they are simple equality / regex / `containsString` checks. Complex Groovy assertions are summarized to prose and stored as a single string assertion — flag with a `warnings[]` entry that the assertion is lossy.
+**`nf_tests[]`** — enumerate every `tests/*.nf.test` file. Real pipelines have one .nf.test per test profile (bacass has 9). For each:
+
+- `name` = the description string passed to `test("...")`.
+- `path` = repo-relative file path.
+- `profiles[]` = file-level `profile "<name>"` declaration plus any per-test config overrides.
+- `params_overrides` = the `when { params { ... } }` block as a key→value map.
+- `assert_workflow_success` = `true` when an `assert workflow.success` (or equivalent) clause is present.
+- `snapshot` = structured `SnapshotFixture` when an `assert snapshot(...).match()` clause is present, else `null`. nf-core templates use a near-uniform snapshot pattern; extract:
+  - `captures[]` = logical names of values passed into `snapshot(...)` (typical set: `succeeded_task_count`, `versions_yml`, `stable_names`, `stable_paths`).
+  - `helpers[]` = nf-test helper functions invoked (`getAllFilesFromDir`, `removeNextflowVersion`, ...).
+  - `ignore_files[]` = repo-relative paths passed as `ignoreFile:` to helpers (e.g. `tests/.nftignore`).
+  - `ignore_globs[]` = inline `ignore: [...]` glob list from helpers.
+  - `snap_path` = repo-relative path of the corresponding `.nf.test.snap` file.
+- `prose_assertions[]` = any other complex/non-snapshot assertions, summarized to prose strings. Empty for snapshot-only tests (the common nf-core case).
+
+**Consult `references/notes/nextflow-testing.md`** when fixtures use a layout outside `conf/test.config` + nf-test (e.g. legacy `test/` scripts, external test harnesses) or when assertions are non-snapshot equality / regex / `containsString` checks.
 
 ### 8. Validate and emit
 
 Validate the assembled object against `schemas/summary-nextflow.schema.json` before emitting. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early.
+
+## Revision history
+
+- **rev 4 (2026-05-01)** — second cast against `nf-core/bacass @ 2.5.0` (33 processes, 9 nf-test files, 11 test profiles) exposed two patterns the first cast couldn't see: process aliasing via `include { X as Y }` (six distinct alias-rename patterns in bacass) and the per-test-file structure of nf-test fixtures. §4 grew the alias-sweep rule; §7 split into `test_fixtures` + `nf_tests[]` with structured snapshot extraction. Schema bumped to rev 3 in lockstep. Cast log: `content/log.md` second 2026-05-01 entry.
+- **rev 3 (2026-05-01)** — first cast against `nf-core/demo @ 1.1.0` exposed the gaps now folded into §1 (multi-workflow selection rule), §4 (verbatim directive capture, channel topics), §5 (ternary container resolver, file-path conda directives, Wave registry), §6 (utility-vs-pipeline subworkflow split, free-function calls). Schema bumped to rev 2 in lockstep — see `[[summary-nextflow]]`'s revision-2 section. Cast log: `content/log.md` 2026-05-01 entry.
+- **rev 2 (2026-04-30)** — substantive body added; output schema declared.
+- **rev 1 (2026-04-30)** — stub.
 
 ## Caveats baked into the procedure
 

@@ -31,13 +31,10 @@ iwc:
   repo: galaxyproject/iwc
   ref: main
 
-iwc_format2:
-  # Local-only authoring aid: cleaned format2 conversions of IWC workflows.
-  # Citations resolve on disk for the validator and authoring agents but
-  # render as plain code on the site (no `repo` set — workflow-fixtures
-  # has no upstream remote). Prefer re-anchoring to `$IWC` when the
-  # upstream `.ga` file is the right pointer.
-  path: ~/projects/repositories/workflow-fixtures/iwc-format2
+# $IWC_FORMAT2 and $IWC_SKELETONS resolve automatically to
+# <foundry-checkout>/workflow-fixtures/{iwc-format2,iwc-skeletons} — built in
+# to scripts/lib/common-paths.ts, no user config needed. Override here if
+# you keep the corpus elsewhere.
 
 galaxy:
   path: ~/projects/repositories/galaxy

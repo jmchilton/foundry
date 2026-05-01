@@ -4,6 +4,7 @@
   "private": true,
   "description": "Galaxy Workflow Foundry — knowledge base + casting pipeline for Galaxy workflows.",
   "type": "module",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "validate": "tsx scripts/validate.ts",
     "test": "vitest run",
@@ -16,19 +17,34 @@
     "iwc-overview": "tsx scripts/generate-iwc-overview.ts",
     "check:iwc-overview": "tsx scripts/generate-iwc-overview.ts --check",
     "cast": "tsx scripts/cast-mold.ts",
+    "packages-build": "pnpm -r build",
+    "packages-test": "pnpm -r test",
+    "packages-typecheck": "pnpm -r typecheck",
+    "packages-lint": "eslint packages/*/src/ packages/*/test/",
+    "packages-format": "prettier --check 'packages/*/src/**/*.ts' 'packages/*/test/**/*.ts'",
+    "packages-format-fix": "prettier --write 'packages/*/src/**/*.ts' 'packages/*/test/**/*.ts'",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm -r build && changeset publish",
     "site:dev": "cd site && astro dev",
     "site:build": "cd site && astro build",
     "site:preview": "cd site && astro preview"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.31.0",
+    "@eslint/js": "^10.0.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "eslint": "^10.3.0",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0",
+    "prettier": "^3.8.3",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
+    "typescript-eslint": "^8.59.1",
     "vitest": "^2.1.0"
   }
 }
