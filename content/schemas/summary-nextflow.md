@@ -2,6 +2,8 @@
 type: schema
 name: summary-nextflow
 title: Nextflow pipeline summary
+package: "@galaxy-foundry/summary-nextflow-schema"
+upstream: "https://github.com/jmchilton/foundry/blob/main/packages/summary-nextflow-schema/src/summary-nextflow.schema.json"
 tags:
   - schema
   - source/nextflow
@@ -19,9 +21,17 @@ related_notes:
 summary: "JSON Schema for the structured summary emitted by the summarize-nextflow Mold."
 ---
 
-This schema is **Foundry-authored** — there is no upstream package. The JSON lives at `content/schemas/summary-nextflow.schema.json` next to this note and is registered in `site/src/lib/schema-registry.ts` for rendering.
+This page is auto-rendered from the JSON Schema authored in this repo and shipped on npm as `@galaxy-foundry/summary-nextflow-schema`. Each `$def` becomes a section below with a stable anchor ID — research notes and Mold bodies can deep-link individual shapes via `[[summary-nextflow#Tool]]`.
 
-Contrast with [[tests-format]], which is vendored from the `@galaxy-tool-util/schema` npm package: that one has an upstream source of truth; this one's source of truth is in this repo.
+**Source-of-truth chain:**
+
+1. `content/schemas/summary-nextflow.schema.json` in this repo — the canonical JSON. Edited as part of the mold/cast loop ([[summarize-nextflow]]).
+2. `packages/summary-nextflow-schema/scripts/sync-schema.mjs` runs at `prebuild`, copying the JSON into `src/` and emitting a typed `summary-nextflow.schema.generated.ts` const wrapper.
+3. Published as `@galaxy-foundry/summary-nextflow-schema` on npm. Site rendering currently reads directly from `content/schemas/`; the published artifact also exports `validateSummary()` and ships a `validate-summary-nextflow` CLI bin for downstream consumers.
+
+**At runtime in cast skills:** the same schema is copied verbatim into `references/schemas/summary-nextflow.schema.json` per the casting policy in `docs/COMPILATION_PIPELINE.md`. The package additionally exports `validateSummary` (AJV gate) and the `validate-summary-nextflow` CLI — both pure-JS and used by [[summarize-nextflow]]'s emit-time validation step.
+
+Contrast with [[tests-format]], which is vendored *from* an external npm package (`@galaxy-tool-util/schema`); this schema is *authored here* and shipped *to* npm — the direction of the source-of-truth chain is reversed.
 
 ## Why per-source
 

@@ -1,0 +1,48 @@
+{
+  "name": "@galaxy-foundry/summarize-nextflow",
+  "version": "0.0.0",
+  "description": "Statically introspect a Nextflow / nf-core pipeline tree and emit a structured JSON summary.",
+  "type": "module",
+  "bin": {
+    "summarize-nextflow": "dist/bin/summarize-nextflow.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmchilton/foundry.git",
+    "directory": "packages/summarize-nextflow"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@galaxy-foundry/summary-nextflow-schema": "workspace:*",
+    "commander": "^12.1.0",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
