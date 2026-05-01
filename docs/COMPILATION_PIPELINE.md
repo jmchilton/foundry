@@ -20,6 +20,17 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 
 Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for kinds where it adds value (patterns, partial manpage extracts when only a slice is referenced).
 
+### Agent-facing vs. human-facing vendored artifacts
+
+When an upstream project ships *both* a structured source (YAML, JSON Schema, IDL) *and* a derived human-rendered form (LaTeX-heavy Markdown, generated HTML), **cast from the structured source, not the rendered form.** The structured source is denser per token, schema-regular, and preserves identifiers (labels, test pin names) that the renderer typically discards.
+
+Canonical example: [[galaxy-collection-semantics]]. Upstream (`galaxyproject/galaxy`) keeps the formal type-rule spec in `lib/galaxy/model/dataset_collections/types/collection_semantics.yml` and runs `semantics.py` to generate `doc/source/dev/collection_semantics.md` (MyST admonitions + LaTeX math). The Foundry vendors **both** at the same SHA:
+
+- `content/research/galaxy-collection-semantics.yml` — canonical for casting and for any agent reasoning about collection mapping/reduction. Carries `tests:` blocks pinning concrete Galaxy test names that the rendered MD drops.
+- `content/research/galaxy-collection-semantics.upstream.md` — vendored solely so the site can render the upstream view for human readers. Not consumed by casting.
+
+Casting policy: a cast that needs collection-semantics knowledge resolves the `.yml` and inlines/condenses from there; the rendered `.md` is a site-rendering concern only. Pattern generalizes — when both forms exist, agents read structure, humans read prose.
+
 The casting process is itself expected to evolve. Today: an LLM with a target-specific prompt for the condensation steps; deterministic file copies for the rest. Tomorrow: maybe smarter prompts, different models per kind, partial determinism within a kind. The Foundry does not lock in a casting algorithm; it locks in a **contract** (input shape, output shape, provenance).
 
 ## When casting runs
