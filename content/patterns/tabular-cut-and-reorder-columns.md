@@ -23,7 +23,7 @@ related_molds:
 
 ## Tool
 
-`Cut1` (Galaxy core; bundled, no toolshed owner). Display name "Cut columns from a table".
+`Cut1` (Galaxy core; bundled, no toolshed owner). Display name "Cut columns from a table". Source: `$GALAXY/tools/filters/cutWrapper.xml`.
 
 ## When to reach for it
 
@@ -33,8 +33,8 @@ For project + compute fused, see [[tabular-sql-query]] or [[tabular-compute-new-
 
 ## Parameters
 
-- `columnList`: a single comma-separated string of `cN` references — e.g. `c4,c6,c7`. **Order matters**: the output column order is the list order, so listing columns out of input order *reorders* them.
-- `delimiter`: enum; `T` for tab (the dominant value across the corpus), `C` for comma, `Sp` for whitespace (collapses runs of spaces/tabs), `Dt` for dot, `U` for underscore, `Pi` for pipe. Tab is the corpus-default; always set explicitly.
+- `columnList`: a single comma-separated string of `cN` references — e.g. `c4,c6,c7`. Range syntax `c2-c5` is also accepted (per the tool's tests). **Order matters**: the output column order is the list order, so listing columns out of input order *reorders* them. The IWC corpus uses long enumerations rather than ranges; either is valid.
+- `delimiter`: select enum from the wrapper. Values: `T` (Tab), `Sp` (Whitespace — collapses runs), `Dt` (Dot), `C` (Comma), `D` (Dash), `U` (Underscore), `P` (Pipe). Tab dominates the corpus; always set explicitly.
 - The connected `input` port is the tabular dataset.
 
 ## Idiomatic shapes
@@ -61,9 +61,9 @@ Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting
 
 ## Pitfalls
 
-- **No range syntax.** `c4-c10` is not parsed; expand the list explicitly. The corpus uses long enumerations, not ranges.
 - **No header awareness.** The header row is cut and reordered identically to data rows. Usually what you want; flagging only because `Filter1` / `Grouping1` *do* take `header_lines`.
-- **`delimiter` must match the input.** Mismatched delimiter (e.g. `delimiter: T` on comma-separated input) treats each line as a single field — `c1` echoes the whole row, `c2…` produce empty output. Silent.
+- **`delimiter` must match the input.** Mismatched delimiter (e.g. `delimiter: T` on comma-separated input) treats each line as a single field — `c1` echoes the whole row, `c2…` produce a `.` (the wrapper's missing-column fill) per row. Silent.
+- **Cut breaks Galaxy column metadata.** The wrapper warns: re-cutting may invalidate column-assignment metadata (chrom/start/end for interval/BED). Re-establish via the dataset's "edit attributes" if downstream tools need it.
 - **Reorder-then-rename** is *not* `Cut1`'s job. Renaming columns means rewriting the header row — handle that with [[tabular-compute-new-column]] or with a `tp_replace_in_line` pass.
 - **Adding a constant column** belongs to [[tabular-compute-new-column]] (`column_maker/Add_a_column1`), not `Cut1` + `Paste1`. The latter is legacy.
 

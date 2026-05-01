@@ -44,6 +44,11 @@ galaxy:
   repo: galaxyproject/galaxy
   ref: dev
 
+tools_iuc:
+  path: ~/projects/repositories/tools-iuc
+  repo: galaxyproject/tools-iuc
+  ref: main
+
 planemo:
   path: ~/projects/repositories/planemo
   repo: galaxyproject/planemo

@@ -23,7 +23,7 @@ related_molds:
 
 ## Tool
 
-`toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1` ("Compute on rows", historically "Add a column"). 93 step occurrences in the surveyed IWC corpus — the canonical computed-column tool.
+`toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1` ("Compute on rows", historically "Add a column"). 93 step occurrences in the surveyed IWC corpus — the canonical computed-column tool. Source: `$TOOLS_IUC/tools/column_maker/column_maker.xml` (the toolshed owner is `devteam` for historical reasons; modern source lives in `tools-iuc`).
 
 ## When to reach for it
 
@@ -33,7 +33,7 @@ If the row decision needs a multi-line conditional or `split`/`gsub`, prefer awk
 
 ## Parameters
 
-The tool's `tool_state` has two top-level fields that matter for authoring: `error_handling` (sibling of `ops`, *not* nested inside it) and `ops` (which contains `header_lines_select` and `expressions`). Authors who flatten `expressions:` to the top level produce YAML that won't roundtrip.
+`tool_state` has three top-level fields that matter for authoring: `error_handling` (a `<section>` in the wrapper), `ops` (a conditional keyed on `header_lines_select`, holding `expressions`), and the optional `avoid_scientific_notation` boolean. `expressions` is a `<repeat>` nested under `ops` — flattening it to the top level produces YAML that won't roundtrip.
 
 - `error_handling` — **set as below**:
 
@@ -42,14 +42,18 @@ The tool's `tool_state` has two top-level fields that matter for authoring: `err
     auto_col_types: <see table>
     fail_on_non_existent_columns: true
     non_computable:
-      action: --fail-on-non-computable   # or --skip-non-computable, see below
+      action: --fail-on-non-computable   # see enum below
   ```
 
-  `fail_on_non_existent_columns: true` is uniform across all 51 corpus instances. `non_computable.action: --fail-on-non-computable` is the dominant choice (49/51); the two `--skip-non-computable` instances both live in `consensus-from-variation.gxwf.yml` (`:364`, `:402`) where coordinate-arithmetic on BED rows can legitimately yield non-numeric inputs and skipping is intentional.
+  `fail_on_non_existent_columns: true` is uniform across all 51 corpus instances. `non_computable.action` accepts five values per the wrapper: `--fail-on-non-computable` (default; 49/51 in corpus), `--skip-non-computable` (2/51, both in `consensus-from-variation.gxwf.yml` where BED-coordinate arithmetic can legitimately yield non-numerics), `--keep-non-computable`, `--non-computable-blank`, and `--non-computable-default` (which requires a `non_computable.default_value` sub-field, e.g. `nan`, `NA`, `.`).
 
-- `ops.header_lines_select`: `yes` if the input has a header row, `no` otherwise. The `yes` setting tells the tool to pass the first line through untouched.
+- `ops.header_lines_select`: select with values `yes` / `no`. With `yes`, the first input line is passed through unchanged and each expression must include a `new_column_name` (used as the header label). With `no`, expressions must *omit* `new_column_name` and the first line is computed like any other.
 
-- `ops.expressions`: list of `{ cond: <python-expr>, add_column: { mode: I | R | "" , pos: "<n>" }, new_column_name: <str> }` entries, evaluated in order. `mode: I` inserts at `pos`, `R` replaces at `pos`, `""` (with `pos: ""`) appends. `pos` is a quoted-numeric string, 1-indexed (corpus-inferred; not independently verified against tool source).
+- `ops.expressions`: repeat list of `{ cond, add_column: { mode, pos }, new_column_name? }` entries, evaluated left-to-right. Expressions can reference columns added by earlier expressions in the same step.
+
+- `add_column.mode`: select with values `""` (Append), `I` (Insert), `R` (Replace).
+- `add_column.pos`: 1-indexed integer (`min: 1` per wrapper) for `I` and `R`; the empty string `""` for Append (the wrapper renders `pos` as a hidden empty param when `mode: ""`).
+- `avoid_scientific_notation`: optional top-level boolean (default `false`). Set `true` to force decimal output for floats; otherwise small floats render as `1e-13`.
 
 ## The strict `auto_col_types` rule
 
@@ -129,10 +133,11 @@ Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting
 ## Pitfalls
 
 - **Wrong `auto_col_types`.** See the table above — the failure mode is silent and downstream-only.
-- **Flattening `expressions:` to `tool_state` top level.** The actual nesting is `tool_state.ops.expressions` with `tool_state.ops.header_lines_select` as a sibling. `error_handling` is a sibling of `ops`, *not* nested inside it. Flat shapes don't roundtrip.
+- **Flattening `expressions:` to `tool_state` top level.** The actual nesting is `tool_state.ops.expressions` with `tool_state.ops.header_lines_select` as a sibling. `error_handling` and `avoid_scientific_notation` are siblings of `ops`, not nested inside it. Flat shapes don't roundtrip.
+- **`new_column_name` paired with `header_lines_select: no`.** The wrapper only exposes `new_column_name` inside the `header_lines_select: yes` branch. Authoring a step with `header_lines_select: no` AND `new_column_name` produces YAML the tool form won't accept.
 - **Mixing arithmetic and string concat in one entry.** Split into two `expressions:` entries with different `auto_col_types` rather than reaching for `str(...)` inside the expression.
-- **Skipping `error_handling`.** The defaults are not the corpus defaults; non-existent columns and non-computable rows pass through silently.
-- **`add_column.mode` / `pos`.** `I` (insert) and `R` (replace) take a quoted 1-indexed `pos`; append uses `mode: ""` and `pos: ""`. Off-by-one in `pos` shifts every downstream `cN` reference in subsequent expressions.
+- **Skipping `error_handling`.** Wrapper defaults differ from corpus defaults; without explicit `fail_on_non_existent_columns: true`, non-existent column refs may pass through depending on `non_computable.action`.
+- **`add_column.mode` / `pos`.** `I` (insert) and `R` (replace) take a 1-indexed integer `pos`; append uses `mode: ""` and `pos: ""`. Off-by-one in `pos` shifts every downstream `cN` reference in subsequent expressions in the same step.
 - **`Add a column` (`addValue/1.0.1`)** — a different, legacy tool that adds a *constant* column only. Do not confuse with `column_maker/Add_a_column1`.
 
 ## Exemplars (IWC)
