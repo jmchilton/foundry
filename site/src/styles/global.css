@@ -1,5 +1,6 @@
 @import "@fontsource/atkinson-hyperlegible/400.css";
 @import "@fontsource/atkinson-hyperlegible/700.css";
+@import "katex/dist/katex.min.css";
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where(.dark, .dark *));
@@ -313,6 +314,51 @@ a:hover .tag {
 .tinted-shadow-hover:hover {
   box-shadow: 0 2px 4px color-mix(in srgb, var(--color-galaxy-primary) 12%, transparent),
               0 16px 32px -10px color-mix(in srgb, var(--color-galaxy-primary) 28%, transparent);
+}
+
+/* --- Vendored MyST blocks --- */
+
+.vendored-myst {
+  margin: 1.5rem 0;
+}
+.vendored-myst-provenance {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-surface-raised);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 0.25rem;
+}
+.vendored-myst-error {
+  color: var(--color-badge-stale-text);
+  background-color: var(--color-badge-stale-bg);
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+}
+.admonition {
+  border: 1px solid var(--color-border-subtle);
+  border-left: 4px solid var(--color-accent);
+  background-color: var(--color-surface-raised);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border-radius: 0.25rem;
+}
+.admonition-title {
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-galaxy-primary);
+}
+.dark .admonition-title {
+  color: var(--color-link);
+}
+.admonition-caution {
+  border-left-color: var(--color-badge-draft-text);
+}
+.admonition-caution .admonition-title {
+  color: var(--color-badge-draft-text);
 }
 
 /* Notes duplicate their title as the first body H1 (consistent across all
