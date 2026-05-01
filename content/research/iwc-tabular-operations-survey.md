@@ -32,7 +32,7 @@ Ranked by step occurrences. "DT" = devteam, "BG" = bgruening, "IUC" = iuc, "NML"
 |---|---|---|---|
 | 127 | `Cut1` | Cut1 (Cut columns from a table) | Column projection |
 | 33 | `Filter1` | Filter1 (Filter data on any column using simple expressions) | Row filter |
-| 26 | `Grep1` | Grep1 (Select lines that match an expression) | Row filter (regex) |
+| 47 | `Grep1` | Grep1 (Select lines that match an expression) | Row filter (regex) |
 | 25 | `sort1` | sort1 (Sort) | Sort |
 | 21 | `Remove beginning1` | Remove beginning | Header strip |
 | 19 | `Grouping1` | Grouping1 (Group data by a column) | Group/aggregate |
@@ -58,7 +58,7 @@ By far the largest single family. Same upstream tool collection (`text_processin
 | 195 | `tp_awk_tool` | Free-form awk |
 | 66 | `tp_find_and_replace` | Regex/string replace (whole-line) |
 | 39 | `tp_replace_in_line` | Regex replace in line |
-| 19 | `tp_grep_tool` | Row filter (regex; vs core `Grep1`) |
+| 43 | `tp_grep_tool` | Row filter (regex; vs core `Grep1`) |
 | 16 | `tp_sed_tool` | Free-form sed |
 | 15 | `tp_cat` | Row-bind |
 | 12 | `tp_text_file_with_recurring_lines` | Header/template lines (constant prefix) |
@@ -82,7 +82,7 @@ Representative full IDs (first occurrence in corpus):
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sorted_uniq/9.5+galaxy3` — `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:773`.
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_uniq_tool/9.5+galaxy3` — `VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:2476` (inside a subworkflow).
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_head_tool/9.5+galaxy0` — `microbiome/pathogen-identification/allele-based-pathogen-identification/Allele-based-Pathogen-Identification.gxwf.yml:495`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_grep_tool/9.5+galaxy3` — used 19x; coexists with core `Grep1` (26x). See §3.
+- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_grep_tool/9.5+galaxy3` — used 43x across four pins (`1.1.1`, `9.3+galaxy1`, `9.5+galaxy2`, `9.5+galaxy3` — last dominates); coexists with core `Grep1` (47x). See §3.
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_multijoin_tool/9.3+galaxy1` — `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:796`.
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sort_header_tool/9.3+galaxy1` — `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:923`.
 - `toolshed.g2.bx.psu.edu/repos/bgruening/split_file_on_column/tp_split_on_column/0.6` — `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:369` (split a tabular into a collection by a key column).
@@ -240,7 +240,7 @@ Not visible at the tabular layer in any sampled file; sampling happens upstream 
 | Operation | Tools that cover it (corpus-observed) | Recommendation lean |
 |---|---|---|
 | Filter rows (column expression) | `Filter1`, `query_tabular`, `filter_tabular`, awk | `Filter1` for one-shot; `query_tabular` only when SQL semantics needed |
-| Filter rows (regex) | `Grep1` (26), `tp_grep_tool` (19), awk | **Real redundancy** — 26 vs 19 split with no semantic distinction visible |
+| Filter rows (regex) | `Grep1` (47), `tp_grep_tool` (43), awk | **Real redundancy** — 47 vs 43 split with no semantic distinction visible |
 | Cut/project columns | `Cut1` (127), `query_tabular`, `filter_tabular`, `Paste1`+`Cut1` chains | `Cut1` dominates; use `query_tabular` for project+compute fused |
 | Computed column | `Add_a_column1` (93), awk, `query_tabular` | `Add_a_column1` if the expression is short; awk if the row needs a multi-line decision tree (see §2g taxonomy splitter) |
 | Sort | `sort1`, `tp_sort_header_tool` | `tp_sort_header_tool` whenever the input has a header — `sort1`'s header handling is implicit |
@@ -312,7 +312,7 @@ Proposed leaf pages, each scoped tightly. Where a candidate is weak, I say so.
 
 ## 6. Open questions
 
-- **Q1.** `Grep1` (26) vs `tp_grep_tool` (19) — semantic difference real? Both take `pattern`, `invert`, `keep_header`. Suggest the regex page recommend one and demote the other; need your call which.
+- **Q1.** `Grep1` (47) vs `tp_grep_tool` (43) — semantic difference real? Both take `pattern`, `invert`, `keep_header`. Suggest the regex page recommend one and demote the other; need your call which.
 - **Q2.** `awk-in-galaxy` page depth: one page covering all 195 invocations, or split into 4 sub-pages (`awk-header-injection`, `awk-bed-synthesis`, `awk-taxonomy-split`, `awk-relabel`)? Lean: one page with idiom sections; split only if frontmatter cross-linking gets noisy.
 - **Q3.** Should `Add_a_column1` page warn against `auto_col_types: false`? Many corpus uses set it true, some false (`variation-reporting.gxwf.yml:454`); silent string-vs-numeric coercion is a real bug source. Need your call on prescriptiveness.
 - **Q4.** Is `query_tabular` deep-dive in scope for this hierarchy or its own thing? It overlaps Galaxy's broader "compute over tabular" story (R, Python, csvtk-shaped). Lean: keep it in this hierarchy as the SQL leaf.
@@ -330,14 +330,17 @@ Resolved via `AskUserQuestion` after this survey landed. Pinned here so the next
 - **Grep1 vs tp_grep_tool (Q1).** Recommend `tp_grep_tool`. Demote `Grep1` to a "legacy alternative" footnote. Consistency with the rest of the `tp_*` family wins over slight corpus-frequency edge of `Grep1`.
 - **Format-conversion gap (Q5).** Skip. Corpus-first principle: no exemplar = no page. The §2m gap note in this survey stands as the only record.
 - **`auto_col_types` (Q3).** The `tabular-compute-new-column` page prescribes a **strict structured rule**:
-  - **Always** set `fail_on_non_existent_columns: true` and `non_computable.action: --fail-on-non-computable` (51/51 corpus instances).
+  - **Always** set `fail_on_non_existent_columns: true` (51/51 corpus instances).
+  - `non_computable.action: --fail-on-non-computable` is the dominant choice (49/51); the two `--skip-non-computable` exceptions (`consensus-from-variation.gxwf.yml:364`, `:402`) are intentional, for BED-coordinate arithmetic where some rows are legitimately non-numeric.
   - **`auto_col_types`** is per-expression-kind:
     | Expression kind | `auto_col_types` |
     |---|---|
-    | Arithmetic (`+`, `*`, `round()`, `int()`, …) | `true` |
+    | Arithmetic on raw `cN` (`(c18+c19)/c6`, `round(...)`) | `true` |
     | Pure string concat (`c5 + '>' + c6`) | `false` |
+    | Arithmetic with explicit casts (`int(cN)`, `float(cN)`) | `false` |
     | Mixed | split into two `expressions:` entries with different settings |
-  - Cite `variation-reporting.gxwf.yml:316-329` (true, arithmetic) and `:454-477` (false, string concat) as the canonical pair.
+  - Corpus distribution: 48 `true` / 3 `false`. Cite `variation-reporting.gxwf.yml:307-329` (true, raw-`cN` arithmetic), `:438-475` (false, string concat), and `consensus-from-variation.gxwf.yml:343-378` (false, explicit-cast arithmetic) as the canonical triple.
+  - Note on YAML shape: `expressions:` is nested under `tool_state.ops.expressions` (with `header_lines_select: yes|no` as sibling). `error_handling` is a top-level sibling of `ops`, not nested inside it. The pattern page must show this shape; flat `expressions:` does not roundtrip.
 - **Legacy tool IDs (Q6).** Pages name the modern tool primarily; include a short "Legacy alternative" footnote pointing to the old ID (`Grouping1`, `cat1`, `addValue/1.0.1`, `Remove beginning1`, `Paste1`, `sort1`). Reading old IWC workflows must remain possible.
 - **`query_tabular` (Q4).** Leaf in this tabular hierarchy as `tabular-sql-query`. Scope narrowly to "when SQL is the right reach" — window functions, multi-table JOINs, project+compute fused. Cross-link from filter / join / compute leaves; do not evangelize.
 - **Tabular-source cross-ref (Q7).** Deferred. If a Mold (e.g. `summarize-galaxy-tool`) later needs to point to multiqc/tooldistillator-as-tabular-source context, write the page then.
