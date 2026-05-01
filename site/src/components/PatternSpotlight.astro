@@ -1,0 +1,121 @@
+---
+import { getCollection } from 'astro:content';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const all = await getCollection('content');
+const patterns = all
+  .filter(n => n.data.type === 'pattern' && n.data.status !== 'archived')
+  .sort((a, b) => {
+    const revised = b.data.revised.getTime() - a.data.revised.getTime();
+    if (revised !== 0) return revised;
+    return (a.data as any).title.localeCompare((b.data as any).title);
+  });
+
+const visible = patterns.slice(0, 4);
+
+function shortTitle(title: string): string {
+  return title.replace(/^Tabular:\s*/, '');
+}
+---
+{patterns.length > 0 && (
+  <section aria-labelledby="pattern-spotlight-heading" class="pattern-spotlight">
+    <div class="section-rule">
+      <h2 id="pattern-spotlight-heading">Patterns</h2>
+      <span class="section-tail">/ corpus-backed recipes</span>
+      <a href={`${base}/patterns/`} class="spotlight-all">View all {patterns.length}</a>
+    </div>
+
+    <div class="spotlight-grid">
+      {visible.map((pattern, index) => {
+        const data = pattern.data as any;
+        return (
+          <a href={`${base}/${pattern.id}/`} class="spotlight-card no-underline tinted-shadow tinted-shadow-hover">
+            <span class="spotlight-index font-mono">{String(index + 1).padStart(2, '0')}</span>
+            <span class="spotlight-title">{shortTitle(data.title)}</span>
+            <span class="spotlight-summary">{data.summary}</span>
+            <span class="spotlight-foot">
+              <span class={`badge badge-${data.status}`}>{data.status}</span>
+              <span class="font-mono">pattern</span>
+            </span>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+)}
+
+<style>
+  .pattern-spotlight {
+    margin-top: 1.5rem;
+  }
+  .spotlight-all {
+    margin-left: auto;
+    color: var(--color-link);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-link) 30%, transparent);
+  }
+  .spotlight-all:hover {
+    color: var(--color-link-hover);
+    border-color: var(--color-accent);
+  }
+  .spotlight-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .spotlight-card {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 0.55rem;
+    min-height: 14rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.6rem;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 40%),
+      var(--color-surface-raised);
+    color: inherit;
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .spotlight-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .spotlight-index {
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+  }
+  .spotlight-title {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .spotlight-summary {
+    color: var(--color-text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+  .spotlight-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+  @media (max-width: 900px) {
+    .spotlight-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .spotlight-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

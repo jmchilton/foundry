@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import PipelineMatrix from '../components/PipelineMatrix.astro';
+import PatternSpotlight from '../components/PatternSpotlight.astro';
 import GlossaryPrimer from '../components/GlossaryPrimer.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -8,6 +9,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const navCards = [
   { href: `${base}/dashboard/`, label: 'Dashboard', desc: 'Sectioned tables of every active note.', kbd: 'D' },
   { href: `${base}/molds/`, label: 'Molds', desc: 'Abstract templates grouped by axis.', kbd: 'M' },
+  { href: `${base}/patterns/`, label: 'Patterns', desc: 'Corpus-grounded Galaxy authoring recipes.', kbd: 'R' },
   { href: `${base}/pipelines/`, label: 'Pipelines', desc: 'Flat list of all pipelines.', kbd: 'P' },
   { href: `${base}/glossary/`, label: 'Glossary', desc: 'Pinned definitions for Foundry terminology.', kbd: 'G' },
   { href: `${base}/log/`, label: 'Log', desc: 'Append-only project log.', kbd: 'L' },
@@ -42,6 +44,7 @@ const navCards = [
   </section>
 
   <PipelineMatrix />
+  <PatternSpotlight />
   <GlossaryPrimer />
 
   <section aria-labelledby="nav-cards-heading">
