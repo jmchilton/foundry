@@ -1,0 +1,10 @@
+# Cloned pipeline working trees — materialized by scripts/fetch.sh from fixtures.yaml.
+pipelines/
+
+# IWC working tree + intermediate + final format2 outputs (built by scripts/build-iwc.sh)
+iwc-src/
+iwc-cleaned/
+iwc-format2/
+
+# Skeleton corpus — derived from iwc-format2/ by scripts/build-skeletons.ts.
+iwc-skeletons/
