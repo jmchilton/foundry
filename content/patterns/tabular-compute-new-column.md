@@ -97,7 +97,7 @@ tool_state:
         new_column_name: AF
 ```
 
-Cited at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:307-329`.
+Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:307-329`.
 
 String-concat new columns (append), `auto_col_types: false`:
 
@@ -124,7 +124,7 @@ tool_state:
         new_column_name: change_with_pos
 ```
 
-Cited at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:438-475`.
+Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:438-475`.
 
 ## Pitfalls
 
@@ -137,11 +137,10 @@ Cited at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-re
 
 ## Exemplars (IWC)
 
-All paths relative to `<iwc-format2>/`:
 
-- `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:307-329` — raw-`cN` arithmetic, `auto_col_types: true`, insert + replace pair.
-- `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:438-475` — string concat, `auto_col_types: false`, append (`mode: ""`).
-- `sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:343-378` — explicit-cast arithmetic (`int(c2) - …`), `auto_col_types: false`, `--skip-non-computable`. Counter-example to "arithmetic always implies `auto_col_types: true`."
+- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:307-329` — raw-`cN` arithmetic, `auto_col_types: true`, insert + replace pair.
+- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:438-475` — string concat, `auto_col_types: false`, append (`mode: ""`).
+- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:343-378` — explicit-cast arithmetic (`int(c2) - …`), `auto_col_types: false`, `--skip-non-computable`. Counter-example to "arithmetic always implies `auto_col_types: true`."
 
 ## Legacy alternative
 

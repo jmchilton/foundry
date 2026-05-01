@@ -1,0 +1,55 @@
+# common_paths.yml — machine-local mapping of citation prefixes to filesystem
+# paths and (optionally) GitHub repo metadata for permalink rendering.
+#
+# Copy to `common_paths.yml` (gitignored) and adjust paths to your machine.
+#
+# In note bodies, write corpus citations inside inline code as:
+#
+#   `$NAME/relative/path/to/file.ext`
+#   `$NAME/relative/path/to/file.ext:545`
+#   `$NAME/relative/path/to/file.ext:545-560`
+#
+# Per-entry fields:
+#   path         — absolute filesystem path on this machine. ~ expands to $HOME.
+#   repo         — optional. "<owner>/<repo>" on github.com. When set, the
+#                  Astro renderer rewrites citations into clickable permalinks.
+#   ref          — optional, requires repo. branch / tag / commit SHA used to
+#                  build the permalink. Default: "main". Pin to a SHA for
+#                  stable links; pin to a branch for fresh-but-rotting links.
+#   path_prefix  — optional, requires repo. Prepended to the relative path
+#                  when constructing the GitHub URL. Use when the local
+#                  checkout is a subset / transformed view of the upstream
+#                  repo (the cited file's *local* path differs from its path
+#                  in the repo).
+#
+# Naming convention: uppercase letters, digits, underscores. The leading `$`
+# in citations is the marker; the rest is matched against the keys below
+# case-insensitively.
+
+iwc:
+  path: ~/projects/repositories/iwc
+  repo: galaxyproject/iwc
+  ref: main
+
+iwc_format2:
+  # Local-only authoring aid: cleaned format2 conversions of IWC workflows.
+  # Citations resolve on disk for the validator and authoring agents but
+  # render as plain code on the site (no `repo` set — workflow-fixtures
+  # has no upstream remote). Prefer re-anchoring to `$IWC` when the
+  # upstream `.ga` file is the right pointer.
+  path: ~/projects/repositories/workflow-fixtures/iwc-format2
+
+galaxy:
+  path: ~/projects/repositories/galaxy
+  repo: galaxyproject/galaxy
+  ref: dev
+
+planemo:
+  path: ~/projects/repositories/planemo
+  repo: galaxyproject/planemo
+  ref: master
+
+gxformat2:
+  path: ~/projects/repositories/gxformat2
+  repo: galaxyproject/gxformat2
+  ref: main

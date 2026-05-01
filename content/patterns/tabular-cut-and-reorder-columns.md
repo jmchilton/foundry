@@ -57,7 +57,7 @@ tool_state:
   delimiter: T
 ```
 
-Cited at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782`.
+Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782`.
 
 ## Pitfalls
 
@@ -69,11 +69,10 @@ Cited at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-re
 
 ## Exemplars (IWC)
 
-All paths relative to `<iwc-format2>/`:
 
-- `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782` — long projection + reorder (17 columns, `c20` last).
-- `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:830`, `:878` — sibling Cut1 steps in the same workflow, different column lists.
-- `genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:733` — `Paste1`+`Cut1` chain (legacy idiom; prefer [[tabular-compute-new-column]] today).
+- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782` — long projection + reorder (17 columns, `c20` last).
+- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:830`, `:878` — sibling Cut1 steps in the same workflow, different column lists.
+- `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:733` — `Paste1`+`Cut1` chain (legacy idiom; prefer [[tabular-compute-new-column]] today).
 
 ## Legacy alternative
 

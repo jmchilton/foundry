@@ -48,7 +48,7 @@ tool_state:
   header_lines: '1'
 ```
 
-Cited at `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545`.
+Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545`.
 
 Predicate produced upstream and wired in via `ConnectedValue` (lets a workflow author parameterize the predicate without a runtime parameter). Note that this corpus example has `header_lines: "0"` because the upstream rule already accounts for the header — the `header_lines` setting is independent of the `cond` source:
 
@@ -59,7 +59,7 @@ tool_state:
   header_lines: '0'
 ```
 
-Cited at `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336`.
+Cited at `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336`.
 
 ## Pitfalls
 
@@ -70,11 +70,10 @@ Cited at `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:32
 
 ## Exemplars (IWC)
 
-All paths relative to `<iwc-format2>/`:
 
-- `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545` — literal predicate `c4=='PASS' or c4=='.'`, `header_lines: "1"`.
-- `sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:276` — `ConnectedValue` predicate, `header_lines: "0"` (rule generated upstream).
-- `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336` — `ConnectedValue` predicate, `header_lines: "0"`.
+- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545` — literal predicate `c4=='PASS' or c4=='.'`, `header_lines: "1"`.
+- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:276` — `ConnectedValue` predicate, `header_lines: "0"` (rule generated upstream).
+- `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336` — `ConnectedValue` predicate, `header_lines: "0"`.
 
 All three corpus filters are equality / disjunction over a string column, or a `ConnectedValue` rule. Numeric-range predicates are unattested — if you reach for `cN > X`, you're slightly off the corpus path; verify behavior on a sample.
 
