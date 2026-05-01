@@ -32,7 +32,7 @@ Ranked by step occurrences. "DT" = devteam, "BG" = bgruening, "IUC" = iuc, "NML"
 |---|---|---|---|
 | 127 | `Cut1` | Cut1 (Cut columns from a table) | Column projection |
 | 33 | `Filter1` | Filter1 (Filter data on any column using simple expressions) | Row filter |
-| 26 | `Grep1` | Grep1 (Select lines that match an expression) | Row filter (regex) |
+| 47 | `Grep1` | Grep1 (Select lines that match an expression) | Row filter (regex) |
 | 25 | `sort1` | sort1 (Sort) | Sort |
 | 21 | `Remove beginning1` | Remove beginning | Header strip |
 | 19 | `Grouping1` | Grouping1 (Group data by a column) | Group/aggregate |
@@ -58,7 +58,7 @@ By far the largest single family. Same upstream tool collection (`text_processin
 | 195 | `tp_awk_tool` | Free-form awk |
 | 66 | `tp_find_and_replace` | Regex/string replace (whole-line) |
 | 39 | `tp_replace_in_line` | Regex replace in line |
-| 19 | `tp_grep_tool` | Row filter (regex; vs core `Grep1`) |
+| 43 | `tp_grep_tool` | Row filter (regex; vs core `Grep1`) |
 | 16 | `tp_sed_tool` | Free-form sed |
 | 15 | `tp_cat` | Row-bind |
 | 12 | `tp_text_file_with_recurring_lines` | Header/template lines (constant prefix) |
@@ -82,7 +82,7 @@ Representative full IDs (first occurrence in corpus):
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sorted_uniq/9.5+galaxy3` — `comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:773`.
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_uniq_tool/9.5+galaxy3` — `VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:2476` (inside a subworkflow).
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_head_tool/9.5+galaxy0` — `microbiome/pathogen-identification/allele-based-pathogen-identification/Allele-based-Pathogen-Identification.gxwf.yml:495`.
-- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_grep_tool/9.5+galaxy3` — used 19x; coexists with core `Grep1` (26x). See §3.
+- `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_grep_tool/9.5+galaxy3` — used 43x across four pins (`1.1.1`, `9.3+galaxy1`, `9.5+galaxy2`, `9.5+galaxy3` — last dominates); coexists with core `Grep1` (47x). See §3.
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_multijoin_tool/9.3+galaxy1` — `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:796`.
 - `toolshed.g2.bx.psu.edu/repos/bgruening/text_processing/tp_sort_header_tool/9.3+galaxy1` — `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:923`.
 - `toolshed.g2.bx.psu.edu/repos/bgruening/split_file_on_column/tp_split_on_column/0.6` — `microbiome/pathogen-identification/.../Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:369` (split a tabular into a collection by a key column).
@@ -240,7 +240,7 @@ Not visible at the tabular layer in any sampled file; sampling happens upstream 
 | Operation | Tools that cover it (corpus-observed) | Recommendation lean |
 |---|---|---|
 | Filter rows (column expression) | `Filter1`, `query_tabular`, `filter_tabular`, awk | `Filter1` for one-shot; `query_tabular` only when SQL semantics needed |
-| Filter rows (regex) | `Grep1` (26), `tp_grep_tool` (19), awk | **Real redundancy** — 26 vs 19 split with no semantic distinction visible |
+| Filter rows (regex) | `Grep1` (47), `tp_grep_tool` (43), awk | **Real redundancy** — 47 vs 43 split with no semantic distinction visible |
 | Cut/project columns | `Cut1` (127), `query_tabular`, `filter_tabular`, `Paste1`+`Cut1` chains | `Cut1` dominates; use `query_tabular` for project+compute fused |
 | Computed column | `Add_a_column1` (93), awk, `query_tabular` | `Add_a_column1` if the expression is short; awk if the row needs a multi-line decision tree (see §2g taxonomy splitter) |
 | Sort | `sort1`, `tp_sort_header_tool` | `tp_sort_header_tool` whenever the input has a header — `sort1`'s header handling is implicit |
@@ -312,7 +312,7 @@ Proposed leaf pages, each scoped tightly. Where a candidate is weak, I say so.
 
 ## 6. Open questions
 
-- **Q1.** `Grep1` (26) vs `tp_grep_tool` (19) — semantic difference real? Both take `pattern`, `invert`, `keep_header`. Suggest the regex page recommend one and demote the other; need your call which.
+- **Q1.** `Grep1` (47) vs `tp_grep_tool` (43) — semantic difference real? Both take `pattern`, `invert`, `keep_header`. Suggest the regex page recommend one and demote the other; need your call which.
 - **Q2.** `awk-in-galaxy` page depth: one page covering all 195 invocations, or split into 4 sub-pages (`awk-header-injection`, `awk-bed-synthesis`, `awk-taxonomy-split`, `awk-relabel`)? Lean: one page with idiom sections; split only if frontmatter cross-linking gets noisy.
 - **Q3.** Should `Add_a_column1` page warn against `auto_col_types: false`? Many corpus uses set it true, some false (`variation-reporting.gxwf.yml:454`); silent string-vs-numeric coercion is a real bug source. Need your call on prescriptiveness.
 - **Q4.** Is `query_tabular` deep-dive in scope for this hierarchy or its own thing? It overlaps Galaxy's broader "compute over tabular" story (R, Python, csvtk-shaped). Lean: keep it in this hierarchy as the SQL leaf.
