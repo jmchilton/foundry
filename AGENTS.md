@@ -31,7 +31,14 @@
 ## Run
 
 ```sh
-npm run validate     # schema + cross-file checks
-npm run test         # vitest
-npm run typecheck    # tsc --noEmit
+npm run validate           # schema + cross-file checks
+npm run test               # vitest (root: validator + content tests)
+npm run typecheck          # tsc --noEmit (foundry-internal scripts/)
+npm run packages-test      # vitest across packages/* via pnpm -r
+npm run packages-typecheck # tsc --noEmit across packages/* via pnpm -r
+npm run packages-build     # tsc emit across packages/*
 ```
+
+## Package layout
+
+Publishable CLIs live under `packages/<name>/` as a pnpm workspace; mirrors `galaxy-tool-util-ts`'s structure. First package: `@galaxy-foundry/summarize-nextflow`. Foundry-internal scripts stay under `scripts/` (not workspace packages — they support content authoring, not external consumers). pnpm 10.x is the package manager (`packageManager` field is contractual). The npm wrappers above invoke `pnpm -r` under the hood.

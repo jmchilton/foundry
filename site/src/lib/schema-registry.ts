@@ -8,10 +8,13 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { testsSchema } from '@galaxy-tool-util/schema';
 import summaryNextflowSchema from '../../../content/schemas/summary-nextflow.schema.json';
+import summaryNextflowSchemaPkg from '../../../packages/summary-nextflow-schema/package.json';
 
-// Read versions directly from node_modules — the published package's `exports`
-// field doesn't expose `package.json`, and lockfile-pinning means the on-disk
-// path is stable.
+// For schemas vendored from external npm packages (e.g. `@galaxy-tool-util/schema`),
+// the published `exports` field doesn't expose `package.json`, so we read the
+// version by walking node_modules. Lockfile-pinning makes the on-disk path stable.
+// Foundry-authored schemas shipped from this monorepo (e.g. summary-nextflow) read
+// the version directly from the workspace package.json instead.
 function readVendoredPackageVersion(packageName: string): string {
   try {
     const here = dirname(fileURLToPath(import.meta.url));
@@ -44,6 +47,6 @@ export const schemaRegistry: Record<string, SchemaEntry> = {
   },
   'summary-nextflow': {
     schema: summaryNextflowSchema as unknown as Record<string, unknown>,
-    version: '',
+    version: (summaryNextflowSchemaPkg as { version?: string }).version ?? '',
   },
 };
