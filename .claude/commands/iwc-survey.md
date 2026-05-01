@@ -14,7 +14,7 @@ Produce or refresh `content/research/iwc-$1-survey.md`. The survey **proposes ca
 3. **`docs/PATTERNS.md`** — pattern-authorship policy. **Operation-anchored naming** is mandatory in candidate-pattern proposals; do not surface tool-anchored names. Corpus-first applies — no speculative candidates.
 4. **`docs/ARCHITECTURE.md`** §3 (note types), §5 (frontmatter), §6 (validation).
 5. **`meta_schema.yml`** + **`meta_tags.yml`**.
-6. **`common_paths.yml.sample`** — `$IWC_FORMAT2` is the cleaned `gxformat2` corpus root for grep work; `$IWC` is the upstream `.ga` source for permalinks. Write every citation as `` `$IWC_FORMAT2/path:line` `` so the renderer can resolve it.
+6. **`common_paths.yml.sample`** — `$IWC_FORMAT2` is the cleaned `gxformat2` corpus root for grep work and full-workflow reads; `$IWC_SKELETONS` mirrors that tree with non-structural fields stripped (tool_ids + topology + control flow only) — cheap structural scans for step-pair / step-sequence patterns; `$IWC` is the upstream `.ga` source for permalinks. Write citations as `` `$IWC_FORMAT2/path:line` `` (or `` `$IWC_SKELETONS/path:line` `` when the structural view is what's evidenced).
 7. **`content/research/iwc-shortcuts-anti-patterns.md`** — already-pinned "don't endorse" calls. Do not re-surface anything covered here as a recommendation.
 8. **Existing surveys** under `content/research/iwc-*-survey.md` — for shape and tone, and to detect topic overlap.
 9. **If `content/research/iwc-$1-survey.md` already exists** — load it. You are in **refresh mode** (see §Refresh mode below).
@@ -24,11 +24,11 @@ Produce or refresh `content/research/iwc-$1-survey.md`. The survey **proposes ca
 Before any heavy mining, post a short scoping plan (~2 minutes of work):
 
 - What kind of topic this is (operation family / single tool / workflow concern / domain) and what that implies for the survey shape.
-- **Evidence techniques you'll use, and roughly how much of each.** Grep is one technique; whole-workflow reading is another; step-pair / step-sequence scanning is another. Different topics need different mixes:
-    - Single-tool topics (`awk`, `apply_rules`) lean grep-heavy plus structured-block extraction.
-    - Operation-family topics (`tabular`) need grep for inventory **plus** workflow-level reading on the highest-density files to find multi-tool recipes.
-    - Workflow-shape topics (`conditionals`, `collections`) lean **workflow-level reading** as the primary technique; grep is supporting.
-- **How much workflow reading.** Be explicit and let the user gate the cost: "the 5 highest-density workflows," "every workflow that calls `__APPLY_RULES__`," "all 120 — yes I know it's expensive." This number is the main token-cost lever; surface it.
+- **Evidence techniques you'll use, and roughly how much of each.** Three tiers: grep over `$IWC_FORMAT2` (cheap, blind to topology); skeleton scan over `$IWC_SKELETONS` (cheap, sees step-pair / step-sequence shape — all 120 fit in context); whole-workflow reads of `$IWC_FORMAT2` (expensive, parameter-level evidence). Different topics need different mixes:
+    - Single-tool topics (`awk`, `apply_rules`) lean grep-heavy plus structured-block extraction; full reads on a few high-density files.
+    - Operation-family topics (`tabular`) need grep for inventory **plus** skeleton scans for multi-tool recipes, with selective full reads to confirm parameter shapes.
+    - Workflow-shape topics (`conditionals`, `collections`, harness routing) default to **skeleton scan first** to catalog topologies and recipes; full reads only on the few workflows that need parameter-level confirmation.
+- **How much workflow reading.** Distinguish skeleton reads (cheap — feel free to scan dozens) from full `$IWC_FORMAT2` reads (expensive — gate explicitly: "the 5 highest-density," "every workflow that calls `__APPLY_RULES__`," "all 120 — yes I know it's expensive"). Full-read count is the main token-cost lever; surface it.
 - The rough section skeleton you'll write (titles only — section *layout* is per-topic, not pre-specified; see §Required moves).
 - What you are deliberately **not** covering (out-of-scope adjacencies, deferred follow-ups).
 - Anything in `iwc-shortcuts-anti-patterns.md` or existing pattern pages that already constrains the surface.
@@ -39,10 +39,11 @@ Before any heavy mining, post a short scoping plan (~2 minutes of work):
 
 Once scope is confirmed, work through the techniques you committed to:
 
-- **Grep / counts** for tool inventory and ranking.
-- **Structured-block extraction** for tools whose idioms live inside parameter blobs (`__APPLY_RULES__` rule sequences, `tp_awk_tool` `code:` programs, `column_maker` `expressions:` lists). Pull the blocks, not just counts.
-- **Whole-workflow reading** when the patterns of interest are step-pairs, step-sequences, or topology-shaped (one tool's output feeding another in a recurring shape). Grep cannot see these. For each workflow read, take notes on multi-step recipes — an `__APPLY_RULES__` followed by `__FILTER_EMPTY_DATASETS__` to clean up after restructuring is a *recipe*, not a single-tool idiom, and it deserves to be surfaced as such.
-- **Connection / shape inspection** when the topic touches map-over, reduction, or collection-type transitions — those are visible at the workflow connection level, not in any single step.
+- **Grep / counts** over `$IWC_FORMAT2` for tool inventory and ranking.
+- **Skeleton scan** over `$IWC_SKELETONS` to surface step-pair / step-sequence patterns and topology-shaped recipes — one tool's output feeding another in a recurring shape. Cheap enough to read dozens or all 120; the structural-only view is the right tier for "which workflows have a `__FILTER_EMPTY_DATASETS__` whose input is an `__APPLY_RULES__` output?" An `__APPLY_RULES__` followed by `__FILTER_EMPTY_DATASETS__` cleanup is a *recipe*, not a single-tool idiom, and it deserves to surface as such.
+- **Structured-block extraction** from `$IWC_FORMAT2` for tools whose idioms live inside parameter blobs (`__APPLY_RULES__` rule sequences, `tp_awk_tool` `code:` programs, `column_maker` `expressions:` lists). Skeletons strip these; pull from full files.
+- **Whole-workflow reading** of `$IWC_FORMAT2` files reserved for parameter-level confirmation on the recipes the skeleton scan flagged as promising.
+- **Connection / shape inspection** for map-over, reduction, or collection-type transitions — visible at the workflow connection level, scannable from skeletons.
 
 ## Step 3 — Write the survey
 

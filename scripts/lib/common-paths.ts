@@ -46,16 +46,27 @@ function normalizeKeys(raw: Record<string, CommonPathEntry>): CommonPaths {
   return out;
 }
 
+// Built-in entries for corpora that live inside the Foundry checkout —
+// resolved without user configuration so $IWC_FORMAT2 / $IWC_SKELETONS
+// citations work out of the box. User entries with the same key override.
+function builtinPaths(repoRoot: string): CommonPaths {
+  return {
+    iwc_format2: { path: path.join(repoRoot, "workflow-fixtures", "iwc-format2") },
+    iwc_skeletons: { path: path.join(repoRoot, "workflow-fixtures", "iwc-skeletons") },
+  };
+}
+
 export function loadCommonPaths(repoRoot: string): CommonPaths {
+  const builtins = builtinPaths(repoRoot);
   const local = path.join(repoRoot, "common_paths.yml");
   const sample = path.join(repoRoot, "common_paths.yml.sample");
   const file = fs.existsSync(local) ? local : fs.existsSync(sample) ? sample : null;
-  if (!file) return {};
+  if (!file) return builtins;
   try {
     const raw = yaml.load(fs.readFileSync(file, "utf-8")) as Record<string, CommonPathEntry> | null;
-    return raw ? normalizeKeys(raw) : {};
+    return raw ? { ...builtins, ...normalizeKeys(raw) } : builtins;
   } catch {
-    return {};
+    return builtins;
   }
 }
 

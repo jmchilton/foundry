@@ -10,6 +10,30 @@ Problem: the unique value per exemplar page is the hand-curated `## Patterns dem
 
 `workflow-fixtures` was R&D scratch for pattern-research. Treating it as Foundry-runtime input recreates the "we mirror IWC" problem in lighter clothing. Agents have `gxwf` and can clean / inspect IWC directly. Foundry contributors can use `workflow-fixtures` locally as an authoring aid without the Foundry depending on it.
 
+`workflow-fixtures/` now lives as a top-level directory inside the Foundry checkout (Foundry support infrastructure, not a separate product). Generated corpora — `pipelines/`, `iwc-src/`, `iwc-cleaned/`, `iwc-format2/`, `iwc-skeletons/` — are gitignored. The validator and site-content traversal stay scoped to `content/`; `workflow-fixtures/` is invisible to them. The directory is cited by `$IWC_FORMAT2/...` and `$IWC_SKELETONS/...` from authoring/survey notes; nothing in `casts/` or `content/` reads from it at build time.
+
+## Skeleton tier
+
+Survey-time evidence has three tiers:
+
+1. **Grep** over `$IWC_FORMAT2/**/*.gxwf.yml` — cheap, blind to step-pair / step-sequence patterns.
+2. **Skeleton scan** over `$IWC_SKELETONS/**/*.gxwf.yml` — cheap structural read; sees topology, control flow, and tool sequences. All 120 skeletons fit in agent context (median ~6KB, total ~1MB).
+3. **Whole-workflow reading** of selective `$IWC_FORMAT2` files — expensive; reserved for parameter-level evidence on the recipes that look promising from tier 1 or 2.
+
+A skeleton is the format2 workflow with non-structural fields stripped, leaving:
+
+- `tool_id`, `label`, `doc` per step
+- `in:` (with `source:`) / `out:` (ids only) / `step_inputs` topology
+- `when:` expressions and other control flow
+- `run:` subworkflow descents (recursive)
+- workflow-level `inputs:` / `outputs:` / `tags` / `release` / `license`
+
+Dropped: `tool_state` parameter blobs, step `position:` UI metadata, step-level `comments:` / `uuid` / `tool_shed_repository` / `tool_version` (redundant with `tool_id`), output post-processing fields (`add_tags`, `change_datatype`, `hide`, `rename`, …), and top-level `comments:` (Galaxy sticky-notes, not topology).
+
+Regen: `cd workflow-fixtures && make skeletons` (or `tsx workflow-fixtures/scripts/build-skeletons.ts`). Idempotent — rebuilds `iwc-skeletons/` from the current `iwc-format2/`. Re-run after `make iwc` bumps the IWC pin.
+
+The pattern is **skeletons + selective full reads**, not skeletons replacing full reads. `/iwc-survey` defaults to "skeleton scan first, then drill into `$IWC_FORMAT2`" for workflow-shape topics; tool-level topics still lean grep + structured-block extraction.
+
 ## What the Foundry does instead
 
 1. **Patterns cite IWC by URL, in the page body.** A pattern's `## Exemplars` section lists IWC workflows that demonstrate it, each as a free-form Markdown link (`[bacterial-genomics/...](https://github.com/galaxyproject/iwc/blob/<sha>/workflows/...)`) with one-liner author commentary. Pin to a specific commit SHA when stability matters; pin to `main` when freshness matters. Author choice per citation; no enforced policy.
