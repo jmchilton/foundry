@@ -112,6 +112,34 @@ properties:
     type: array
     items:
       type: string
+  references:
+    type: array
+    items:
+      type: object
+      required: [kind, ref, used_at, load, mode]
+      additionalProperties: false
+      properties:
+        kind:
+          type: string
+          enum: [pattern, cli-command, schema, prompt, example, research]
+        ref:
+          type: string
+          minLength: 1
+        used_at:
+          type: string
+          enum: [cast-time, runtime, both]
+        load:
+          type: string
+          enum: [upfront, on-demand]
+        mode:
+          type: string
+          enum: [verbatim, condense, sidecar, copy]
+        purpose:
+          type: string
+          minLength: 1
+        trigger:
+          type: string
+          minLength: 1
 
   # --- CLI command fields ---
   command:

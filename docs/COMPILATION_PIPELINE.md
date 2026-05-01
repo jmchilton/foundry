@@ -4,7 +4,7 @@ Initial sketch of how Molds become cast skills. Anchored to the file layout in `
 
 ## What casting is
 
-Casting takes a Mold (a typed reference manifest plus a procedural body) and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples — and produces a target-specific skill artifact. The cast is **condensed and isolated** — no links back to the Foundry, no runtime dependency on it.
+Casting takes a Mold (a typed reference manifest plus a procedural body) and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific skill artifact. The cast is **condensed and isolated** — no links back to the Foundry, no runtime dependency on it.
 
 Casting operates as **per-kind dispatch** over the manifest, not a single resolve-and-inline pass. Different reference kinds get different transformations:
 
@@ -15,10 +15,43 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 | `schema` | `content/schemas/<name>.schema.json` (Foundry-authored, paired with a `<name>.md` schema note) **or** vendored from an upstream npm/PyPI package and registered in `site/src/lib/schema-registry.ts` (canonical case: `@galaxy-tool-util/schema` for the workflow test-format) | Verbatim copy | `references/schemas/<name>.schema.json` |
 | `prompt` | `content/prompts/*.md` | Inlined verbatim, no LLM rewrite | inlined into `SKILL.md` or `references/prompts/` |
 | `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` |
+| `research` | `content/research/*.md` or paired structured sources under `content/research/` | Verbatim copy or LLM condensation, controlled by the reference `mode` | `references/notes/` or inlined excerpt |
 | `eval` | `content/molds/<slug>/eval.md` | **Never packaged** | — (Foundry-only) |
 | `mold` (smell) | another Mold | Discouraged; see Open questions | — |
 
-Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for kinds where it adds value (patterns, partial manpage extracts when only a slice is referenced).
+Verbatim-copy paths are deterministic; LLM-driven condensation is reserved for kinds where it adds value (patterns, research notes, partial manpage extracts when only a slice is referenced). `mode: condense` is part of the manifest schema now, but the generic condensation handler is not implemented yet; casting is incomplete until it can honor that mode for every kind that allows it.
+
+### Typed reference manifest
+
+Molds may declare the new object-shaped `references` manifest. It is additive during migration and will replace `patterns`, `cli_commands`, `prompts`, and `examples` once enough Molds have moved. `input_schemas` and `output_schemas` remain explicit Mold IO fields for now because they describe the Mold contract as well as cast packaging.
+
+```yaml
+references:
+  - kind: schema
+    ref: "content/schemas/summary-nextflow.schema.json"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    purpose: "Validate emitted summary JSON."
+  - kind: research
+    ref: "[[component-nextflow-testing]]"
+    used_at: runtime
+    load: on-demand
+    mode: condense
+    purpose: "Extract nf-test fixtures and snapshots."
+    trigger: "When filling test_fixtures or nf_tests."
+```
+
+Field contract:
+
+- `kind` selects the resolver and transformation handler: `pattern`, `cli-command`, `schema`, `prompt`, `example`, or `research`.
+- `ref` is a wiki link for note-backed kinds (`pattern`, `cli-command`, `prompt`, `research`) and a path for file-backed kinds (`schema`, `example`).
+- `used_at` is `cast-time`, `runtime`, or `both`; it says whether the reference is consumed while building the cast, consulted by the cast skill at runtime, or both.
+- `load` is `upfront` or `on-demand`; it is the progressive-disclosure contract and should be honored by generated skill instructions and sidecar layout.
+- `mode` is `verbatim`, `condense`, `sidecar`, or `copy`; it declares the transformation, even when that transformation is not fully implemented yet.
+- `purpose` and `trigger` are optional prose for maintainers and cast-skill instructions. `trigger` is especially important for `load: on-demand` references.
+
+`load: never` is deliberately omitted. Non-operational graph links stay in `related_notes`; once a reference appears in `references`, casting and validation should treat it as operational.
 
 ### Agent-facing vs. human-facing vendored artifacts
 
@@ -49,11 +82,12 @@ To cast a Mold, the casting process consumes:
 
 - **The Mold directory** — `index.md` (frontmatter manifest + procedural body) plus, if the schema permits, casting hints. **Not** `eval.md` — evals stay in the Foundry.
 - **All typed references declared in the manifest**, resolved by kind:
-  - `patterns` — wiki links into `content/patterns/`.
-  - `cli_commands` — wiki links into `content/cli/<tool>/<cmd>.md`.
+  - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
+  - `patterns` — legacy wiki links into `content/patterns/`.
+  - `cli_commands` — legacy wiki links into `content/cli/<tool>/<cmd>.md`.
   - `input_schemas` / `output_schemas` — paths into `content/schemas/`.
-  - `prompts` — wiki links into `content/prompts/` (when the Mold needs them).
-  - `examples` — paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
+  - `prompts` — legacy wiki links into `content/prompts/` (when the Mold needs them).
+  - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
   - Other Molds (`related_molds`) — flagged as a smell; see Open questions.
 - **The cast target spec** — a per-target adapter (prompt templates per kind + output structure) declared in `casts/<target>/_target.yml`.
@@ -62,7 +96,8 @@ To cast a Mold, the casting process consumes:
 Resolution policy is per-kind, not a single rule:
 - `pattern` — verbatim inline if under a size threshold; LLM-summarize otherwise. Casting hints (`inline: true` / `summarize: true`) may override.
 - `cli-command` — always cast to JSON sidecar (deterministic structuring; no token-budget condensation needed because the sidecar is loaded only when the agent needs that command).
-- `schema`, `example`, `prompt` — always verbatim copy. No LLM in the loop.
+- `schema`, `example`, `prompt` — always verbatim copy unless the typed reference declares a future supported transformation.
+- `research` — operational background; copied or condensed according to `mode`, and loaded according to `used_at` / `load`. `mode: condense` is specified but not implemented in v1 tooling yet.
 - `eval` — never packaged.
 
 ## Output contract
@@ -78,6 +113,7 @@ casts/claude/<mold-name>/
 │   ├── cli/                  # JSON sidecars cast from manpages
 │   │   └── <tool>/<cmd>.json
 │   ├── patterns/             # condensed pattern excerpts (when not fully inlined)
+│   ├── notes/                # research notes or condensed operational excerpts
 │   ├── prompts/              # verbatim prompt fragments (when not fully inlined)
 │   └── examples/             # verbatim fixtures
 └── _provenance.json          # required, not part of the skill
@@ -142,7 +178,7 @@ The reference-kind `schema` does not distinguish between Foundry-authored and up
 cast_mold(mold_name, target):
   mold     <- read molds/<mold_name>/index.md
   validate mold against frontmatter schema (incl. typed-reference manifest)
-  refs     <- resolve_manifest(mold)               # by kind: patterns, cli_commands, schemas, prompts, examples
+  refs     <- resolve_manifest(mold)               # by kind: references plus legacy fields
   validate every ref exists and conforms to its kind's contract
   target   <- load_target_adapter(target)
 
@@ -154,6 +190,7 @@ cast_mold(mold_name, target):
       cli-command  -> sidecar = llm.cast_manpage_to_json(ref, target.cli_prompt)
                       write to references/cli/<tool>/<cmd>.json
       schema       -> copy verbatim to references/schemas/
+      research     -> copy verbatim or condense to references/notes/ per mode
       prompt       -> copy verbatim (inlined or to references/prompts/)
       example      -> copy verbatim to references/examples/
       eval         -> skip

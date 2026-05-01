@@ -13,6 +13,34 @@ revision: 4
 ai_generated: true
 output_schemas:
   - "content/schemas/summary-nextflow.schema.json"
+references:
+  - kind: schema
+    ref: "content/schemas/summary-nextflow.schema.json"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    purpose: "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract."
+  - kind: research
+    ref: "[[component-nextflow-pipeline-anatomy]]"
+    used_at: runtime
+    load: on-demand
+    mode: condense
+    purpose: "Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology."
+    trigger: "When walking pipeline structure or resolving process aliases and channel flow."
+  - kind: research
+    ref: "[[component-nextflow-containers-and-envs]]"
+    used_at: runtime
+    load: on-demand
+    mode: condense
+    purpose: "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence."
+    trigger: "When extracting tools, versions, containers, conda directives, or environment equivalences."
+  - kind: research
+    ref: "[[component-nextflow-testing]]"
+    used_at: runtime
+    load: on-demand
+    mode: condense
+    purpose: "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions."
+    trigger: "When filling test_fixtures or nf_tests sections of the summary."
 related_notes:
   - "[[summary-nextflow]]"
 summary: "Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to."
