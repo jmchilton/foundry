@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { cliRegistry } from '../lib/cli-registry';
 
 interface Props {
   entry: CollectionEntry<'content'>;
@@ -7,7 +8,94 @@ interface Props {
 
 const { entry } = Astro.props;
 const data = entry.data as any;
+const key = `${data.tool}/${data.command}`;
+const reg = cliRegistry[key];
+const cmd = reg?.command;
 ---
-<div class="mb-6">
-  <pre class="not-prose p-3 rounded-lg bg-(--color-galaxy-dark) text-(--color-text-on-dark) font-mono text-sm overflow-x-auto"><code>{data.tool} {data.command}</code></pre>
+<div class="mb-6 flex flex-wrap gap-2 items-center">
+  <span class="text-xs px-2 py-1 rounded bg-(--color-galaxy-primary) text-white font-mono">cli</span>
+  <span class="text-xs px-2 py-1 rounded border border-(--color-border) font-mono">{data.tool} {data.command}</span>
+  {reg?.package && (
+    <span class="text-xs px-2 py-1 rounded border border-(--color-border) font-mono">
+      {reg.package}{reg.version && ` @ ${reg.version}`}
+    </span>
+  )}
+  {reg?.upstream && (
+    <a href={reg.upstream} class="text-xs text-(--color-link) hover:underline">upstream ↗</a>
+  )}
 </div>
+
+{!reg && (
+  <div class="mb-6 p-3 rounded-lg border border-(--color-border) bg-(--color-surface-raised) text-sm">
+    No CLI metadata registered for <code>{key}</code>. The note body below is the source of truth until <code>@galaxy-tool-util/cli/meta</code> is wired up. See <code>docs/CLI_META_INTEGRATION.md</code>.
+  </div>
+)}
+
+{cmd && (
+  <section class="mb-8 p-4 rounded-lg border border-(--color-border) bg-(--color-surface-raised)">
+    <h2 class="not-prose text-lg font-semibold mb-2">{cmd.fullName}</h2>
+    <p class="not-prose text-sm text-(--color-text-secondary) m-0">{cmd.description}</p>
+    <pre class="not-prose mt-3 p-3 rounded bg-(--color-galaxy-dark) text-(--color-text-on-dark) font-mono text-sm overflow-x-auto"><code>{cmd.synopsis}</code></pre>
+  </section>
+)}
+
+{cmd && cmd.args.length > 0 && (
+  <section id="arguments" class="mb-8 not-prose p-4 rounded-lg border border-(--color-border) scroll-mt-20">
+    <h3 class="text-base font-semibold m-0 mb-2">Arguments</h3>
+    <table class="w-full text-xs border-collapse">
+      <thead>
+        <tr class="border-b border-(--color-border)">
+          <th class="text-left py-1 pr-2 font-semibold">name</th>
+          <th class="text-left py-1 pr-2 font-semibold">req</th>
+          <th class="text-left py-1 pr-2 font-semibold">variadic</th>
+          <th class="text-left py-1 font-semibold">description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {cmd.args.map(a => (
+          <tr class="border-b border-(--color-border) align-top">
+            <td class="py-1 pr-2 font-mono">{a.name}</td>
+            <td class="py-1 pr-2">{a.required ? '✓' : ''}</td>
+            <td class="py-1 pr-2">{a.variadic ? '✓' : ''}</td>
+            <td class="py-1">{a.description ?? ''}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+)}
+
+{cmd && cmd.options.length > 0 && (
+  <section id="options" class="mb-8 not-prose p-4 rounded-lg border border-(--color-border) scroll-mt-20">
+    <h3 class="text-base font-semibold m-0 mb-2">Options</h3>
+    <table class="w-full text-xs border-collapse">
+      <thead>
+        <tr class="border-b border-(--color-border)">
+          <th class="text-left py-1 pr-2 font-semibold">flag</th>
+          <th class="text-left py-1 pr-2 font-semibold">arg</th>
+          <th class="text-left py-1 font-semibold">description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {cmd.options.map(o => (
+          <tr id={`opt-${o.name}`} class="border-b border-(--color-border) align-top scroll-mt-20">
+            <td class="py-1 pr-2 font-mono">
+              <a href={`#opt-${o.name}`} class="text-(--color-text-primary) hover:underline">{o.flags}</a>
+              {o.short && <span class="text-(--color-text-secondary)"> / {o.short}</span>}
+            </td>
+            <td class="py-1 pr-2 font-mono text-(--color-text-secondary)">{o.argumentPlaceholder ?? ''}</td>
+            <td class="py-1">
+              {o.description}
+              {o.defaultValue !== undefined && (
+                <span class="block text-(--color-text-secondary) mt-0.5">default: <code>{JSON.stringify(o.defaultValue)}</code></span>
+              )}
+              {o.negatable && (
+                <span class="block text-(--color-text-secondary) mt-0.5">negatable</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+)}
