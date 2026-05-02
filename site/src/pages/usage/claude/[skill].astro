@@ -1,0 +1,49 @@
+---
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import Base from '../../../layouts/Base.astro';
+import { listAllCasts } from '../../../lib/casts';
+
+export async function getStaticPaths() {
+  const casts = listAllCasts().filter(c => c.target === 'claude' && c.hasSkill);
+  return casts.map(c => ({
+    params: { skill: c.moldSlug },
+    props: {
+      moldSlug: c.moldSlug,
+      dir: c.dir,
+      name: c.name,
+      description: c.description,
+    },
+  }));
+}
+
+const { moldSlug, dir, name, description } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const skillText = readFileSync(path.join(dir, 'SKILL.md'), 'utf8');
+const body = skillText.replace(/^---\n[\s\S]*?\n---\n/, '');
+---
+<Base title={`${moldSlug} (Claude skill)`}>
+  <section class="page-hero bg-grain" aria-labelledby="skill-heading">
+    <span class="eyebrow mb-3">Claude skill · cast</span>
+    <h1 id="skill-heading" class="page-title text-balance font-mono">{name ?? moldSlug}</h1>
+    {description && <p class="page-lede text-pretty">{description}</p>}
+    <p class="text-sm">
+      <a href={`${base}/usage/`} class="text-(--color-link) hover:underline">← All cast skills</a>
+      <span class="mx-2">·</span>
+      <a href={`${base}/molds/${moldSlug}/`} class="text-(--color-link) hover:underline">Source mold →</a>
+    </p>
+  </section>
+
+  <section class="mb-6 p-3 rounded-lg border border-(--color-border)">
+    <h2 class="text-sm font-semibold mb-2">Install</h2>
+    <pre class="p-3 rounded bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/plugin marketplace add jmchilton/foundry
+/plugin install foundry-skills@galaxy-workflow-foundry</code></pre>
+    <p class="text-sm mt-3 mb-1">Then invoke as:</p>
+    <pre class="p-3 rounded bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/foundry-skills:{moldSlug}</code></pre>
+  </section>
+
+  <article class="prose prose-slate max-w-none dark:prose-invert">
+    <h2>SKILL.md</h2>
+    <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm overflow-x-auto"><code>{body}</code></pre>
+  </article>
+</Base>

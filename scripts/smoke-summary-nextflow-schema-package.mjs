@@ -31,7 +31,7 @@ run("npm", ["install", join(tempRoot, tarball)], { cwd: consumerDir });
 
 const summaryPath = join(
   repoRoot,
-  "casts/claude/summarize-nextflow/runs/nf-core__demo/summary.json",
+  "casts/claude/skills/summarize-nextflow/runs/nf-core__demo/summary.json",
 );
 const smokeScript = join(consumerDir, "smoke.mjs");
 writeFileSync(

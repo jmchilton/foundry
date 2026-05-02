@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 import ReferenceContract from './ReferenceContract.astro';
+import CastArtifacts from './CastArtifacts.astro';
 
 interface Props {
   entry: CollectionEntry<'content'>;
@@ -31,6 +32,8 @@ const specifier = data.source ?? data.target ?? data.tool ?? null;
 </div>
 
 <ReferenceContract references={data.references} linkMap={linkMap} />
+
+<CastArtifacts moldSlug={data.name} />
 
 {(patterns.length + cliCommands.length + prompts.length) > 0 && (
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">

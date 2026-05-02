@@ -510,7 +510,11 @@ function main(): void {
   }
   const moldHash = sha256(moldAbs);
 
-  const bundleRoot = path.join(repoRoot, "casts", args.target, args.moldName);
+  // Claude target lives under a `skills/` subdir so casts/claude/ doubles as a
+  // Claude Code plugin root (.claude-plugin/plugin.json + skills/<name>/SKILL.md).
+  const bundleRoot = args.target === "claude"
+    ? path.join(repoRoot, "casts", args.target, "skills", args.moldName)
+    : path.join(repoRoot, "casts", args.target, args.moldName);
   mkdirSync(bundleRoot, { recursive: true });
   const provenancePath = path.join(bundleRoot, "_provenance.json");
   const carry = readExistingProvenance(provenancePath);

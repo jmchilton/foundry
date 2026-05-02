@@ -8,6 +8,7 @@ const navLinks = [
   { href: `${base}/molds/`, label: 'Molds', match: (p: string) => p.startsWith(`${base}/molds`) },
   { href: `${base}/patterns/`, label: 'Patterns', match: (p: string) => p.startsWith(`${base}/patterns`) },
   { href: `${base}/pipelines/`, label: 'Pipelines', match: (p: string) => p.startsWith(`${base}/pipelines`) && !p.includes('/molds') },
+  { href: `${base}/usage/`, label: 'Usage', match: (p: string) => p.startsWith(`${base}/usage`) },
   { href: `${base}/index/`, label: 'Index', match: (p: string) => p.startsWith(`${base}/index`) },
   { href: `${base}/tags/`, label: 'Tags', match: (p: string) => p.startsWith(`${base}/tags`) },
   { href: `${base}/log/`, label: 'Log', match: (p: string) => p.startsWith(`${base}/log`) },
