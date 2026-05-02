@@ -10,7 +10,7 @@ required: [type, tags, status, created, revised, revision, ai_generated, summary
 properties:
   type:
     type: string
-    enum: [mold, pattern, cli-command, pipeline, research, schema, verification]
+    enum: [mold, pattern, cli-command, pipeline, research, schema]
   tags:
     type: array
     items:
@@ -75,14 +75,10 @@ properties:
     items:
       type: string
       pattern: "^\\[\\[.+\\]\\]$"
-  verifies_pattern:
-    type: string
-    pattern: "^\\[\\[.+\\]\\]$"
-  verifications:
+  verification_paths:
     type: array
     items:
       type: string
-      pattern: "^\\[\\[.+\\]\\]$"
 
   # --- Mold fields ---
   name:
@@ -96,11 +92,6 @@ properties:
   target:
     type: string
     enum: [galaxy, cwl, web, generic]
-  workflow_path:
-    type: string
-  verification_status:
-    type: string
-    enum: [passing, failing, skipped]
   tool:
     type: string
     enum: [gxwf, planemo]
@@ -274,14 +265,6 @@ allOf:
       required: [type]
     then:
       required: [name, title]
-
-  # verification requires workflow path + pattern target
-  - if:
-      properties:
-        type: { const: verification }
-      required: [type]
-    then:
-      required: [title, workflow_path, target, verification_status, verifies_pattern]
 
 # Strict mode: unknown fields are rejected to catch typos and schema drift.
 additionalProperties: false

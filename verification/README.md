@@ -15,7 +15,7 @@ Each workflow directory should contain:
 - One Planemo workflow test file.
 - `test-data/` with tiny inputs and expected baselines.
 
-The matching Foundry note lives under `content/verification/` and links the workflow back to the pattern it verifies.
+Pattern pages link directly to the workflow test case through `verification_paths` frontmatter.
 
 ## Local runs
 
@@ -35,5 +35,3 @@ A verified workflow should be committed only when it is deterministic, small, an
 Prefer in-tree test data for tiny fixtures. Do not use Zenodo or remote fixtures for byte-scale inputs.
 
 This v1 surface deliberately avoids generators, RO-Crate metadata, Dockstore wiring, scheduled Galaxy-version matrices, and IWC-style sharding.
-
-See `docs/VERIFIED_WORKFLOWS_PLAN.md` for the implementation plan.

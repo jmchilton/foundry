@@ -98,7 +98,7 @@ const patternSchema = z.object({
   evidence: z.enum(['corpus-observed', 'structurally-verified', 'corpus-and-verified', 'hypothesis']),
   title: z.string(),
   parent_pattern: wikiLink.optional(),
-  verifications: z.array(wikiLink).optional(),
+  verification_paths: z.array(z.string()).optional(),
   ...baseFields,
 }).strict();
 
@@ -132,15 +132,6 @@ const schemaNoteSchema = z.object({
   ...baseFields,
 }).strict();
 
-const verificationSchema = z.object({
-  type: z.literal('verification'),
-  target: z.enum(['galaxy', 'cwl', 'web', 'generic']),
-  workflow_path: z.string(),
-  verification_status: z.enum(['passing', 'failing', 'skipped']),
-  verifies_pattern: wikiLink,
-  ...baseFields,
-}).strict();
-
 const noteSchema = z.discriminatedUnion('type', [
   moldSchema,
   patternSchema,
@@ -148,7 +139,6 @@ const noteSchema = z.discriminatedUnion('type', [
   pipelineSchema,
   researchSchema,
   schemaNoteSchema,
-  verificationSchema,
 ]).superRefine((d, ctx) => {
   if (d.type !== 'mold') return;
   if (d.axis === 'source-specific' && !d.source) ctx.addIssue({ code: 'custom', message: 'source-specific mold requires `source`' });
@@ -165,7 +155,6 @@ const content = defineCollection({
       'pipelines/**/*.md',
       'research/**/*.md',
       'schemas/**/*.md',
-      'verification/**/*.md',
       '!Dashboard.md',
       '!Index.md',
       '!log.md',

@@ -25,8 +25,8 @@ related_patterns:
   - "[[collection-cleanup-after-mapover-failure]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
-verifications:
-  - "[[conditional-gate-on-nonempty-result-verification]]"
+verification_paths:
+  - verification/workflows/conditional-gate-on-nonempty-result/gate-on-nonempty.gxwf-test.yml
 ---
 
 # Conditional: gate on non-empty result
@@ -41,7 +41,7 @@ The corpus-backed collection recipe is:
 collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file -> when
 ```
 
-MGnify proves this shape in IWC, and [[conditional-gate-on-nonempty-result-verification]] verifies the same operation against Galaxy `release_25.1`. It is clunky: four shim steps to produce one boolean. Treat it as the known-good recipe until a shorter route validates cleanly.
+MGnify proves this shape in IWC, and the checked verification workflow tests the same operation against Galaxy `release_25.1`. It is clunky: four shim steps to produce one boolean. Treat it as the known-good recipe until a shorter route validates cleanly.
 
 ## When to reach for it
 
@@ -143,7 +143,7 @@ These snippets summarize observed and verified shapes. Do not simplify the MGnif
 
 ## Verification
 
-[[conditional-gate-on-nonempty-result-verification]] passes under Planemo against Galaxy `release_25.1` using the MGnify-style shim. The fixture rejected two shorter candidates first: direct `when` over a collection-derived value failed with `when_not_boolean`, and an embedded CWL `ExpressionTool` shim failed gxformat2 validation.
+The verification test case at `verification/workflows/conditional-gate-on-nonempty-result/gate-on-nonempty.gxwf-test.yml` passes under Planemo against Galaxy `release_25.1` using the MGnify-style shim. The fixture rejected two shorter candidates first: direct `when` over a collection-derived value failed with `when_not_boolean`, and an embedded CWL `ExpressionTool` shim failed gxformat2 validation.
 
 The verified result keeps the MGnify chain as the lead known-good recipe despite the clunkiness.
 
