@@ -19,28 +19,35 @@ references:
     used_at: both
     load: upfront
     mode: verbatim
+    evidence: cast-validated
     purpose: "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract."
   - kind: research
     ref: "[[component-nextflow-pipeline-anatomy]]"
     used_at: runtime
     load: on-demand
     mode: condense
+    evidence: hypothesis
     purpose: "Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology."
     trigger: "When walking pipeline structure or resolving process aliases and channel flow."
+    verification: "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves process/channel topology extraction."
   - kind: research
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
     load: on-demand
     mode: condense
+    evidence: hypothesis
     purpose: "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence."
     trigger: "When extracting tools, versions, containers, conda directives, or environment equivalences."
+    verification: "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves tool/container/environment extraction."
   - kind: research
     ref: "[[component-nextflow-testing]]"
     used_at: runtime
     load: on-demand
     mode: condense
+    evidence: hypothesis
     purpose: "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions."
     trigger: "When filling test_fixtures or nf_tests sections of the summary."
+    verification: "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves nf_tests and snapshot fixture extraction."
 related_notes:
   - "[[summary-nextflow]]"
 summary: "Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to."

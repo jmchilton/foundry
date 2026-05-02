@@ -18,6 +18,8 @@ export interface ValidationResult {
 }
 
 export interface JsonSchema {
-  properties?: { tags?: { items?: { enum?: string[] } } };
+  properties?: Record<string, JsonSchema>;
+  items?: JsonSchema;
+  enum?: string[];
   [key: string]: unknown;
 }

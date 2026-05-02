@@ -1,10 +1,10 @@
 # Initial Compilation Pipeline
 
-Initial sketch of how Molds become cast skills. Anchored to the file layout in `ARCHITECTURE.md` (`molds/<name>/` → `casts/<target>/<name>/`). Working premise: **LLM-driven, evolution-friendly, reproducible enough to diff**. Casting is not deterministic; it is recorded.
+Initial sketch of how Molds become cast artifacts. Anchored to the file layout in `ARCHITECTURE.md` (`molds/<name>/` → `casts/<target>/<name>/`). Working premise: **LLM-driven, evolution-friendly, reproducible enough to diff**. Casting is not deterministic; it is recorded.
 
 ## What casting is
 
-Casting takes a Mold (a typed reference manifest plus a procedural body) and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific skill artifact. The cast is **condensed and isolated** — no links back to the Foundry, no runtime dependency on it.
+Casting takes a Mold (a typed reference manifest plus a procedural body) and its declared references — pattern pages, CLI manual pages, IO schemas, prompt fragments, examples, and operational research notes — and produces a target-specific cast artifact. The cast is **condensed and isolated** — no links back to the Foundry, no runtime dependency on it.
 
 Casting operates as **per-kind dispatch** over the manifest, not a single resolve-and-inline pass. Different reference kinds get different transformations:
 
@@ -32,26 +32,43 @@ references:
     used_at: both
     load: upfront
     mode: verbatim
+    evidence: cast-validated
     purpose: "Validate emitted summary JSON."
   - kind: research
     ref: "[[component-nextflow-testing]]"
     used_at: runtime
     load: on-demand
     mode: condense
+    evidence: hypothesis
     purpose: "Extract nf-test fixtures and snapshots."
     trigger: "When filling test_fixtures or nf_tests."
+    verification: "Run the generated summarize-nextflow skill on nf-core/bacass and confirm nf_tests extraction improves."
 ```
 
 Field contract:
 
 - `kind` selects the resolver and transformation handler: `pattern`, `cli-command`, `schema`, `prompt`, `example`, or `research`.
 - `ref` is a wiki link for note-backed kinds (`pattern`, `cli-command`, `prompt`, `research`) and a path for file-backed kinds (`schema`, `example`).
-- `used_at` is `cast-time`, `runtime`, or `both`; it says whether the reference is consumed while building the cast, consulted by the cast skill at runtime, or both.
+- `used_at` is `cast-time`, `runtime`, or `both`; it says whether the reference is consumed while building the cast, consulted by the generated skill at runtime, or both.
 - `load` is `upfront` or `on-demand`; it is the progressive-disclosure contract and should be honored by generated skill instructions and sidecar layout.
 - `mode` is `verbatim`, `condense`, `sidecar`, or `copy`; it declares the transformation, even when that transformation is not fully implemented yet.
-- `purpose` and `trigger` are optional prose for maintainers and cast-skill instructions. `trigger` is especially important for `load: on-demand` references.
+- `evidence` is `hypothesis`, `corpus-observed`, or `cast-validated`; it records whether the connection is speculative, observed in real-world source/corpus work, or verified by a generated-skill run.
+- `verification` is required when `evidence: hypothesis`; it names the real-data run or check needed to prove the connection is useful.
+- `purpose` and `trigger` are optional prose for maintainers and generated-skill instructions. `trigger` is especially important for `load: on-demand` references.
 
 `load: never` is deliberately omitted. Non-operational graph links stay in `related_notes`; once a reference appears in `references`, casting and validation should treat it as operational.
+
+#### Reference evidence
+
+Reference connections can be exploratory without hiding that uncertainty:
+
+- `hypothesis` — added because it seems useful; not yet proven by a real cast run. Requires `verification`.
+- `corpus-observed` — grounded in survey or research over real workflows, upstream source, or runtime behavior.
+- `cast-validated` — a generated skill used this reference successfully on real data.
+
+This lets maintainers add promising references while preserving an implicit TODO: run the generated skill on real-world data and promote or remove the connection based on the result.
+
+The controlled vocabulary, labels, descriptions, and help links for `kind`, `used_at`, `load`, `mode`, and `evidence` live in `reference_contract.yml`. Validation and site rendering both read that registry.
 
 ### Agent-facing vs. human-facing vendored artifacts
 
@@ -119,7 +136,7 @@ casts/claude/<mold-name>/
 └── _provenance.json          # required, not part of the skill
 ```
 
-Per-kind subdirectories under `references/` mirror the casting dispatch and let the cast skill's runtime locate any artifact deterministically.
+Per-kind subdirectories under `references/` mirror the casting dispatch and let the generated skill's runtime locate any artifact deterministically.
 
 For the **web target** (sketch):
 ```
