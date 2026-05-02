@@ -45,8 +45,11 @@ The survey ends at numbered open questions. Walk them. Each question's answer ei
 For each surveyed candidate the user marked **keep**, ask:
 
 - Confirm operation-anchored name (propose one based on the survey; let the user rename).
+- Confirm title family / MOC bucket (`Tabular:`, `Collection:`, bridge, Apply Rules cluster, etc.) so later pages browse coherently.
 - Confirm scope sketch and the 2-3 anchor citations.
 - Anything to flag for the eventual author (prescriptive rules surfaced in the survey, foot-guns, recommended-default tuples).
+
+Before issue creation, assemble a compact candidate manifest: final slug, title prefix, keep/drop/merge call, nearest sibling pages, MOC bucket, anchor workflow paths plus step labels/tool names, and unresolved evidence questions.
 
 Collect into an issue draft per pattern. Do not open issues yet.
 
