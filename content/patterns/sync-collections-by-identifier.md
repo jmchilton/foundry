@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: sync collections by identifier"
 aliases:
   - "collection sync by identifier"

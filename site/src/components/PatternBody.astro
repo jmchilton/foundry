@@ -1,4 +1,99 @@
 ---
-// Pattern body — title is in the header. Parent_pattern shows in NoteMeta.
-// Reserved for future pattern-specific surfaces.
+import type { CollectionEntry } from 'astro:content';
+import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+
+interface Props {
+  entry: CollectionEntry<'content'>;
+  linkMap: Map<string, WikiLinkTarget>;
+}
+
+const { entry, linkMap } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const data = entry.data as any;
+const isMap = data.pattern_kind === 'moc';
+const relatedPatterns = (data.related_patterns ?? [])
+  .map((link: string) => resolveWikiLink(link, linkMap, base))
+  .filter((link: ReturnType<typeof resolveWikiLink>) => link.href);
 ---
+
+{isMap && (
+  <aside class="pattern-map-panel" aria-labelledby="pattern-map-heading">
+    <div class="pattern-map-panel-top">
+      <span class="badge badge-draft">pattern map</span>
+      <span class="pattern-map-count font-mono">{relatedPatterns.length} linked patterns</span>
+    </div>
+    <h2 id="pattern-map-heading">Start Here</h2>
+    <p>
+      This page is a map of content, not a leaf recipe. Use it to choose the right operation page,
+      then follow the linked leaf pattern for concrete Galaxy authoring guidance.
+    </p>
+    {relatedPatterns.length > 0 && (
+      <div class="pattern-map-links">
+        {relatedPatterns.map(link => (
+          <a href={link.href!} class="pattern-map-link no-underline">
+            <span>{link.label}</span>
+            {link.summary && <small>{link.summary}</small>}
+          </a>
+        ))}
+      </div>
+    )}
+  </aside>
+)}
+
+<style>
+  .pattern-map-panel {
+    margin: 0 0 1.25rem;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-galaxy-primary) 22%, var(--color-border-subtle));
+    border-radius: 0.75rem;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--color-galaxy-primary) 8%, transparent), transparent 45%),
+      var(--color-surface-raised);
+  }
+  .pattern-map-panel-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .pattern-map-count {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+  .pattern-map-panel h2 {
+    margin: 0 0 0.35rem;
+    color: var(--color-text-primary);
+    font-size: 1.15rem;
+  }
+  .pattern-map-panel p {
+    margin: 0 0 0.9rem;
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+  .pattern-map-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 0.6rem;
+  }
+  .pattern-map-link {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.7rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.55rem;
+    background: var(--color-surface);
+    color: var(--color-link);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .pattern-map-link:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
+  }
+  .pattern-map-link small {
+    color: var(--color-text-muted);
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+</style>

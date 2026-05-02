@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: build named bundle"
 aliases:
   - "collection build list named outputs"

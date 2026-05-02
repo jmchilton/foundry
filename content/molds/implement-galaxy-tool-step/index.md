@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
 references:
@@ -37,22 +37,22 @@ references:
     evidence: corpus-observed
     purpose: "Implement identifier-derived collection reshaping via Apply Rules."
     trigger: "When collection element identifiers need regex parsing, nesting-level swaps, regrouping, or paired identifier assignment."
-  - kind: research
-    ref: "[[iwc-transformations-survey]]"
+  - kind: pattern
+    ref: "[[galaxy-collection-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
     purpose: "Choose corpus-attested collection recipes when implementing concrete Galaxy steps."
-    trigger: "When the implementation needs cleanup-after-fanout, sync-by-identifier, singleton unboxing, relabeling, or collection-to-tabular bridges."
-  - kind: research
-    ref: "[[iwc-tabular-operations-survey]]"
+    trigger: "When implementation needs cleanup-after-fanout, sync-by-identifier, singleton unboxing, relabeling, collection reshaping, or collection-tabular bridges."
+  - kind: pattern
+    ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Choose corpus-attested tabular/text-processing recipes when implementing concrete Galaxy steps."
-    trigger: "When the implementation needs row filtering, column projection, computed columns, joins, grouping, awk, or text-processing wrappers."
+    purpose: "Choose corpus-attested tabular recipes when implementing concrete Galaxy steps."
+    trigger: "When implementation needs row filtering, column projection, computed columns, joins, grouping, SQL, awk, text-processing wrappers, or tabular-collection bridges."
 ---
 # implement-galaxy-tool-step
 

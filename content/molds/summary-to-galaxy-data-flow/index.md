@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 summary: "Abstract DAG with Galaxy collection / scatter / branching idioms surfaced."
 references:
@@ -44,22 +44,22 @@ references:
     evidence: corpus-observed
     purpose: "Represent identifier-derived collection reshaping with Apply Rules when simpler collection tools are insufficient."
     trigger: "When channel identifiers need regex extraction, regrouping, nesting-level swaps, or paired identifier construction."
-  - kind: research
-    ref: "[[iwc-transformations-survey]]"
+  - kind: pattern
+    ref: "[[galaxy-collection-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Ground collection-shape translation choices in observed IWC transformation recipes."
-    trigger: "When selecting between Galaxy collection-operation recipes or checking whether a proposed shape transform is corpus-attested."
-  - kind: research
-    ref: "[[iwc-tabular-operations-survey]]"
+    purpose: "Ground collection-shape choices in curated, corpus-observed leaf patterns."
+    trigger: "When selecting between collection cleanup, reshape, identifier, or collection-tabular bridge patterns."
+  - kind: pattern
+    ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Ground tabular bridge choices that appear while translating Nextflow channel/data-flow operations."
-    trigger: "When data-flow translation leaves collection-land for tabular projection, filtering, joining, aggregation, or pivoting."
+    purpose: "Ground tabular bridge and table-operation choices in curated, corpus-observed leaf patterns."
+    trigger: "When data-flow translation leaves collection-land for tabular projection, filtering, joining, aggregation, pivoting, or tabular-collection bridges."
 ---
 # summary-to-galaxy-data-flow
 

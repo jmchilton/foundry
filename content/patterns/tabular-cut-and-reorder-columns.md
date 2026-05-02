@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Tabular: cut and reorder columns"
 tags:
   - pattern

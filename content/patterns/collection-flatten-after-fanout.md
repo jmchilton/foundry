@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: flatten after fan-out"
 aliases:
   - "collection flatten after fanout"

@@ -8,27 +8,27 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 summary: "Find nearest IWC exemplar(s) and surface a structural diff against a draft."
 references:
-  - kind: research
-    ref: "[[iwc-transformations-survey]]"
+  - kind: pattern
+    ref: "[[galaxy-collection-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Compare draft collection-shape recipes against corpus-observed IWC examples."
-    trigger: "When the draft workflow contains collection reshape, cleanup, relabel, or synchronization sections."
-  - kind: research
-    ref: "[[iwc-tabular-operations-survey]]"
+    purpose: "Compare draft collection transformations against curated corpus-observed pattern guidance."
+    trigger: "When the draft workflow contains collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections."
+  - kind: pattern
+    ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Compare draft tabular/text-processing sections against corpus-observed IWC examples."
-    trigger: "When the draft workflow contains tabular filtering, projection, join, aggregation, or free-form text-processing sections."
+    purpose: "Compare draft tabular transformations against curated corpus-observed pattern guidance."
+    trigger: "When the draft workflow contains tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections."
   - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime

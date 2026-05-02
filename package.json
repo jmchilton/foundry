@@ -28,9 +28,9 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm -r build && changeset publish",
-    "site:dev": "cd site && astro dev",
-    "site:build": "cd site && astro build",
-    "site:preview": "cd site && astro preview"
+    "site:dev": "npm --prefix site run dev",
+    "site:build": "npm --prefix site run build",
+    "site:preview": "npm --prefix site run preview"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.6.0",

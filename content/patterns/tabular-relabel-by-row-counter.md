@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Tabular: relabel by row counter"
 aliases:
   - "sample_N relabel"

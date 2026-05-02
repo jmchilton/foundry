@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: build list paired with Apply Rules"
 aliases:
   - "Apply Rules build list:paired"

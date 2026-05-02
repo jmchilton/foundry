@@ -75,7 +75,7 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
 
     {data.type === 'mold' && <MoldBody entry={entry} linkMap={linkMap} />}
     {data.type === 'pipeline' && <PipelineBody entry={entry} linkMap={linkMap} />}
-    {data.type === 'pattern' && <PatternBody />}
+    {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} />}
     {data.type === 'cli-command' && <CliCommandBody entry={entry} />}
     {data.type === 'research' && <ResearchBody entry={entry} />}
     {data.type === 'schema' && <SchemaBody entry={entry} />}

@@ -56,6 +56,7 @@ Drop sections that do not earn their space. A thin “None surfaced” legacy se
 ## Frontmatter guidance
 
 - Required fields must conform to `meta_schema.yml`; do not add ad-hoc fields.
+- Set `pattern_kind: leaf` for concrete operation pages and `pattern_kind: moc` for map-of-content pages that route readers to leaf patterns.
 - `summary` is a compressed “what to do and when” line, not a mini abstract.
 - `related_notes` should name primary source notes only, usually the survey. Put secondary context notes in body or `See also` unless they are essential source material.
 - `related_patterns` should be focused: pages that decide against this one, close siblings, or immediate follow-ups. Do not list the whole neighborhood.
