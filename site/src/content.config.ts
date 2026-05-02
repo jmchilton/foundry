@@ -1,5 +1,13 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { contractKeys, loadReferenceContract } from '../../scripts/lib/reference-contract';
+
+const referenceContract = loadReferenceContract();
+
+function registryEnum(group: keyof typeof referenceContract) {
+  const values = contractKeys(referenceContract, group);
+  return z.string().refine((v: string) => values.includes(v), { message: `must be one of: ${values.join(', ')}` });
+}
 
 function slugifyPath(entry: string): string {
   return entry.replace(/\.md$/, '').split('/')
@@ -11,14 +19,20 @@ function slugifyPath(entry: string): string {
 const wikiLink = z.string().regex(/^\[\[.+\]\]$/, { message: 'must be a [[wiki-link]]' });
 
 const typedReference = z.object({
-  kind: z.enum(['pattern', 'cli-command', 'schema', 'prompt', 'example', 'research']),
+  kind: registryEnum('kinds'),
   ref: z.string().min(1),
-  used_at: z.enum(['cast-time', 'runtime', 'both']),
-  load: z.enum(['upfront', 'on-demand']),
-  mode: z.enum(['verbatim', 'condense', 'sidecar', 'copy']),
+  used_at: registryEnum('used_at'),
+  load: registryEnum('load'),
+  mode: registryEnum('modes'),
+  evidence: registryEnum('evidence'),
   purpose: z.string().min(1).optional(),
   trigger: z.string().min(1).optional(),
-}).strict();
+  verification: z.string().min(1).optional(),
+}).strict().superRefine((ref: any, ctx: any) => {
+  if (ref.evidence === 'hypothesis' && !ref.verification) {
+    ctx.addIssue({ code: 'custom', message: 'hypothesis references require `verification`' });
+  }
+});
 
 const baseFields = {
   tags: z.array(z.string()).min(1),

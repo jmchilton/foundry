@@ -252,6 +252,20 @@ function validateTypedReference(
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return;
   const ref = raw as Record<string, unknown>;
   if (typeof ref.kind !== "string" || typeof ref.ref !== "string") return;
+  if (ref.evidence === "hypothesis" && typeof ref.verification !== "string") {
+    findings.push({
+      path: filePath,
+      severity: "error",
+      message: `references[${index}]: evidence=hypothesis requires verification`,
+    });
+  }
+  if (ref.evidence === "hypothesis" && typeof ref.trigger !== "string") {
+    findings.push({
+      path: filePath,
+      severity: "warning",
+      message: `references[${index}]: evidence=hypothesis should describe the on-demand trigger`,
+    });
+  }
 
   const expectedTypes: Record<string, string> = {
     pattern: "pattern",

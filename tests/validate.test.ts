@@ -96,8 +96,10 @@ describe("validateData (per-file)", () => {
             used_at: "runtime",
             load: "on-demand",
             mode: "condense",
+            evidence: "hypothesis",
             purpose: "Explain when to load this reference.",
             trigger: "When the runtime task needs component details.",
+            verification: "Run the generated skill on a real fixture and confirm this reference helps.",
           },
         ],
       }),
@@ -120,6 +122,7 @@ describe("validateData (per-file)", () => {
             used_at: "runtime",
             load: "on-demand",
             mode: "verbatim",
+            evidence: "corpus-observed",
             bogus: "x",
           },
         ],
@@ -127,6 +130,28 @@ describe("validateData (per-file)", () => {
       schema,
     );
     expect(r.errors.some((e) => /bogus/.test(e))).toBe(true);
+  });
+
+  it("requires evidence on typed references", () => {
+    const r = validateData(
+      baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "x",
+        axis: "generic",
+        references: [
+          {
+            kind: "research",
+            ref: "[[component-x]]",
+            used_at: "runtime",
+            load: "on-demand",
+            mode: "verbatim",
+          },
+        ],
+      }),
+      schema,
+    );
+    expect(r.errors.some((e) => /evidence/.test(e))).toBe(true);
   });
 
   it("rejects bad date format", () => {
@@ -253,9 +278,9 @@ describe("validateDirectory (cross-file)", () => {
         name: "m",
         axis: "generic",
         references: [
-          { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim" },
-          { kind: "pattern", ref: "[[pattern-x]]", used_at: "cast-time", load: "upfront", mode: "condense" },
-          { kind: "schema", ref: "content/schemas/x.schema.json", used_at: "both", load: "upfront", mode: "verbatim" },
+          { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed" },
+          { kind: "pattern", ref: "[[pattern-x]]", used_at: "cast-time", load: "upfront", mode: "condense", evidence: "corpus-observed" },
+          { kind: "schema", ref: "content/schemas/x.schema.json", used_at: "both", load: "upfront", mode: "verbatim", evidence: "cast-validated" },
         ],
       }),
     });
@@ -284,12 +309,36 @@ describe("validateDirectory (cross-file)", () => {
         name: "m",
         axis: "generic",
         references: [
-          { kind: "research", ref: "[[not-research]]", used_at: "runtime", load: "on-demand", mode: "verbatim" },
+          { kind: "research", ref: "[[not-research]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed" },
         ],
       }),
     });
     writeFm(path.join(dir, "patterns/not-research.md"), {
       ...baseRequired({ type: "pattern", tags: ["pattern"], title: "Not Research" }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("requires verification for hypothesis references", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+        references: [
+          { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "hypothesis" },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "research/component-x.md"), {
+      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
     });
 
     const r = validateDirectory({

@@ -116,28 +116,34 @@ properties:
     type: array
     items:
       type: object
-      required: [kind, ref, used_at, load, mode]
+      required: [kind, ref, used_at, load, mode, evidence]
       additionalProperties: false
       properties:
         kind:
           type: string
-          enum: [pattern, cli-command, schema, prompt, example, research]
+          enum: []  # injected at runtime from reference_contract.yml
         ref:
           type: string
           minLength: 1
         used_at:
           type: string
-          enum: [cast-time, runtime, both]
+          enum: []  # injected at runtime from reference_contract.yml
         load:
           type: string
-          enum: [upfront, on-demand]
+          enum: []  # injected at runtime from reference_contract.yml
         mode:
           type: string
-          enum: [verbatim, condense, sidecar, copy]
+          enum: []  # injected at runtime from reference_contract.yml
+        evidence:
+          type: string
+          enum: []  # injected at runtime from reference_contract.yml
         purpose:
           type: string
           minLength: 1
         trigger:
+          type: string
+          minLength: 1
+        verification:
           type: string
           minLength: 1
 

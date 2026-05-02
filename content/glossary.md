@@ -8,13 +8,15 @@ Alphabetical.
 
 **Branch** *(`[branch]` annotation, phase kind)* — a Pipeline phase that encodes harness-level routing/fallback rather than wrapping a Mold. Carries a named **routing pattern** (`discover-or-author`, `test-data-resolution`, …) and either `branches:` (binary with fallthrough) or `chain:` (N-step sequential fallback) of Mold wiki-links plus optional terminal sentinels (e.g. `user-supplied`). Inner wiki-links resolve to Molds and are validator-checked. Renders on a subway map as a decision diamond. Replaces the prior `[harness]` annotation umbrella.
 
-**Cast** *(verb)* — produce a self-contained skill artifact from a Mold via the casting process. *(noun)* — synonym for **cast skill**. Example: "the cast of `implement-galaxy-tool-step` for the Claude target."
+**Cast** *(verb)* — produce a self-contained artifact from a Mold via the casting process. *(noun)* — a single casting result for one Mold and target. Example: "the cast of `implement-galaxy-tool-step` for the Claude target."
 
-**Cast skill** — the compiled artifact produced by casting a Mold. Self-contained, condensed, no links back to the Foundry, no runtime dependency on it. Frozen against the Foundry version it was cast from. May target Claude's skill format, a web-app-baked skill, a generic format, etc.
+**Cast artifact** — the compiled output produced by casting a Mold. Self-contained, condensed, no links back to the Foundry, no runtime dependency on it. Frozen against the Foundry version it was cast from. May target Claude's skill format, a web-app-baked skill, a generic format, etc.
 
 **Cast target** — an output format that casting can produce. Examples: Claude skill directory, skill baked into a web application, generic (non-Claude) skill format. A single Mold may cast to several targets.
 
-**Casting** — the LLM-driven process that produces a cast skill from a Mold. Operates as **per-kind dispatch** over the Mold's typed references (see *Reference kind*): patterns get LLM-condensed, schemas get copied verbatim, manpages get cast to JSON sidecars, examples get copied, prompts get inlined, evals get dropped. The casting process is non-deterministic by design and expected to evolve as models improve.
+**Casting** — the LLM-driven process that produces a cast artifact from a Mold. Operates as **per-kind dispatch** over the Mold's typed references (see *Reference kind*): patterns get LLM-condensed, schemas get copied verbatim, manpages get cast to JSON sidecars, examples get copied, prompts get inlined, evals get dropped. The casting process is non-deterministic by design and expected to evolve as models improve.
+
+**Casting skill** — the producer skill or tool that reads a Mold and emits a cast artifact. Distinct from a **generated skill**, which is one possible kind of cast artifact.
 
 **CLI Mold** — a Mold whose primary content is a CLI's reference surface. Examples: `gxwf-cli`, `planemo-cli`. Casts roll up the relevant `cli/<tool>/*` manual-page content into a structured runtime artifact (typically JSON) plus a thin procedural overview — *not* a markdown dump of `--help` output. Per-action Molds (`discover-shed-tool`, `validate-with-gxwf`, `run-workflow-test`) reference individual manual pages directly rather than depending on the whole-CLI Mold.
 
@@ -28,13 +30,15 @@ Alphabetical.
 
 **Discover-or-author branch** — a `[branch]` routing pattern (named `discover-or-author`) used in Galaxy-targeting per-step loops: try `discover-shed-tool` first; on fallthrough, invoke `author-galaxy-tool-wrapper`. The branch itself is harness logic; the two underlying capabilities are clean Molds. (`discover-shed-tool` may have siblings later — `discover-tool-via-galaxy-api`, `discover-tool-on-github` — each named for the mechanism it uses, not the goal.)
 
-**Evaluation plan** — Mold-owned content that describes how a cast skill is exercised: which IWC exemplars it should reproduce or align with, pass/fail or qualitative criteria. Lives alongside the Mold in the Foundry. **Not** packaged into cast skills — evals are Foundry-maintainer infrastructure, not consumer-facing.
+**Evaluation plan** — Mold-owned content that describes how a generated skill or other cast artifact is exercised: which IWC exemplars it should reproduce or align with, pass/fail or qualitative criteria. Lives alongside the Mold in the Foundry. **Not** packaged into cast artifacts — evals are Foundry-maintainer infrastructure, not consumer-facing.
 
 **Foundry** *(short for Galaxy Workflow Foundry)* — the standalone knowledge base where Pipelines, Molds, pattern pages, CLI manual pages, IO schemas, and IWC-citing content live. Renders as a navigable site; serves as the source of truth that casting reads.
 
 **Gate** *(`[gate]` annotation, phase kind — future)* — placeholder for a phase-level annotation marking an inline approval / scope-confirmation checkpoint. Coined when a real pipeline first needs an inline pause for user input; not used by any current pipeline. The phase-kind set is open and not pre-enumerated — `[branch]` and `[gate]` are unrelated behaviors and don't share an umbrella tag.
 
 **Galaxy Workflow Foundry** — the project's full name. See **Foundry**. Subtitle of choice for documents and presentations.
+
+**Generated skill** — a skill-shaped cast artifact, such as a Claude skill produced from a Mold. Generated skills are consumed by harnesses; they are not the same thing as the casting skill that produced them.
 
 **gxformat2** — Galaxy's Format-2 workflow format. The target format for Galaxy-targeting authoring Molds.
 
@@ -46,17 +50,17 @@ Alphabetical.
 
 **IWC** — Intergalactic Workflow Commission. Curates the canonical set of high-quality Galaxy workflows. The Foundry's foundational corpus.
 
-**IWC exemplar** — one workflow from the IWC corpus. The cleaned `gxformat2` versions live in `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-format2/`. Pattern pages cite exemplars; Molds reference them as ground truth; casting may inline references; evaluations exercise cast skills against them.
+**IWC exemplar** — one workflow from the IWC corpus. The cleaned `gxformat2` versions live in `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-format2/`. Pattern pages cite exemplars; Molds reference them as ground truth; casting may inline references; evaluations exercise generated skills against them.
 
 **Loop** *(`[loop]` annotation)* — a phase-level flag (`loop: true` in frontmatter) marking a phase that runs once per step in the workflow being constructed. Applied to per-step authoring phases (`implement-galaxy-tool-step`, `validate-with-gxwf`, …) and to `[branch]` phases that route per-step (`discover-or-author`). Renders on a subway map as a decorated station.
 
-**Mold** — an abstract, structured template inside the Foundry that describes a workflow-construction action. Authored as a **typed reference manifest with a presentation layer**: a `.md` file whose frontmatter declares typed references to heterogeneous artifacts (pattern pages, CLI manual pages, IO schemas, prompt fragments, examples), and whose body is a procedural skeleton that ties them together. Rendered as a navigable Foundry page; cast into one or more cast skills via casting's per-kind dispatch over those references.
+**Mold** — an abstract, structured template inside the Foundry that describes a workflow-construction action. Authored as a **typed reference manifest with a presentation layer**: a `.md` file whose frontmatter declares typed references to heterogeneous artifacts (pattern pages, CLI manual pages, IO schemas, prompt fragments, examples), and whose body is a procedural skeleton that ties them together. Rendered as a navigable Foundry page; cast into one or more cast artifacts via casting's per-kind dispatch over those references.
 
 **Mold (atomic, phase-sized)** — the granularity rule: each Mold is roughly the size of one Mold-shaped phase in a Pipeline. Not necessarily small; `summarize-nextflow` and `implement-galaxy-tool-step` are both atomic at this tier even though they differ in content size.
 
 **Not a Mold** — explicit boundary marker for things that are *not* cast from the Foundry. Includes harnesses, harness-level concerns (state, resumption, autonomy posture), Pipelines themselves, non-Mold phase kinds (`[branch]`, future `[gate]` — these reference Molds via embedded wiki-links but are not Molds), and pure reference content (pattern pages, CLI manual pages, IO schemas — these are *referenced by* Molds, not Molds themselves). Wrapping a CLI is *not* a disqualifier: see `validate-with-gxwf`, `discover-shed-tool`, `run-workflow-test`.
 
-**Pattern page** — a Foundry reference page describing a Galaxy workflow construction pattern (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring, …). Wiki-linked from action Molds; pulled into cast skills via casting's pattern-kind dispatch (LLM-condensed, mixed verbatim and summarization). Different from a Mold: a pattern page is reference, a Mold is action. Some patterns have a companion action Mold (e.g., custom-tool-authoring pattern + `author-galaxy-tool-wrapper` Mold).
+**Pattern page** — a Foundry reference page describing a Galaxy workflow construction pattern (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring, …). Wiki-linked from action Molds; pulled into cast artifacts via casting's pattern-kind dispatch (LLM-condensed, mixed verbatim and summarization). Different from a Mold: a pattern page is reference, a Mold is action. Some patterns have a companion action Mold (e.g., custom-tool-authoring pattern + `author-galaxy-tool-wrapper` Mold).
 
 **Phase** — one atomic unit of a Pipeline's ordered `phases` array. Either Mold-shaped (`mold: [[...]]`, optionally `loop: true`) or a non-Mold annotation kind: `[branch]` today, future `[gate]` when needed. Open set — new phase kinds are coined when first surfaced inline rather than pre-enumerated. Validator resolves embedded wiki-links per kind (Mold-shaped phases must resolve to `type: mold`; `[branch]` inner items resolve to Molds or are terminal sentinels like `user-supplied`).
 

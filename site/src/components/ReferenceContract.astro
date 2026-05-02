@@ -1,5 +1,6 @@
 ---
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
+import { loadReferenceContract, type ReferenceContractTerm } from '../../../scripts/lib/reference-contract';
 
 interface TypedReference {
   kind: string;
@@ -7,8 +8,10 @@ interface TypedReference {
   used_at: string;
   load: string;
   mode: string;
+  evidence: string;
   purpose?: string;
   trigger?: string;
+  verification?: string;
 }
 
 interface Props {
@@ -18,34 +21,40 @@ interface Props {
 
 const { references = [], linkMap } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-
-const KIND_HELP: Record<string, string> = {
-  pattern: 'Workflow-construction idiom. Usually condensed during casting.',
-  'cli-command': 'Command reference. Usually cast to a sidecar and loaded only when invoked.',
-  schema: 'Structured contract. Usually copied verbatim for validation or lookup.',
-  prompt: 'Prompt fragment. Usually copied verbatim or inlined by the target adapter.',
-  example: 'Fixture or exemplar. Usually copied verbatim.',
-  research: 'Background synthesis. Loaded by explicit progressive-disclosure metadata.',
-};
+const contract = loadReferenceContract();
 
 function linkFor(ref: string) {
   if (!/^\[\[.+\]\]$/.test(ref)) return null;
   return resolveWikiLink(ref, linkMap, base);
+}
+
+function term(group: keyof typeof contract, key: string): ReferenceContractTerm {
+  return contract[group][key] ?? { label: key, description: 'Unregistered reference contract value.', href: '#' };
+}
+
+function pillInfo(group: keyof typeof contract, key: string, extraClass = '') {
+  const t = term(group, key);
+  return { ...t, className: `pill ${extraClass}` };
 }
 ---
 {references.length > 0 && (
   <section class="reference-contract mb-6">
     <div class="reference-contract-head">
       <h2>Reference Loading Contract</h2>
-      <p>Typed Mold references describe what casting consumes and when the cast skill should load each artifact.</p>
+      <p>Typed Mold references describe what casting consumes and when the generated skill should load each artifact.</p>
     </div>
     <div class="reference-grid">
       {references.map(ref => {
         const link = linkFor(ref.ref);
+        const kind = pillInfo('kinds', ref.kind, 'kind');
+        const usedAt = pillInfo('used_at', ref.used_at);
+        const load = pillInfo('load', ref.load);
+        const mode = pillInfo('modes', ref.mode);
+        const evidence = pillInfo('evidence', ref.evidence, `evidence evidence-${ref.evidence}`);
         return (
           <article class="reference-card">
             <div class="reference-card-top">
-              <span class="kind">{ref.kind}</span>
+              <a class={kind.className} href={kind.href} title={kind.description}>{kind.label}</a>
               <span class="ref">
                 {link
                   ? link.href
@@ -54,14 +63,16 @@ function linkFor(ref: string) {
                   : ref.ref}
               </span>
             </div>
-            <p class="kind-help">{KIND_HELP[ref.kind] ?? 'Typed reference consumed by casting.'}</p>
+            <p class="kind-help">{term('kinds', ref.kind).description}</p>
             <div class="chips" aria-label="loading metadata">
-              <span>{ref.used_at}</span>
-              <span>{ref.load}</span>
-              <span>{ref.mode}</span>
+              <a class={usedAt.className} href={usedAt.href} title={usedAt.description}>{usedAt.label}</a>
+              <a class={load.className} href={load.href} title={load.description}>{load.label}</a>
+              <a class={mode.className} href={mode.href} title={mode.description}>{mode.label}</a>
+              <a class={evidence.className} href={evidence.href} title={evidence.description}>{evidence.label}</a>
             </div>
             {ref.purpose && <p class="detail"><strong>Purpose:</strong> {ref.purpose}</p>}
             {ref.trigger && <p class="detail"><strong>Trigger:</strong> {ref.trigger}</p>}
+            {ref.verification && <p class="detail verification"><strong>Verification:</strong> {ref.verification}</p>}
           </article>
         );
       })}
@@ -111,12 +122,12 @@ function linkFor(ref: string) {
     gap: 0.75rem;
     margin-bottom: 0.4rem;
   }
-  .kind,
-  .chips span {
+  .pill {
     font-family: var(--font-mono);
     font-size: 0.68rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
+    text-decoration: none;
   }
   .kind {
     color: var(--color-text-muted);
@@ -139,12 +150,29 @@ function linkFor(ref: string) {
     gap: 0.35rem;
     margin: 0.65rem 0;
   }
-  .chips span {
+  .chips .pill {
     border: 1px solid var(--color-border);
     border-radius: 999px;
     padding: 0.14rem 0.45rem;
     color: var(--color-text-secondary);
     background: var(--color-surface-raised);
+  }
+  .pill:hover {
+    color: var(--color-link-hover);
+    border-color: var(--color-accent);
+  }
+  .evidence-hypothesis {
+    color: var(--color-badge-draft-text) !important;
+    background: var(--color-badge-draft-bg) !important;
+  }
+  .evidence-corpus-observed,
+  .evidence-cast-validated {
+    color: var(--color-badge-reviewed-text) !important;
+    background: var(--color-badge-reviewed-bg) !important;
+  }
+  .verification {
+    border-left: 3px solid var(--color-badge-draft-text);
+    padding-left: 0.55rem;
   }
   .detail + .detail {
     margin-top: 0.35rem;
