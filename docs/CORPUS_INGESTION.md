@@ -42,7 +42,7 @@ The pattern is **skeletons + selective full reads**, not skeletons replacing ful
 
 3. **No IWC category aggregation layer for now.** Earlier plans had an `iwc/*` tag family and generated overview. Current pattern work has pulled back from that: corpus grounding lives in survey notes, pattern exemplars, and body citations.
 
-4. **`compare-against-iwc-exemplar` (the Mold) operates against live IWC.** The cast skill loads with instructions to fetch IWC at runtime via `WebFetch` / `gxwf`, not against Foundry-hosted exemplar pages. The Mold's source artifact describes the *procedure*, not a corpus index.
+4. **`compare-against-iwc-exemplar` (the Mold) operates against live IWC.** The generated skill loads with instructions to fetch IWC at runtime via `WebFetch` / `gxwf`, not against Foundry-hosted exemplar pages. The Mold's source artifact describes the *procedure*, not a corpus index.
 
 ## What this gives up
 
@@ -75,4 +75,4 @@ If the loop holds, scale to more patterns. No further integration tooling planne
 - **Stale citation detection.** Pin-to-SHA citations rot silently when IWC moves files. Worth a periodic `tsx scripts/check-citations.ts` that verifies each cited URL still resolves (HEAD request)? Cheap, but adds a CI dependency on network. Defer unless rot becomes visible.
 - ~~**`iwc/*` seed source of truth.**~~ Resolved: top-level directories under `<iwc-clone>/workflows/`, slugified. See vocabulary section above.
 - **Inline excerpts in pattern bodies — typeset how?** Plain fenced Markdown with `gxformat2` as the language hint, or a custom directive? Plain fenced is simplest; revisit if syntax highlighting matters.
-- **`compare-against-iwc-exemplar` Mold's discovery mechanism.** Without a Foundry-hosted exemplar index, how does the cast skill find candidate exemplars to compare against? Probably via IWC's own listing (URL TBD) plus `gxwf` tooling. The Mold's `eval.md` will need to specify this; not blocking for the Foundry's architecture.
+- **`compare-against-iwc-exemplar` Mold's discovery mechanism.** Without a Foundry-hosted exemplar index, how does the generated skill find candidate exemplars to compare against? Probably via IWC's own listing (URL TBD) plus `gxwf` tooling. The Mold's `eval.md` will need to specify this; not blocking for the Foundry's architecture.

@@ -1,6 +1,9 @@
 # Alignment: gxy-sketches ↔ Galaxy Workflow Foundry
 
-Adjacent project, different target, overlapping ingest sources. This doc records the seams where the Foundry's per-source summary Molds (`summarize-paper`, `summarize-nextflow`, `summarize-cwl`) and the eventual `summarize-galaxy-workflow` should align with `gxy-sketches`, so the two projects stay legible to each other without becoming dependent.
+Project-infrastructure research for an adjacent workflow-sketch project. This note records where
+the Foundry's per-source summary Molds (`summarize-paper`, `summarize-nextflow`, `summarize-cwl`) and
+a possible future `summarize-galaxy-workflow` should align with `gxy-sketches`, so the two projects
+stay legible to each other without becoming dependent.
 
 **gxy-sketches is not a Foundry project.** It is owned by another contributor (boss). The Foundry does not consume it at runtime, casting time, or build time. "Alignment" here means: shared field names, shared mental model for test manifests, and a documented mapping for vocabularies — nothing more invasive.
 
@@ -39,9 +42,9 @@ Pydantic types worth knowing (`src/gxy_sketches/schema.py`):
 | Test fixtures | Bundled into the sketch dir, capped at 5 MB total | Referenced as data; no bundling, no size cap |
 | Generation | One-shot LLM call per workflow, prompt-cached system prompt | Per-Mold cast, per-kind dispatch over typed references |
 
-## Concrete alignment moves
+## Alignment moves
 
-Cheap, additive, none of them block either project. Each is a recommendation, not a contract.
+These are additive recommendations, not shared runtime contracts.
 
 ### 1. Test-fixture field-name parity
 
@@ -89,9 +92,9 @@ If a future `sketch` cast target is added (§7), it will need either:
 
 This is a deferred design question, not a v1 commit. Recorded here so it is not lost when the alignment is revisited.
 
-### 7. Future cast target: `sketch`
+### 7. Possible cast target: `sketch`
 
-A plausible — not committed — Foundry cast target is `sketch`: a `summarize-nextflow` / `summarize-galaxy-workflow` / `summarize-cwl` Mold cast emits a SKETCH.md-shaped artifact (frontmatter + the technical body sections). gxy-sketches today derives this content via a single LLM call against the raw workflow files; a Foundry-cast version would be derived from a structured summary instead.
+A plausible — not committed — Foundry cast target is `sketch`: a `summarize-nextflow` / `summarize-galaxy-workflow` / `summarize-cwl` Mold cast emits a `SKETCH.md`-shaped artifact (frontmatter + the technical body sections). gxy-sketches today derives this content via a single LLM call against the raw workflow files; a Foundry-cast version would be derived from a structured summary instead.
 
 Open questions if/when this is pursued:
 - Does the cast emit only the technical sections (`## Analysis outline`, `## Key parameters`, `## Test data`, `## Reference workflow`) and leave the routing sections to gxy-sketches' own pipeline?
@@ -105,21 +108,14 @@ Explicit non-goals, so future contributors do not retrofit them:
 - **Storage backends.** gxy-sketches is Python + pydantic + typer + `frontmatter` lib + plain markdown. The Foundry is TypeScript + Astro + Ajv. No code sharing.
 - **Validators.** gxy-sketches' validator enforces a sketch-directory bundle contract (file presence, orphan files, 5 MB cap, name uniqueness). The Foundry's validator enforces a content-collection contract (frontmatter schema, wiki-link integrity, tag coherence, Mold ref resolution). Different jobs.
 - **5 MB test-fixture cap.** Sketch-bundle-only invariant. Do not propagate into Foundry summary schemas.
-- **LLM generation pipeline.** gxy-sketches: one-shot prompt-cached call per workflow, JSON output, deterministic frontmatter fill-in by the writer. Foundry: per-Mold cast with per-kind dispatch over typed references (patterns LLM-condensed, schemas verbatim, manpages → JSON sidecar). Different shapes for different jobs.
-- **IWC mirroring.** gxy-sketches clones IWC into `workflows_cache/`. The Foundry **does not** — patterns cite IWC by URL (`CORPUS_INGESTION.md`). If `summarize-galaxy-workflow` lands (§5), revisit whether the Foundry needs an IWC clone for that Mold's runtime; the answer should still be "no" if the cast skill operates on URLs supplied at runtime.
+- **LLM generation pipeline.** gxy-sketches: one-shot prompt-cached call per workflow, JSON output, deterministic frontmatter fill-in by the writer. Foundry: per-Mold cast with per-kind dispatch over typed references (patterns LLM-condensed, schemas verbatim, CLI command pages → JSON sidecars). Different shapes for different jobs.
+- **IWC mirroring.** gxy-sketches clones IWC into `workflows_cache/`. The Foundry **does not** — patterns cite IWC by URL (`CORPUS_INGESTION.md`). If `summarize-galaxy-workflow` lands (§5), revisit whether the Foundry needs an IWC clone for that Mold's runtime; the answer should still be "no" if the generated skill operates on URLs supplied at runtime.
 
-## Linking moves
+## Site placement
 
-Done in this commit:
-
-- This file added under `vault/projects/workflow_state/skills/`.
-- `RELEVANT_PATHS.md` patched: new "Adjacent projects" section pointing at `gxy-sketches`.
-
-Suggested future, not done here:
-
-- `MOLDS.md` source-summarization tier: a one-line "see also `GXY_SKETCHES_ALIGNMENT.md` for field-name parity" pointer.
-- A `meta_tags.yml` description on `iwc/*` keys noting the gxy-sketches `domain` mapping.
-- When `summarize-galaxy-workflow` is added to the inventory, link this doc from its Mold note.
+This is project-infrastructure research, not runtime Mold knowledge. It belongs on the design
+landing page with other developer-facing records. It should not be pulled into cast artifacts unless
+a future `sketch` target makes that relationship explicit.
 
 ## Open questions
 

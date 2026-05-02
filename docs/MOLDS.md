@@ -46,7 +46,7 @@ This isn't a frontmatter schema; it's a mental model for v1 grouping. `tool-spec
 
 ### Source summarization (source-specific, target-agnostic)
 
-Each source emits its **own schema** by design — paper, Nextflow, and CWL are different enough that forcing a shared summary shape would either lose detail or bloat all three. Downstream Molds (data flow, templates) consume any source's summary; the cast skills are responsible for handling the polymorphism.
+Each source emits its **own schema** by design — paper, Nextflow, and CWL are different enough that forcing a shared summary shape would either lose detail or bloat all three. Downstream Molds (data flow, templates) consume any source's summary; generated skills are responsible for handling the polymorphism.
 
 - `summarize-paper` — extract methods, tools/algorithms, sample data, metrics, references from a paper.
 - `summarize-nextflow` — enumerate processes, channels, conditionals, containers (biocontainers / Docker / Singularity refs and their bioconda equivalents), test fixtures from an NF source tree. Container-and-env info is structured output, consumed downstream by `author-galaxy-tool-wrapper` when discovery fails.
@@ -95,7 +95,7 @@ Open question: whether the `<source>-test-to-<target>-tests` family factors clea
 
 ### Validation (target-specific)
 
-Validate Molds describe the **step in the process** even where they wrap a static / structured CLI. The underlying validation is deterministic, but the cast skill is the Mold-shaped procedural description (when to run, how to interpret results, what to recommend on failure, when to loop back to authoring). Wraps gxwf / cwltool but is *not* a hand-authored CLI skill — it's a Mold that references the relevant CLI manual pages.
+Validate Molds describe the **step in the process** even where they wrap a static / structured CLI. The underlying validation is deterministic, but the generated skill is the Mold-shaped procedural description (when to run, how to interpret results, what to recommend on failure, when to loop back to authoring). Wraps gxwf / cwltool but is *not* a hand-authored CLI skill — it's a Mold that references the relevant CLI manual pages.
 
 - `validate-galaxy-step` — run gxwf validation inside the per-step Galaxy loop, classify failures local to the just-implemented step, and route back to step implementation or wrapper authoring.
 - `validate-galaxy-workflow` — run gxwf validation after workflow assembly, classify workflow-level failures, and route back to the responsible authoring phase when possible.
@@ -134,7 +134,7 @@ Excluded from the inventory by design. Naming them keeps the boundary visible.
 
 - 26 current candidate Molds total in `content/molds/` (Galaxy validation split into step/workflow Molds; `find-test-data` included; corpus Mold renamed/reframed as `compare-against-iwc-exemplar`; `discover-shed-tool` graduated from "Not Molds"; whole-CLI catalogs are reference content, not Molds).
 - Source-summarization tier: 3 Molds, each used by exactly the pipelines starting from that source.
-- Data-flow tier: 2 Molds (`summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`). Each consumes any source summary; cast skills handle the polymorphism.
+- Data-flow tier: 2 Molds (`summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`). Each consumes any source summary; generated skills handle the polymorphism.
 - Galaxy-target tier: `summary-to-galaxy-data-flow`, `summary-to-galaxy-template`, `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`, `implement-galaxy-workflow-test`, `validate-galaxy-step`, `validate-galaxy-workflow`, `run-workflow-test`, `debug-galaxy-workflow-output`, `compare-against-iwc-exemplar` — used by all 3 Galaxy-targeting pipelines.
 - CWL-target tier: `summary-to-cwl-data-flow`, `summary-to-cwl-template`, `summarize-cwl-tool`, `implement-cwl-tool-step`, `implement-cwl-workflow-test`, `validate-cwl`, `run-workflow-test`, `debug-cwl-workflow-output` — used by 2 CWL-targeting pipelines.
 - CLI command tier: `content/cli/<tool>/<command>.md` — referenced by action Molds through typed references and cast as sidecars when needed.

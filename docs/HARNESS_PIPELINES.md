@@ -19,7 +19,7 @@ CWL is unofficially positioned as a **low-level, high-structure interchange form
 - Direct paths are simpler to run and debug. Composed paths buy a structured checkpoint (CWL) at the cost of running two harnesses.
 - Whether composition is reliable enough to *prefer* over direct is a longer-term research question. For now: both paths must be possible from the Mold inventory; the harness picks.
 
-**Mold-inventory parity.** Source summarizers emit per-source schemas (paper, NF, CWL each different by design). Data flow is split by **target** (`summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`); each consumes any source summary, with the cast skill handling the polymorphism. This pushes complexity into the data-flow Molds rather than into a forced shared summary schema, and keeps direct/composed pipelines using the same Mold catalog.
+**Mold-inventory parity.** Source summarizers emit per-source schemas (paper, NF, CWL each different by design). Data flow is split by **target** (`summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`); each consumes any source summary, with generated skills handling the polymorphism. This pushes complexity into the data-flow Molds rather than into a forced shared summary schema, and keeps direct/composed pipelines using the same Mold catalog.
 
 ## Harness-level concerns (not Molds)
 
@@ -130,7 +130,7 @@ CWL is already structured; the upstream extraction work is much lighter.
 ## Cross-pipeline observations
 
 - **Source-specific (one per source)**: `summarize-paper`, `summarize-nextflow`, `summarize-cwl`. Each emits its own schema by design.
-- **Target-specific data-flow**: `summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`. Each consumes any source summary; the cast skill handles polymorphism.
+- **Target-specific data-flow**: `summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`. Each consumes any source summary; generated skills handle polymorphism.
 - **Target-specific (one per target)**:
   - Templates: `summary-to-galaxy-template`, `summary-to-cwl-template`.
   - Per-step (Galaxy): `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`.
@@ -143,9 +143,9 @@ CWL is already structured; the upstream extraction work is much lighter.
 
 ## Pattern pages, not Molds
 
-Per the architecture, the `design-*` knowledge skills (collection manipulation, tabular manipulation, conditional handling, …) are **Foundry pattern pages**, not Molds. They are wiki-linked from action Molds (especially `implement-galaxy-tool-step` and `summary-to-galaxy-template`) and pulled into cast skills via casting's link resolution.
+Per the architecture, the `design-*` knowledge skills (collection manipulation, tabular manipulation, conditional handling, …) are **Foundry pattern pages**, not Molds. They are wiki-linked from action Molds (especially `implement-galaxy-tool-step` and `summary-to-galaxy-template`) and pulled into generated skills via casting's link resolution.
 
-Custom-Galaxy-tool authoring is split: a **pattern page** (reference and guidance) plus a companion **action Mold** (`author-galaxy-tool-wrapper`) that performs the authoring. The Mold links to the pattern page; the pattern page is consumed by the Mold's cast skill via link resolution.
+Custom-Galaxy-tool authoring is split: a **pattern page** (reference and guidance) plus a companion **action Mold** (`author-galaxy-tool-wrapper`) that performs the authoring. The Mold links to the pattern page; the pattern page is consumed by the generated skill via link resolution.
 
 ## Open questions
 

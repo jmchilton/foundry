@@ -14,6 +14,8 @@ pipeline:
   description: "Pipeline note — ordered Mold sequence composing a harness journey"
 research/component:
   description: "Background synthesis on an external component or topic"
+research/infrastructure:
+  description: "Project-infrastructure research for developer-facing systems, integrations, and adjacent tools"
 research/design-problem:
   description: "Identified design problem awaiting resolution"
 research/design-spec:

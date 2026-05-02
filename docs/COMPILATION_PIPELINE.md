@@ -178,7 +178,7 @@ Provenance is the foundation for drift detection, reproducibility audits, and "w
 Casting policy for upstream-package schemas:
 
 - **Source of truth lives upstream.** The Foundry pins a version (in its toolchain `package.json` for npm, etc.) but does not edit the schema.
-- **Casting copies the schema verbatim into `references/schemas/`.** The cast skill's runtime loads it for AJV / equivalent validation; no Foundry round-trip needed.
+- **Casting copies the schema verbatim into `references/schemas/`.** The generated skill's runtime loads it for AJV / equivalent validation; no Foundry round-trip needed.
 - **Bundle helper functions when applicable.** For test-format specifically, `@galaxy-tool-util/schema` also exports `validateTestsFile` and `checkTestsAgainstWorkflow` (label/type cross-check between a `.ga` and a tests file). When a cast's runtime is Node-capable, depending on the package directly is cleaner than vendoring just the JSON; the dependency is also recorded in `_provenance.json` so reviewers can see the version pin.
 - **Schema-page rendering in the Foundry uses the same vendored copy.** The Foundry's site renders the schema as a navigable page (`content/schemas/<name>/`), so research notes and Mold bodies can deep-link individual `$defs` (e.g. `[[schemas/tests-format#has_text]]`). The vendored JSON is the single source for both casting output and site rendering.
 
@@ -231,7 +231,7 @@ A cast is **stale** when any of:
 
 ## Versioning
 
-**No semver on Molds, no semver on casts.** Identity is content hash + commit SHA. Re-casting is the migration path. If a cast skill needs to be "frozen" (e.g., a published skill on a marketplace), pin it by commit SHA in the consumer.
+**No semver on Molds, no semver on casts.** Identity is content hash + commit SHA. Re-casting is the migration path. If a generated skill needs to be "frozen" (e.g., a published skill on a marketplace), pin it by commit SHA in the consumer.
 
 This keeps the Foundry's iteration loop fast: change a Mold, re-cast, review the diff. Don't bump versions, don't manage compatibility tables, don't write changelogs for every cast.
 
@@ -248,7 +248,7 @@ We do not guarantee that re-casting produces byte-identical output. We do guaran
 ## What casting does *not* do
 
 - **Does not write to the Foundry.** Casting is read-only against `content/molds/`, `content/patterns/`, `content/cli/`, `content/prompts/`, `content/examples/`, and `content/schemas/`. All writes go to `casts/`.
-- **Does not invoke gxwf or Planemo.** Those are the cast skill's responsibility at runtime, not casting time. (Validation tooling does invoke schemas, but that's distinct.)
+- **Does not invoke gxwf or Planemo.** Those are the generated skill's responsibility at runtime, not casting time. (Validation tooling does invoke schemas, but that's distinct.)
 - **Does not update Molds.** If casting reveals a Mold is wrong, that's a hand edit by the maintainer.
 - **Does not touch eval plans.** `eval.md` is Foundry-only; never read by casting.
 

@@ -63,7 +63,7 @@ Progressive disclosure is both an authoring principle and a runtime contract:
 - Load policy distinguishes material needed up front from material that should stay on demand.
 - Casting mode decides whether a reference is copied, condensed, inlined, or turned into a sidecar.
 
-This keeps context focused without hiding the source record. A cast skill can start with a compact procedure and a required schema, then consult a deeper research note only when the work crosses into that topic. For example, `summarize-nextflow` needs its output schema up front, but details about Nextflow testing or container-resolution edge cases can load only when those cases appear.
+This keeps context focused without hiding the source record. A generated skill can start with a compact procedure and a required schema, then consult a deeper research note only when the work crosses into that topic. For example, `summarize-nextflow` needs its output schema up front, but details about Nextflow testing or container-resolution edge cases can load only when those cases appear.
 
 The goal is not minimalism for its own sake. The goal is navigable depth: humans can browse from journey to Mold to reference, and agents can move from action to supporting evidence without dragging the whole library into every step.
 

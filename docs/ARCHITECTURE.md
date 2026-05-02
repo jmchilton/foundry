@@ -9,7 +9,7 @@ These are sketches, not specs. Layouts and component edges will move as we walk 
 External:
 - **IWC corpus** — the canonical Galaxy workflow corpus at `https://github.com/galaxyproject/iwc`. Pattern pages cite IWC workflows by URL (optionally pinned to commit SHA per citation). Not mirrored into the Foundry; not a build-time dependency. `workflow-fixtures/` lives as a top-level directory inside the Foundry checkout — a generated-corpus workspace for authoring/survey evidence, outside `content/`, with gitignored outputs (`pipelines/`, `iwc-src/`, `iwc-cleaned/`, `iwc-format2/`, `iwc-skeletons/`). Not part of the content model; not a runtime/cast dependency. See `CORPUS_INGESTION.md`.
 - **gxwf** — design-time CLI; called by Molds (and by validation tooling) for schema validation, tool search/discovery, conversion. TS and Python implementations with a shared interface. Lives in its own repo(s).
-- **Planemo** — runtime CLI; executes Galaxy and CWL workflows. Used by `run-workflow-test` and `debug-*-workflow-output` Molds at cast skill runtime, not by the Foundry directly.
+- **Planemo** — runtime CLI; executes Galaxy and CWL workflows. Used by `run-workflow-test` and `debug-*-workflow-output` Molds at generated-skill runtime, not by the Foundry directly.
 
 Foundry-internal (in the `foundry/` repo):
 - **Pattern pages** — Foundry reference content (collection manipulation, tabular, conditional, custom-tool authoring, …). Hand-authored. Wiki-linked from Molds. **IWC is referenced by URL in pattern bodies**, not mirrored — see `CORPUS_INGESTION.md`.
@@ -25,7 +25,7 @@ Foundry-internal (in the `foundry/` repo):
 - **Static site** — Astro renderer over the foundry's content collections, deployed to GitHub Pages.
 
 Consumers (external):
-- **Harnesses** — hand-authored orchestration that consumes cast skills. Live in their own repos. The Foundry produces the cast skills they load.
+- **Harnesses** — hand-authored orchestration that consumes generated skills or other cast artifacts. Live in their own repos. The Foundry produces the artifacts they load.
 - **Web applications** — consume `web`-target casts.
 
 ## 2. Concepts and vocabulary
@@ -292,7 +292,7 @@ content/molds/implement-galaxy-tool-step/
   casting-hints.md   ← optional per-target overrides (deferred until walk-throughs surface need)
 ```
 
-`eval.md` co-locates evaluation with the Mold (improves discoverability and ownership) without bleeding it into the cast skill. Casting reads `index.md` and refs; never reads `eval.md`.
+`eval.md` co-locates evaluation with the Mold (improves discoverability and ownership) without bleeding it into cast artifacts. Casting reads `index.md` and refs; never reads `eval.md`.
 
 `docs/` holds long-form Foundry-meta design narrative; the validator's directory-note rule applies only to Mold.
 
@@ -511,7 +511,7 @@ Key decisions reflected in the layout:
 ## 15. Open questions
 
 Layout:
-- **Mold directory companions beyond `index.md` + `eval.md`?** `casting-hints.md`, `tests.md` (regression tests for the cast skill itself, distinct from eval), … defer until walk-throughs surface need.
+- **Mold directory companions beyond `index.md` + `eval.md`?** `casting-hints.md`, `tests.md` (regression tests for a generated skill itself, distinct from eval), … defer until walk-throughs surface need.
 - **Render casts on the public site?** Or only as downloadable archives? v1: don't render; revisit if discoverability matters.
 - **`site/` urgency.** Markdown-on-GitHub is enough until contributor or page count makes browse painful.
 
@@ -544,7 +544,7 @@ Tooling:
 Process:
 - **One repo or several?** Keep everything in one repo for v1. Split casting tooling or schemas into a publishable library only if they grow.
 - **Mold-to-pattern coupling.** Some patterns will pair with action Molds (e.g., custom-tool-authoring pattern + `author-galaxy-tool-wrapper` Mold). Encode the pairing in frontmatter (`companion_mold: [[…]]` on patterns, `companion_pattern: [[…]]` on Molds), or leave it implicit via wiki links? v1: implicit; promote if the pairing rules need to be machine-checked.
-- **`compare-against-iwc-exemplar` Mold's discovery mechanism.** Without a Foundry-hosted exemplar index, how does the cast skill find candidate exemplars to compare against at runtime? Probably via an IWC listing URL plus `gxwf` tooling. Specified in the Mold's `eval.md`, not at the architecture layer.
+- **`compare-against-iwc-exemplar` Mold's discovery mechanism.** Without a Foundry-hosted exemplar index, how does the generated skill find candidate exemplars to compare against at runtime? Probably via an IWC listing URL plus `gxwf` tooling. Specified in the Mold's `eval.md`, not at the architecture layer.
 
 Resolved (moved out of this list):
 - *Content root name.* `content/`.

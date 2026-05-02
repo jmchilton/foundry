@@ -48,8 +48,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </p>
       <p>
         Casting is the bridge. A Mold names one workflow-construction action and declares the
-        references that action needs. Casting reads that Mold and produces a portable skill artifact
-        for a target runtime. The cast skill is smaller and more executable than the full knowledge
+        references that action needs. Casting reads that Mold and produces a portable cast artifact
+        for a target runtime. A generated skill is smaller and more executable than the full knowledge
         base, while the knowledge base remains the durable source of truth.
       </p>
       <p>
@@ -88,7 +88,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         Progressive disclosure is not only a site-navigation idea here. It is part of the runtime
         contract. Mold references can say whether a source is needed at cast time, runtime, or both;
         whether it should load up front or on demand; and whether it should be copied, condensed, or
-        turned into a sidecar. That keeps the cast skill focused without cutting it off from richer
+        turned into a sidecar. That keeps the generated skill focused without cutting it off from richer
         knowledge when the task actually needs it.
       </p>
       <p>
@@ -103,7 +103,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <span class="story-kicker font-mono">05 / Casting</span>
       <h2>Casts are frozen, portable, and traceable.</h2>
       <p>
-        A cast skill should not need the whole Foundry at runtime. It should load with the condensed
+        A generated skill should not need the whole Foundry at runtime. It should load with the condensed
         instructions, copied schemas, structured sidecars, and examples it needs to do one job. That
         makes the artifact portable across runtimes: Claude skills are one target, web artifacts and
         generic bundles are other possible targets.
@@ -213,7 +213,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </a>
       <a href={`${base}/design/casting/`}>
         <span>Casting</span>
-        <small>The compilation procedure that turns typed Mold references into cast skills.</small>
+        <small>The compilation procedure that turns typed Mold references into cast artifacts.</small>
       </a>
       <a href={`${base}/design/corpus/`}>
         <span>Corpus Integration</span>

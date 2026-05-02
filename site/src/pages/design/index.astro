@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { DESIGN_DOCS } from '../../lib/design-docs';
+import { DESIGN_DOC_GROUPS, designDocsByCategory } from '../../lib/design-docs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
@@ -14,21 +14,35 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <h1 id="design-heading">The working record behind the Foundry story.</h1>
     <p>
       Start with the story, then come here for the deeper rationale: the principles, architecture,
-      Mold inventory, casting procedure, corpus approach, and pipeline narrative that shape the
-      public Foundry pages.
+      Mold inventory, casting procedure, corpus approach, pipeline narrative, and infrastructure
+      research that shape the public Foundry pages.
     </p>
   </section>
 
-  <div class="design-doc-grid">
-    {DESIGN_DOCS.map((doc, index) => (
-      <a href={`${base}/design/${doc.slug}/`} class="design-doc-card tinted-shadow tinted-shadow-hover">
-        <span class="design-doc-num font-mono">{String(index + 1).padStart(2, '0')}</span>
-        <span class="design-doc-title">{doc.title}</span>
-        <span class="design-doc-summary">{doc.summary}</span>
-        <span class="design-doc-source font-mono">READ THE RECORD</span>
-      </a>
-    ))}
-  </div>
+  {DESIGN_DOC_GROUPS.map(group => {
+    const docs = designDocsByCategory(group.category);
+    return (
+      <section class="design-doc-section" aria-labelledby={`design-${group.category}`}>
+        <div class="design-section-heading">
+          <div>
+            <h2 id={`design-${group.category}`}>{group.title}</h2>
+            <p>{group.summary}</p>
+          </div>
+          <span class="font-mono">{docs.length} records</span>
+        </div>
+        <div class="design-doc-grid">
+          {docs.map((doc, index) => (
+            <a href={`${base}/design/${doc.slug}/`} class="design-doc-card tinted-shadow tinted-shadow-hover">
+              <span class="design-doc-num font-mono">{String(index + 1).padStart(2, '0')}</span>
+              <span class="design-doc-title">{doc.title}</span>
+              <span class="design-doc-summary">{doc.summary}</span>
+              <span class="design-doc-source font-mono">{group.action}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    );
+  })}
 </Base>
 
 <style>
@@ -60,11 +74,43 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     border-radius: 0.25rem;
     padding: 0.08rem 0.28rem;
   }
+  .design-doc-section {
+    margin-top: 2rem;
+  }
+  .design-section-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .design-section-heading h2 {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: 1.15rem;
+    line-height: 1.2;
+  }
+  .design-section-heading p {
+    margin: 0.35rem 0 0;
+    max-width: 62ch;
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+  .design-section-heading span {
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
   .design-doc-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.85rem;
-    margin-top: 1.25rem;
   }
   .design-doc-card {
     display: grid;
@@ -111,6 +157,13 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     }
   }
   @media (max-width: 560px) {
+    .design-section-heading {
+      display: block;
+    }
+    .design-section-heading span {
+      display: inline-block;
+      margin-top: 0.65rem;
+    }
     .design-doc-grid {
       grid-template-columns: 1fr;
     }

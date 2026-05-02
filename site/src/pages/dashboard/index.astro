@@ -2,9 +2,11 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import sections from '../../../../dashboard_sections.json';
+import { designDocsByCategory } from '../../lib/design-docs';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const allNotes = await getCollection('content');
+const infrastructureDocs = designDocsByCategory('infrastructure');
 
 const dashboardSections = sections.map(s => ({
   label: s.label,
@@ -43,7 +45,7 @@ function noteTitle(n: typeof allNotes[number]): string {
         </div>
         <div>
           <dt>Sections</dt>
-          <dd>{activeDashboardSections.length}</dd>
+          <dd>{activeDashboardSections.length + 1}</dd>
         </div>
       </dl>
     </div>
@@ -74,4 +76,26 @@ function noteTitle(n: typeof allNotes[number]): string {
       </table>
     </section>
   ))}
+
+  <section aria-labelledby="section-project-infrastructure-research">
+    <h2
+      id="section-project-infrastructure-research"
+      class="mt-8 mb-3 text-xl font-bold border-b-2 border-(--color-accent)/20 pb-2 text-balance"
+    >
+      Project Infrastructure Research
+      <span class="ml-2 text-sm font-normal text-(--color-text-muted)">({infrastructureDocs.length})</span>
+    </h2>
+    <table class="data-table">
+      <thead><tr><th>Name</th><th>Summary</th><th>Surface</th></tr></thead>
+      <tbody>
+        {infrastructureDocs.map(doc => (
+          <tr>
+            <td><a href={`${base}/design/${doc.slug}/`}>{doc.title}</a></td>
+            <td class="text-sm text-(--color-text-muted)">{doc.summary}</td>
+            <td><span class="tag">design</span></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
 </Base>
