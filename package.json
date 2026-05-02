@@ -14,8 +14,6 @@
     "check:dashboard": "tsx scripts/generate-dashboard.ts --check",
     "index": "tsx scripts/generate-index.ts",
     "check:index": "tsx scripts/generate-index.ts --check",
-    "iwc-overview": "tsx scripts/generate-iwc-overview.ts",
-    "check:iwc-overview": "tsx scripts/generate-iwc-overview.ts --check",
     "check:vendored": "tsx scripts/sync-vendored-upstreams.ts --check",
     "sync:vendored": "tsx scripts/sync-vendored-upstreams.ts --update",
     "cast": "tsx scripts/cast-mold.ts",

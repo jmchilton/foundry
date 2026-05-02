@@ -155,7 +155,6 @@ const content = defineCollection({
       'schemas/**/*.md',
       '!Dashboard.md',
       '!Index.md',
-      '!iwc-overview.md',
       '!log.md',
       '!glossary.md',
     ],
