@@ -41,7 +41,7 @@ references:
     ref: "[[galaxy-collection-patterns]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Choose corpus-attested collection recipes when implementing concrete Galaxy steps."
     trigger: "When implementation needs cleanup-after-fanout, sync-by-identifier, singleton unboxing, relabeling, collection reshaping, or collection-tabular bridges."
@@ -49,7 +49,7 @@ references:
     ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Choose corpus-attested tabular recipes when implementing concrete Galaxy steps."
     trigger: "When implementation needs row filtering, column projection, computed columns, joins, grouping, SQL, awk, text-processing wrappers, or tabular-collection bridges."

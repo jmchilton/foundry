@@ -17,7 +17,7 @@ references:
     ref: "[[galaxy-collection-patterns]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Compare draft collection transformations against curated corpus-observed pattern guidance."
     trigger: "When the draft workflow contains collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections."
@@ -25,7 +25,7 @@ references:
     ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Compare draft tabular transformations against curated corpus-observed pattern guidance."
     trigger: "When the draft workflow contains tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections."
