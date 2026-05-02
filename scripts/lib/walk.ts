@@ -8,7 +8,6 @@ export const SKIP_DIRS = new Set([".obsidian", "casts"]);
 export const SKIP_FILES = new Set([
   "Dashboard.md",
   "Index.md",
-  "iwc-overview.md",
   "log.md",
   "glossary.md",
 ]);

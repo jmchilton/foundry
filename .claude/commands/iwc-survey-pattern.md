@@ -80,6 +80,22 @@ Before reporting back, reread the drafted page against its 1-3 nearest siblings 
 - For conceptual workflow shapes, label snippets as conceptual. For observed gxformat2, cite the exemplar and avoid simplifying silently.
 - Keep membership sync, order sync, relabeling, and structural reshape pages distinct when working with collection identifiers.
 
+## Merge/refinement report mode
+
+If `$2` names an existing page, or the survey says a candidate should merge into an existing page instead of becoming a standalone page, prepare a merge/refinement report before editing.
+
+Report shape:
+
+- Target page path.
+- Survey candidate(s) or open question(s) driving the refinement.
+- Concrete edit type: add section, add subsection, add pitfall, add exemplar, rework recommendation, add boundary note, add related link, or no-op.
+- Exact corpus citations to add, with one-line reason each.
+- Wording snippets for any prescriptive rule or boundary language.
+- Edits **not** to make, especially standalone pages suppressed by merge/drop calls.
+- Expected validation side effects, especially advisory `related_notes` backlink warnings if adding the survey to page frontmatter without updating the survey.
+
+Only after this report is clear should you edit the existing page. Keep refinements narrow: do not turn a mature page into a survey dump.
+
 ## Validation
 
 After writing or editing the page:
@@ -87,6 +103,7 @@ After writing or editing the page:
 1. Run `npm run validate`.
 2. Fix schema, tag, and broken-link errors. Do not weaken the schema to pass.
 3. Warnings can remain if they are known backlink advisories; report them explicitly.
+4. If new pages should appear in generated catalogs, check that the relevant package scripts point to existing generator files before running them. Report stale scripts as repo drift.
 
 ## Report back
 
@@ -95,5 +112,6 @@ Summarize:
 - Page written/refined.
 - Main operation boundary.
 - Comparator pages used.
+- Merge/refinement report outcome, if applicable.
 - Validation result.
 - Any unresolved naming or evidence questions.

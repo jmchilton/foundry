@@ -27,7 +27,7 @@ function slugifyPath(rel: string): string {
   return rel.replace(/\.md$/, '').split('/').map(slugify).join('/');
 }
 
-const SKIP_TOP = new Set(['Dashboard.md', 'Index.md', 'iwc-overview.md', 'log.md', 'glossary.md']);
+const SKIP_TOP = new Set(['Dashboard.md', 'Index.md', 'log.md', 'glossary.md']);
 const SKIP_DIRS = new Set(['.obsidian', 'templates']);
 
 function walk(dir: string, root: string, out: string[]): void {
