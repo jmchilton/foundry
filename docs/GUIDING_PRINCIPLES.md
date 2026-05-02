@@ -50,6 +50,23 @@ This keeps agents more reliable and cheaper to run:
 
 The Foundry therefore treats LLM output as one stage in a larger system, not as the system itself. Molds guide model behavior, but validation, schema checking, CLI execution, and generated artifacts provide the rails.
 
+## Progressive Disclosure Over Context Flooding
+
+Agents should see the right knowledge at the right time. The Foundry should not flatten every pattern, CLI manual page, schema, example, research note, and design rationale into a single prompt or skill body just because the information exists.
+
+Progressive disclosure is both an authoring principle and a runtime contract:
+
+- Pipelines disclose the journey: which phase comes next and where branches or loops exist.
+- Molds disclose the action: what the current step does and which references it may need.
+- Typed references disclose the dependency surface: pattern, CLI command, schema, prompt, example, research note, or eval.
+- Reference metadata declares whether material is used at cast time, runtime, or both.
+- Load policy distinguishes material needed up front from material that should stay on demand.
+- Casting mode decides whether a reference is copied, condensed, inlined, or turned into a sidecar.
+
+This keeps context focused without hiding the source record. A cast skill can start with a compact procedure and a required schema, then consult a deeper research note only when the work crosses into that topic. For example, `summarize-nextflow` needs its output schema up front, but details about Nextflow testing or container-resolution edge cases can load only when those cases appear.
+
+The goal is not minimalism for its own sake. The goal is navigable depth: humans can browse from journey to Mold to reference, and agents can move from action to supporting evidence without dragging the whole library into every step.
+
 ## Portable Artifacts Over Platform Fashion
 
 Claude skills are useful. Other orchestration systems are useful. The agentic-coding landscape will keep changing.
@@ -100,6 +117,8 @@ This keeps the Foundry from becoming a speculative ontology. The vocabulary shou
 These principles reinforce each other.
 
 Keeping information at its source makes upstream sync possible, but it only works if derived artifacts record provenance. Provenance is only meaningful if deterministic tooling performs the checks it can perform. Deterministic tooling is easier to reuse when artifacts are portable rather than bound to one orchestrator. Portable artifacts need an inspectable source of truth, which pushes the project toward a knowledge base. The knowledge base becomes actionable through Molds, casts, and Pipelines. Corpus-first grounding keeps that whole loop tied to real Galaxy practice.
+
+Progressive disclosure is the connective tissue inside that loop. It keeps the source record rich without forcing every runtime artifact to carry every page, and it lets agents open deeper context only when a phase, Mold, or reference kind justifies it.
 
 The resulting shape is intentional:
 

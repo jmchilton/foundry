@@ -1,0 +1,383 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base
+  title="Foundry Story"
+  description="Why the Galaxy Workflow Foundry uses Molds, casting, static validation, and a public knowledge base."
+>
+  <section class="story-hero bg-grain" aria-labelledby="story-heading">
+    <span class="eyebrow mb-4">Foundry Story</span>
+    <h1 id="story-heading">A knowledge base agents can act on.</h1>
+    <p>
+      Workflow conversion knowledge is too rich, cross-cutting, and tool-shaped to survive as a
+      pile of monolithic prompts. The Foundry keeps that knowledge as inspectable source material,
+      then casts focused Molds into portable skills that agents can execute with deterministic rails.
+    </p>
+  </section>
+
+  <article class="story-prose">
+    <section>
+      <span class="story-kicker font-mono">01 / The Problem</span>
+      <h2>Workflow conversion knowledge does not fit in one prompt.</h2>
+      <p>
+        Converting a paper, Nextflow pipeline, or CWL workflow into a validated Galaxy workflow is
+        not one task. It is a chain of tasks: understand the source, reshape its data flow, select or
+        author tools, implement steps, validate the result, assemble tests, run them, and debug the
+        failures that remain. Each step touches different facts and different kinds of authority.
+      </p>
+      <p>
+        A monolithic skill can feel convenient at first, but it tends to become brittle. It mixes
+        Galaxy patterns with CLI details, upstream schema contracts, project rationale, examples,
+        caveats, and operational procedure. When something changes, there is no clean boundary to
+        update. When an agent uses it, there is no obvious path from the runtime instruction back to
+        the source record that justified it.
+      </p>
+    </section>
+
+    <section>
+      <span class="story-kicker font-mono">02 / The Thesis</span>
+      <h2>The Foundry keeps knowledge inspectable, then casts it into action.</h2>
+      <p>
+        The Foundry separates source knowledge from runtime artifacts. The knowledge base stays
+        rich: patterns explain observed Galaxy idioms, research notes capture background, CLI docs
+        describe tool surfaces, schemas define contracts, and best practices preserve the design
+        rationale. That source material is meant to be read, reviewed, linked, and improved.
+      </p>
+      <p>
+        Casting is the bridge. A Mold names one workflow-construction action and declares the
+        references that action needs. Casting reads that Mold and produces a portable skill artifact
+        for a target runtime. The cast skill is smaller and more executable than the full knowledge
+        base, while the knowledge base remains the durable source of truth.
+      </p>
+      <p>
+        The key design principle is progressive disclosure. The Foundry should not push every
+        pattern, CLI manual, schema, research note, and caveat into an agent's context up front.
+        It should expose the right surface at the right moment: a Pipeline for the journey, a Mold
+        for the current action, a schema for the contract, a CLI doc when a command is needed, and
+        deeper research only when the work crosses that boundary.
+      </p>
+    </section>
+
+    <section>
+      <span class="story-kicker font-mono">03 / Molds</span>
+      <h2>A Mold is an action-sized source artifact.</h2>
+      <p>
+        Molds are not just prose pages. A Mold is a typed reference manifest with a procedural body.
+        It can point at patterns, CLI docs, schemas, examples, prompt fragments, and research notes,
+        and each reference kind has its own casting behavior. A schema can be copied verbatim, a CLI
+        page can become a sidecar, a pattern can be condensed, and an evaluation plan can stay
+        Foundry-only.
+      </p>
+      <p>
+        This gives each action a shape the validator and the casting pipeline can reason about.
+        <code>summarize-nextflow</code> emits a structured source summary.
+        <code>implement-galaxy-tool-step</code> turns an abstract step into a concrete
+        <code>gxformat2</code> step. <code>validate-with-gxwf</code> interprets static validation
+        results and loops back to fixes. <code>planemo-cli</code> captures runtime execution
+        reference. These are different actions, so they deserve different Molds.
+      </p>
+    </section>
+
+    <section>
+      <span class="story-kicker font-mono">04 / Progressive Disclosure</span>
+      <h2>The structure decides what loads now and what waits.</h2>
+      <p>
+        Progressive disclosure is not only a site-navigation idea here. It is part of the runtime
+        contract. Mold references can say whether a source is needed at cast time, runtime, or both;
+        whether it should load up front or on demand; and whether it should be copied, condensed, or
+        turned into a sidecar. That keeps the cast skill focused without cutting it off from richer
+        knowledge when the task actually needs it.
+      </p>
+      <p>
+        For example, <code>summarize-nextflow</code> loads its output schema up front because every
+        emitted summary must validate against it. But deeper notes about Nextflow pipeline anatomy,
+        containers, environments, and testing can stay on demand. The skill starts small, then opens
+        the drawer that matches the problem it has encountered.
+      </p>
+    </section>
+
+    <section>
+      <span class="story-kicker font-mono">05 / Casting</span>
+      <h2>Casts are frozen, portable, and traceable.</h2>
+      <p>
+        A cast skill should not need the whole Foundry at runtime. It should load with the condensed
+        instructions, copied schemas, structured sidecars, and examples it needs to do one job. That
+        makes the artifact portable across runtimes: Claude skills are one target, web artifacts and
+        generic bundles are other possible targets.
+      </p>
+      <p>
+        The cast is also transparent. Provenance records which Mold and references produced it. A
+        reviewer can ask why a skill says something, then follow the trail back to the Mold, the
+        pattern, the CLI doc, or the schema. Casting is allowed to be LLM-assisted, but its inputs
+        and outputs are explicit enough to diff and inspect.
+      </p>
+    </section>
+
+    <section>
+      <span class="story-kicker font-mono">06 / Deterministic Rails</span>
+      <h2>The Foundry lets tools enforce what tools can enforce.</h2>
+      <p>
+        Galaxy workflow authoring has failure modes that should not be handled as folklore. Tool
+        identifiers, revision suffixes, parameter names, workflow-test assertions, collection shapes,
+        and schema-level validity are better checked by deterministic tools than by a paragraph of
+        warnings. The Foundry leans on <code>gxwf</code>, Planemo, JSON Schema, generated indexes,
+        and tests for that work.
+      </p>
+      <p>
+        That posture changes the agent loop. The goal is not "author and hope." The loop is author,
+        validate, fix, and validate again. Molds describe how to use those rails, while the rails
+        keep the artifacts honest.
+      </p>
+    </section>
+
+    <section>
+      <span class="story-kicker font-mono">07 / Pipelines</span>
+      <h2>Pipelines compose Molds into journeys.</h2>
+      <p>
+        Pipelines are the journey surface of the Foundry. A pipeline such as
+        <code>nextflow-to-galaxy</code> orders the Molds a harness would run: summarize the source,
+        shape the data flow, make a template, compare against IWC exemplars, discover or author
+        tools, implement steps, validate, test, and debug.
+      </p>
+      <p>
+        Some pipeline phases are Molds. Some are harness-level routing, such as the
+        discover-or-author branch that tries an existing Tool Shed wrapper before falling through to
+        new wrapper authoring. Keeping that distinction visible lets Pipelines act as both navigation
+        and build artifact without pretending orchestration is itself a Mold.
+      </p>
+    </section>
+
+    <section>
+      <span class="story-kicker font-mono">08 / Source Authority</span>
+      <h2>The Foundry synthesizes; upstream owns the facts.</h2>
+      <p>
+        IWC owns its workflows. Tool Shed and Galaxy APIs own tool metadata. CLI projects own their
+        behavior. Schema packages own validation contracts. The Foundry should not mirror all of
+        that as if it were the new source of truth. It cites, vendors, or copies only where the cast
+        artifact needs a stable runtime reference.
+      </p>
+      <p>
+        This is why IWC evidence appears as citations and selective excerpts rather than a generated
+        mirror of every workflow. Patterns stay corpus-grounded, but the corpus remains upstream.
+        The Foundry's job is cross-reference, synthesis, and operationalization.
+      </p>
+    </section>
+
+    <section>
+      <span class="story-kicker font-mono">09 / Result</span>
+      <h2>The same source can be read by humans and acted on by agents.</h2>
+      <p>
+        The landing page gives the abstract. This story page explains the architecture. The rendered
+        design docs preserve the source record. Underneath them, Molds and Pipelines make the
+        knowledge actionable. That is the Foundry's core bargain: keep the reasoning visible, but
+        still produce static skills an agent can actually use.
+      </p>
+    </section>
+  </article>
+
+  <section class="story-links" aria-labelledby="story-links-heading">
+    <div class="section-rule">
+      <h2 id="story-links-heading">Source Record</h2>
+      <span class="section-tail">/ read next</span>
+    </div>
+    <div class="design-entry">
+      <div>
+        <span class="story-kicker font-mono">Design docs</span>
+        <h3>Read the working record behind the story.</h3>
+        <p>
+          The pages below render selected files from <code>docs/</code> directly. They are source
+          rationale, not validated content notes, and the story is their public entry point.
+        </p>
+      </div>
+      <a href={`${base}/design/`} class="design-entry-link">
+        Browse all design docs
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+    <div class="link-grid">
+      <a href={`${base}/design/guiding-principles/`}>
+        <span>Guiding Principles</span>
+        <small>The canonical rationale for source authority, progressive disclosure, validation, and portability.</small>
+      </a>
+      <a href={`${base}/design/architecture/`}>
+        <span>Architecture</span>
+        <small>The structural record for content types, validation, rendering, and generated artifacts.</small>
+      </a>
+      <a href={`${base}/design/molds/`}>
+        <span>Molds</span>
+        <small>The inventory and boundary rules behind the action-sized Mold catalog.</small>
+      </a>
+      <a href={`${base}/design/casting/`}>
+        <span>Casting</span>
+        <small>The compilation procedure that turns typed Mold references into cast skills.</small>
+      </a>
+      <a href={`${base}/design/corpus/`}>
+        <span>Corpus Integration</span>
+        <small>The lighter IWC grounding model: cite upstream, avoid mirroring the corpus.</small>
+      </a>
+      <a href={`${base}/design/harness-pipelines/`}>
+        <span>Harness Pipelines</span>
+        <small>The pipeline narrative behind source-to-target journeys and branch phases.</small>
+      </a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .story-hero {
+    padding: 1.5rem 0 1.25rem;
+    max-width: 54rem;
+  }
+  .story-hero h1 {
+    margin: 0 0 1rem;
+    color: var(--color-galaxy-dark);
+    font-size: clamp(2.1rem, 5vw, 4.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  .dark .story-hero h1 {
+    color: var(--color-text-primary);
+  }
+  .story-hero p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 1.08rem;
+    line-height: 1.72;
+    text-wrap: pretty;
+  }
+  .story-prose {
+    display: grid;
+    gap: 1.35rem;
+    max-width: 52rem;
+    margin-top: 1.5rem;
+  }
+  .story-kicker {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .story-prose section {
+    padding-top: 1.1rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
+  }
+  .story-prose h2 {
+    margin: 0.45rem 0 0.55rem;
+    color: var(--color-text-primary);
+    font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+    line-height: 1.14;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  .story-prose p {
+    margin: 0.7rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    line-height: 1.72;
+    text-wrap: pretty;
+  }
+  .story-prose code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    background: var(--color-surface-hover);
+    border-radius: 0.25rem;
+    padding: 0.08rem 0.28rem;
+  }
+  .link-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .design-entry {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 0.45rem;
+    background: var(--color-surface-raised);
+  }
+  .design-entry h3 {
+    margin: 0.35rem 0 0.35rem;
+    color: var(--color-text-primary);
+    font-size: 1.2rem;
+    line-height: 1.2;
+  }
+  .design-entry p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+  .design-entry code {
+    font-family: var(--font-mono);
+    background: var(--color-surface-hover);
+    border-radius: 0.25rem;
+    padding: 0.08rem 0.28rem;
+  }
+  .design-entry-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    padding: 0.55rem 0.85rem;
+    color: var(--color-text-on-dark);
+    background: var(--color-galaxy-dark);
+    border-radius: 0.35rem;
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .design-entry-link:hover {
+    background: var(--color-galaxy-primary);
+    transform: translateX(2px);
+  }
+  .link-grid a {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0.85rem 1rem;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.45rem;
+    background: var(--color-surface-raised);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .link-grid a:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .link-grid span {
+    color: var(--color-link);
+    font-weight: 700;
+  }
+  .link-grid small {
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  @media (max-width: 920px) {
+    .design-entry {
+      grid-template-columns: 1fr;
+    }
+    .design-entry-link {
+      justify-self: start;
+    }
+    .link-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .link-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
