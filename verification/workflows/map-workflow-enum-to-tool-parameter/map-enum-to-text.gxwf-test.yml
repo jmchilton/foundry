@@ -1,0 +1,5 @@
+- doc: "Map workflow enum label to tool code"
+  job:
+    strandedness: stranded - reverse
+  outputs:
+    mapped_code: "2"

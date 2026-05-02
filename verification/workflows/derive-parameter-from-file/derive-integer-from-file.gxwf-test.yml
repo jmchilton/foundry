@@ -1,0 +1,8 @@
+- doc: "Read one-value dataset as integer parameter"
+  job:
+    scalar_file:
+      class: File
+      path: test-data/scalar_integer.txt
+      filetype: txt
+  outputs:
+    derived_integer: 7

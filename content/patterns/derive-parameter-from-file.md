@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Parameter: derive from file"
 aliases:
   - "file-to-parameter bridge"
@@ -14,7 +14,7 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters."
 related_notes:
@@ -24,6 +24,8 @@ related_patterns:
   - "[[tabular-compute-new-column]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/derive-parameter-from-file/derive-integer-from-file.gxwf-test.yml
 ---
 
 # Parameter: derive from file

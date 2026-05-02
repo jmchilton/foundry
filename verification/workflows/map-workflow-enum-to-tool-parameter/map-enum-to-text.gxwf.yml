@@ -1,0 +1,38 @@
+class: GalaxyWorkflow
+name: "Map enum to text parameter"
+inputs:
+  - id: strandedness
+    type: text
+outputs:
+  - id: mapped_code
+    outputSource: map_strandedness/output_param_text
+steps:
+  - id: map_strandedness
+    label: map_strandedness
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/map_param_value/map_param_value/0.2.0
+    tool_version: 0.2.0
+    tool_shed_repository:
+      changeset_revision: 5ac8a4bf7a8d
+      name: map_param_value
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_param_type|input_param
+        source: strandedness
+    out:
+      - id: output_param_text
+    tool_state:
+      input_param_type:
+        type: text
+        input_param:
+          __class__: ConnectedValue
+        mappings:
+          - from: stranded - forward
+            to: "1"
+          - from: stranded - reverse
+            to: "2"
+          - from: unstranded
+            to: "0"
+      output_param_type: text
+      unmapped:
+        on_unmapped: fail

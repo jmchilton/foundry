@@ -1,0 +1,23 @@
+class: GalaxyWorkflow
+name: "Derive integer parameter from file"
+inputs:
+  - id: scalar_file
+    type: data
+outputs:
+  - id: derived_integer
+    outputSource: read_scalar/integer_param
+steps:
+  - id: read_scalar
+    label: read_scalar
+    tool_id: param_value_from_file
+    tool_version: 0.1.0
+    in:
+      - id: input1
+        source: scalar_file
+    out:
+      - id: integer_param
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      param_type: integer
+      remove_newlines: true
