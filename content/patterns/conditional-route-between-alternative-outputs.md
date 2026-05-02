@@ -13,11 +13,12 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value."
 related_notes:
   - "[[iwc-conditionals-survey]]"
+  - "[[iwc-parameter-derivation-survey]]"
 related_patterns:
   - "[[conditional-run-optional-step]]"
   - "[[conditional-transform-or-pass-through]]"
@@ -74,6 +75,12 @@ On the merge step:
 - connect all downstream consumers to the `pick_value` output.
 
 If authoring inverse or mode booleans, use a small mapper step such as `map_param_value` rather than duplicating branch logic inside downstream tools.
+
+For mapped route booleans, use `map_param_value` as a graph-visible normalization step before the gated alternatives.
+
+Binary inverse route: map the direct user boolean to its opposite for the second branch, then gate one branch from the original boolean and the other from `map_param_value/output_param_boolean`.
+
+One-of-N route: create one `map_param_value` step per mode. Each mapper turns one selected enum/text value into `true` and uses `unmapped.default_value: false`; each branch consumes its own boolean as `inputs.when`.
 
 ## Idiomatic Shapes
 
@@ -138,6 +145,7 @@ These snippets are conceptual. Use the cited gxformat2 exemplars for exact seria
 - Non-exclusive booleans. If two branches can run at once, `pick_value` chooses by input order. That may hide an upstream routing bug.
 - Mismatched output semantics. `pick_value` can merge present values, but it does not make incompatible outputs equivalent. Branches should produce the same logical artifact.
 - Hiding the route in one wrapper. IWC evidence favors graph-visible `when` branches plus merge for these route operations.
+- Duplicating enum comparisons inside every downstream tool. Normalize once with `map_param_value`, then connect the resulting boolean to `id: when`.
 - Confusing route merge with collection cleanup. `__FILTER_EMPTY_DATASETS__` and `__FILTER_FAILED_DATASETS__` clean mapped collection elements; they are not the observed IWC mechanism for one-of-N conditional routing.
 
 ## Exemplars (IWC)
@@ -145,10 +153,13 @@ These snippets are conceptual. Use the cited gxformat2 exemplars for exact seria
 - `$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:180-211`, `$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:337-399` — binary 10x import route: legacy vs v3 `anndata_import`, then `pick_value` selects the present AnnData output.
 - `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:244-395`, `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:396-429` — one-of-N eggNOG mapper mode fan-out, then `pick_value` collapses the selected annotation output.
 - `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:295-410`, `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:411-439` — alternative assembly route including an embedded subworkflow branch, then `pick_value` chooses among individual, co-assembly, or custom assemblies.
+- `$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:173-241` — binary route uses direct boolean for one branch and `map_param_value` inversion for the other.
+- `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:55-195` — one enum input maps into one boolean per eggNOG mode before the gated branches.
 
 ## See Also
 
 - [[iwc-conditionals-survey]] — Candidate B evidence and conditionals boundary decisions.
+- [[iwc-parameter-derivation-survey]] — boundary between conditional boolean mapping and tool-parameter mapping.
 - [[galaxy-conditionals-patterns]] — conditionals MOC.
 - [[conditional-run-optional-step]] — direct boolean gate with no required merge.
 - [[conditional-gate-on-nonempty-result]] — derive boolean from empty/non-empty result, then gate reporting/export.

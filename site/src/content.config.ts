@@ -168,7 +168,6 @@ const content = defineCollection({
       'verification/**/*.md',
       '!Dashboard.md',
       '!Index.md',
-      '!iwc-overview.md',
       '!log.md',
       '!glossary.md',
     ],

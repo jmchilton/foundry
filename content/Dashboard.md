@@ -1,0 +1,124 @@
+# Dashboard
+
+Generated from `dashboard_sections.json` and content frontmatter. Do not edit by hand.
+
+## Pipelines
+
+| Name | Summary | Status | Revised | Rev |
+| --- | --- | --- | --- | --- |
+| [[cwl-to-galaxy]] | Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction. | draft | 2026-04-30 | 1 |
+| [[nextflow-to-cwl]] | Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set. | draft | 2026-04-30 | 1 |
+| [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | draft | 2026-04-30 | 1 |
+| [[paper-to-cwl]] | Direct path from a paper to a CWL Workflow + CommandLineTool set. | draft | 2026-04-30 | 1 |
+| [[paper-to-galaxy]] | Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate. | draft | 2026-04-30 | 1 |
+
+## Molds
+
+| Name | Summary | Status | Revised | Rev |
+| --- | --- | --- | --- | --- |
+| [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against a draft. | draft | 2026-05-02 | 2 |
+| [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify failure modes; propose fixes. | draft | 2026-05-02 | 2 |
+| [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary. | draft | 2026-05-02 | 2 |
+| [[summarize-nextflow]] | Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to. | draft | 2026-05-02 | 7 |
+| [[summary-to-galaxy-data-flow]] | Abstract DAG with Galaxy collection / scatter / branching idioms surfaced. | draft | 2026-05-02 | 2 |
+| [[summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a data-flow summary. | draft | 2026-05-02 | 2 |
+| [[validate-galaxy-step]] | Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation. | draft | 2026-05-02 | 1 |
+| [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | draft | 2026-05-02 | 1 |
+| [[author-galaxy-tool-wrapper]] | Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable. | draft | 2026-04-30 | 1 |
+| [[cwl-test-to-target-tests]] | Translate CWL test fixtures into a target workflow's test format. | draft | 2026-04-30 | 1 |
+| [[debug-cwl-workflow-output]] | Triage failing CWL run outputs; classify failure modes; propose fixes. | draft | 2026-04-30 | 1 |
+| [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | draft | 2026-04-30 | 2 |
+| [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | draft | 2026-04-30 | 1 |
+| [[implement-cwl-tool-step]] | Convert an abstract step into a concrete CWL CommandLineTool + step. | draft | 2026-04-30 | 1 |
+| [[implement-cwl-workflow-test]] | Assemble CWL job file(s) and expected-output assertions. | draft | 2026-04-30 | 1 |
+| [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | draft | 2026-04-30 | 1 |
+| [[nextflow-test-to-target-tests]] | Translate NF test fixtures into a target workflow's test format. | draft | 2026-04-30 | 1 |
+| [[paper-to-test-data]] | Derive workflow test inputs and expected outputs from a paper. | draft | 2026-04-30 | 1 |
+| [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | draft | 2026-04-30 | 1 |
+| [[summarize-cwl]] | Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals. | draft | 2026-04-30 | 1 |
+| [[summarize-cwl-tool]] | Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target. | draft | 2026-04-30 | 1 |
+| [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | draft | 2026-04-30 | 1 |
+| [[summarize-paper]] | Extract methods, tools, sample data, and references from a paper. | draft | 2026-04-30 | 1 |
+| [[summary-to-cwl-data-flow]] | Abstract DAG with CWL scatter / valueFrom / step idioms surfaced. | draft | 2026-04-30 | 1 |
+| [[summary-to-cwl-template]] | CWL Workflow skeleton with per-step TODOs from a data-flow summary. | draft | 2026-04-30 | 1 |
+| [[validate-cwl]] | Run cwltool --validate / schema lint, classify failures, recommend fixes. | draft | 2026-04-30 | 1 |
+
+## Patterns
+
+| Name | Summary | Status | Revised | Rev |
+| --- | --- | --- | --- | --- |
+| [[collection-build-list-paired-with-apply-rules]] | Use Apply Rules to promote identifier columns into a list:paired collection, with optional cleanup first. | draft | 2026-05-02 | 1 |
+| [[collection-build-named-bundle]] | Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in. | draft | 2026-05-02 | 1 |
+| [[collection-cleanup-after-mapover-failure]] | Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps. | draft | 2026-05-02 | 1 |
+| [[collection-flatten-after-fanout]] | Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters. | draft | 2026-05-02 | 1 |
+| [[collection-split-identifier-via-rules]] | Use Apply Rules regex columns to split one collection identifier into nested list identifiers. | draft | 2026-05-02 | 1 |
+| [[collection-swap-nesting-with-apply-rules]] | Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns. | draft | 2026-05-02 | 1 |
+| [[collection-unbox-singleton]] | Use __EXTRACT_DATASET__ with which: first when a one-element collection must become a dataset. | draft | 2026-05-02 | 1 |
+| [[compose-runtime-text-parameter]] | Use compose_text_param to build connected text expressions from constants plus runtime scalar values. | draft | 2026-05-02 | 1 |
+| [[conditional-gate-on-nonempty-result]] | Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps. | draft | 2026-05-02 | 2 |
+| [[conditional-route-between-alternative-outputs]] | Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value. | draft | 2026-05-02 | 2 |
+| [[conditional-run-optional-step]] | Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch. | draft | 2026-05-02 | 2 |
+| [[conditional-transform-or-pass-through]] | Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise. | draft | 2026-05-02 | 1 |
+| [[derive-parameter-from-file]] | Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters. | draft | 2026-05-02 | 1 |
+| [[galaxy-collection-patterns]] | Use this MOC to choose corpus-grounded Galaxy collection transformation patterns. | draft | 2026-05-02 | 1 |
+| [[galaxy-conditionals-patterns]] | Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns. | draft | 2026-05-02 | 1 |
+| [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-05-02 | 1 |
+| [[harmonize-by-sortlist-from-identifiers]] | Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers. | draft | 2026-05-02 | 1 |
+| [[map-workflow-enum-to-tool-parameter]] | Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets. | draft | 2026-05-02 | 1 |
+| [[regex-relabel-via-tabular]] | Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE. | draft | 2026-05-02 | 1 |
+| [[relabel-via-rules-and-find-replace]] | Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup. | draft | 2026-05-02 | 1 |
+| [[sync-collections-by-identifier]] | Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections. | draft | 2026-05-02 | 1 |
+| [[tabular-compute-new-column]] | Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule. | draft | 2026-05-02 | 2 |
+| [[tabular-concatenate-collection-to-table]] | Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe. | draft | 2026-05-02 | 1 |
+| [[tabular-group-and-aggregate-with-datamash]] | Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions. | draft | 2026-05-02 | 1 |
+| [[tabular-join-on-key]] | Use tp_easyjoin_tool for two-tabular key joins; use tp_multijoin_tool for many files and query_tabular for SQL joins. | draft | 2026-05-02 | 1 |
+| [[tabular-pivot-collection-to-wide]] | Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table. | draft | 2026-05-02 | 1 |
+| [[tabular-prepend-header]] | Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row. | draft | 2026-05-02 | 1 |
+| [[tabular-relabel-by-row-counter]] | Use tp_awk_tool to replace each row or label with deterministic sample_N values from awk NR. | draft | 2026-05-02 | 1 |
+| [[tabular-split-taxonomy-string]] | Use tp_awk_tool to split semicolon-delimited taxonomy strings into explicit rank columns with missing-rank handling. | draft | 2026-05-02 | 1 |
+| [[tabular-sql-query]] | Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars. | draft | 2026-05-02 | 1 |
+| [[tabular-synthesize-bed-from-3col]] | Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants. | draft | 2026-05-02 | 1 |
+| [[tabular-to-collection-by-row]] | Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key. | draft | 2026-05-02 | 1 |
+| [[tabular-cut-and-reorder-columns]] | Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom. | draft | 2026-04-30 | 1 |
+| [[tabular-filter-by-column-value]] | Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC. | draft | 2026-04-30 | 1 |
+| [[tabular-filter-by-regex]] | Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative. | draft | 2026-04-30 | 1 |
+
+## CLI Commands
+
+| Name | Summary | Status | Revised | Rev |
+| --- | --- | --- | --- | --- |
+| [[validate]] | Validate gxformat2 Galaxy workflow structure and emit diagnostics before runtime execution. | draft | 2026-05-02 | 1 |
+| [[tool-revisions]] | Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin. | draft | 2026-04-30 | 1 |
+| [[tool-search]] | Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence. | draft | 2026-04-30 | 1 |
+| [[tool-versions]] | List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence. | draft | 2026-04-30 | 1 |
+
+## Schemas
+
+| Name | Summary | Status | Revised | Rev |
+| --- | --- | --- | --- | --- |
+| [[summary-nextflow]] | JSON Schema for the structured summary emitted by the summarize-nextflow Mold. | draft | 2026-05-01 | 3 |
+| [[tests-format]] | JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`. | draft | 2026-04-30 | 1 |
+
+## Component Research
+
+| Name | Summary | Status | Revised | Rev |
+| --- | --- | --- | --- | --- |
+| [[galaxy-apply-rules-dsl]] | Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls. | draft | 2026-05-02 | 2 |
+| [[galaxy-collection-semantics]] | Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references. | draft | 2026-05-02 | 2 |
+| [[galaxy-collection-tools]] | Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics. | draft | 2026-05-02 | 2 |
+| [[iwc-conditionals-survey]] | Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection. | draft | 2026-05-02 | 2 |
+| [[iwc-nearest-exemplar-selection]] | Defines a feature hierarchy for selecting useful IWC exemplar workflows for structural comparison. | draft | 2026-05-02 | 1 |
+| [[iwc-parameter-derivation-survey]] | Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters. | draft | 2026-05-02 | 1 |
+| [[iwc-tabular-operations-survey]] | Corpus survey of tabular tools and operations across IWC workflows; map for the leaf pattern hierarchy on row/column data manipulation. | draft | 2026-05-02 | 2 |
+| [[iwc-test-data-conventions]] | How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas. | draft | 2026-05-02 | 2 |
+| [[iwc-transformations-survey]] | Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over. | draft | 2026-05-02 | 2 |
+| [[nextflow-operators-to-galaxy-collection-recipes]] | Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers. | draft | 2026-05-02 | 1 |
+| [[nextflow-to-galaxy-channel-shape-mapping]] | Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes. | draft | 2026-05-02 | 1 |
+| [[component-nextflow-containers-and-envs]] | Stub. Biocontainers / bioconda equivalence, Docker/Singularity refs, container directive resolution. Grows from cast contact — see issue #17. | draft | 2026-05-01 | 1 |
+| [[component-nextflow-inspect]] | White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision. | draft | 2026-05-01 | 1 |
+| [[component-nextflow-pipeline-anatomy]] | Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17. | draft | 2026-05-01 | 1 |
+| [[component-nextflow-testing]] | Stub. conf/test.config, nf-core/test-datasets, nf-test idioms, samplesheet conventions. Grows from cast contact — see issue #17. | draft | 2026-05-01 | 1 |
+| [[component-nf-core-tools]] | White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision. | draft | 2026-05-01 | 1 |
+| [[component-tool-shed-search]] | Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload | draft | 2026-04-30 | 1 |
+| [[iwc-shortcuts-anti-patterns]] | What IWC test suites cut corners on (accepted) vs what's a code smell — existence-only probes, sim_size deltas, image dim checks, label coupling. | draft | 2026-04-30 | 1 |
+| [[planemo-asserts-idioms]] | Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate. | draft | 2026-04-30 | 1 |

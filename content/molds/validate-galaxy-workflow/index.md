@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures."
 references:
@@ -22,6 +22,14 @@ references:
     purpose: "Validate the assembled gxformat2 workflow before runtime testing."
     trigger: "After all Galaxy steps and workflow tests have been assembled."
     verification: "Run the cast skill on a complete IWC-derived workflow and confirm terminal validation findings are separated from runtime test failures."
+  - kind: research
+    ref: "[[galaxy-workflow-invocation-failure-reference]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Keep static workflow validation findings distinct from Galaxy invocation/runtime failure surfaces."
+    trigger: "When a workflow passes gxwf validation but still has likely runtime risks around invocation scheduling, outputs, conditionals, or collection population."
 ---
 
 # validate-galaxy-workflow

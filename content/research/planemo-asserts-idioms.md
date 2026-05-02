@@ -6,14 +6,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 related_notes:
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[implement-galaxy-workflow-test]]"
   - "[[tests-format]]"
+  - "[[planemo-workflow-test-architecture]]"
 summary: "Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate."
 ---
 

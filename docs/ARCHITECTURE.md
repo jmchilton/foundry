@@ -89,7 +89,7 @@ Validation injects the registry keys into the schema at runtime (`scripts/lib/sc
 
 Tag families:
 - **Note-type tags** (`mold`, `pattern`, `cli-command`, `pipeline`, `research/*`) — every note carries exactly one. Coherence-checked.
-- **`iwc/*` (IWC domain coverage)** — zero or more on patterns and Molds; the one subject-area family committed for v1. Hand-maintained vocabulary; seeded once from current IWC categories. Drives the `iwc-overview.md` aggregation page (§8) and `tags/iwc/<category>` browse pages. See `CORPUS_INGESTION.md`.
+- **`iwc/*` (IWC domain coverage)** — deferred. Earlier plans had this as a hand-maintained IWC category vocabulary; current pattern work relies on corpus citations in bodies instead of an IWC tag aggregation surface.
 - **`cli/*` (CLI affiliation)** — every `cli-command` note carries `cli/<tool>` (e.g., `cli/gxwf`, `cli/planemo`). Drives per-tool browse pages and action-Mold reference surfaces.
 - **Source/target/tool axis tags** (`source/paper`, `source/nextflow`, `source/cwl`, `target/galaxy`, `target/cwl`, `tool/gxwf`, `tool/planemo`) — for Molds. Whether these graduate into typed frontmatter fields or stay as tags is an open question; tags are cheap to start with.
 
@@ -198,7 +198,7 @@ Layered validation (`validateData` orchestrates):
 
 ```ts
 const SKIP_DIRS = new Set([".obsidian", "casts"]);
-const SKIP_FILES = new Set(["Dashboard.md", "Index.md", "iwc-overview.md", "log.md", "glossary.md"]);
+const SKIP_FILES = new Set(["Dashboard.md", "Index.md", "log.md", "glossary.md"]);
 const DIR_NOTE_TYPES = new Set(["molds"]);
 ```
 
@@ -260,9 +260,7 @@ Pipelines lead the dashboard because they are the **primary task surface** of th
 
 `scripts/generate-index.ts` walks `findMdFiles` (reusing the validator's skip logic), groups by type, emits the file. Directory-note slugs use the parent directory name.
 
-**`content/iwc-overview.md`** — Auto-generated grouping of every `iwc/<category>` tag into a single dashboard, with counts and per-category lists of patterns + Molds. Single landing page for "what does the Foundry have for variant-calling, RNA-seq, …". Detail in `CORPUS_INGESTION.md`.
-
-**Drift detection**: `--check` flag on every generator reads the file and string-compares with re-generation; exit 1 on mismatch. Wired into `npm run check:dashboard`, `check:index`, `check:iwc-overview`. Designed as CI gates, run from day one.
+**Drift detection**: `--check` flag on every generator reads the file and string-compares with re-generation; exit 1 on mismatch. Wired into `npm run check:dashboard` and `check:index`.
 
 ## 9. Authoring flow
 
@@ -332,7 +330,7 @@ Routes:
 
 Theme: CSS custom properties under `@theme { ... }` with `@custom-variant dark` and a `.dark { ... }` override block. Status badges (`.badge-draft`, …) and `.tag` chips first-class. `.dangling` styles unresolved wiki links muted+italic.
 
-Deployment: minimal two-job GitHub Actions on push to `main` (`withastro/action@v3` + `actions/deploy-pages@v4`). CI runs `npm run validate`, `check:index`, `check:dashboard`, `check:iwc-overview`, and `test` *before* the deploy.
+Deployment: minimal two-job GitHub Actions on push to `main` (`withastro/action@v3` + `actions/deploy-pages@v4`). CI runs `npm run validate`, `check:index`, `check:dashboard`, and `test` *before* the deploy.
 
 ## 12. Ingestion and maintenance
 
@@ -356,7 +354,6 @@ One ingestion spine — Mold casting. There is no IWC ingestion (see `CORPUS_ING
 - `test` — Vitest suite.
 - `dashboard` / `check:dashboard` — Obsidian dashboard.
 - `index` / `check:index` — flat catalog.
-- `iwc-overview` / `check:iwc-overview` — IWC category aggregation.
 - `cast -- --mold=<slug> --target=<target>` — one-shot cast.
 - `site:dev` / `site:build` / `site:preview` — Astro lifecycle.
 
@@ -405,7 +402,6 @@ foundry/
 ├── content/
 │   ├── Dashboard.md                      # generated; --check
 │   ├── Index.md                          # generated; --check
-│   ├── iwc-overview.md                   # generated; --check
 │   ├── log.md                            # append-only operations journal
 │   ├── glossary.md                       # hand-curated terminology; skipped by validator
 │   ├── schemas/                          # Mold IO schemas (the schema library)
@@ -468,7 +464,6 @@ foundry/
 │   ├── validate.ts
 │   ├── generate-dashboard.ts
 │   ├── generate-index.ts
-│   ├── generate-iwc-overview.ts
 │   ├── seed-iwc-tags.ts                  # one-time, then archived
 │   ├── cast-mold.ts
 │   ├── status.ts                         # cast drift detection

@@ -13,11 +13,12 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch."
 related_notes:
   - "[[iwc-conditionals-survey]]"
+  - "[[iwc-parameter-derivation-survey]]"
 related_patterns:
   - "[[conditional-route-between-alternative-outputs]]"
   - "[[conditional-gate-on-nonempty-result]]"
@@ -56,6 +57,10 @@ Do not use this for data-derived emptiness checks unless you first compute a boo
 - Step gate: set `when: $(inputs.when)` on every step that belongs to the optional branch.
 
 For a multi-step optional branch, repeat the same boolean connection and `when:` expression on each gated step. Do not rely on one upstream gated step to implicitly suppress every downstream consumer; make the branch boundary explicit.
+
+The `when` source does not have to be a raw workflow boolean. If the workflow-facing input is an enum, integer, text value, or inverted boolean, normalize it first with `map_param_value` and connect `output_param_boolean` as `id: when`.
+
+If multiple mapped booleans select among peer alternatives and downstream needs one merged output, use [[conditional-route-between-alternative-outputs]] instead.
 
 ## Idiomatic Shapes
 
@@ -110,6 +115,7 @@ The second shape is conceptual, derived from the VGP Hi-C suffixing branch. The 
 - Gating only the first step of a branch. If later optional steps should also disappear, put `when:` on those steps too.
 - Consuming a missing optional output unconditionally. If downstream requires a value regardless of the boolean, add an explicit merge/fallback with `pick_value`.
 - Confusing user choice with data-derived choice. Empty/non-empty result checks need a separate boolean-producing shim before `when:`.
+- Duplicating normalization logic inside optional tools. If the gate depends on a derived boolean, compute it once and connect that boolean as `id: when`.
 - Leading with `__FILTER_NULL__` as conditional cleanup. The survey found zero `__FILTER_NULL__` hits in `$IWC_FORMAT2`; keep it as catalog knowledge, not the corpus-backed authoring path.
 
 ## Exemplars (IWC)
@@ -119,10 +125,12 @@ The second shape is conceptual, derived from the VGP Hi-C suffixing branch. The 
 - `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1082-1140` — RNA-seq gates the optional StringTie FPKM branch with `Compute StringTie FPKM`.
 - `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1141-1214` — RNA-seq gates the optional Cufflinks FPKM branch separately with `Compute Cufflinks FPKM`.
 - `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:338-459` — VGP Hi-C gates a multi-step suffixing branch with a user boolean; downstream fallback uses `pick_value`, marking the boundary with [[conditional-transform-or-pass-through]].
+- `$IWC_FORMAT2/VGP-assembly-v2/Assembly-decontamination-VGP9/Assembly-decontamination-VGP9.gxwf.yml:205-305` — integer-derived value is normalized with `map_param_value`, then the boolean gates optional filtering steps.
 
 ## See Also
 
 - [[iwc-conditionals-survey]] — Candidate A decision and boundaries with route/non-empty candidates.
+- [[iwc-parameter-derivation-survey]] — parameter survey boundary for mapped booleans.
 - [[galaxy-conditionals-patterns]] — conditionals MOC.
 - [[conditional-route-between-alternative-outputs]] — mutually exclusive branches merged by `pick_value`.
 - [[conditional-gate-on-nonempty-result]] — booleans computed from dataset or collection emptiness.

@@ -11,3 +11,9 @@
 - check: llm-judged
 - fixture: partial workflow where a selected Tool Shed wrapper lacks an expected parameter.
 - expectation: distinguishes fix-in-step from re-summarize/re-author wrapper work and explains the recommended loop target.
+
+## Case: tool failure semantics visibility
+
+- check: llm-judged
+- fixture: partial workflow step whose selected wrapper has non-default failure detection, such as explicit stdio regexes, exit-code ranges, or strict-shell behavior.
+- expectation: records whether static step validation can see the relevant tool failure semantics and what job API fields must be inspected if the step later fails at runtime.

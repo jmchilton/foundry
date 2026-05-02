@@ -8,15 +8,17 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 summary: "Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[iwc-parameter-derivation-survey]]"
 related_patterns:
   - "[[tabular-cut-and-reorder-columns]]"
   - "[[tabular-sql-query]]"
+  - "[[derive-parameter-from-file]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
 ---
@@ -32,6 +34,8 @@ related_molds:
 Insert, replace, or append a column whose value is a Python expression over the existing `cN` columns. Multiple expressions can be sequenced inside a single tool step (each one operates on the running output of the previous). Use this for arithmetic, simple type coercion, and string concatenation.
 
 If the row decision needs a multi-line conditional or `split`/`gsub`, prefer awk (see the awk recipe sub-pages cross-referenced from [[iwc-tabular-operations-survey]]). If columns and a row predicate are computed together, prefer [[tabular-sql-query]].
+
+If the computed table value is only an intermediate scalar or boolean that will be read back with `param_value_from_file`, keep the `column_maker` mechanics here but follow [[derive-parameter-from-file]] or [[conditional-gate-on-nonempty-result]] downstream. MGnify uses this shape for `c1 != 0` before reading the result as a boolean.
 
 ## Parameters
 
@@ -148,6 +152,7 @@ Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting
 - `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:307-329` — raw-`cN` arithmetic, `auto_col_types: true`, insert + replace pair.
 - `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:438-475` — string concat, `auto_col_types: false`, append (`mode: ""`).
 - `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:343-378` — explicit-cast arithmetic (`int(c2) - …`), `auto_col_types: false`, `--skip-non-computable`. Counter-example to "arithmetic always implies `auto_col_types: true`."
+- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1396-1463` — computes `c1 != 0`, then reads the result as a boolean parameter for a non-empty gate.
 
 ## Legacy alternative
 
@@ -156,5 +161,7 @@ Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting
 ## See also
 
 - [[iwc-tabular-operations-survey]] — corpus survey, §7 decision record for the `auto_col_types` rule.
+- [[iwc-parameter-derivation-survey]] — compute-then-parameterize seam.
 - [[tabular-cut-and-reorder-columns]] — pure column projection without computation.
 - [[tabular-sql-query]] — when project + compute + filter need to fuse.
+- [[derive-parameter-from-file]] — when a one-value dataset must become a typed runtime parameter.

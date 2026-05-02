@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-02
-revision: 2
+revision: 3
 ai_generated: true
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
 references:
@@ -69,6 +69,14 @@ references:
     evidence: corpus-observed
     purpose: "Choose corpus-attested tabular recipes when implementing concrete Galaxy steps."
     trigger: "When implementation needs row filtering, column projection, computed columns, joins, grouping, SQL, awk, text-processing wrappers, or tabular-collection bridges."
+  - kind: research
+    ref: "[[galaxy-tool-job-failure-reference]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Preserve concrete tool/job failure evidence while implementing step labels, tool ids, output labels, and collection wiring."
+    trigger: "When a selected wrapper has explicit failure semantics, dynamic outputs, non-default stdio rules, strict-shell behavior, or runtime-only failure risk."
 ---
 # implement-galaxy-tool-step
 

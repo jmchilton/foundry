@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve } from "node:path";
+import YAML from "yaml";
 
 interface Summary {
   source: Record<string, unknown>;
@@ -9,11 +10,36 @@ interface Summary {
   profiles: string[];
   tools: Tool[];
   processes: Process[];
-  subworkflows: unknown[];
-  workflow: { name: string; channels: unknown[]; edges: unknown[]; conditionals: unknown[] };
+  subworkflows: Subworkflow[];
+  workflow: { name: string; channels: Channel[]; edges: Edge[]; conditionals: unknown[] };
   test_fixtures: { profile: string; inputs: TestDataRef[]; outputs: unknown[] };
   nf_tests: NfTest[];
   warnings: string[];
+}
+
+interface Subworkflow {
+  name: string;
+  path: string;
+  kind: "pipeline" | "utility";
+  calls: string[];
+  inputs?: ChannelIO[];
+  outputs?: ChannelIO[];
+}
+
+interface ParsedWorkflow extends Subworkflow {
+  body: string;
+}
+
+interface Channel {
+  name: string;
+  source: string;
+  shape: string;
+}
+
+interface Edge {
+  from: string;
+  to: string;
+  via?: string[];
 }
 
 interface Param {
@@ -101,7 +127,13 @@ export async function resolveNextflowSummary(
   const processes = discoverProcessFiles(pipelineRoot).map((path) =>
     parseProcessFile(pipelineRoot, path),
   );
+  const aliases = discoverProcessAliases(pipelineRoot);
   const tools = buildTools(pipelineRoot, processes);
+  const workflows = parseWorkflows(
+    pipelineRoot,
+    processes.map((process) => process.name),
+  );
+  const primaryWorkflow = selectPrimaryWorkflow(workflows);
 
   const summary: Summary = {
     source: {
@@ -120,14 +152,17 @@ export async function resolveNextflowSummary(
     tools,
     processes: processes.map((process) => ({
       ...process,
+      aliases: aliases.get(process.name) ?? [],
       tool:
         tools.find((tool) => process.name.toLowerCase().includes(tool.name))?.name ?? process.tool,
     })),
-    subworkflows: [],
+    subworkflows: workflows
+      .filter((workflow) => workflow.name !== primaryWorkflow?.name)
+      .map(stripWorkflowBody),
     workflow: {
-      name: workflowName.split("/").at(-1)?.toUpperCase() ?? "WORKFLOW",
-      channels: [],
-      edges: [],
+      name: primaryWorkflow?.name ?? workflowName.split("/").at(-1)?.toUpperCase() ?? "WORKFLOW",
+      channels: primaryWorkflow ? parseWorkflowChannels(primaryWorkflow.body) : [],
+      edges: primaryWorkflow ? parseWorkflowEdges(primaryWorkflow.body, primaryWorkflow.calls) : [],
       conditionals: [],
     },
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
@@ -287,6 +322,179 @@ function parseProcessFile(pipelineRoot: string, path: string): Process {
   };
 }
 
+function discoverProcessAliases(pipelineRoot: string): Map<string, string[]> {
+  const aliases = new Map<string, Set<string>>();
+  for (const path of walk(pipelineRoot).filter((candidate) => candidate.endsWith(".nf"))) {
+    for (const include of parseIncludeItems(readText(path))) {
+      if (!include.alias || include.alias === include.name) continue;
+      const existing = aliases.get(include.name) ?? new Set<string>();
+      existing.add(include.alias);
+      aliases.set(include.name, existing);
+    }
+  }
+  return new Map([...aliases.entries()].map(([name, values]) => [name, [...values].sort()]));
+}
+
+function parseWorkflows(pipelineRoot: string, processNames: string[]): ParsedWorkflow[] {
+  const workflows = new Map<string, ParsedWorkflow>();
+  const knownProcesses = new Set(processNames);
+  for (const path of walk(pipelineRoot).filter((candidate) => candidate.endsWith(".nf"))) {
+    const text = readText(path);
+    const importedNames = new Set(
+      parseIncludeItems(text).map((include) => include.alias ?? include.name),
+    );
+    for (const block of extractWorkflowBlocks(text)) {
+      if (!block.name) continue;
+      const calls = parseWorkflowCalls(block.body, new Set([...knownProcesses, ...importedNames]));
+      workflows.set(block.name, {
+        name: block.name,
+        path: relative(pipelineRoot, path),
+        kind: calls.length > 0 ? "pipeline" : "utility",
+        calls,
+        inputs: parseWorkflowIoBlock(block.body, "take"),
+        outputs: parseWorkflowIoBlock(block.body, "emit"),
+        body: block.body,
+      });
+    }
+  }
+  return [...workflows.values()].sort((left, right) => left.path.localeCompare(right.path));
+}
+
+function selectPrimaryWorkflow(workflows: ParsedWorkflow[]): ParsedWorkflow | null {
+  return (
+    [...workflows].sort((left, right) => {
+      const callDiff = right.calls.length - left.calls.length;
+      if (callDiff !== 0) return callDiff;
+      const pathDiff =
+        Number(right.path.startsWith("workflows/")) - Number(left.path.startsWith("workflows/"));
+      if (pathDiff !== 0) return pathDiff;
+      return left.name.localeCompare(right.name);
+    })[0] ?? null
+  );
+}
+
+function stripWorkflowBody(workflow: ParsedWorkflow): Subworkflow {
+  const { body: _body, ...summaryWorkflow } = workflow;
+  return summaryWorkflow;
+}
+
+function extractWorkflowBlocks(text: string): { name: string | null; body: string }[] {
+  const blocks: { name: string | null; body: string }[] = [];
+  const regex = /\bworkflow(?:\s+([A-Za-z0-9_]+))?\s*\{/gu;
+  for (const match of text.matchAll(regex)) {
+    const openIndex = match.index + match[0].lastIndexOf("{");
+    const body = extractBlockAt(text, openIndex);
+    if (body !== null) blocks.push({ name: match[1] ?? null, body });
+  }
+  return blocks;
+}
+
+function parseWorkflowCalls(body: string, knownNames: Set<string>): string[] {
+  const calls = new Set<string>();
+  for (const match of body.matchAll(/^\s*([A-Z][A-Z0-9_]+)\s*\(/gmu)) {
+    const name = match[1]!;
+    if (knownNames.has(name)) calls.add(name);
+  }
+  return [...calls].sort();
+}
+
+function parseWorkflowChannels(body: string): Channel[] {
+  const channels = new Map<string, Channel>();
+  for (const match of body.matchAll(/^\s*(ch_[A-Za-z0-9_]+)\s*=\s*([^\n]+)/gmu)) {
+    channels.set(match[1]!, {
+      name: match[1]!,
+      source: match[2]!.trim(),
+      shape: "channel",
+    });
+  }
+  for (const match of body.matchAll(
+    /([A-Za-z0-9_.()\s]+)\s*\.set\s*\{\s*(ch_[A-Za-z0-9_]+)\s*\}/gu,
+  )) {
+    channels.set(match[2]!, {
+      name: match[2]!,
+      source: match[1]!.replace(/\s+/gu, " ").trim(),
+      shape: "channel",
+    });
+  }
+  return [...channels.values()].sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function parseWorkflowEdges(body: string, calls: string[]): Edge[] {
+  const callNames = new Set(calls);
+  const edges: Edge[] = [];
+  for (const invocation of extractCallInvocations(body)) {
+    if (!callNames.has(invocation.name)) continue;
+    for (const argument of invocation.arguments) {
+      edges.push({ from: argument, to: invocation.name, via: [] });
+    }
+  }
+  return edges;
+}
+
+function extractCallInvocations(body: string): { name: string; arguments: string[] }[] {
+  const invocations: { name: string; arguments: string[] }[] = [];
+  const lines = body.split("\n");
+  for (let index = 0; index < lines.length; index += 1) {
+    const singleLine = /^\s*([A-Z][A-Z0-9_]+)\s*\(([^)]*)\)\s*$/u.exec(lines[index]!);
+    if (singleLine) {
+      invocations.push({
+        name: singleLine[1]!,
+        arguments: splitCallArguments(singleLine[2]!),
+      });
+      continue;
+    }
+    const start = /^\s*([A-Z][A-Z0-9_]+)\s*\(\s*$/u.exec(lines[index]!);
+    if (!start) continue;
+    const args: string[] = [];
+    for (index += 1; index < lines.length; index += 1) {
+      const line = lines[index]!.trim();
+      if (line === ")") break;
+      const argument = line.replace(/,$/u, "").trim();
+      if (argument && !argument.startsWith("//")) args.push(argument);
+    }
+    invocations.push({ name: start[1]!, arguments: args });
+  }
+  return invocations;
+}
+
+function splitCallArguments(text: string): string[] {
+  return text
+    .split(",")
+    .map((argument) => argument.trim())
+    .filter(Boolean);
+}
+
+function parseWorkflowIoBlock(text: string, blockName: "take" | "emit"): ChannelIO[] {
+  const block = matchOne(
+    text,
+    new RegExp(`${blockName}:\\s*\\n([\\s\\S]*?)(?:\\n\\s*(?:take|main|emit):|$)`, "u"),
+  );
+  if (!block) return [];
+  return block
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith("//"))
+    .map((line) => ({
+      name:
+        matchOne(line, /^([A-Za-z0-9_]+)\s*=/u) ??
+        matchOne(line, /^([A-Za-z0-9_]+)/u) ??
+        `io_${Math.abs(hash(line))}`,
+      shape: line.replace(/\s+/gu, " "),
+      topic: null,
+    }));
+}
+
+function parseIncludeItems(text: string): { name: string; alias: string | null }[] {
+  const items: { name: string; alias: string | null }[] = [];
+  for (const match of text.matchAll(/include\s*\{([^}]+)\}\s*from\s*['"][^'"]+['"]/gu)) {
+    for (const item of match[1]!.split(";")) {
+      const include = /^\s*([A-Za-z0-9_]+)(?:\s+as\s+([A-Za-z0-9_]+))?\s*$/u.exec(item);
+      if (include) items.push({ name: include[1]!, alias: include[2] ?? null });
+    }
+  }
+  return items;
+}
+
 function normalizeDirective(value: string | null): string | null {
   if (!value) return null;
   return value.replace(/\s+/gu, " ").trim();
@@ -325,31 +533,49 @@ function buildTools(pipelineRoot: string, processes: Process[]): Tool[] {
   const tools = new Map<string, Tool>();
   for (const process of processes) {
     const envPath = join(pipelineRoot, dirname(process.module_path), "environment.yml");
-    const bioconda = existsSync(envPath)
-      ? matchOne(readText(envPath), /-\s*(bioconda::([A-Za-z0-9_.-]+)=([^\s]+))/u)
-      : null;
-    const name = bioconda ? matchOne(bioconda, /bioconda::([A-Za-z0-9_.-]+)=/u) : null;
-    const version = bioconda ? matchOne(bioconda, /=([^\s]+)/u) : null;
-    if (!name || !version) continue;
     const containerStrings = [...(process.container ?? "").matchAll(/'([^']+)'/gu)]
       .map((match) => match[1]!)
       .filter((value) => value.includes(":") || value.includes("/"));
-    tools.set(name, {
-      name,
-      version,
-      biocontainer: containerStrings.find((value) => value.includes("biocontainers/")) ?? null,
-      bioconda,
-      docker: containerStrings.find((value) => !isKnownContainer(value)) ?? null,
-      singularity:
-        containerStrings.find(
-          (value) =>
-            value.includes("depot.galaxyproject.org/singularity") ||
-            value.includes("community-cr-prod.seqera.io"),
-        ) ?? null,
-      wave: containerStrings.find((value) => value.includes("community.wave.seqera.io")) ?? null,
-    });
+    for (const dependency of existsSync(envPath)
+      ? parseBiocondaDependencies(readText(envPath))
+      : []) {
+      tools.set(dependency.name, {
+        name: dependency.name,
+        version: dependency.version,
+        biocontainer: containerStrings.find((value) => value.includes("biocontainers/")) ?? null,
+        bioconda: dependency.spec,
+        docker: containerStrings.find((value) => !isKnownContainer(value)) ?? null,
+        singularity:
+          containerStrings.find(
+            (value) =>
+              value.includes("depot.galaxyproject.org/singularity") ||
+              value.includes("community-cr-prod.seqera.io"),
+          ) ?? null,
+        wave: containerStrings.find((value) => value.includes("community.wave.seqera.io")) ?? null,
+      });
+    }
   }
   return [...tools.values()];
+}
+
+function parseBiocondaDependencies(
+  text: string,
+): { name: string; version: string; spec: string }[] {
+  const data = YAML.parse(text) as { dependencies?: unknown[] } | null;
+  return (data?.dependencies ?? [])
+    .filter((dependency): dependency is string => typeof dependency === "string")
+    .map(parseBiocondaDependency)
+    .filter((dependency): dependency is { name: string; version: string; spec: string } =>
+      Boolean(dependency),
+    );
+}
+
+function parseBiocondaDependency(
+  spec: string,
+): { name: string; version: string; spec: string } | null {
+  const match = /^bioconda::([A-Za-z0-9_.-]+)(?:=([^=\s]+))?/u.exec(spec);
+  if (!match) return null;
+  return { name: match[1]!, version: match[2] ?? "unknown", spec };
 }
 
 function isKnownContainer(value: string): boolean {
@@ -550,34 +776,35 @@ function parseNfTests(pipelineRoot: string): NfTest[] {
   const testsRoot = join(pipelineRoot, "tests");
   return walk(testsRoot)
     .filter((path) => path.endsWith(".nf.test"))
-    .map((path) => {
+    .flatMap((path) => {
       const text = readText(path);
       const relPath = relative(pipelineRoot, path);
-      const name = matchOne(text, /test\("([^"]+)"\)/u) ?? basename(path);
-      return {
-        name,
+      const fileProfiles = parseNfTestFileProfiles(text);
+      const blocks = extractNfTestBlocks(text);
+      return blocks.map((block) => ({
+        name: block.name,
         path: relPath,
-        profiles: parseNfTestProfiles(text, name),
-        params_overrides: parseParamsOverrides(text),
-        assert_workflow_success: text.includes("workflow.success"),
-        snapshot: text.includes("snapshot(")
-          ? {
-              captures: ["versions_yml", "stable_names", "stable_paths"],
-              helpers: [...text.matchAll(/\b([A-Za-z0-9_]+)\(/gu)]
-                .map((match) => match[1]!)
-                .filter((value) => ["getAllFilesFromDir", "removeNextflowVersion"].includes(value)),
-              ignore_files: [...text.matchAll(/ignoreFile:\s*['"]([^'"]+)['"]/gu)].map(
-                (match) => match[1]!,
-              ),
-              ignore_globs: [...text.matchAll(/ignore:\s*\[([^\]]+)\]/gu)].flatMap((match) =>
-                [...match[1]!.matchAll(/['"]([^'"]+)['"]/gu)].map((inner) => inner[1]!),
-              ),
-              snap_path: existsSync(`${path}.snap`) ? `${relPath}.snap` : null,
-            }
-          : null,
-        prose_assertions: [],
-      };
+        profiles: unique([...parseNfTestProfiles(block.body, block.name), ...fileProfiles]),
+        params_overrides: parseParamsOverrides(block.body),
+        assert_workflow_success: block.body.includes("workflow.success"),
+        snapshot: parseSnapshot(path, relPath, block.body),
+        prose_assertions: parseProseAssertions(block.body),
+      }));
     });
+}
+
+function parseNfTestFileProfiles(text: string): string[] {
+  return unique([...text.matchAll(/^\s*profile\s+["']([^"']+)["']/gmu)].map((match) => match[1]!));
+}
+
+function extractNfTestBlocks(text: string): { name: string; body: string }[] {
+  const blocks: { name: string; body: string }[] = [];
+  for (const match of text.matchAll(/\btest\("([^"]+)"\)\s*\{/gu)) {
+    const openIndex = match.index + match[0].lastIndexOf("{");
+    const body = extractBlockAt(text, openIndex);
+    if (body !== null) blocks.push({ name: match[1]!, body });
+  }
+  return blocks.length > 0 ? blocks : [{ name: "unnamed", body: text }];
 }
 
 function parseNfTestProfiles(text: string, name: string): string[] {
@@ -602,6 +829,42 @@ function parseParamsOverrides(text: string): Record<string, unknown> {
   return values;
 }
 
+function parseSnapshot(path: string, relPath: string, text: string): NfTest["snapshot"] {
+  if (!text.includes("snapshot(")) return null;
+  return {
+    captures: parseSnapshotCaptures(text),
+    helpers: unique(
+      [...text.matchAll(/\b([A-Za-z0-9_]+)\(/gu)]
+        .map((match) => match[1]!)
+        .filter((value) => ["getAllFilesFromDir", "removeNextflowVersion"].includes(value)),
+    ),
+    ignore_files: [...text.matchAll(/ignoreFile:\s*['"]([^'"]+)['"]/gu)].map((match) => match[1]!),
+    ignore_globs: [...text.matchAll(/ignore:\s*\[([^\]]+)\]/gu)].flatMap((match) =>
+      [...match[1]!.matchAll(/['"]([^'"]+)['"]/gu)].map((inner) => inner[1]!),
+    ),
+    snap_path: existsSync(`${path}.snap`) ? `${relPath}.snap` : null,
+  };
+}
+
+function parseSnapshotCaptures(text: string): string[] {
+  const captures: string[] = [];
+  if (/workflow\.trace\.succeeded\(\)\.size\(\)/u.test(text)) captures.push("succeeded_task_count");
+  if (/removeNextflowVersion\(/u.test(text)) captures.push("versions_yml");
+  for (const match of text.matchAll(/\b(stable_[A-Za-z0-9_]+)\b/gu)) {
+    const capture = match[1]!
+      .replace(/^stable_name$/u, "stable_names")
+      .replace(/^stable_path$/u, "stable_paths");
+    captures.push(capture);
+  }
+  return unique(captures);
+}
+
+function parseProseAssertions(text: string): string[] {
+  return [...text.matchAll(/assert\s+(?!workflow\.success\b)([^}\n]+)/gu)]
+    .map((match) => match[1]!.trim())
+    .filter((assertion) => !assertion.startsWith("snapshot("));
+}
+
 function summarizeScript(name: string): string {
   const tool = name.toLowerCase().replace(/_/gu, " ");
   return `Run ${tool} and emit declared Nextflow outputs.`;
@@ -610,16 +873,26 @@ function summarizeScript(name: string): string {
 function extractNamedBlock(text: string, name: string): string | null {
   const startMatch = new RegExp(`\\b${name}\\s*\\{`, "u").exec(text);
   if (!startMatch) return null;
+  const openIndex = text.indexOf("{", startMatch.index);
+  const block = extractBlockAt(text, openIndex);
+  return block === null ? null : text.slice(startMatch.index, openIndex + block.length + 2);
+}
+
+function extractBlockAt(text: string, openIndex: number): string | null {
   let depth = 0;
-  for (let index = startMatch.index; index < text.length; index += 1) {
+  for (let index = openIndex; index < text.length; index += 1) {
     const char = text[index];
     if (char === "{") depth += 1;
     if (char === "}") {
       depth -= 1;
-      if (depth === 0) return text.slice(startMatch.index, index + 1);
+      if (depth === 0) return text.slice(openIndex + 1, index);
     }
   }
   return null;
+}
+
+function unique<T>(values: T[]): T[] {
+  return [...new Set(values)];
 }
 
 function matchOne(text: string, regex: RegExp): string | null {
