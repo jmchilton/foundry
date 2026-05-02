@@ -95,8 +95,10 @@ const moldSchema = z.object({
 const patternSchema = z.object({
   type: z.literal('pattern'),
   pattern_kind: z.enum(['leaf', 'moc']),
+  evidence: z.enum(['corpus-observed', 'structurally-verified', 'corpus-and-verified', 'hypothesis']),
   title: z.string(),
   parent_pattern: wikiLink.optional(),
+  verification_paths: z.array(z.string()).optional(),
   ...baseFields,
 }).strict();
 

@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: moc
+evidence: corpus-observed
 title: "Galaxy: conditionals patterns"
 aliases:
   - "Galaxy conditional pattern MOC"

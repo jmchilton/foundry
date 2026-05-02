@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Parameter: compose runtime text parameter"
 aliases:
   - "compose_text_param"

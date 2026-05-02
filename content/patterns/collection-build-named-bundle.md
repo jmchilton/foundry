@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Collection: build named bundle"
 aliases:
   - "collection build list named outputs"

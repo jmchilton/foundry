@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Collection: sync collections by identifier"
 aliases:
   - "collection sync by identifier"

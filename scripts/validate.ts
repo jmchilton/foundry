@@ -576,6 +576,54 @@ function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
   return findings;
 }
 
+function validatePatternVerificationEvidence(files: FileMeta[]): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    if (f.meta.type === "pattern") {
+      validatePatternVerificationPaths(f, findings);
+    }
+  }
+  return findings;
+}
+
+function validatePatternVerificationPaths(file: FileMeta, findings: CrossFileFinding[]): void {
+  const verificationPaths = Array.isArray(file.meta.verification_paths) ? file.meta.verification_paths : [];
+  for (const verificationPath of verificationPaths) {
+    if (typeof verificationPath !== "string") continue;
+    const abs = path.resolve(process.cwd(), verificationPath);
+    if (!existsSync(abs)) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `verification_paths: file does not exist: ${verificationPath}`,
+      });
+    } else if (!statSync(abs).isFile()) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `verification_paths: path is not a file: ${verificationPath}`,
+      });
+    }
+  }
+
+  const evidence = file.meta.evidence;
+  if (evidence === "structurally-verified" || evidence === "corpus-and-verified") {
+    if (verificationPaths.length === 0) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `evidence=${evidence} requires at least one verification path`,
+      });
+    }
+  } else if ((evidence === "corpus-observed" || evidence === "hypothesis") && verificationPaths.length > 0) {
+    findings.push({
+      path: file.path,
+      severity: "error",
+      message: `evidence=${evidence} must not declare verification_paths`,
+    });
+  }
+}
+
 function listMarkdownFiles(dir: string): string[] {
   const files: string[] = [];
   for (const entry of readdirSync(dir).sort()) {
@@ -670,6 +718,7 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateMoldSourceLayout(opts.directory, validFiles.filter((f) => f.meta.type === "mold")));
   crossFindings.push(...validateCliCommandDocs(validFiles));
+  crossFindings.push(...validatePatternVerificationEvidence(validFiles));
 
   for (const f of crossFindings) {
     printHeader(f.path);

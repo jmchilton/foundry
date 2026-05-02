@@ -29,6 +29,7 @@ const baseRequired = (overrides: Record<string, unknown> = {}) => ({
 
 const patternRequired = (overrides: Record<string, unknown> = {}) => baseRequired({
   pattern_kind: "leaf",
+  evidence: "corpus-observed",
   ...overrides,
 });
 
@@ -200,7 +201,6 @@ describe("validateDirectory (cross-file)", () => {
   });
 
   it("validates a tiny vault end-to-end", () => {
-
     writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
 
     const r = validateDirectory({
@@ -210,6 +210,70 @@ describe("validateDirectory (cross-file)", () => {
     });
     expect(r.errors).toBe(0);
     expect(r.filesChecked).toBe(1);
+  });
+
+  it("accepts verified evidence with an existing verification path", () => {
+    const workflowFile = path.join(dir, "verification-workflows/gate.gxformat2.yml");
+    mkdirSync(path.dirname(workflowFile), { recursive: true });
+    writeFileSync(workflowFile, "class: GalaxyWorkflow\n");
+    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
+      title: "Pattern X",
+      evidence: "corpus-and-verified",
+      verification_paths: [path.relative(repoRoot, workflowFile)],
+    }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+  });
+
+  it("rejects a missing verification path", () => {
+    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
+      title: "Pattern X",
+      evidence: "corpus-and-verified",
+      verification_paths: ["verification/workflows/missing/gate.gxformat2.yml"],
+    }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("rejects structurally verified evidence without verification paths", () => {
+    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
+      title: "Pattern X",
+      evidence: "structurally-verified",
+    }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("rejects corpus-observed evidence with verification paths", () => {
+    const workflowFile = path.join(dir, "verification-workflows/gate.gxformat2.yml");
+    mkdirSync(path.dirname(workflowFile), { recursive: true });
+    writeFileSync(workflowFile, "class: GalaxyWorkflow\n");
+    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
+      title: "Pattern X",
+      verification_paths: [path.relative(repoRoot, workflowFile)],
+    }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
   it("flags pipeline phase resolving to non-Mold", () => {

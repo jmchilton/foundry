@@ -157,7 +157,7 @@ Call: **keep**. This is distinct from generic optional branching because the boo
 
 User story: a generated Galaxy workflow needs to skip optional reporting/export steps when an upstream dataset or collection is empty. The corpus-backed MGnify recipe proves the shape by turning collection membership into a boolean through `collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file`, then using that boolean as `inputs.when`. This is structurally useful but clunky: it is a four-step shim for one boolean, so the pattern page should present it as verified IWC precedent, not necessarily the preferred authoring target.
 
-TODO: revisit this candidate after adding a small verified-pattern workflow that tests the non-empty gate directly. If a shorter Galaxy-native `when` expression or expression-tool boolean shim validates cleanly, lead with the smaller verified pattern and keep the MGnify shape as corpus-observed fallback evidence.
+Verification outcome: `verification/workflows/conditional-gate-on-nonempty-result/gate-on-nonempty.gxwf-test.yml` passes under Planemo against Galaxy `release_25.1` with the MGnify-style shim. Direct `when` over the collection failed with `when_not_boolean`, and an embedded CWL `ExpressionTool` shim failed gxformat2 validation, so the known-good recipe remains `collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file -> when`.
 
 ### Candidate D: `conditional-transform-or-pass-through`
 
@@ -192,7 +192,7 @@ Call: **merge** into the collection-cleanup pattern family; do not create a cond
 
 2. Answered for now: keep `conditional-transform-or-pass-through` separate from `conditional-route-between-alternative-outputs`. The boundary is "same value optionally modified" vs "peer alternatives routed to one output". Revisit only if the separate page proves too thin.
 
-3. Verification TODO: add a small verified-pattern workflow for `conditional-gate-on-nonempty-result` and use it to decide whether a shorter Galaxy-native `when` expression or expression-tool boolean shim should supersede the MGnify `collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file` recipe as the lead recommendation.
+3. Answered for now: `verification/workflows/conditional-gate-on-nonempty-result/gate-on-nonempty.gxwf-test.yml` passes with the MGnify shim, while the tested direct collection gate and embedded CWL expression-tool shim fail. Keep the MGnify recipe as lead known-good shape until a different short route validates.
 
 4. No. Do not add `__FILTER_NULL__` to the anti-pattern note from zero uptake alone. Lack of uptake does not make a Galaxy feature an anti-pattern; users can be slow to adopt newer or esoteric features. Keep the survey call as "catalog capability, no IWC-backed pattern candidate" unless separate evidence shows a concrete reason not to endorse it.
 

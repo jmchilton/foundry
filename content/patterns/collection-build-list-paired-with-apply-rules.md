@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Collection: build list paired with Apply Rules"
 aliases:
   - "Apply Rules build list:paired"

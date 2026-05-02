@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Collection: regex relabel via tabular"
 aliases:
   - "collection regex relabel via tabular"

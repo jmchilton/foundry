@@ -1,0 +1,120 @@
+class: GalaxyWorkflow
+name: "Gate on non-empty collection"
+inputs:
+  - id: inputs
+    type: collection
+    collection_type: list
+outputs:
+  - id: gate_boolean
+    outputSource: gate_boolean/boolean_param
+  - id: gated_marker
+    outputSource: gated_marker/out_file1
+  - id: false_path_marker
+    outputSource: false_path_marker/out_file1
+steps:
+  - id: identifiers
+    label: identifiers
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/collection_element_identifiers/collection_element_identifiers/0.0.2
+    tool_version: 0.0.2
+    tool_shed_repository:
+      changeset_revision: d3c07d270a50
+      name: collection_element_identifiers
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input_collection
+        source: inputs
+    out:
+      - id: output
+    tool_state:
+      input_collection:
+        __class__: ConnectedValue
+  - id: count_identifiers
+    label: count_identifiers
+    tool_id: wc_gnu
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: identifiers/output
+    out:
+      - id: out_file1
+    tool_state:
+      include_header: false
+      input1:
+        __class__: ConnectedValue
+      options:
+        - lines
+  - id: count_to_boolean_table
+    label: count_to_boolean_table
+    tool_id: toolshed.g2.bx.psu.edu/repos/devteam/column_maker/Add_a_column1/2.1
+    tool_version: "2.1"
+    tool_shed_repository:
+      changeset_revision: aff5135563c6
+      name: column_maker
+      owner: devteam
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: input
+        source: count_identifiers/out_file1
+    out:
+      - id: out_file1
+    tool_state:
+      avoid_scientific_notation: false
+      error_handling:
+        auto_col_types: true
+        fail_on_non_existent_columns: true
+        non_computable:
+          action: --fail-on-non-computable
+      input:
+        __class__: ConnectedValue
+      ops:
+        header_lines_select: "no"
+        expressions:
+          - cond: c1 != 0
+            add_column:
+              mode: R
+              pos: "1"
+  - id: gate_boolean
+    label: gate_boolean
+    tool_id: param_value_from_file
+    tool_version: 0.1.0
+    in:
+      - id: input1
+        source: count_to_boolean_table/out_file1
+    out:
+      - id: boolean_param
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+      param_type: boolean
+      remove_newlines: true
+  - id: gated_marker
+    label: gated_marker
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: identifiers/output
+      - id: when
+        source: gate_boolean/boolean_param
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(inputs.when)
+  - id: false_path_marker
+    label: false_path_marker
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: count_to_boolean_table/out_file1
+      - id: when
+        source: gate_boolean/boolean_param
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(!inputs.when)

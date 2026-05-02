@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Collection: cleanup after map-over failure"
 aliases:
   - "cleanup after fanout failure"
