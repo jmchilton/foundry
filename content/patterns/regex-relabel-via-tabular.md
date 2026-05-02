@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: regex relabel via tabular"
 aliases:
   - "collection regex relabel via tabular"

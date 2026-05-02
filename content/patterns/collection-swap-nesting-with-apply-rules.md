@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: swap nesting with Apply Rules"
 aliases:
   - "regroup list:list by inner identifier"

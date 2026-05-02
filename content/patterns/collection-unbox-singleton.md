@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: unbox singleton"
 aliases:
   - "extract first dataset"

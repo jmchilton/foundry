@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: relabel via rules and find/replace"
 aliases:
   - "collection relabel via rules and find replace"

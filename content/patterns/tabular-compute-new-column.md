@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Tabular: compute a new column"
 tags:
   - pattern

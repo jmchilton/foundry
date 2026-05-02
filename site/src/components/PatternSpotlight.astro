@@ -11,10 +11,15 @@ const patterns = all
     return (a.data as any).title.localeCompare((b.data as any).title);
   });
 
-const visible = patterns.slice(0, 4);
+const maps = patterns
+  .filter(p => (p.data as any).pattern_kind === 'moc')
+  .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
+const recentLeaves = patterns
+  .filter(p => (p.data as any).pattern_kind === 'leaf')
+  .slice(0, 4);
 
 function shortTitle(title: string): string {
-  return title.replace(/^Tabular:\s*/, '');
+  return title.replace(/^(Tabular|Collection|Galaxy):\s*/, '');
 }
 ---
 {patterns.length > 0 && (
@@ -25,8 +30,27 @@ function shortTitle(title: string): string {
       <a href={`${base}/patterns/`} class="spotlight-all">View all {patterns.length}</a>
     </div>
 
+    {maps.length > 0 && (
+      <div class="map-spotlight-grid">
+        {maps.map((pattern) => {
+          const data = pattern.data as any;
+          return (
+            <a href={`${base}/${pattern.id}/`} class="map-spotlight-card no-underline tinted-shadow tinted-shadow-hover">
+              <span class="spotlight-index font-mono">MAP</span>
+              <span class="spotlight-title">{shortTitle(data.title)}</span>
+              <span class="spotlight-summary">{data.summary}</span>
+              <span class="spotlight-foot">
+                <span class="badge badge-draft">map</span>
+                <span class="font-mono">{data.related_patterns?.length ?? 0} links</span>
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    )}
+
     <div class="spotlight-grid">
-      {visible.map((pattern, index) => {
+      {recentLeaves.map((pattern, index) => {
         const data = pattern.data as any;
         return (
           <a href={`${base}/${pattern.id}/`} class="spotlight-card no-underline tinted-shadow tinted-shadow-hover">
@@ -35,7 +59,7 @@ function shortTitle(title: string): string {
             <span class="spotlight-summary">{data.summary}</span>
             <span class="spotlight-foot">
               <span class={`badge badge-${data.status}`}>{data.status}</span>
-              <span class="font-mono">pattern</span>
+              <span class="font-mono">leaf</span>
             </span>
           </a>
         );
@@ -64,6 +88,30 @@ function shortTitle(title: string): string {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.75rem;
+  }
+  .map-spotlight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .map-spotlight-card {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 0.55rem;
+    min-height: 12rem;
+    padding: 1.05rem;
+    border: 1px solid color-mix(in srgb, var(--color-galaxy-primary) 22%, var(--color-border-subtle));
+    border-radius: 0.65rem;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--color-galaxy-primary) 12%, transparent), transparent 42%),
+      var(--color-surface-raised);
+    color: inherit;
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .map-spotlight-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
   }
   .spotlight-card {
     display: grid;
@@ -109,11 +157,13 @@ function shortTitle(title: string): string {
     font-size: 0.75rem;
   }
   @media (max-width: 900px) {
+    .map-spotlight-grid,
     .spotlight-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
   @media (max-width: 560px) {
+    .map-spotlight-grid,
     .spotlight-grid {
       grid-template-columns: 1fr;
     }

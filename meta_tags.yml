@@ -46,3 +46,11 @@ tool/planemo:
 # Seeded once from top-level dirs of <iwc-clone>/workflows/.
 # See INITIAL_CORPUS_INGESTION.md.
 # Add iwc/<category> entries here as patterns and Molds reference them.
+
+# --- topic/* (Foundry-authored pattern/MOC topics) ---
+topic/galaxy-transform:
+  description: "Galaxy data-shape transformation pattern maps"
+topic/collection-transform:
+  description: "Galaxy collection transformation pattern map"
+topic/tabular-transform:
+  description: "Galaxy tabular transformation pattern map"

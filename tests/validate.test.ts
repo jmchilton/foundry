@@ -27,11 +27,16 @@ const baseRequired = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const patternRequired = (overrides: Record<string, unknown> = {}) => baseRequired({
+  pattern_kind: "leaf",
+  ...overrides,
+});
+
 describe("validateData (per-file)", () => {
   const schema = loadRealSchema();
 
   it("accepts a minimal pattern", () => {
-    const r = validateData(baseRequired(), schema);
+    const r = validateData(patternRequired(), schema);
     expect(r.errors).toEqual([]);
   });
 
@@ -41,7 +46,7 @@ describe("validateData (per-file)", () => {
   });
 
   it("rejects unknown fields", () => {
-    const r = validateData(baseRequired({ bogus: "x" }), schema);
+    const r = validateData(patternRequired({ bogus: "x" }), schema);
     expect(r.errors.some((e) => /bogus/.test(e))).toBe(true);
   });
 
@@ -155,17 +160,17 @@ describe("validateData (per-file)", () => {
   });
 
   it("rejects bad date format", () => {
-    const r = validateData(baseRequired({ created: "not-a-date" }), schema);
+    const r = validateData(patternRequired({ created: "not-a-date" }), schema);
     expect(r.errors.length).toBeGreaterThan(0);
   });
 
   it("rejects whitespace-only wiki link", () => {
-    const r = validateData(baseRequired({ parent_pattern: "[[   ]]" }), schema);
+    const r = validateData(patternRequired({ parent_pattern: "[[   ]]" }), schema);
     expect(r.errors.some((e) => /whitespace-only/.test(e))).toBe(true);
   });
 
   it("warns on tag coherence drift", () => {
-    const r = validateData(baseRequired({ tags: ["mold"] }), schema);
+    const r = validateData(patternRequired({ tags: ["mold"] }), schema);
     expect(r.warnings.some((w) => /expected 'pattern'/.test(w))).toBe(true);
   });
 });
@@ -196,7 +201,7 @@ describe("validateDirectory (cross-file)", () => {
 
   it("validates a tiny vault end-to-end", () => {
 
-    writeFm(path.join(dir, "patterns/foo.md"), baseRequired());
+    writeFm(path.join(dir, "patterns/foo.md"), patternRequired());
 
     const r = validateDirectory({
       directory: dir,
@@ -218,7 +223,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "patterns/some-pattern.md"), {
-      ...baseRequired({ type: "pattern", tags: ["pattern"], title: "Some Pattern" }),
+      ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Some Pattern" }),
     });
 
     const r = validateDirectory({
@@ -288,7 +293,7 @@ describe("validateDirectory (cross-file)", () => {
       ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
     });
     writeFm(path.join(dir, "patterns/pattern-x.md"), {
-      ...baseRequired({ type: "pattern", tags: ["pattern"], title: "Pattern X" }),
+      ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Pattern X" }),
     });
     mkdirSync(path.join(dir, "schemas"), { recursive: true });
     writeFileSync(path.join(dir, "schemas/x.schema.json"), "{}");
@@ -314,7 +319,7 @@ describe("validateDirectory (cross-file)", () => {
       }),
     });
     writeFm(path.join(dir, "patterns/not-research.md"), {
-      ...baseRequired({ type: "pattern", tags: ["pattern"], title: "Not Research" }),
+      ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Not Research" }),
     });
 
     const r = validateDirectory({

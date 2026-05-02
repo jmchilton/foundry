@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Tabular: to collection by row"
 aliases:
   - "collection from tabular rows"

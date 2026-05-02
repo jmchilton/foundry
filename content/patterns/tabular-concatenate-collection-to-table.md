@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Tabular: concatenate collection to table"
 aliases:
   - "collection-to-single-tabular-with-collapse_dataset"

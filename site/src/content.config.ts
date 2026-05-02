@@ -94,6 +94,7 @@ const moldSchema = z.object({
 
 const patternSchema = z.object({
   type: z.literal('pattern'),
+  pattern_kind: z.enum(['leaf', 'moc']),
   title: z.string(),
   parent_pattern: wikiLink.optional(),
   ...baseFields,

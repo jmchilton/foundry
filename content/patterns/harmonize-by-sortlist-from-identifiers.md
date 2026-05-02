@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: harmonize by sortlist from identifiers"
 aliases:
   - "collection harmonize by sortlist from identifiers"

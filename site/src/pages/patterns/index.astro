@@ -8,8 +8,13 @@ const patterns = all
   .filter(n => n.data.type === 'pattern' && n.data.status !== 'archived')
   .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
 
-const groups = new Map<string, typeof patterns>();
-for (const pattern of patterns) {
+const maps = patterns.filter(p => (p.data as any).pattern_kind === 'moc');
+const leafPatterns = patterns.filter(p => (p.data as any).pattern_kind === 'leaf');
+const topicTags = [...new Set(patterns.flatMap(p => (p.data.tags as string[]).filter(t => t.startsWith('topic/'))))]
+  .sort((a, b) => a.localeCompare(b));
+
+const groups = new Map<string, typeof leafPatterns>();
+for (const pattern of leafPatterns) {
   const title = (pattern.data as any).title as string;
   const group = title.includes(':') ? title.split(':')[0] : 'General';
   const list = groups.get(group) ?? [];
@@ -32,8 +37,7 @@ function formatDate(d: Date): string {
           IWC-grounded workflow construction recipes.
         </h1>
         <p class="patterns-lede text-pretty">
-          Pattern pages capture reusable Galaxy authoring moves that Molds can reference and casts can condense.
-          They are operation-anchored, corpus-backed, and separate from action Molds.
+          Pattern maps are the entry points; leaf pages are the concrete Galaxy authoring moves that Molds can reference and casts can condense.
         </p>
       </div>
       <dl class="patterns-stats" aria-label="Pattern library stats">
@@ -42,18 +46,59 @@ function formatDate(d: Date): string {
           <dd>{patterns.length}</dd>
         </div>
         <div>
-          <dt>Groups</dt>
-          <dd>{groupedPatterns.length}</dd>
+          <dt>Maps</dt>
+          <dd>{maps.length}</dd>
         </div>
       </dl>
     </div>
   </section>
 
+  {maps.length > 0 && (
+    <section class="pattern-group" aria-labelledby="pattern-maps-heading">
+      <div class="section-rule">
+        <h2 id="pattern-maps-heading">Pattern Maps</h2>
+        <span class="section-tail">/ start here</span>
+      </div>
+      <div class="pattern-map-grid">
+        {maps.map(pattern => {
+          const data = pattern.data as any;
+          const linkedCount = data.related_patterns?.length ?? 0;
+          const subjectTags = (data.tags as string[]).filter(t => t !== 'pattern');
+          return (
+            <article class="pattern-map-card tinted-shadow tinted-shadow-hover">
+              <div class="pattern-card-top">
+                <span class="badge badge-draft">map</span>
+                <span class="pattern-date font-mono">{linkedCount} links</span>
+              </div>
+              <h3 class="pattern-map-title"><a href={`${base}/${pattern.id}/`}>{data.title}</a></h3>
+              <p class="pattern-summary">{data.summary}</p>
+              <div class="pattern-tags" aria-label="Tags">
+                {subjectTags.map(tag => <a href={`${base}/tags/${tag}/`} class="tag no-underline">{tag}</a>)}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
+  {topicTags.length > 0 && (
+    <section class="pattern-group" aria-labelledby="pattern-topics-heading">
+      <div class="section-rule">
+        <h2 id="pattern-topics-heading">Browse By Topic</h2>
+        <span class="section-tail">/ tag rollups</span>
+      </div>
+      <div class="pattern-topic-row">
+        {topicTags.map(tag => <a href={`${base}/tags/${tag}/`} class="topic-chip no-underline">{tag}</a>)}
+      </div>
+    </section>
+  )}
+
   {groupedPatterns.map(([group, list]) => (
     <section class="pattern-group" aria-labelledby={`patterns-${group.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
       <div class="section-rule">
         <h2 id={`patterns-${group.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{group}</h2>
-        <span class="section-tail">/ {list.length} {list.length === 1 ? 'pattern' : 'patterns'}</span>
+        <span class="section-tail">/ {list.length} leaf {list.length === 1 ? 'pattern' : 'patterns'}</span>
       </div>
       <div class="pattern-grid">
         {list.map(pattern => {
@@ -63,7 +108,7 @@ function formatDate(d: Date): string {
             <article class="pattern-card tinted-shadow tinted-shadow-hover">
               <div class="pattern-card-top">
                 <span class={`badge badge-${data.status}`}>{data.status}</span>
-                <span class="pattern-date font-mono">rev {data.revision} · {formatDate(data.revised)}</span>
+                <span class="pattern-date font-mono">leaf · rev {data.revision} · {formatDate(data.revised)}</span>
               </div>
               <h3 class="pattern-card-title">
                 <a href={`${base}/${pattern.id}/`}>{data.title}</a>
@@ -145,6 +190,63 @@ function formatDate(d: Date): string {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
     gap: 1rem;
+  }
+  .pattern-map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: 1rem;
+  }
+  .pattern-map-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-height: 12rem;
+    padding: 1.1rem;
+    border: 1px solid color-mix(in srgb, var(--color-galaxy-primary) 22%, var(--color-border-subtle));
+    border-radius: 0.75rem;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--color-galaxy-primary) 9%, transparent), transparent 46%),
+      var(--color-surface-raised);
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .pattern-map-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .pattern-map-title {
+    margin: 0;
+    font-size: 1.35rem;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+  .pattern-map-title a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+  .pattern-map-title a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+  .pattern-topic-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .topic-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 999px;
+    background: var(--color-surface-raised);
+    color: var(--color-link);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .topic-chip:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-1px);
   }
   .pattern-card {
     display: flex;

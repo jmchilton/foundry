@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Collection: split identifier via rules"
 aliases:
   - "Apply Rules split identifier into nesting"
