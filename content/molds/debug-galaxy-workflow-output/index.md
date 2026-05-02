@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-02
-revision: 2
+revision: 3
 ai_generated: true
 summary: "Triage failing Galaxy run outputs; classify failure modes; propose fixes."
 references:
@@ -45,6 +45,30 @@ references:
     evidence: corpus-observed
     purpose: "Trace collection output failures back to possibly lossy operator translations."
     trigger: "When debugging wrong nesting, missing elements, branch merges, bad joins, or gather/reduction mismatches."
+  - kind: research
+    ref: "[[galaxy-tool-job-failure-reference]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Interpret Galaxy job-level failure evidence including stdio rules, exit code, job messages, and output dataset state."
+    trigger: "When a failed workflow test includes errored jobs, tool stderr/stdout, non-zero exit codes, or red output datasets."
+  - kind: research
+    ref: "[[galaxy-workflow-invocation-failure-reference]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Interpret Galaxy invocation-level failure evidence including invocation state, structured messages, and step job summaries."
+    trigger: "When a failed workflow test has invocation failure, missing workflow outputs, cancelled/paused steps, subworkflow failures, or collection population errors."
+  - kind: research
+    ref: "[[planemo-workflow-test-architecture]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Locate which Planemo artifact or Galaxy API surface preserves the failure evidence."
+    trigger: "When Planemo output is ambiguous, structured test JSON is available, or rerunning can be avoided by inspecting an existing invocation."
 ---
 # debug-galaxy-workflow-output
 
