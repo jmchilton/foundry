@@ -306,6 +306,30 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBe(0);
   });
 
+  it("resolves CLI command references by tool and command", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+        references: [
+          { kind: "cli-command", ref: "[[gxwf validate]]", used_at: "runtime", load: "on-demand", mode: "sidecar", evidence: "corpus-observed", trigger: "After editing a Galaxy workflow." },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "cli/gxwf/validate.md"), {
+      ...baseRequired({ type: "cli-command", tags: ["cli-command", "cli/gxwf"], tool: "gxwf", command: "validate" }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+  });
+
   it("rejects typed references that resolve to the wrong type", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({
@@ -352,5 +376,74 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("warns when on-demand references omit triggers", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+        references: [
+          { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed" },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "research/component-x.md"), {
+      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
+
+  it("flags Mold source layout drift", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFm(path.join(dir, "molds/m/notes.md"), {
+      ...patternRequired({ title: "Unexpected Note" }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
+
+  it("accepts a Mold eval plan without frontmatter", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: synthetic\n",
+    );
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
   });
 });

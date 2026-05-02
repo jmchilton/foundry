@@ -2,7 +2,7 @@
 // Foundry frontmatter validator.
 // See INITIAL_ARCHITECTURE.md §6 for the layered pipeline.
 
-import { existsSync, statSync } from "node:fs";
+import { existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import AjvImport, { type ErrorObject } from "ajv";
@@ -149,7 +149,12 @@ interface CrossFileFinding {
 
 function buildSlugMap(files: FileMeta[]): Map<string, string> {
   const m = new Map<string, string>();
-  for (const f of files) m.set(slugify(f.slug), f.path);
+  for (const f of files) {
+    m.set(slugify(f.slug), f.path);
+    if (f.meta.type === "cli-command" && typeof f.meta.tool === "string" && typeof f.meta.command === "string") {
+      m.set(slugify(`${f.meta.tool} ${f.meta.command}`), f.path);
+    }
+  }
   return m;
 }
 
@@ -259,11 +264,11 @@ function validateTypedReference(
       message: `references[${index}]: evidence=hypothesis requires verification`,
     });
   }
-  if (ref.evidence === "hypothesis" && typeof ref.trigger !== "string") {
+  if (ref.load === "on-demand" && typeof ref.trigger !== "string") {
     findings.push({
       path: filePath,
       severity: "warning",
-      message: `references[${index}]: evidence=hypothesis should describe the on-demand trigger`,
+      message: `references[${index}]: load=on-demand should describe the trigger`,
     });
   }
 
@@ -488,6 +493,102 @@ function validatePipelinePhases(
   return findings;
 }
 
+function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const moldsRoot = path.join(contentRoot, "molds");
+  if (!existsSync(moldsRoot) || !statSync(moldsRoot).isDirectory()) return findings;
+
+  const seenMoldDirs = new Set(moldFiles.map((f) => path.dirname(f.path)));
+  for (const entry of readdirSync(moldsRoot).sort()) {
+    const moldDir = path.join(moldsRoot, entry);
+    if (!statSync(moldDir).isDirectory()) continue;
+    const indexPath = path.join(moldDir, "index.md");
+    const evalPath = path.join(moldDir, "eval.md");
+
+    if (!existsSync(indexPath)) {
+      findings.push({
+        path: moldDir,
+        severity: "error",
+        message: "mold source directory must contain index.md",
+      });
+    } else if (!seenMoldDirs.has(moldDir)) {
+      findings.push({
+        path: indexPath,
+        severity: "error",
+        message: "mold source index.md must validate as type=mold",
+      });
+    }
+
+    for (const mdPath of listMarkdownFiles(moldDir)) {
+      if (path.basename(mdPath) === "index.md") continue;
+      const parsed = readMarkdown(mdPath);
+      if (parsed.hasFrontmatter) {
+        findings.push({
+          path: mdPath,
+          severity: "error",
+          message: "only mold index.md may have frontmatter",
+        });
+      }
+    }
+
+    if (!existsSync(evalPath)) {
+      findings.push({
+        path: moldDir,
+        severity: "warning",
+        message: "mold source directory should contain eval.md",
+      });
+      continue;
+    }
+
+    const evalBody = readMarkdown(evalPath).body;
+    if (!/^##\s+Case:/m.test(evalBody)) {
+      findings.push({
+        path: evalPath,
+        severity: "warning",
+        message: "eval.md should declare at least one '## Case:' section",
+      });
+    }
+    if (!/\b(deterministic|llm-judged)\b/.test(evalBody)) {
+      findings.push({
+        path: evalPath,
+        severity: "warning",
+        message: "eval.md should identify deterministic or llm-judged checks",
+      });
+    }
+  }
+
+  return findings;
+}
+
+function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const requiredSections = ["Install", "Synopsis", "Output", "Exit codes", "Examples", "Gotchas"];
+  for (const f of files) {
+    if (f.meta.type !== "cli-command") continue;
+    const body = readMarkdown(f.path).body;
+    for (const section of requiredSections) {
+      if (new RegExp(`^##\\s+${section}\\b`, "m").test(body)) continue;
+      findings.push({
+        path: f.path,
+        severity: "warning",
+        message: `cli-command should include ## ${section}`,
+      });
+    }
+  }
+  return findings;
+}
+
+function listMarkdownFiles(dir: string): string[] {
+  const files: string[] = [];
+  for (const entry of readdirSync(dir).sort()) {
+    const full = path.join(dir, entry);
+    const st = statSync(full);
+    if (st.isDirectory()) files.push(...listMarkdownFiles(full));
+    else if (entry.endsWith(".md")) files.push(full);
+  }
+  return files;
+}
+
 // ---- driver ----
 
 function parseArgs(argv: string[]): CliArgs {
@@ -569,6 +670,8 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateBidirectionalRelatedNotes(validFiles, slugMap));
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
+  crossFindings.push(...validateMoldSourceLayout(opts.directory, validFiles.filter((f) => f.meta.type === "mold")));
+  crossFindings.push(...validateCliCommandDocs(validFiles));
 
   for (const f of crossFindings) {
     printHeader(f.path);

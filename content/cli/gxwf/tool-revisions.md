@@ -19,6 +19,10 @@ related_notes:
 
 Resolve a Tool Shed tool to the changeset revisions that publish it, ordered oldest→newest by `get_ordered_installable_revisions`. Needed when emitting a workflow that pins `(name, owner, changeset_revision)` for reproducible reinstall — TRS version strings alone are insufficient because the Tool Shed dedupes versions across changesets.
 
+## Install
+
+Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Prefer the project-local executable when running inside a checked-out Foundry or galaxy-tool-util workspace.
+
 ## Synopsis
 
 ```

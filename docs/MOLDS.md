@@ -1,8 +1,35 @@
 # Initial Molds
 
-Initial Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines sketched in `HARNESS_PIPELINES.md`, plus the **CLI Molds** that capture reusable tool-reference content the action Molds depend on. Each Mold is atomic at the harness-step tier (not necessarily small in content).
+Initial Mold inventory for the Galaxy Workflow Foundry, derived as the **union of phases** across the harness pipelines sketched in `HARNESS_PIPELINES.md`. CLI command knowledge is reference content used by action Molds, not a separate whole-CLI Mold tier. Each Mold is atomic at the harness-step tier (not necessarily small in content).
 
-This is a v1 candidate list, not a spec. Names, splits, and groupings will shift as we ground each Mold against IWC corpus exemplars and write the first one or two end-to-end. The point of this list is to surface what metadata a Mold actually needs, by enumerating concrete cases.
+This is a v1 inventory, not the Mold metadata spec. Names, splits, and groupings will shift as we ground each Mold against IWC corpus exemplars and write them end-to-end. The reference model has moved out of this inventory: `COMPILATION_PIPELINE.md`, `meta_schema.yml`, and `reference_contract.yml` now define the authoritative `references:` manifest, progressive-disclosure controls, and evidence labels.
+
+## Reference model status
+
+Current Molds are authored as a procedural body plus an operational `references:` manifest. The older top-level reference fields (`patterns`, `cli_commands`, `prompts`, `examples`) remain supported during migration, and `input_schemas` / `output_schemas` still describe Mold IO contracts, but new operational references should use object-shaped entries:
+
+```yaml
+references:
+  - kind: research
+    ref: "[[component-nextflow-testing]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Extract nf-test files and snapshot fixtures."
+    trigger: "When filling test_fixtures or nf_tests sections."
+    verification: "Run the generated summarize-nextflow skill on a real nf-core pipeline and confirm extraction improves."
+```
+
+The important contract pieces are:
+
+- `kind` chooses resolver and casting behavior (`pattern`, `cli-command`, `schema`, `prompt`, `example`, `research`).
+- `used_at` records whether the reference is used at cast time, runtime, or both.
+- `load` is the automatic progressive-disclosure annotation: `upfront` references are loaded with the generated skill; `on-demand` references need a `trigger` that tells the skill when to consult them.
+- `mode` declares the transformation (`verbatim`, `condense`, `sidecar`, `copy`). Some modes are specified before all cast handlers are fully implemented.
+- `evidence` tracks confidence in the reference connection: `hypothesis`, `corpus-observed`, or `cast-validated`. `hypothesis` requires `verification` so speculative links carry their own promotion/removal check.
+
+`reference_contract.yml` owns the controlled vocabulary and labels. The validator injects those enums into `meta_schema.yml` and checks typed references by kind.
 
 ## Bucketing axes
 
@@ -10,10 +37,10 @@ Each Mold falls along these axes:
 
 - **Source-specific** — input format determines content (`PAPER`, `NEXTFLOW`, `CWL`).
 - **Target-specific** — output target determines content (`GALAXY`, `CWL`).
-- **Tool-specific** — content depends on a specific external CLI surface (`gxwf`, `planemo`).
+- **Tool-specific** — reserved for a future action that genuinely depends on one external tool's behavior. Whole-CLI reference surfaces are not Molds.
 - **Generic** — none of the above.
 
-This isn't a frontmatter schema; it's a mental model for v1 grouping. Whether these axes graduate into Mold metadata is a spec-time decision. `tool-specific` is provisional and may collapse into `generic` if the distinction stays uninteresting.
+This isn't a frontmatter schema; it's a mental model for v1 grouping. `tool-specific` remains provisional and should not be used for whole-CLI catalogs.
 
 ## Catalog
 
@@ -70,7 +97,8 @@ Open question: whether the `<source>-test-to-<target>-tests` family factors clea
 
 Validate Molds describe the **step in the process** even where they wrap a static / structured CLI. The underlying validation is deterministic, but the cast skill is the Mold-shaped procedural description (when to run, how to interpret results, what to recommend on failure, when to loop back to authoring). Wraps gxwf / cwltool but is *not* a hand-authored CLI skill — it's a Mold that references the relevant CLI manual pages.
 
-- `validate-with-gxwf` — run gxwf schema/lint, interpret the output, classify failures (fixable in place vs. requires re-implementation), recommend or apply fixes; re-run until clean. Runs both inline (per-step) and terminally (whole-workflow). References `cli/gxwf/validate` and friends.
+- `validate-galaxy-step` — run gxwf validation inside the per-step Galaxy loop, classify failures local to the just-implemented step, and route back to step implementation or wrapper authoring.
+- `validate-galaxy-workflow` — run gxwf validation after workflow assembly, classify workflow-level failures, and route back to the responsible authoring phase when possible.
 - `validate-cwl` — analogous: `cwltool --validate` / schema lint, interpret, recommend/apply fixes.
 
 ### Run & debug (Planemo-backed runtime)
@@ -78,19 +106,14 @@ Validate Molds describe the **step in the process** even where they wrap a stati
 **Planemo is the runtime tool** (it can run both Galaxy and CWL workflows); **gxwf is the design-time tool**. Run/debug Molds reference Planemo's CLI manual pages.
 
 - `run-workflow-test` — execute a workflow's tests via Planemo; emit structured pass/fail and outputs. Target-agnostic interface; per-target adapters if needed. References `cli/planemo/test` (and run, etc.).
-- `debug-galaxy-workflow-output` — given a failing Galaxy run's outputs/logs/import warnings, classify the failure and propose fixes. Consumes the SKILLS_NF caveat catalog (UUIDs, tool-ID/owner/+galaxyN, conditional selectors, parameter-name mismatches, semantics ≠ existence) via wiki link.
+- `debug-galaxy-workflow-output` — given a failing Galaxy run's outputs/logs/import warnings, classify the failure and propose fixes. Uses validation output and on-demand operational references for failure interpretation; the Foundry does not maintain a parallel prose caveat catalog.
 - `debug-cwl-workflow-output` — given a failing CWL run's outputs/logs, classify the failure and propose fixes.
 
 Note: this run/debug tier is sized for "smart enough as a Claude skill, but Claude could often do it ad-hoc without one." Treat them as nominally Mold-shaped for inventory completeness, but accept that they may end up thinner than the authoring Molds.
 
-### CLI Molds (tool-specific)
+### CLI reference content
 
-Whole-CLI casts. Each rolls up all `cli/<tool>/*` manual pages under it, plus a thin procedural overview, into a structured runtime artifact (typically JSON manifest + sidecar). The cast is what an agent loads when it needs general competence with the CLI rather than a specific verb. Per-action Molds (above) reference individual manual pages directly; they do *not* depend on the whole-CLI cast.
-
-- `gxwf-cli` — design-time CLI: validate, lint, convert, tool-search, tool-versions, tool-revisions, schema export, etc. Replaces the prior-art `~/.claude/skills/gxwf-cli` (a help-text dump); the new cast is a structured manifest, not a markdown firehose.
-- `planemo-cli` — runtime CLI: workflow execution, test invocation, lint, tool/workflow scaffolding, etc.
-
-Open question: whether one Mold per *tool* is the right granularity, or whether very large CLIs (planemo) should split into sub-Molds. v1: one Mold per tool; revisit if the cast bundle is unwieldy.
+CLI command docs live under `content/cli/<tool>/<command>.md`. Action Molds reference the exact commands they need via `references:`. Casting can still produce structured sidecars for those command references, but there is no whole-CLI Mold unless a real action emerges beyond reference lookup.
 
 ### Corpus-grounding (Galaxy-specific, generic in source)
 
@@ -100,29 +123,29 @@ Open question: whether one Mold per *tool* is the right granularity, or whether 
 
 Excluded from the inventory by design. Naming them keeps the boundary visible.
 
-- **Pure reference content.** Pattern pages (`design-galaxy-tabular-manipulation`, `design-galaxy-collection-manipulation`, `design-galaxy-conditional-handling`, the custom-tool-authoring pattern, …), CLI manual pages (`content/cli/<tool>/<cmd>.md`), and IO schemas (`content/schemas/<name>.schema.json` paired with a `<name>.md` schema note) are **referenced by** Molds, not Molds themselves. Casting handles each kind differently — patterns get LLM-condensed, manpages get cast to JSON sidecars, schemas get copied verbatim. See `ARCHITECTURE.md` and `COMPILATION_PIPELINE.md`.
+- **Pure reference content.** Pattern pages (`design-galaxy-tabular-manipulation`, `design-galaxy-collection-manipulation`, `design-galaxy-conditional-handling`, the custom-tool-authoring pattern, …), CLI manual pages (`content/cli/<tool>/<cmd>.md`), IO schemas (`content/schemas/<name>.schema.json` paired with a `<name>.md` schema note), prompt fragments, examples, and operational research notes are **referenced by** Molds, not Molds themselves. Casting handles each kind differently — patterns may be LLM-condensed, manpages become JSON sidecars, schemas and examples are copied, and research notes are copied or condensed according to the reference's `mode` / `load` contract. See `ARCHITECTURE.md` and `COMPILATION_PIPELINE.md`.
 - **Harnesses.** `nf-to-galaxy`, the conjectural Archon harness, lightweight orchestration skills — all hand-authored, sequence Molds, never cast.
 - **Approval gates / scope confirmation / plan presentation.** Harness-level concerns, not Molds. See `HARNESS_PIPELINES.md` for the rationale.
-- **Hand-authored prior-art skills (being replaced).** The current `~/.claude/skills/gxwf-cli` (help-text dump) and the `find-shed-tool` skill design (`old/PLAN_SEARCH_CLI.md`) are *not* Foundry artifacts; they are prior art that the `gxwf-cli` and `discover-shed-tool` Molds replace. Their content feeds the new Molds; their form does not.
+- **Hand-authored prior-art skills (being replaced).** The current `~/.claude/skills/gxwf-cli` (help-text dump) and the `find-shed-tool` skill design (`old/PLAN_SEARCH_CLI.md`) are *not* Foundry artifacts; they are prior art. Their content feeds CLI manual pages and action Molds; their form does not.
 
-**Wrapping a CLI is *not* a Mold disqualifier.** `discover-shed-tool`, `validate-with-gxwf`, `run-workflow-test`, and the CLI Molds all wrap CLIs and are all Molds. The criterion is whether there is procedural content worth casting (when to run, how to interpret, when to loop back), not whether the underlying mechanism is a CLI.
+**Wrapping a CLI is *not* a Mold disqualifier.** `discover-shed-tool`, `validate-galaxy-step`, `validate-galaxy-workflow`, and `run-workflow-test` all wrap CLIs and are Molds. The criterion is whether there is procedural content worth casting (when to run, how to interpret, when to loop back), not whether the underlying mechanism is a CLI.
 
 ## Counts and reuse
 
-- ~24 candidate Molds total (validate-* kept as Molds; +1 for `find-test-data`; corpus Mold renamed/reframed as `compare-against-iwc-exemplar`; `discover-shed-tool` graduated from "Not Molds"; CLI Molds `gxwf-cli` and `planemo-cli` added).
+- 26 current candidate Molds total in `content/molds/` (Galaxy validation split into step/workflow Molds; `find-test-data` included; corpus Mold renamed/reframed as `compare-against-iwc-exemplar`; `discover-shed-tool` graduated from "Not Molds"; whole-CLI catalogs are reference content, not Molds).
 - Source-summarization tier: 3 Molds, each used by exactly the pipelines starting from that source.
 - Data-flow tier: 2 Molds (`summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`). Each consumes any source summary; cast skills handle the polymorphism.
-- Galaxy-target tier: `summary-to-galaxy-data-flow`, `summary-to-galaxy-template`, `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`, `implement-galaxy-workflow-test`, `validate-with-gxwf`, `run-workflow-test`, `debug-galaxy-workflow-output`, `compare-against-iwc-exemplar` — used by all 3 Galaxy-targeting pipelines.
+- Galaxy-target tier: `summary-to-galaxy-data-flow`, `summary-to-galaxy-template`, `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`, `implement-galaxy-workflow-test`, `validate-galaxy-step`, `validate-galaxy-workflow`, `run-workflow-test`, `debug-galaxy-workflow-output`, `compare-against-iwc-exemplar` — used by all 3 Galaxy-targeting pipelines.
 - CWL-target tier: `summary-to-cwl-data-flow`, `summary-to-cwl-template`, `summarize-cwl-tool`, `implement-cwl-tool-step`, `implement-cwl-workflow-test`, `validate-cwl`, `run-workflow-test`, `debug-cwl-workflow-output` — used by 2 CWL-targeting pipelines.
-- Tool-specific tier: `gxwf-cli`, `planemo-cli` — referenced by every pipeline indirectly through manual-page citations from per-action Molds; the whole-CLI cast is the standalone product.
+- CLI command tier: `content/cli/<tool>/<command>.md` — referenced by action Molds through typed references and cast as sidecars when needed.
 
 ## What this list is for
 
-This list exists to **drive the Mold metadata schema**. Once we walk through 2-3 of these and see what each one actually needs to encode (typed references by kind: patterns, CLI manual pages, IO schemas, prompts, examples; dependencies on other Molds; evaluation hooks; casting hints), the schema falls out empirically. Suggested first walks, in priority order:
+This list exists to keep the Mold inventory and pipeline coverage understandable. The metadata schema is now carried by `meta_schema.yml` plus the `reference_contract.yml` registry; `COMPILATION_PIPELINE.md` is the design narrative for casting and reference dispatch. Suggested first walks, in priority order:
 
 1. `summarize-paper` — most novel, most uncertain, exercises source-summarization shape and IO-schema reference.
 2. `implement-galaxy-tool-step` — runs in inner loop, pulls heavily from pattern pages and corpus, exercises wiki-link resolution and condensation.
-3. `validate-with-gxwf` — exercises CLI-manual-page reference, error-feedback loop; surfaces what a per-action Mold needs from a manpage cast.
-4. `gxwf-cli` — exercises whole-CLI roll-up, manpage→JSON casting, the "structured runtime artifact" cast target.
+3. `validate-galaxy-step` — exercises CLI-manual-page reference, error-feedback loop; surfaces what a per-action Mold needs from a manpage cast.
+4. `validate-galaxy-workflow` — exercises terminal Galaxy validation separate from the per-step loop.
 
-After those four, the schema for a Mold should be obvious; spec time.
+After those four, the remaining work is not inventing the reference schema from scratch; it is tightening `MOLD_SPEC.md`, migrating legacy reference fields where useful, and verifying that the `references:` manifest gives generated skills enough progressive-disclosure and evidence metadata to behave well.

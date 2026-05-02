@@ -40,7 +40,7 @@ The Foundry distinguishes:
 
 gxwf provides **static schema validation** for `gxformat2` workflows and tool steps that catches the failure modes prior-art skills (e.g., the existing `nf-to-galaxy` skill in `SKILLS_NF.md`) had to enumerate as prose caveats — UUID validity, tool-ID/owner/+galaxyN suffix mismatches, `input_connections` parameter-name mismatches, conditional-selector branches in `tool_state`, etc. The Foundry does **not** maintain a parallel "caveat catalog" of these failure modes; gxwf's schema is the source of truth and the validation loop is the enforcement mechanism.
 
-This shifts the per-step loop from "author and hope" to **author → validate → fix** with validation running inline after each step is implemented, not only as a terminal phase. The pipelines below reflect this by invoking `validate-with-gxwf` (or `validate-cwl`) inside the per-step loop.
+This shifts the per-step loop from "author and hope" to **author → validate → fix** with validation running inline after each step is implemented, not only as a terminal phase. The pipelines below reflect this by invoking `validate-galaxy-step` (or `validate-cwl`) inside the per-step loop.
 
 ## Pipelines
 
@@ -59,10 +59,10 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
    - on fallthrough, `author-galaxy-tool-wrapper`.
 6. `[loop]` `summarize-galaxy-tool` — pull JSON schema, containers, inputs/outputs for the resolved tool.
 7. `[loop]` `implement-galaxy-tool-step` — convert abstract step to concrete `gxformat2` step.
-8. `[loop]` `validate-with-gxwf` — schema-validate the just-implemented step; on red, the harness loops back to (7).
+8. `[loop]` `validate-galaxy-step` — schema-validate the just-implemented step; on red, the harness loops back to (7).
 9. `[branch]` test-data resolution chain: try `paper-to-test-data` → on failure, `find-test-data` → on failure, harness gates to user-supplied data.
 10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions.
-11. `validate-with-gxwf` — terminal schema/lint pass on the assembled workflow.
+11. `validate-galaxy-workflow` — terminal schema/lint pass on the assembled workflow.
 12. `run-workflow-test` — execute via Planemo.
 13. `debug-galaxy-workflow-output` — triage failures, propose fixes.
 
@@ -102,10 +102,10 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 5. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
 6. `[loop]` `summarize-galaxy-tool`
 7. `[loop]` `implement-galaxy-tool-step`
-8. `[loop]` `validate-with-gxwf` — inline schema validation per step; loop back on red.
+8. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
 9. `nextflow-test-to-target-tests` — target = Galaxy.
 10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated tests.
-11. `validate-with-gxwf` — terminal pass on the assembled workflow.
+11. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
 12. `run-workflow-test` — execute via Planemo.
 13. `debug-galaxy-workflow-output`
 
@@ -120,10 +120,10 @@ CWL is already structured; the upstream extraction work is much lighter.
 5. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
 6. `[loop]` `summarize-galaxy-tool`
 7. `[loop]` `implement-galaxy-tool-step`
-8. `[loop]` `validate-with-gxwf` — inline schema validation per step; loop back on red.
+8. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
 9. `cwl-test-to-target-tests` — target = Galaxy.
 10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated tests.
-11. `validate-with-gxwf` — terminal pass on the assembled workflow.
+11. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
 12. `run-workflow-test` — execute via Planemo.
 13. `debug-galaxy-workflow-output`
 
@@ -135,7 +135,7 @@ CWL is already structured; the upstream extraction work is much lighter.
   - Templates: `summary-to-galaxy-template`, `summary-to-cwl-template`.
   - Per-step (Galaxy): `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`.
   - Per-step (CWL): `summarize-cwl-tool`, `implement-cwl-tool-step`.
-  - Validate: `validate-with-gxwf`, `validate-cwl`.
+  - Validate: `validate-galaxy-step`, `validate-galaxy-workflow`, `validate-cwl`.
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
 - **Source × target (test translation)**: `nextflow-test-to-target-tests`, `cwl-test-to-target-tests`. May or may not factor cleanly into a single `<source>-test-to-<target>-tests` Mold family vs. a per-pair Mold; defer.

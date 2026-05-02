@@ -19,6 +19,10 @@ related_notes:
 
 List the TRS-published versions of a Tool Shed tool, ordered oldest→newest (newest last). Used after `[[tool-search]]` has surfaced a candidate `trsToolId` and the caller needs to pick a version to cache.
 
+## Install
+
+Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Prefer the project-local executable when running inside a checked-out Foundry or galaxy-tool-util workspace.
+
 ## Synopsis
 
 ```

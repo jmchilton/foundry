@@ -258,7 +258,7 @@ To exercise the architecture without overbuilding:
 
 - One cast target: **Claude**. Web and generic deferred.
 - One casting model: pick one, pin in `casts/claude/_target.yml`.
-- Cast 3-4 Molds end-to-end: `summarize-paper` (exercises `schema` + `pattern`), `implement-galaxy-tool-step` (exercises `pattern` + `example`), `validate-with-gxwf` (exercises `cli-command` reference from a per-action Mold), `gxwf-cli` (exercises whole-CLI roll-up + many `cli-command` references). Diversity exercises the per-kind dispatch, not just the prompt.
+- Cast 3-4 Molds end-to-end: `summarize-paper` (exercises `schema` + `pattern`), `implement-galaxy-tool-step` (exercises `pattern` + `example`), `validate-galaxy-step` (exercises `cli-command` reference from an action Mold), `validate-galaxy-workflow` (exercises terminal validation posture). Diversity exercises the per-kind dispatch, not just the prompt.
 - Manual `foundry cast` only — no CI, no watch.
 - Commit casts to the repo so we can review the actual outputs.
 
