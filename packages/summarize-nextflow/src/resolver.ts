@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, dirname, join, relative } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { basename, dirname, join, relative, resolve } from "node:path";
 
 interface Summary {
   source: Record<string, unknown>;
@@ -85,6 +85,7 @@ export interface ResolveOptions {
   profile: string;
   withNextflow: boolean;
   fetchTestData: boolean;
+  testDataDir?: string;
 }
 
 export async function resolveNextflowSummary(
@@ -135,7 +136,7 @@ export async function resolveNextflowSummary(
   };
 
   if (options.withNextflow) mergeNextflowInspect(summary, pipelineRoot, options.profile);
-  if (options.fetchTestData) await fetchTestData(summary);
+  if (options.fetchTestData) await fetchTestData(summary, options.testDataDir);
   return summary;
 }
 
@@ -145,7 +146,11 @@ function readText(path: string): string {
 
 function gitOutput(cwd: string, args: string[]): string | null {
   try {
-    return execFileSync("git", args, { cwd, encoding: "utf8" }).trim();
+    return execFileSync("git", args, {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
   } catch {
     return null;
   }
@@ -359,26 +364,81 @@ function isKnownContainer(value: string): boolean {
 function parseTestFixtures(pipelineRoot: string, profile: string): Summary["test_fixtures"] {
   const configPath = join(pipelineRoot, "conf", `${profile}.config`);
   const text = existsSync(configPath) ? readText(configPath) : "";
-  const input = matchOne(text, /input\s*=\s*['"]([^'"]+)['"]/u);
+  const baseParams = parseParamAssignments(
+    readText(join(pipelineRoot, "nextflow.config")),
+    new Map(),
+  );
+  const profileParams = parseParamAssignments(text, baseParams);
+  const remoteInputs = [...profileParams.entries()]
+    .filter(([name]) => isFixtureParam(name))
+    .map(([name, value]) => ({ name, url: normalizeTestDataUrl(value) }))
+    .filter((input): input is { name: string; url: string } => Boolean(input.url));
   return {
     profile,
-    inputs: input
-      ? [
-          {
-            role: "samplesheet",
-            path: input.startsWith("http") ? null : input,
-            url: input.startsWith("http") ? input : null,
-            sha1: null,
-            filetype: input.split(".").at(-1) ?? null,
-            description: `Samplesheet from conf/${profile}.config`,
-          },
-        ]
-      : [],
+    inputs: remoteInputs.map(({ name, url }) => ({
+      role: inferParamRole(name, url),
+      path: null,
+      url,
+      sha1: null,
+      filetype: inferFiletype(url),
+      description: `${name} from conf/${profile}.config`,
+    })),
     outputs: [],
   };
 }
 
-async function fetchTestData(summary: Summary): Promise<void> {
+function parseParamAssignments(
+  text: string,
+  baseParams: Map<string, string>,
+  options: { changedOnly?: boolean } = {},
+): Map<string, string> {
+  const params = new Map(baseParams);
+  const changed = new Map<string, string>();
+  const block = extractNamedBlock(text, "params");
+  if (!block) return options.changedOnly ? changed : params;
+  for (const match of block.matchAll(/^\s*([A-Za-z0-9_]+)\s*=\s*([^\n]+)$/gmu)) {
+    const value = resolveParamExpression(match[2]!.trim(), params);
+    if (value) {
+      params.set(match[1]!, value);
+      changed.set(match[1]!, value);
+    }
+  }
+  return options.changedOnly ? changed : params;
+}
+
+function isFixtureParam(name: string): boolean {
+  return name === "input" || /(^reference_|_fasta$|_gff$|_gtf$|_bed$|_proteins$)/u.test(name);
+}
+
+function resolveParamExpression(expression: string, params: Map<string, string>): string | null {
+  const literal = matchOne(expression, /^['"]([^'"]*)['"]/u);
+  if (literal !== null) return literal;
+  const concat = /^params\.([A-Za-z0-9_]+)\s*\+\s*['"]([^'"]+)['"]/u.exec(expression);
+  if (!concat) return null;
+  const prefix = params.get(concat[1]!);
+  if (!prefix) return null;
+  return joinUrlParts(prefix, concat[2]!);
+}
+
+function joinUrlParts(prefix: string, suffix: string): string {
+  if (!/^https?:\/\//u.test(prefix)) return `${prefix}${suffix}`;
+  const separator = prefix.endsWith("/") || suffix.startsWith("/") ? "" : "/";
+  return `${prefix}${separator}${suffix}`;
+}
+
+function normalizeTestDataUrl(value: string): string | null {
+  if (!/^https?:\/\//u.test(value)) return null;
+  const nfCoreRaw =
+    /^https:\/\/raw\.githubusercontent\.com\/nf-core\/test-datasets\/(?!refs\/heads\/)([^/]+)\/(.+)$/u.exec(
+      value,
+    );
+  if (nfCoreRaw) {
+    return `https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/${nfCoreRaw[1]}/${nfCoreRaw[2]}`;
+  }
+  return value;
+}
+
+async function fetchTestData(summary: Summary, testDataDir?: string): Promise<void> {
   const urls = new Set<string>();
   for (const input of summary.test_fixtures.inputs) {
     if (input.url) urls.add(input.url);
@@ -389,6 +449,7 @@ async function fetchTestData(summary: Summary): Promise<void> {
     try {
       const content = await fetchText(input.url);
       input.sha1 = sha1(content);
+      if (testDataDir) input.path = writeFetchedTestData(testDataDir, input.url, content);
       for (const url of extractRemoteUrls(content)) urls.add(url);
     } catch (err) {
       summary.warnings.push(`failed to fetch test fixture ${input.url}: ${formatError(err)}`);
@@ -408,7 +469,7 @@ async function fetchTestData(summary: Summary): Promise<void> {
       const bytes = await fetchBytes(url);
       summary.test_fixtures.inputs.push({
         role: inferTestDataRole(url),
-        path: null,
+        path: testDataDir ? writeFetchedTestData(testDataDir, url, bytes) : null,
         url,
         sha1: sha1(bytes),
         filetype: inferFiletype(url),
@@ -418,6 +479,19 @@ async function fetchTestData(summary: Summary): Promise<void> {
       summary.warnings.push(`failed to fetch test data ${url}: ${formatError(err)}`);
     }
   }
+}
+
+function writeFetchedTestData(testDataDir: string, url: string, data: string | Uint8Array): string {
+  const path = join(resolve(testDataDir), localTestDataPath(url));
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, data);
+  return path;
+}
+
+function localTestDataPath(url: string): string {
+  const parsed = new URL(url);
+  const parts = parsed.pathname.split("/").filter(Boolean).map(safePathPart);
+  return join(safePathPart(parsed.hostname), ...parts);
 }
 
 async function fetchText(url: string): Promise<string> {
@@ -444,6 +518,15 @@ function inferTestDataRole(url: string): string {
   if (/samplesheet\.(csv|tsv|ya?ml|json)$/u.test(url)) return "samplesheet";
   if (/fastq\.gz$/u.test(url)) return "reads";
   return "test_data";
+}
+
+function inferParamRole(name: string, _url: string): string {
+  if (name === "input") return "samplesheet";
+  return name;
+}
+
+function safePathPart(value: string): string {
+  return value.replace(/[^A-Za-z0-9_.-]/gu, "_");
 }
 
 function inferFiletype(url: string): string | null {

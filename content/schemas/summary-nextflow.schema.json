@@ -192,7 +192,7 @@
       "required": ["role"],
       "properties": {
         "role":        { "type": "string", "description": "Logical role of the input (e.g. `samplesheet`, `reference_fasta`)." },
-        "path":        { "type": ["string", "null"], "description": "Repo-relative path when the fixture lives in-tree." },
+        "path":        { "type": ["string", "null"], "description": "Repo-relative path when the fixture lives in-tree, or local filesystem path when the CLI fetched the remote fixture into a caller-provided test-data directory." },
         "url":         { "type": ["string", "null"], "format": "uri" },
         "sha1":        { "type": ["string", "null"], "description": "SHA-1 integrity hash when published alongside the fixture." },
         "filetype":    { "type": ["string", "null"], "description": "File format, e.g. `fastq.gz`, `csv`." },
