@@ -1,0 +1,12 @@
+# Vendored files copied from repositories declared in common_paths.yml.
+# `source` uses the same $NAME/path citation grammar as content notes.
+
+- local: content/research/galaxy-collection-semantics.yml
+  source: $GALAXY/lib/galaxy/model/dataset_collections/types/collection_semantics.yml
+  pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
+  framing: content/research/galaxy-collection-semantics.md
+
+- local: content/research/galaxy-collection-semantics.upstream.myst
+  source: $GALAXY/doc/source/dev/collection_semantics.md
+  pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
+  framing: content/research/galaxy-collection-semantics.md
