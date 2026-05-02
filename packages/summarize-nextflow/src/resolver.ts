@@ -129,7 +129,10 @@ export async function resolveNextflowSummary(
   );
   const aliases = discoverProcessAliases(pipelineRoot);
   const tools = buildTools(pipelineRoot, processes);
-  const workflows = parseWorkflows(pipelineRoot, processes.map((process) => process.name));
+  const workflows = parseWorkflows(
+    pipelineRoot,
+    processes.map((process) => process.name),
+  );
   const primaryWorkflow = selectPrimaryWorkflow(workflows);
 
   const summary: Summary = {
@@ -358,14 +361,16 @@ function parseWorkflows(pipelineRoot: string, processNames: string[]): ParsedWor
 }
 
 function selectPrimaryWorkflow(workflows: ParsedWorkflow[]): ParsedWorkflow | null {
-  return [...workflows].sort((left, right) => {
-    const callDiff = right.calls.length - left.calls.length;
-    if (callDiff !== 0) return callDiff;
-    const pathDiff =
-      Number(right.path.startsWith("workflows/")) - Number(left.path.startsWith("workflows/"));
-    if (pathDiff !== 0) return pathDiff;
-    return left.name.localeCompare(right.name);
-  })[0] ?? null;
+  return (
+    [...workflows].sort((left, right) => {
+      const callDiff = right.calls.length - left.calls.length;
+      if (callDiff !== 0) return callDiff;
+      const pathDiff =
+        Number(right.path.startsWith("workflows/")) - Number(left.path.startsWith("workflows/"));
+      if (pathDiff !== 0) return pathDiff;
+      return left.name.localeCompare(right.name);
+    })[0] ?? null
+  );
 }
 
 function stripWorkflowBody(workflow: ParsedWorkflow): Subworkflow {
@@ -402,7 +407,9 @@ function parseWorkflowChannels(body: string): Channel[] {
       shape: "channel",
     });
   }
-  for (const match of body.matchAll(/([A-Za-z0-9_.()\s]+)\s*\.set\s*\{\s*(ch_[A-Za-z0-9_]+)\s*\}/gu)) {
+  for (const match of body.matchAll(
+    /([A-Za-z0-9_.()\s]+)\s*\.set\s*\{\s*(ch_[A-Za-z0-9_]+)\s*\}/gu,
+  )) {
     channels.set(match[2]!, {
       name: match[2]!,
       source: match[1]!.replace(/\s+/gu, " ").trim(),
@@ -787,9 +794,7 @@ function parseNfTests(pipelineRoot: string): NfTest[] {
 }
 
 function parseNfTestFileProfiles(text: string): string[] {
-  return unique(
-    [...text.matchAll(/^\s*profile\s+["']([^"']+)["']/gmu)].map((match) => match[1]!),
-  );
+  return unique([...text.matchAll(/^\s*profile\s+["']([^"']+)["']/gmu)].map((match) => match[1]!));
 }
 
 function extractNfTestBlocks(text: string): { name: string; body: string }[] {
@@ -824,11 +829,7 @@ function parseParamsOverrides(text: string): Record<string, unknown> {
   return values;
 }
 
-function parseSnapshot(
-  path: string,
-  relPath: string,
-  text: string,
-): NfTest["snapshot"] {
+function parseSnapshot(path: string, relPath: string, text: string): NfTest["snapshot"] {
   if (!text.includes("snapshot(")) return null;
   return {
     captures: parseSnapshotCaptures(text),

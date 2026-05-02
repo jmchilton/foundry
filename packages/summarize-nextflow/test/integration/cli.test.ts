@@ -549,7 +549,9 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     const data = JSON.parse(r.stdout);
     expect(data.workflow.name).toBe("BACASS");
     expect(data.workflow.edges).toEqual(
-      expect.arrayContaining([{ from: "ch_shortreads_fastqs.multiple", to: "CAT_FASTQ_SHORT", via: [] }]),
+      expect.arrayContaining([
+        { from: "ch_shortreads_fastqs.multiple", to: "CAT_FASTQ_SHORT", via: [] },
+      ]),
     );
     const trim = data.subworkflows.find(
       (workflow: { name: string }) => workflow.name === "FASTQ_TRIM_FASTP_FASTQC",
