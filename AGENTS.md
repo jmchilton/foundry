@@ -39,6 +39,34 @@ npm run packages-typecheck # tsc --noEmit across packages/* via pnpm -r
 npm run packages-build     # tsc emit across packages/*
 ```
 
+The top-level `Makefile` mirrors common entry points:
+
+```sh
+make validate          # npm run validate
+make test              # npm run test
+make typecheck         # npm run typecheck
+make fixtures          # materialize Nextflow fixtures + IWC format2 + IWC skeletons
+make fixtures-nextflow # materialize workflow-fixtures/pipelines/
+make fixtures-iwc      # materialize workflow-fixtures/iwc-src, iwc-cleaned, iwc-format2
+make fixtures-skeletons # materialize workflow-fixtures/iwc-skeletons from iwc-format2
+make fixtures-verify   # verify materialized fixture SHAs
+make fixtures-clean    # remove generated fixture dirs
+```
+
+## Generated fixtures
+
+`workflow-fixtures/` is the generated-corpus workspace used for research, not committed content. The generated directories are gitignored and may be absent in a fresh worktree:
+
+- `workflow-fixtures/pipelines/` — pinned Nextflow pipeline clones from `workflow-fixtures/fixtures.yaml`.
+- `workflow-fixtures/iwc-src/` — pinned IWC clone.
+- `workflow-fixtures/iwc-cleaned/` — intermediate cleaned Galaxy workflows.
+- `workflow-fixtures/iwc-format2/` — cleaned gxformat2 IWC corpus, cited as `$IWC_FORMAT2/...`.
+- `workflow-fixtures/iwc-skeletons/` — structural-only views, cited as `$IWC_SKELETONS/...`.
+
+Before launching or acting as a research subagent that needs corpus evidence, check whether the needed generated dirs exist. If they are missing, use the top-level fixture targets above. If you cannot materialize them, stop and report the missing target instead of inventing evidence.
+
+For IWC survey work, prefer `make fixtures-iwc fixtures-skeletons` before mining `$IWC_FORMAT2` or `$IWC_SKELETONS`. For Nextflow example work, prefer `make fixtures-nextflow` before reading `workflow-fixtures/pipelines/`.
+
 ## Package layout
 
 Publishable CLIs live under `packages/<name>/` as a pnpm workspace; mirrors `galaxy-tool-util-ts`'s structure. First package: `@galaxy-foundry/summarize-nextflow`. Foundry-internal scripts stay under `scripts/` (not workspace packages — they support content authoring, not external consumers). pnpm 10.x is the package manager (`packageManager` field is contractual). The npm wrappers above invoke `pnpm -r` under the hood.
