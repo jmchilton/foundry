@@ -2,10 +2,11 @@
 // Skips gracefully when the workflow-fixtures repo isn't present locally.
 
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { chmodSync, existsSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import os from "node:os";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { validateSummary } from "@galaxy-foundry/summary-nextflow-schema";
 
 const PKG_ROOT = resolve(__dirname, "..", "..");
 const FOUNDRY_ROOT = resolve(PKG_ROOT, "..", "..");
@@ -50,16 +51,74 @@ describe("summarize-nextflow CLI — built bin", () => {
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
-  itIfFixtures("rejects gracefully against the demo fixture (not yet implemented)", () => {
-    // Until the resolver is implemented the CLI exits 64.
-    // When `build` lands, this test should be promoted: run the CLI, parse stdout
-    // as JSON, validate against the schema, and assert key fields land.
+  itIfFixtures("emits valid JSON summary for the demo fixture", () => {
     const r = spawnSync("node", [CLI, DEMO_PIPELINE, "--no-with-nextflow", "--no-validate"], {
       encoding: "utf8",
     });
-    expect(r.status).toBe(64);
-    expect(r.stderr).toContain("not yet implemented");
-    expect(r.stderr).toContain(DEMO_PIPELINE);
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    const validation = validateSummary(data);
+    expect(validation.valid).toBe(true);
+    expect(data.source.workflow).toBe("demo");
+    expect(data.profiles).toContain("test");
+    expect(data.processes.map((p: { name: string }) => p.name)).toEqual(
+      expect.arrayContaining(["FASTQC", "SEQTK_TRIM", "MULTIQC"]),
+    );
+    expect(data.tools.map((t: { name: string }) => t.name)).toEqual(
+      expect.arrayContaining(["fastqc", "seqtk", "multiqc"]),
+    );
+    expect(data.test_fixtures.inputs[0].url).toContain("samplesheet_test_illumina_amplicon.csv");
+    expect(data.nf_tests[0].profiles).toContain("test");
+  });
+
+  itIfFixtures("uses nextflow inspect by default when available", () => {
+    const binDir = mkdtempSync(join(os.tmpdir(), "foundry-nextflow-bin-"));
+    const fakeNextflow = join(binDir, "nextflow");
+    writeFileSync(
+      fakeNextflow,
+      `#!/bin/sh\nprintf '%s\n' '{"processes":[{"name":"FASTQC","container":"quay.io/example/fastqc:inspect"}]}'\n`,
+    );
+    chmodSync(fakeNextflow, 0o755);
+
+    const r = spawnSync("node", [CLI, DEMO_PIPELINE, "--no-validate"], {
+      encoding: "utf8",
+      env: { ...process.env, PATH: `${binDir}${process.env.PATH ? `:${process.env.PATH}` : ""}` },
+    });
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    const fastqc = data.processes.find((p: { name: string }) => p.name === "FASTQC");
+    expect(fastqc.container).toBe("quay.io/example/fastqc:inspect");
+  });
+
+  itIfFixtures("fetches samplesheet-referenced test data when requested", () => {
+    const r = spawnSync(
+      "node",
+      [CLI, DEMO_PIPELINE, "--no-with-nextflow", "--fetch-test-data", "--no-validate"],
+      { encoding: "utf8", timeout: 120_000 },
+    );
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    const inputs = data.test_fixtures.inputs as {
+      role: string;
+      url: string;
+      sha1: string;
+      filetype: string;
+    }[];
+    const urls = inputs.map((input) => input.url);
+    expect(new Set(urls).size).toBe(urls.length);
+    expect(inputs.find((input) => input.role === "samplesheet")?.sha1).toMatch(/^[a-f0-9]{40}$/u);
+    expect(inputs.filter((input) => input.role === "reads").length).toBe(4);
+    expect(inputs.filter((input) => input.role === "reads").map((input) => input.filetype)).toEqual(
+      ["fastq.gz", "fastq.gz", "fastq.gz", "fastq.gz"],
+    );
+    expect(
+      inputs
+        .filter((input) => input.role === "reads")
+        .every((input) => /^[a-f0-9]{40}$/u.test(input.sha1)),
+    ).toBe(true);
   });
 });
 

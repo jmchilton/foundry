@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 import { Command } from "commander";
+import { writeFileSync } from "node:fs";
+import { validateSummary } from "@galaxy-foundry/summary-nextflow-schema";
+import {
+  buildSummary,
+  SummarizeNextflowNotImplementedError,
+  type SummarizeNextflowOptions,
+} from "../index.js";
 import { VERSION } from "../version.js";
 
 const program = new Command();
@@ -15,10 +22,30 @@ program
   .option("--no-with-nextflow", "Disable Nextflow shell-out; static parse only (default: enabled)")
   .option("--fetch-test-data", "Resolve and hash referenced test data", false)
   .option("--no-validate", "Skip schema validation of the emitted summary (default: enabled)")
-  .action((pathOrUrl: string, _options: Record<string, unknown>) => {
-    process.stderr.write(`summarize-nextflow ${VERSION}: not yet implemented\n`);
-    process.stderr.write(`  target: ${pathOrUrl}\n`);
-    process.exit(64);
+  .action(async (pathOrUrl: string, options: SummarizeNextflowOptions) => {
+    try {
+      const summary = await buildSummary(pathOrUrl, options);
+      if (options.validate) {
+        const result = validateSummary(summary);
+        if (!result.valid) {
+          for (const diag of result.errors) {
+            process.stderr.write(`  ${diag.path}: ${diag.message} (${diag.keyword})\n`);
+          }
+          process.exit(3);
+        }
+      }
+
+      const json = `${JSON.stringify(summary, null, 2)}\n`;
+      if (options.out) writeFileSync(options.out, json);
+      else process.stdout.write(json);
+    } catch (err) {
+      if (err instanceof SummarizeNextflowNotImplementedError) {
+        process.stderr.write(`summarize-nextflow ${VERSION}: not yet implemented\n`);
+        process.stderr.write(`  target: ${err.target}\n`);
+        process.exit(err.exitCode);
+      }
+      throw err;
+    }
   });
 
 program.parseAsync(process.argv).catch((err) => {

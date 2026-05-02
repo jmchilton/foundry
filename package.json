@@ -23,6 +23,7 @@
     "packages-lint": "eslint packages/*/src/ packages/*/test/",
     "packages-format": "prettier --check 'packages/*/src/**/*.ts' 'packages/*/test/**/*.ts'",
     "packages-format-fix": "prettier --write 'packages/*/src/**/*.ts' 'packages/*/test/**/*.ts'",
+    "smoke:summary-nextflow-schema": "node scripts/smoke-summary-nextflow-schema-package.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm -r build && changeset publish",
