@@ -18,9 +18,9 @@ Alphabetical.
 
 **Casting skill** — the producer skill or tool that reads a Mold and emits a cast artifact. Distinct from a **generated skill**, which is one possible kind of cast artifact.
 
-**CLI Mold** — a Mold whose primary content is a CLI's reference surface. Examples: `gxwf-cli`, `planemo-cli`. Casts roll up the relevant `cli/<tool>/*` manual-page content into a structured runtime artifact (typically JSON) plus a thin procedural overview — *not* a markdown dump of `--help` output. Per-action Molds (`discover-shed-tool`, `validate-with-gxwf`, `run-workflow-test`) reference individual manual pages directly rather than depending on the whole-CLI Mold.
+**CLI reference content** — per-command CLI documentation under `content/cli/<tool>/<command>.md`. Action Molds (`discover-shed-tool`, `validate-galaxy-step`, `validate-galaxy-workflow`, `run-workflow-test`) reference individual manual pages directly; whole-CLI reference surfaces are not Molds unless a real action emerges.
 
-**CLI manual page** — a Foundry content note describing a single CLI command or subcommand (synopsis, args, flags, examples, exit codes, output shape, error patterns, gotchas). Lives at `content/cli/<tool>/<cmd>.md`. Hand-authored or seeded from `--help` then humanized. Wiki-linked from CLI Molds and from per-action Molds. Cast to a structured sidecar by the casting pipeline; not inlined as prose.
+**CLI manual page** — a Foundry content note describing a single CLI command or subcommand (install/source, synopsis, args, flags, examples, exit codes, output shape, error patterns, gotchas). Lives at `content/cli/<tool>/<cmd>.md`. Hand-authored or seeded from `--help` then humanized. Wiki-linked from action Molds. Cast to a structured sidecar by the casting pipeline; not inlined as prose.
 
 **Composed path** — a harness pipeline that uses CWL as a structured intermediate target before reaching Galaxy. Examples: `PAPER → CWL → GALAXY`, `NEXTFLOW → CWL → GALAXY`. Contrasts with **direct path**. Both are first-class options.
 
@@ -42,7 +42,7 @@ Alphabetical.
 
 **gxformat2** — Galaxy's Format-2 workflow format. The target format for Galaxy-targeting authoring Molds.
 
-**gxwf** — the design-time CLI tool. Workflow validation, tool discovery / search / revisions, schema, conversion, lint. Available in TypeScript and Python; both share an interface. Inside the Foundry, gxwf's CLI surface is captured as **CLI manual pages** (`content/cli/gxwf/*`) and rolled up by the **`gxwf-cli` Mold**; the existing `~/.claude/skills/gxwf-cli` (a help-text dump) is the prior art being replaced. Contrasts with **Planemo**.
+**gxwf** — the design-time CLI tool. Workflow validation, tool discovery / search / revisions, schema, conversion, lint. Available in TypeScript and Python; both share an interface. Inside the Foundry, gxwf's CLI surface is captured as **CLI manual pages** (`content/cli/gxwf/*`) referenced by action Molds; the existing `~/.claude/skills/gxwf-cli` (a help-text dump) is prior art being replaced. Contrasts with **Planemo**.
 
 **Harness** — hand-authored orchestration glue that sequences Molds, manages user-approval gates, maintains run state, handles routing decisions (e.g., the discover-or-author branch). Not cast from a Mold; not in the Foundry's casting pipeline. May be heavyweight (Archon-style) or a lightweight orchestration skill.
 
@@ -52,21 +52,21 @@ Alphabetical.
 
 **IWC exemplar** — one workflow from the IWC corpus. The cleaned `gxformat2` versions live in `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-format2/`. Pattern pages cite exemplars; Molds reference them as ground truth; casting may inline references; evaluations exercise generated skills against them.
 
-**Loop** *(`[loop]` annotation)* — a phase-level flag (`loop: true` in frontmatter) marking a phase that runs once per step in the workflow being constructed. Applied to per-step authoring phases (`implement-galaxy-tool-step`, `validate-with-gxwf`, …) and to `[branch]` phases that route per-step (`discover-or-author`). Renders on a subway map as a decorated station.
+**Loop** *(`[loop]` annotation)* — a phase-level flag (`loop: true` in frontmatter) marking a phase that runs once per step in the workflow being constructed. Applied to per-step authoring phases (`implement-galaxy-tool-step`, `validate-galaxy-step`, …) and to `[branch]` phases that route per-step (`discover-or-author`). Renders on a subway map as a decorated station.
 
 **Mold** — an abstract, structured template inside the Foundry that describes a workflow-construction action. Authored as a **typed reference manifest with a presentation layer**: a `.md` file whose frontmatter declares typed references to heterogeneous artifacts (pattern pages, CLI manual pages, IO schemas, prompt fragments, examples), and whose body is a procedural skeleton that ties them together. Rendered as a navigable Foundry page; cast into one or more cast artifacts via casting's per-kind dispatch over those references.
 
 **Mold (atomic, phase-sized)** — the granularity rule: each Mold is roughly the size of one Mold-shaped phase in a Pipeline. Not necessarily small; `summarize-nextflow` and `implement-galaxy-tool-step` are both atomic at this tier even though they differ in content size.
 
-**Not a Mold** — explicit boundary marker for things that are *not* cast from the Foundry. Includes harnesses, harness-level concerns (state, resumption, autonomy posture), Pipelines themselves, non-Mold phase kinds (`[branch]`, future `[gate]` — these reference Molds via embedded wiki-links but are not Molds), and pure reference content (pattern pages, CLI manual pages, IO schemas — these are *referenced by* Molds, not Molds themselves). Wrapping a CLI is *not* a disqualifier: see `validate-with-gxwf`, `discover-shed-tool`, `run-workflow-test`.
+**Not a Mold** — explicit boundary marker for things that are *not* cast from the Foundry. Includes harnesses, harness-level concerns (state, resumption, autonomy posture), Pipelines themselves, non-Mold phase kinds (`[branch]`, future `[gate]` — these reference Molds via embedded wiki-links but are not Molds), and pure reference content (pattern pages, CLI manual pages, IO schemas — these are *referenced by* Molds, not Molds themselves). Wrapping a CLI is *not* a disqualifier: see `validate-galaxy-step`, `discover-shed-tool`, `run-workflow-test`.
 
 **Pattern page** — a Foundry reference page describing a Galaxy workflow construction pattern (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring, …). Wiki-linked from action Molds; pulled into cast artifacts via casting's pattern-kind dispatch (LLM-condensed, mixed verbatim and summarization). Different from a Mold: a pattern page is reference, a Mold is action. Some patterns have a companion action Mold (e.g., custom-tool-authoring pattern + `author-galaxy-tool-wrapper` Mold).
 
 **Phase** — one atomic unit of a Pipeline's ordered `phases` array. Either Mold-shaped (`mold: [[...]]`, optionally `loop: true`) or a non-Mold annotation kind: `[branch]` today, future `[gate]` when needed. Open set — new phase kinds are coined when first surfaced inline rather than pre-enumerated. Validator resolves embedded wiki-links per kind (Mold-shaped phases must resolve to `type: mold`; `[branch]` inner items resolve to Molds or are terminal sentinels like `user-supplied`).
 
-**Pipeline** — first-class Foundry note type (`type: pipeline`, `content/pipelines/<slug>.md`). An ordered sequence of phases that compose into a harness journey (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`). Dual purpose: (a) **build artifact** — names the Molds a harness will orchestrate; (b) **navigation primitive** — the journey-surface IA over the KB, rendered as a subway map. `phases` frontmatter is the machine-readable spine; the body is the human-readable view. Pipelines are *referenced content*, not cast. The Mold-inventory invariant ("Molds = union of pipeline phases") is machine-checked: every Mold-shaped phase resolves to a real Mold note, and Molds with no pipeline membership surface as inventory-coverage warnings (excluding drafts and `axis: tool-specific`).
+**Pipeline** — first-class Foundry note type (`type: pipeline`, `content/pipelines/<slug>.md`). An ordered sequence of phases that compose into a harness journey (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`). Dual purpose: (a) **build artifact** — names the Molds a harness will orchestrate; (b) **navigation primitive** — the journey-surface IA over the KB, rendered as a subway map. `phases` frontmatter is the machine-readable spine; the body is the human-readable view. Pipelines are *referenced content*, not cast. The Mold-inventory invariant ("Molds = union of pipeline phases") is machine-checked: every Mold-shaped phase resolves to a real Mold note, and non-draft Molds with no pipeline membership surface as inventory-coverage warnings.
 
-**Planemo** — the runtime CLI tool. Executes Galaxy *and* CWL workflows. Used by `run-workflow-test`, `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`. Inside the Foundry, Planemo's CLI surface is captured as **CLI manual pages** (`content/cli/planemo/*`) and rolled up by the **`planemo-cli` Mold**, parallel to gxwf. Contrasts with **gxwf**.
+**Planemo** — the runtime CLI tool. Executes Galaxy *and* CWL workflows. Used by `run-workflow-test`, `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`. Inside the Foundry, Planemo's CLI surface is captured as **CLI manual pages** (`content/cli/planemo/*`) referenced by action Molds. Contrasts with **gxwf**.
 
 **Reference kind** — the type discriminator on a Mold's typed references; controls casting behavior. Provisional kinds: `pattern` (markdown reference, LLM-condensed), `cli-command` (manual page, cast to JSON sidecar), `schema` (JSON Schema file, copied verbatim), `example` (fixture, copied verbatim), `prompt` (markdown fragment, inlined verbatim), `eval` (Foundry-only, never in cast). Per-kind dispatch is what makes casting more than "resolve all wiki links the same way."
 
@@ -80,7 +80,7 @@ Alphabetical.
 
 **Target-specific** *(Mold axis)* — a Mold whose content depends on the output target. Examples: `summary-to-galaxy-template`, `summarize-galaxy-tool`, `validate-cwl`.
 
-**Tool-specific** *(Mold axis)* — a Mold whose content depends on a specific external tool's CLI surface. Examples: `gxwf-cli`, `planemo-cli`. (Provisional axis value; may merge into `generic` if the distinction stays uninteresting.)
+**Tool-specific** *(Mold axis)* — a provisional Mold axis for actions whose behavior depends on one external tool. Whole-CLI reference surfaces are reference content, not Molds.
 
 **Generic** *(Mold axis)* — a Mold whose content depends on neither source nor target nor a single tool. Rare in the current inventory.
 

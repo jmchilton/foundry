@@ -23,7 +23,7 @@ Hand-authored, monolithic conversion skills are brittle, hard to test, and don't
 - **Pipelines** (`content/pipelines/`) — ordered Mold sequences composing into an end-to-end conversion (`paper-to-galaxy`, `nextflow-to-galaxy`, `cwl-to-galaxy`, `paper-to-cwl`, `nextflow-to-cwl`). Build artifact and primary navigation surface.
 - **Molds** (`content/molds/`) — abstract templates describing a workflow-construction action. Each Mold is a typed reference manifest: it declares the patterns, CLI manual pages, schemas, prompts, and examples it depends on, and casts into one or more skill artifacts.
 - **Patterns** (`content/patterns/`) — Galaxy workflow construction reference (collection manipulation, tabular manipulation, conditional handling, custom-tool authoring). Wiki-linked from action Molds; pulled into cast skills via casting's pattern-kind dispatch.
-- **CLI manual pages** (`content/cli/<tool>/`) — one note per command or subcommand for `gxwf` and `planemo`. Cast to JSON sidecars by per-action Molds; rolled up wholesale by the `gxwf-cli` and `planemo-cli` Molds.
+- **CLI manual pages** (`content/cli/<tool>/`) — one note per command or subcommand for `gxwf` and `planemo`. Cast to JSON sidecars by action Molds that reference exact commands.
 - **Schemas** (`content/schemas/`) — JSON Schema declarations for Mold input/output shapes, paired with a content-note rendering. Foundry-authored schemas live next to their note; vendored schemas are imported from upstream packages and registered in `site/src/lib/schema-registry.ts`. Copied verbatim into cast bundles.
 - **Casts** (`casts/<target>/<name>/`) — generated artifacts, one per (Mold, target) pair. Frozen, condensed, no links back.
 

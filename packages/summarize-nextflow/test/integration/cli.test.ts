@@ -117,6 +117,270 @@ profiles { test {} }
       globalThis.fetch = originalFetch;
     }
   });
+
+  itIfBuilt("extracts all bioconda dependencies from module environments", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
+    const moduleDir = join(root, "modules", "local", "align");
+    mkdirSync(moduleDir, { recursive: true });
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'nf-core/synthetic' }
+profiles { test {} }
+`,
+    );
+    writeFileSync(
+      join(moduleDir, "main.nf"),
+      `process MINIMAP2_ALIGN {
+  conda "\${moduleDir}/environment.yml"
+  input:
+  path reads
+  output:
+  path "*.bam", emit: bam
+  script:
+  """
+  minimap2 | samtools sort
+  """
+}
+`,
+    );
+    writeFileSync(
+      join(moduleDir, "environment.yml"),
+      `name: synthetic
+dependencies:
+  - bioconda::minimap2=2.24
+  - bioconda::samtools=1.18
+  - bioconda::htslib=1.18
+  - conda-forge::pigz=2.6
+`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    });
+    const validation = validateSummary(summary);
+    expect(validation.valid).toBe(true);
+
+    const tools = (summary as { tools: { name: string; version: string; bioconda: string }[] })
+      .tools;
+    expect(tools.map((tool) => tool.name)).toEqual(
+      expect.arrayContaining(["minimap2", "samtools", "htslib"]),
+    );
+    expect(tools.find((tool) => tool.name === "htslib")?.bioconda).toBe("bioconda::htslib=1.18");
+    expect(tools.some((tool) => tool.name === "pigz")).toBe(false);
+  });
+
+  itIfBuilt("extracts process aliases from include statements", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
+    const moduleDir = join(root, "modules", "local", "align");
+    mkdirSync(join(root, "workflows"), { recursive: true });
+    mkdirSync(moduleDir, { recursive: true });
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'nf-core/synthetic' }
+profiles { test {} }
+`,
+    );
+    writeFileSync(
+      join(root, "workflows", "synthetic.nf"),
+      `include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS } from '../modules/local/align'
+include { MINIMAP2_ALIGN as MINIMAP2_POLISH } from '../modules/local/align'
+include { FASTQC } from '../modules/local/fastqc'
+`,
+    );
+    writeFileSync(
+      join(moduleDir, "main.nf"),
+      `process MINIMAP2_ALIGN {
+  output:
+  path "*.paf", emit: paf
+  script:
+  """
+  minimap2
+  """
+}
+`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    });
+    const validation = validateSummary(summary);
+    expect(validation.valid).toBe(true);
+
+    const process = (
+      summary as { processes: { name: string; aliases: string[] }[] }
+    ).processes.find((candidate) => candidate.name === "MINIMAP2_ALIGN");
+    expect(process?.aliases).toEqual(["MINIMAP2_CONSENSUS", "MINIMAP2_POLISH"]);
+  });
+
+  itIfBuilt("extracts one nf-test entry per test block with snapshot details", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
+    mkdirSync(join(root, "tests"));
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'nf-core/synthetic' }
+profiles { test {} test_alt {} }
+`,
+    );
+    writeFileSync(
+      join(root, "tests", "default.nf.test"),
+      `nextflow_pipeline {
+  test("-profile test") {
+    when { params { outdir = "$outputDir" } }
+    then {
+      def stable_name = getAllFilesFromDir(params.outdir, relative: true, ignoreFile: 'tests/.nftignore_files_entirely')
+      def stable_path = getAllFilesFromDir(params.outdir, ignore: ['Prokka/**'])
+      assertAll(
+        { assert workflow.success },
+        { assert snapshot(workflow.trace.succeeded().size(), removeNextflowVersion("$outputDir/versions.yml"), stable_name, stable_path).match() }
+      )
+    }
+  }
+  test("-profile test_alt") {
+    when { params { outdir = "$outputDir" } }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    });
+    const validation = validateSummary(summary);
+    expect(validation.valid).toBe(true);
+
+    const tests = (
+      summary as {
+        nf_tests: {
+          profiles: string[];
+          snapshot: {
+            captures: string[];
+            helpers: string[];
+            ignore_files: string[];
+            ignore_globs: string[];
+          } | null;
+        }[];
+      }
+    ).nf_tests;
+    expect(tests).toHaveLength(2);
+    expect(tests.map((test) => test.profiles[0])).toEqual(["test", "test_alt"]);
+    expect(tests[0]?.snapshot?.captures).toEqual([
+      "succeeded_task_count",
+      "versions_yml",
+      "stable_names",
+      "stable_paths",
+    ]);
+    expect(tests[0]?.snapshot?.helpers).toEqual(["getAllFilesFromDir", "removeNextflowVersion"]);
+    expect(tests[0]?.snapshot?.ignore_files).toEqual(["tests/.nftignore_files_entirely"]);
+    expect(tests[0]?.snapshot?.ignore_globs).toEqual(["Prokka/**"]);
+  });
+
+  itIfBuilt("extracts named subworkflows and selects the primary workflow", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
+    mkdirSync(join(root, "modules", "local", "align"), { recursive: true });
+    mkdirSync(join(root, "subworkflows", "local", "prep"), { recursive: true });
+    mkdirSync(join(root, "workflows"), { recursive: true });
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'nf-core/synthetic' }
+profiles { test {} }
+`,
+    );
+    writeFileSync(
+      join(root, "modules", "local", "align", "main.nf"),
+      `process ALIGN {
+  output:
+  path "*.bam", emit: bam
+  script:
+  """
+  align
+  """
+}
+`,
+    );
+    writeFileSync(
+      join(root, "subworkflows", "local", "prep", "main.nf"),
+      `include { ALIGN } from '../../../modules/local/align'
+workflow PREP_READS {
+  take:
+  ch_reads
+  main:
+  ALIGN(ch_reads)
+  emit:
+  bam = ALIGN.out.bam
+}
+`,
+    );
+    writeFileSync(
+      join(root, "workflows", "synthetic.nf"),
+      `include { PREP_READS } from '../subworkflows/local/prep'
+workflow SYNTHETIC {
+  take:
+  ch_reads
+  main:
+  ch_extra = Channel.empty()
+  PREP_READS(ch_reads)
+  emit:
+  bam = PREP_READS.out.bam
+}
+`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    });
+    const validation = validateSummary(summary);
+    expect(validation.valid).toBe(true);
+
+    const data = summary as {
+      workflow: {
+        name: string;
+        channels: { name: string; source: string }[];
+        edges: { from: string; to: string; via: string[] }[];
+      };
+      subworkflows: {
+        name: string;
+        kind: string;
+        calls: string[];
+        inputs: unknown[];
+        outputs: unknown[];
+      }[];
+    };
+    expect(data.workflow.name).toBe("SYNTHETIC");
+    expect(data.workflow.channels).toEqual([
+      { name: "ch_extra", source: "Channel.empty()", shape: "channel" },
+    ]);
+    expect(data.workflow.edges).toEqual([{ from: "ch_reads", to: "PREP_READS", via: [] }]);
+    const prep = data.subworkflows.find((workflow) => workflow.name === "PREP_READS");
+    expect(prep?.kind).toBe("pipeline");
+    expect(prep?.calls).toEqual(["ALIGN"]);
+    expect(prep?.inputs).toHaveLength(1);
+    expect(prep?.outputs).toHaveLength(1);
+  });
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
@@ -216,6 +480,16 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     expect(validation.valid).toBe(true);
     expect(data.source.workflow).toBe("bacass");
     expect(data.nf_tests.length).toBeGreaterThanOrEqual(9);
+    expect(data.nf_tests[0].snapshot.captures).toEqual([
+      "succeeded_task_count",
+      "versions_yml",
+      "stable_names",
+      "stable_paths",
+    ]);
+    expect(
+      data.nf_tests.find((test: { name: string }) => test.name.includes("test_hybrid_dragonflye"))
+        ?.snapshot.ignore_globs,
+    ).toContain("Prokka/**");
 
     const inputs = data.test_fixtures.inputs as {
       role: string;
@@ -232,6 +506,59 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     expect(inputs.find((input) => input.role === "samplesheet")?.url).toBe(
       "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/bacass/bacass_short.tsv",
     );
+  });
+
+  itIfBacassFixture("extracts multi-dependency bioconda tools from bacass modules", () => {
+    const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+    });
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    const validation = validateSummary(data);
+    expect(validation.valid).toBe(true);
+    expect(data.tools.map((tool: { name: string }) => tool.name)).toEqual(
+      expect.arrayContaining(["samtools", "htslib", "minimap2", "multiqc", "racon"]),
+    );
+    expect(data.tools.find((tool: { name: string }) => tool.name === "htslib")?.bioconda).toMatch(
+      /^bioconda::htslib=/u,
+    );
+  });
+
+  itIfBacassFixture("extracts repeated module aliases from bacass includes", () => {
+    const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+    });
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    const minimap2 = data.processes.find(
+      (process: { name: string }) => process.name === "MINIMAP2_ALIGN",
+    );
+    const fastqc = data.processes.find((process: { name: string }) => process.name === "FASTQC");
+    expect(minimap2.aliases).toEqual(["MINIMAP2_CONSENSUS", "MINIMAP2_POLISH"]);
+    expect(fastqc.aliases).toEqual(["FASTQC_RAW", "FASTQC_TRIM"]);
+  });
+
+  itIfBacassFixture("extracts bacass named subworkflows", () => {
+    const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+    });
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    expect(data.workflow.name).toBe("BACASS");
+    expect(data.workflow.edges).toEqual(
+      expect.arrayContaining([
+        { from: "ch_shortreads_fastqs.multiple", to: "CAT_FASTQ_SHORT", via: [] },
+      ]),
+    );
+    const trim = data.subworkflows.find(
+      (workflow: { name: string }) => workflow.name === "FASTQ_TRIM_FASTP_FASTQC",
+    );
+    expect(trim?.path).toBe("subworkflows/nf-core/fastq_trim_fastp_fastqc/main.nf");
+    expect(trim?.kind).toBe("pipeline");
+    expect(trim?.calls).toEqual(["FASTP", "FASTQC_RAW", "FASTQC_TRIM"]);
   });
 });
 

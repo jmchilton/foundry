@@ -16,6 +16,10 @@ export function buildWikiLinkMap(entries: CollectionEntry<'content'>[]): Map<str
       const nameSlug = slugify(entry.data.name);
       if (!map.has(nameSlug)) map.set(nameSlug, { id: entry.id, summary: entry.data.summary });
     }
+    if (entry.data.type === 'cli-command' && entry.data.tool && entry.data.command) {
+      const commandSlug = slugify(`${entry.data.tool} ${entry.data.command}`);
+      if (!map.has(commandSlug)) map.set(commandSlug, { id: entry.id, summary: entry.data.summary });
+    }
   }
   return map;
 }

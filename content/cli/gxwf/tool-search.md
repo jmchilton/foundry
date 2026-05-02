@@ -21,6 +21,10 @@ Free-text search over the Galaxy Tool Shed's tool index. Designed to feed `galax
 
 Instance-agnostic; targets `https://toolshed.g2.bx.psu.edu` by default.
 
+## Install
+
+Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Prefer the project-local executable when running inside a checked-out Foundry or galaxy-tool-util workspace.
+
 ## Synopsis
 
 ```

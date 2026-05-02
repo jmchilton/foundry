@@ -25,7 +25,7 @@ phases:
     loop: true
   - mold: "[[implement-galaxy-tool-step]]"
     loop: true
-  - mold: "[[validate-with-gxwf]]"
+  - mold: "[[validate-galaxy-step]]"
     loop: true
   - branch: test-data-resolution
     chain:
@@ -33,7 +33,7 @@ phases:
       - "[[find-test-data]]"
       - user-supplied
   - mold: "[[implement-galaxy-workflow-test]]"
-  - mold: "[[validate-with-gxwf]]"
+  - mold: "[[validate-galaxy-workflow]]"
   - mold: "[[run-workflow-test]]"
   - mold: "[[debug-galaxy-workflow-output]]"
 ---

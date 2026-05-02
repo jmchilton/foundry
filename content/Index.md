@@ -19,14 +19,12 @@ Generated from content frontmatter. Do not edit by hand.
 - [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify failure modes; propose fixes.
 - [[discover-shed-tool]] — Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through.
 - [[find-test-data]] — Search IWC fixtures and public sources for test data matching a data-flow shape.
-- [[gxwf-cli]] — Whole-CLI Mold: gxwf design-time surface (validate, lint, convert, search, …).
 - [[implement-cwl-tool-step]] — Convert an abstract step into a concrete CWL CommandLineTool + step.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
 - [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary.
 - [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions.
 - [[nextflow-test-to-target-tests]] — Translate NF test fixtures into a target workflow's test format.
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
-- [[planemo-cli]] — Whole-CLI Mold: Planemo runtime surface (test, run, lint, scaffolding, …).
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
 - [[summarize-cwl]] — Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals.
 - [[summarize-cwl-tool]] — Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target.
@@ -38,7 +36,8 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summary-to-galaxy-data-flow]] — Abstract DAG with Galaxy collection / scatter / branching idioms surfaced.
 - [[summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a data-flow summary.
 - [[validate-cwl]] — Run cwltool --validate / schema lint, classify failures, recommend fixes.
-- [[validate-with-gxwf]] — Run gxwf schema/lint, classify failures, recommend fixes; loop until clean.
+- [[validate-galaxy-step]] — Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation.
+- [[validate-galaxy-workflow]] — Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
 
 ## Patterns
 
@@ -83,6 +82,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[tool-revisions]] — Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin.
 - [[tool-search]] — Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence.
 - [[tool-versions]] — List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence.
+- [[validate]] — Validate gxformat2 Galaxy workflow structure and emit diagnostics before runtime execution.
 
 ## Schemas
 

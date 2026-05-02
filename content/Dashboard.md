@@ -19,21 +19,21 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against a draft. | draft | 2026-05-02 | 2 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify failure modes; propose fixes. | draft | 2026-05-02 | 2 |
 | [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary. | draft | 2026-05-02 | 2 |
-| [[summarize-nextflow]] | Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to. | draft | 2026-05-02 | 5 |
+| [[summarize-nextflow]] | Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to. | draft | 2026-05-02 | 7 |
 | [[summary-to-galaxy-data-flow]] | Abstract DAG with Galaxy collection / scatter / branching idioms surfaced. | draft | 2026-05-02 | 2 |
 | [[summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a data-flow summary. | draft | 2026-05-02 | 2 |
+| [[validate-galaxy-step]] | Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation. | draft | 2026-05-02 | 1 |
+| [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | draft | 2026-05-02 | 1 |
 | [[author-galaxy-tool-wrapper]] | Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable. | draft | 2026-04-30 | 1 |
 | [[cwl-test-to-target-tests]] | Translate CWL test fixtures into a target workflow's test format. | draft | 2026-04-30 | 1 |
 | [[debug-cwl-workflow-output]] | Triage failing CWL run outputs; classify failure modes; propose fixes. | draft | 2026-04-30 | 1 |
 | [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | draft | 2026-04-30 | 2 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | draft | 2026-04-30 | 1 |
-| [[gxwf-cli]] | Whole-CLI Mold: gxwf design-time surface (validate, lint, convert, search, …). | draft | 2026-04-30 | 1 |
 | [[implement-cwl-tool-step]] | Convert an abstract step into a concrete CWL CommandLineTool + step. | draft | 2026-04-30 | 1 |
 | [[implement-cwl-workflow-test]] | Assemble CWL job file(s) and expected-output assertions. | draft | 2026-04-30 | 1 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | draft | 2026-04-30 | 1 |
 | [[nextflow-test-to-target-tests]] | Translate NF test fixtures into a target workflow's test format. | draft | 2026-04-30 | 1 |
 | [[paper-to-test-data]] | Derive workflow test inputs and expected outputs from a paper. | draft | 2026-04-30 | 1 |
-| [[planemo-cli]] | Whole-CLI Mold: Planemo runtime surface (test, run, lint, scaffolding, …). | draft | 2026-04-30 | 1 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | draft | 2026-04-30 | 1 |
 | [[summarize-cwl]] | Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals. | draft | 2026-04-30 | 1 |
 | [[summarize-cwl-tool]] | Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target. | draft | 2026-04-30 | 1 |
@@ -42,7 +42,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[summary-to-cwl-data-flow]] | Abstract DAG with CWL scatter / valueFrom / step idioms surfaced. | draft | 2026-04-30 | 1 |
 | [[summary-to-cwl-template]] | CWL Workflow skeleton with per-step TODOs from a data-flow summary. | draft | 2026-04-30 | 1 |
 | [[validate-cwl]] | Run cwltool --validate / schema lint, classify failures, recommend fixes. | draft | 2026-04-30 | 1 |
-| [[validate-with-gxwf]] | Run gxwf schema/lint, classify failures, recommend fixes; loop until clean. | draft | 2026-04-30 | 1 |
 
 ## Patterns
 
@@ -88,6 +87,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[validate]] | Validate gxformat2 Galaxy workflow structure and emit diagnostics before runtime execution. | draft | 2026-05-02 | 1 |
 | [[tool-revisions]] | Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin. | draft | 2026-04-30 | 1 |
 | [[tool-search]] | Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence. | draft | 2026-04-30 | 1 |
 | [[tool-versions]] | List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence. | draft | 2026-04-30 | 1 |

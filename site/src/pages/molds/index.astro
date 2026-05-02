@@ -1,10 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import Base from '../../layouts/Base.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const all = await getCollection('content');
 const molds = all.filter(n => n.data.type === 'mold' && n.data.status !== 'archived');
+const evalCount = molds.filter(m => hasEval(m.id)).length;
 
 // Group by axis.
 const AXES = ['source-specific', 'target-specific', 'tool-specific', 'generic'] as const;
@@ -16,6 +19,24 @@ for (const m of molds) {
   byAxis.set(ax, list);
 }
 for (const [, list] of byAxis) list.sort((a, b) => (a.data as any).name.localeCompare((b.data as any).name));
+
+function hasEval(id: string): boolean {
+  const evalPath = fileURLToPath(new URL(`../../../../content/${id}/eval.md`, import.meta.url));
+  return existsSync(evalPath);
+}
+
+function healthFor(m: typeof molds[number]): 'ok' | 'warn' | 'error' {
+  const d = m.data as any;
+  if (d.axis === 'source-specific' && !d.source) return 'error';
+  if (d.axis === 'target-specific' && !d.target) return 'error';
+  if (d.axis === 'tool-specific' && !d.tool) return 'error';
+  if (!hasEval(m.id)) return 'warn';
+  const refs = Array.isArray(d.references) ? d.references : [];
+  if (refs.some((ref: any) => ref.evidence === 'hypothesis' && !ref.verification)) return 'error';
+  if (refs.some((ref: any) => ref.load === 'on-demand' && !ref.trigger)) return 'warn';
+  const legacyCount = (d.patterns?.length ?? 0) + (d.cli_commands?.length ?? 0) + (d.prompts?.length ?? 0) + (d.examples?.length ?? 0);
+  return legacyCount > 0 ? 'warn' : 'ok';
+}
 ---
 <Base title="Molds">
   <section class="page-hero bg-grain" aria-labelledby="molds-heading">
@@ -36,6 +57,10 @@ for (const [, list] of byAxis) list.sort((a, b) => (a.data as any).name.localeCo
           <dt>Axes</dt>
           <dd>{[...byAxis.values()].filter(list => list.length > 0).length}</dd>
         </div>
+        <div>
+          <dt>Eval Plans</dt>
+          <dd>{evalCount}/{molds.length}</dd>
+        </div>
       </dl>
     </div>
   </section>
@@ -50,17 +75,19 @@ for (const [, list] of byAxis) list.sort((a, b) => (a.data as any).name.localeCo
           <span class="ml-2 text-sm font-normal text-(--color-text-muted)">({list.length})</span>
         </h2>
         <table class="data-table">
-          <thead><tr><th>Name</th><th>Specifier</th><th>Summary</th><th>Status</th></tr></thead>
+          <thead><tr><th>Name</th><th>Specifier</th><th>Summary</th><th>Status</th><th>Health</th></tr></thead>
           <tbody>
             {list.map(m => {
               const d = m.data as any;
               const spec = d.source ?? d.target ?? d.tool ?? '—';
+              const health = healthFor(m);
               return (
                 <tr>
                   <td><a href={`${base}/${m.id}/`} class="font-mono">{d.name}</a></td>
                   <td class="font-mono text-sm">{spec}</td>
                   <td class="text-sm text-(--color-text-muted)">{d.summary}</td>
                   <td><span class={`badge badge-${d.status}`}>{d.status}</span></td>
+                  <td><span class={`health health-${health}`}>{health}</span></td>
                 </tr>
               );
             })}
@@ -70,3 +97,19 @@ for (const [, list] of byAxis) list.sort((a, b) => (a.data as any).name.localeCo
     );
   })}
 </Base>
+
+<style>
+  .health {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.18rem 0.45rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    color: white;
+  }
+  .health-ok { background: #18794e; }
+  .health-warn { background: #b7791f; }
+  .health-error { background: #c53030; }
+</style>
