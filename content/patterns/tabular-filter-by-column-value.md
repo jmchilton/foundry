@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Tabular: filter rows by column value"
 tags:
   - pattern
@@ -77,10 +78,6 @@ Cited at `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandru
 - `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336` — `ConnectedValue` predicate, `header_lines: "0"`.
 
 All three corpus filters are equality / disjunction over a string column, or a `ConnectedValue` rule. Numeric-range predicates are unattested — if you reach for `cN > X`, you're slightly off the corpus path; verify behavior on a sample.
-
-## Legacy alternative
-
-None — `Filter1` is the modern tool. (Don't confuse with `__FILTER_FROM_FILE__` and `__FILTER_EMPTY_DATASETS__`, which are collection-level filters, not tabular row filters.)
 
 ## See also
 

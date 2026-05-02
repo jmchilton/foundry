@@ -7,15 +7,15 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <Base
   title="Design Docs"
-  description="Rendered source design records for the Galaxy Workflow Foundry."
+  description="Working design records for the Galaxy Workflow Foundry."
 >
   <section class="design-hero bg-grain" aria-labelledby="design-heading">
     <span class="eyebrow mb-4">Design Record</span>
-    <h1 id="design-heading">Working design docs, rendered for the site.</h1>
+    <h1 id="design-heading">The working record behind the Foundry story.</h1>
     <p>
-      These pages come directly from the repository's <code>docs/</code> directory. They are not
-      validated content notes and do not carry Foundry frontmatter; they are the source rationale
-      behind the more polished story, Molds, Pipelines, and pattern pages.
+      Start with the story, then come here for the deeper rationale: the principles, architecture,
+      Mold inventory, casting procedure, corpus approach, and pipeline narrative that shape the
+      public Foundry pages.
     </p>
   </section>
 
@@ -25,7 +25,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         <span class="design-doc-num font-mono">{String(index + 1).padStart(2, '0')}</span>
         <span class="design-doc-title">{doc.title}</span>
         <span class="design-doc-summary">{doc.summary}</span>
-        <span class="design-doc-source font-mono">{doc.source}</span>
+        <span class="design-doc-source font-mono">READ THE RECORD</span>
       </a>
     ))}
   </div>

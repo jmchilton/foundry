@@ -30,22 +30,22 @@ references:
     purpose: "Compare against the draft's abstract intent without turning exemplar comparison into tool resolution."
     trigger: "When deciding whether to compare abstract data-flow, gxformat2 skeleton structure, or concrete implementation details."
     verification: "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata."
-  - kind: research
-    ref: "[[iwc-transformations-survey]]"
+  - kind: pattern
+    ref: "[[galaxy-collection-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Compare draft collection-shape recipes against corpus-observed IWC examples."
-    trigger: "When the draft workflow contains collection reshape, cleanup, relabel, or synchronization sections."
-  - kind: research
-    ref: "[[iwc-tabular-operations-survey]]"
+    purpose: "Compare draft collection transformations against curated corpus-observed pattern guidance."
+    trigger: "When the draft workflow contains collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections."
+  - kind: pattern
+    ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Compare draft tabular/text-processing sections against corpus-observed IWC examples."
-    trigger: "When the draft workflow contains tabular filtering, projection, join, aggregation, or free-form text-processing sections."
+    purpose: "Compare draft tabular transformations against curated corpus-observed pattern guidance."
+    trigger: "When the draft workflow contains tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections."
   - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime

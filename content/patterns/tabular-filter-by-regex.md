@@ -1,5 +1,6 @@
 ---
 type: pattern
+pattern_kind: leaf
 title: "Tabular: filter rows by regex"
 tags:
   - pattern

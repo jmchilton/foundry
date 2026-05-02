@@ -53,22 +53,22 @@ references:
     evidence: corpus-observed
     purpose: "Select likely IWC comparison targets once the skeleton has enough domain, topology, and tool-family signal."
     trigger: "When preparing a draft skeleton for exemplar comparison or citing representative IWC workflows."
-  - kind: research
-    ref: "[[iwc-transformations-survey]]"
+  - kind: pattern
+    ref: "[[galaxy-collection-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Use observed IWC collection recipes as style guidance for unresolved skeleton steps."
-    trigger: "When adding TODO steps for collection cleanup, reshaping, relabeling, or identifier synchronization."
-  - kind: research
-    ref: "[[iwc-tabular-operations-survey]]"
+    purpose: "Use corpus-grounded collection pattern guidance for unresolved skeleton steps."
+    trigger: "When adding TODO steps for collection cleanup, reshaping, relabeling, identifier synchronization, or collection-tabular bridges."
+  - kind: pattern
+    ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Use observed IWC tabular recipes as style guidance for unresolved skeleton steps."
-    trigger: "When adding TODO steps for tabular filtering, projection, joins, aggregation, or text-processing bridges."
+    purpose: "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps."
+    trigger: "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges."
 ---
 # summary-to-galaxy-template
 

@@ -43,6 +43,9 @@ properties:
     type: array
     items:
       type: string
+  pattern_kind:
+    type: string
+    enum: [leaf, moc]
   sources:
     type: array
     minItems: 1
@@ -213,13 +216,13 @@ allOf:
     then:
       required: [tool]
 
-  # pattern requires title
+  # pattern requires title + pattern_kind
   - if:
       properties:
         type: { const: pattern }
       required: [type]
     then:
-      required: [title]
+      required: [title, pattern_kind]
 
   # cli-command requires tool + command
   - if:
