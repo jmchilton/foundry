@@ -67,10 +67,6 @@ modes:
     label: Sidecar
     description: Transformed into a structured runtime artifact beside the generated skill.
     href: https://github.com/jmchilton/foundry/blob/main/docs/COMPILATION_PIPELINE.md#typed-reference-manifest
-  copy:
-    label: Copy
-    description: Copied into the cast artifact as a supporting file.
-    href: https://github.com/jmchilton/foundry/blob/main/docs/COMPILATION_PIPELINE.md#typed-reference-manifest
 
 evidence:
   hypothesis:
