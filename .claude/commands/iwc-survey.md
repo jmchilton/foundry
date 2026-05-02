@@ -64,7 +64,7 @@ The survey *must* support these moves; section titles and ordering are your call
 ### What the survey does **not** include
 
 - **No `## Decisions` section.** Decisions migrate to `/iwc-survey-act`. The survey ends at open questions.
-- **No speculative pattern proposals.** If the corpus shows zero uptake of a capability, document the gap inline and move on. Do not propose a candidate pattern for it.
+- **No speculative pattern proposals.** If the corpus shows zero uptake of a capability, document the gap inline and move on. Do not propose a candidate pattern for it. Zero uptake is not anti-pattern evidence by itself; call it "catalog capability, no corpus-backed candidate" unless corpus evidence or a user decision gives an explicit don't-endorse reason.
 - **No tool-anchored candidate names.** `tp_grep_tool-page` is wrong; `tabular-filter-by-regex` is right.
 
 ### Style rules
