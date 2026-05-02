@@ -29,8 +29,27 @@ function noteTitle(n: typeof allNotes[number]): string {
 }
 ---
 <Base title="Index">
-  <h1 class="mb-4 text-2xl font-bold">Index</h1>
-  <p class="mb-6 text-(--color-text-secondary)">Every note in the Foundry, grouped by directory.</p>
+  <section class="page-hero bg-grain" aria-labelledby="index-heading">
+    <span class="eyebrow mb-3">Full Index</span>
+    <div class="page-hero-grid">
+      <div>
+        <h1 id="index-heading" class="page-title text-balance">Every note in the Foundry.</h1>
+        <p class="page-lede text-pretty">
+          A directory-grouped map of content notes, reference material, and generated navigation surfaces.
+        </p>
+      </div>
+      <dl class="page-stats" aria-label="Index stats">
+        <div>
+          <dt>Notes</dt>
+          <dd>{allNotes.length}</dd>
+        </div>
+        <div>
+          <dt>Dirs</dt>
+          <dd>{dirs.length}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
 
   {dirs.map(d => (
     <section class="mb-8">

@@ -18,8 +18,27 @@ for (const m of molds) {
 for (const [, list] of byAxis) list.sort((a, b) => (a.data as any).name.localeCompare((b.data as any).name));
 ---
 <Base title="Molds">
-  <h1 class="mb-4 text-2xl font-bold">Molds <span class="text-sm font-normal text-(--color-text-muted)">({molds.length})</span></h1>
-  <p class="mb-6 text-(--color-text-secondary)">Source artifacts for casting. Grouped by axis.</p>
+  <section class="page-hero bg-grain" aria-labelledby="molds-heading">
+    <span class="eyebrow mb-3">Mold Inventory</span>
+    <div class="page-hero-grid">
+      <div>
+        <h1 id="molds-heading" class="page-title text-balance">Source artifacts for casting.</h1>
+        <p class="page-lede text-pretty">
+          Molds are atomic action templates grouped by axis, then cast into target-specific skills and harness steps.
+        </p>
+      </div>
+      <dl class="page-stats" aria-label="Mold inventory stats">
+        <div>
+          <dt>Total</dt>
+          <dd>{molds.length}</dd>
+        </div>
+        <div>
+          <dt>Axes</dt>
+          <dd>{[...byAxis.values()].filter(list => list.length > 0).length}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
 
   {AXES.map(axis => {
     const list = byAxis.get(axis) ?? [];

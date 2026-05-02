@@ -12,6 +12,8 @@ const dashboardSections = sections.map(s => ({
     .filter(n => n.data.tags.includes(s.tag) && n.data.status !== 'archived')
     .sort((a, b) => b.data.revised.getTime() - a.data.revised.getTime()),
 }));
+const activeDashboardSections = dashboardSections.filter(s => s.notes.length > 0);
+const activeNotes = allNotes.filter(n => n.data.status !== 'archived');
 
 function formatDate(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -25,10 +27,29 @@ function noteTitle(n: typeof allNotes[number]): string {
 }
 ---
 <Base title="Dashboard">
-  <h1 class="mb-4 text-2xl font-bold text-balance">Galaxy Workflow Foundry</h1>
-  <p class="mb-6 text-(--color-text-secondary)">Knowledge base + casting pipeline for Galaxy workflows.</p>
+  <section class="page-hero bg-grain" aria-labelledby="dashboard-heading">
+    <span class="eyebrow mb-3">Dashboard</span>
+    <div class="page-hero-grid">
+      <div>
+        <h1 id="dashboard-heading" class="page-title text-balance">Galaxy Workflow Foundry.</h1>
+        <p class="page-lede text-pretty">
+          A sectioned operating view over the knowledge base and casting pipeline for Galaxy workflows.
+        </p>
+      </div>
+      <dl class="page-stats" aria-label="Dashboard stats">
+        <div>
+          <dt>Notes</dt>
+          <dd>{activeNotes.length}</dd>
+        </div>
+        <div>
+          <dt>Sections</dt>
+          <dd>{activeDashboardSections.length}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
 
-  {dashboardSections.filter(s => s.notes.length > 0).map(section => (
+  {activeDashboardSections.map(section => (
     <section aria-labelledby={`section-${section.label.replace(/\s+/g, '-').toLowerCase()}`}>
       <h2
         id={`section-${section.label.replace(/\s+/g, '-').toLowerCase()}`}
