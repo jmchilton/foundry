@@ -474,13 +474,11 @@ function validatePipelinePhases(
     for (const p of r.refs.moldPaths) moldsReferenced.add(p);
     for (const p of r.refs.branchedMoldPaths) moldsReferenced.add(p);
   }
-  // Inventory coverage warning: Molds with zero pipeline membership.
-  // Exempts axis=tool-specific (CLI Molds are standalone whole-CLI casts) and drafts.
+  // Inventory coverage warning: non-draft Molds should appear in at least one pipeline.
   const orphans: string[] = [];
   for (const f of files) {
     if (f.meta.type !== "mold") continue;
     if (f.meta.status === "draft") continue;
-    if (f.meta.axis === "tool-specific") continue;
     if (!moldsReferenced.has(f.path)) orphans.push(f.slug);
   }
   if (orphans.length > 0) {
