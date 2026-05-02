@@ -5,9 +5,9 @@
 // defaults) lives in the upstream package's `meta` subpath and is
 // wired in here for the `CliCommandBody.astro` component to render.
 //
-// STATUS: WIP. The registry is intentionally empty until
-// `@galaxy-tool-util/cli` ships its `./meta` subpath. See
-// `docs/CLI_META_INTEGRATION.md` for the activation checklist.
+// STATUS: ready for activation. `@galaxy-tool-util/cli` now ships metadata;
+// the registry stays empty until the site pins the package and wires the
+// imports. See `docs/CLI_META_INTEGRATION.md` for the activation checklist.
 //
 // Once activated:
 //   import { gxwfCliMeta, galaxyToolCacheCliMeta } from '@galaxy-tool-util/cli/meta';

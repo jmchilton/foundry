@@ -1,30 +1,37 @@
-# CLI metadata integration (Shape B for `cli-command` notes)
+# CLI metadata integration
 
-**Status: WIP** — landed as a draft PR; the registry hookup waits on upstream npm publish.
+**Status: ready for Foundry activation.** The upstream CLI metadata work has landed in
+`@galaxy-tool-util/cli` 1.1.0. The Foundry site has the empty registry and renderer shape in
+place; the remaining work is to add the package dependency, populate the registry, and convert the
+first CLI note.
 
 ## Goal
 
-Move `cli-command` notes from hand-authored prose tables to the same Shape B pattern `tests-format` uses for JSON Schemas: a thin in-repo framing stub, with synopsis / args / options / defaults rendered from data imported out of the upstream package. The web view stays rich; the in-repo `.md` shrinks to "when to use, why this exists, gotchas."
+Move `cli-command` notes from hand-authored prose tables to the same rendered-data pattern
+`tests-format` uses for JSON Schemas: a thin in-repo framing stub, with synopsis, args, options, and
+defaults rendered from upstream package metadata. The web view stays rich; the in-repo `.md` shrinks
+to "when to use this, why it exists, and what can go wrong."
 
 See `content/schemas/tests-format.md` for the reference shape this pattern mirrors and `site/src/lib/schema-registry.ts` for the registry shape this one mirrors.
 
-## Why "WIP"
+## Upstream status
 
-The data side is being built upstream:
+The data side is now available upstream:
 
-- Bridge: [galaxy-tool-util-ts#86](https://github.com/jmchilton/galaxy-tool-util-ts/pull/86) — adds `@galaxy-tool-util/cli/meta` subpath, browser-safe, walked from the commander programs at build time.
-- Destination: [galaxy-tool-util-ts#87](https://github.com/jmchilton/galaxy-tool-util-ts/issues/87) — invert the source of truth: spec YAML/JSON drives commander, no generated artifact.
+- [galaxy-tool-util-ts#86](https://github.com/jmchilton/galaxy-tool-util-ts/pull/86) merged on 2026-05-01 and inverted the CLI source of truth so specs drive Commander.
+- [galaxy-tool-util-ts#87](https://github.com/jmchilton/galaxy-tool-util-ts/issues/87) closed with the same change.
+- `@galaxy-tool-util/cli` 1.1.0 is published with the metadata subpath.
 
-PR #86 is the minimum we need to wire rendering. Issue #87 will change the *shape* of the published metadata only modestly (same `CliProgramSpec` interface; cleaner internals); when it lands the activation steps below stay the same — only the version pin moves.
+This document is now an activation checklist for the Foundry repo, not an upstream tracking note.
 
-## What's already in place on this branch
+## What's already in place
 
 - `site/src/lib/cli-registry.ts` — empty registry with the typed shape `CliCommandView` ready to receive data.
 - `site/src/components/CliCommandBody.astro` — upgraded to render synopsis / args / options / defaults / negatable / per-option anchor IDs from the registry. Falls back to "no metadata registered" banner + raw markdown body when the entry is absent, so the existing prose stubs (`content/cli/gxwf/tool-search.md`, etc.) keep rendering on `main` and on this branch.
 
-## Activation checklist (do this once #86 is published)
+## Activation checklist
 
-1. **Pin the package.** Add `"@galaxy-tool-util/cli": "^X.Y.Z"` to `site/package.json` at the version that includes the `./meta` subpath. Run `pnpm install` (or whatever the site uses).
+1. **Pin the package.** Add `"@galaxy-tool-util/cli": "^1.1.0"` to `site/package.json`. Run the site package manager and commit the lockfile change.
 2. **Populate the registry.** In `site/src/lib/cli-registry.ts`:
    ```ts
    import { gxwfCliMeta, galaxyToolCacheCliMeta } from '@galaxy-tool-util/cli/meta';
@@ -51,13 +58,13 @@ PR #86 is the minimum we need to wire rendering. Issue #87 will change the *shap
 7. **Update `docs/COMPILATION_PIPELINE.md`.** The cli-command row already says "Cast to structured JSON sidecar"; clarify that the sidecar is now sourced from the registry rather than parsed from the markdown body.
 8. **Drift safety.** Once notes are converted, add a validator check: cli-command notes whose `<tool>/<command>` doesn't appear in `cliRegistry` should warn (or error). Catches typos and removed-upstream commands.
 
-## Things deliberately left out of the WIP PR
+## Things deliberately left out so far
 
-- No `package.json` change. Adding the dep before #86 is published would either pin a version that doesn't exist or reach into a workspace path that breaks for other contributors.
+- No `package.json` change. This can now land because `@galaxy-tool-util/cli` 1.1.0 is published.
 - No note conversions. Without the registry populated, converting a note loses the option tables on render. The conversions land in the activation PR alongside the registry data.
 - No new `meta_schema.yml` fields. They land with the first note conversion so the schema change is reviewed against an example.
 
 ## Risks to track
 
-- **Spec format inversion (#87) changes the import shape.** Unlikely — the issue explicitly preserves `CliProgramSpec` as the consumer-facing shape — but worth re-reading the registry hookup once that lands.
+- **Import-shape drift.** Re-read the published `@galaxy-tool-util/cli/meta` exports before wiring the registry. The consumer-facing shape should be stable, but the Foundry should bind to the package as published, not to this checklist.
 - **Foundry-authored CLI surface.** If the Foundry ever needs a CLI doc for a command that doesn't exist upstream (a planned subcommand, a documentation-only flag), the registry-only path can't represent it. Solution if it comes up: framing note's body wins when no registry entry exists (already the current fallback). Don't preemptively design for this — wait until a real example appears.

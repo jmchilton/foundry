@@ -4,6 +4,7 @@
   { "label": "Patterns", "tag": "pattern" },
   { "label": "CLI Commands", "tag": "cli-command" },
   { "label": "Schemas", "tag": "schema" },
+  { "label": "Project Infrastructure Research", "tag": "research/infrastructure" },
   { "label": "Component Research", "tag": "research/component" },
   { "label": "Design Problems", "tag": "research/design-problem" }
 ]

@@ -27,13 +27,17 @@ const next = currentIndex >= 0 && currentIndex < DESIGN_DOCS.length - 1
       </a>
       <span class="design-eyebrow">
         <span class="design-eyebrow-rule" aria-hidden="true"></span>
-        <span>working design doc</span>
+        <span>{doc.category === 'infrastructure' ? 'infrastructure research' : 'working design doc'}</span>
       </span>
       <h1 data-pagefind-meta="title">{doc.title}</h1>
       <p data-pagefind-meta="summary">{doc.summary}</p>
       <div class="design-source">
-        <span class="font-mono">DESIGN RECORD</span>
-        <span>Part of the working rationale behind the Foundry story.</span>
+        <span class="font-mono">{doc.category === 'infrastructure' ? 'INFRASTRUCTURE RESEARCH' : 'DESIGN RECORD'}</span>
+        <span>
+          {doc.category === 'infrastructure'
+            ? 'Developer-facing research that shapes how the Foundry is built and integrated.'
+            : 'Part of the working rationale behind the Foundry story.'}
+        </span>
       </div>
     </header>
 

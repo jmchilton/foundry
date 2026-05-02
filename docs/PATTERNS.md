@@ -1,6 +1,8 @@
 # Pattern authorship policy
 
-Project-level conventions for `content/patterns/` notes. Read by the IWC survey commands and by anyone hand-authoring a pattern page. Pattern-specific prescriptive rules (e.g. when to set `auto_col_types: true`) belong on the pattern page itself, not here.
+Project-infrastructure policy for `content/patterns/` notes. Read this before hand-authoring
+pattern pages or running survey commands that propose new ones. Pattern-specific rules (for example,
+when to set `auto_col_types: true`) belong on the pattern page itself, not here.
 
 ## Naming: operation-anchored
 

@@ -9,6 +9,7 @@ export type DesignDoc = {
   title: string;
   source: string;
   summary: string;
+  category: 'foundation' | 'infrastructure';
 };
 
 export const DESIGN_DOCS: DesignDoc[] = [
@@ -17,38 +18,91 @@ export const DESIGN_DOCS: DesignDoc[] = [
     title: 'Guiding Principles',
     source: 'GUIDING_PRINCIPLES.md',
     summary: 'The design pressure behind source authority, progressive disclosure, validation, portability, and corpus grounding.',
+    category: 'foundation',
   },
   {
     slug: 'architecture',
     title: 'Architecture',
     source: 'ARCHITECTURE.md',
     summary: 'Physical layout, content types, validation pipeline, generated artifacts, and site rendering.',
+    category: 'foundation',
   },
   {
     slug: 'molds',
     title: 'Molds',
     source: 'MOLDS.md',
     summary: 'The Mold inventory, bucketing axes, and boundaries between Molds and reference content.',
+    category: 'foundation',
   },
   {
     slug: 'casting',
     title: 'Compilation Pipeline',
     source: 'COMPILATION_PIPELINE.md',
-    summary: 'How typed Mold references become target-specific cast skills with provenance.',
+    summary: 'How typed Mold references become target-specific cast artifacts with provenance.',
+    category: 'foundation',
   },
   {
     slug: 'corpus',
     title: 'Corpus Integration',
     source: 'CORPUS_INGESTION.md',
     summary: 'How IWC grounding works without turning the Foundry into an upstream workflow mirror.',
+    category: 'foundation',
   },
   {
     slug: 'harness-pipelines',
     title: 'Harness Pipelines',
     source: 'HARNESS_PIPELINES.md',
     summary: 'The source-to-target journeys that compose Molds, loops, and branch phases.',
+    category: 'foundation',
+  },
+  {
+    slug: 'archon',
+    title: 'Archon Evaluation',
+    source: 'COMPONENT_ARCHON.md',
+    summary: 'Infrastructure research on Archon as a possible harness substrate: useful boundaries, fit, and risks.',
+    category: 'infrastructure',
+  },
+  {
+    slug: 'gxy-sketches',
+    title: 'gxy-sketches Alignment',
+    source: 'GXY_SKETCHES_ALIGNMENT.md',
+    summary: 'Adjacent-project alignment notes for shared workflow summaries, test manifests, and future sketch targets.',
+    category: 'infrastructure',
+  },
+  {
+    slug: 'cli-metadata',
+    title: 'CLI Metadata Integration',
+    source: 'CLI_META_INTEGRATION.md',
+    summary: 'Implementation plan for rendering CLI command docs from upstream spec metadata instead of prose tables.',
+    category: 'infrastructure',
+  },
+  {
+    slug: 'pattern-authorship',
+    title: 'Pattern Authorship Policy',
+    source: 'PATTERNS.md',
+    summary: 'Developer-facing authorship rules for operation-named, corpus-grounded pattern pages.',
+    category: 'infrastructure',
   },
 ];
+
+export const DESIGN_DOC_GROUPS = [
+  {
+    category: 'foundation',
+    title: 'Foundry design records',
+    summary: 'The core rationale behind Molds, casting, corpus grounding, and source-to-target pipelines.',
+    action: 'READ THE RECORD',
+  },
+  {
+    category: 'infrastructure',
+    title: 'Project infrastructure research',
+    summary: 'Developer-facing evaluations and adjacent-project notes that shape how the Foundry is built, hosted, and integrated.',
+    action: 'READ THE RESEARCH',
+  },
+] as const;
+
+export function designDocsByCategory(category: DesignDoc['category']): DesignDoc[] {
+  return DESIGN_DOCS.filter(doc => doc.category === category);
+}
 
 export function getDesignDoc(slug: string): DesignDoc | undefined {
   return DESIGN_DOCS.find(doc => doc.slug === slug);
