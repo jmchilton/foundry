@@ -1,0 +1,90 @@
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(here, "..");
+const castMold = path.join(repoRoot, "scripts", "cast-mold.ts");
+const castVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
+
+function runTsx(script: string, args: string[]): { code: number; stdout: string; stderr: string } {
+  try {
+    const stdout = execFileSync("npx", ["tsx", script, ...args], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    return { code: 0, stdout, stderr: "" };
+  } catch (e) {
+    const err = e as { status?: number; stdout?: Buffer | string; stderr?: Buffer | string };
+    return {
+      code: typeof err.status === "number" ? err.status : 1,
+      stdout: typeof err.stdout === "string" ? err.stdout : err.stdout?.toString() ?? "",
+      stderr: typeof err.stderr === "string" ? err.stderr : err.stderr?.toString() ?? "",
+    };
+  }
+}
+
+describe("cast-mold (summarize-nextflow integration)", () => {
+  it("--check passes for the committed cast", () => {
+    const r = runTsx(castMold, ["summarize-nextflow", "--target=claude", "--check"]);
+    expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+    expect(r.stdout).toContain("clean");
+  });
+
+  it("provenance is schema v2 and lists deterministic refs", () => {
+    const provPath = path.join(repoRoot, "casts", "claude", "summarize-nextflow", "_provenance.json");
+    const prov = JSON.parse(readFileSync(provPath, "utf8"));
+    expect(prov.provenance_schema_version).toBe(2);
+    expect(prov.cast_target).toBe("claude");
+    expect(Array.isArray(prov.refs)).toBe(true);
+    expect(prov.refs.length).toBeGreaterThan(0);
+    for (const r of prov.refs) {
+      expect(r.source).toBe("deterministic");
+      expect(r.pending_llm).toBeUndefined();
+      expect(r.src_hash).toBe(r.dst_hash);
+    }
+    // Refs sorted by (kind, src) for stability.
+    const keys = prov.refs.map((r: { kind: string; src: string }) => `${r.kind}:${r.src}`);
+    const sorted = [...keys].sort();
+    expect(keys).toEqual(sorted);
+  });
+
+  it("dst paths use strict 1:1 source basename for verbatim refs", () => {
+    const provPath = path.join(repoRoot, "casts", "claude", "summarize-nextflow", "_provenance.json");
+    const prov = JSON.parse(readFileSync(provPath, "utf8"));
+    for (const r of prov.refs) {
+      if (r.mode !== "verbatim") continue;
+      expect(path.basename(r.dst)).toBe(path.basename(r.src));
+    }
+  });
+});
+
+describe("cast-skill-verify (summarize-nextflow integration)", () => {
+  it("verifier passes against committed cast", () => {
+    const r = runTsx(castVerify, ["summarize-nextflow", "--target=claude"]);
+    expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+    expect(r.stdout).toContain("verify clean");
+  });
+
+  it("required outputs present", () => {
+    const bundle = path.join(repoRoot, "casts", "claude", "summarize-nextflow");
+    expect(existsSync(path.join(bundle, "SKILL.md"))).toBe(true);
+    expect(existsSync(path.join(bundle, "_provenance.json"))).toBe(true);
+  });
+
+  it("rejects unknown flags", () => {
+    const r = runTsx(castVerify, ["summarize-nextflow", "--target=claude", "--bogus"]);
+    expect(r.code).not.toBe(0);
+  });
+});
+
+describe("cast-mold negative cases", () => {
+  it("unknown mold fails fast", () => {
+    const r = runTsx(castMold, ["does-not-exist", "--target=claude", "--check"]);
+    expect(r.code).not.toBe(0);
+    expect(r.stderr).toContain("mold source missing");
+  });
+});

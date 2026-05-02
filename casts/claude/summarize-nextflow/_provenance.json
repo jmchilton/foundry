@@ -1,56 +1,99 @@
 {
+  "provenance_schema_version": 2,
   "cast_target": "claude",
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 4
-  },
-  "schema": {
-    "path": "content/schemas/summary-nextflow.schema.json",
-    "note_revision": 3
+    "revision": 7,
+    "content_hash": "e35e59ed138365803fd6f70a5831bc199452b4c1dc271cd466fcda9ca5c3b0d3",
+    "commit": "5e65ff5a673463e5ee86e6de6946baa1a0255b2b"
   },
   "cast_method": "hand-cast",
+  "cast_agent": "claude (manual transcription, no LLM cast prompt)",
+  "cast_at": "2026-05-02T22:44:00.546Z",
   "cast_date": "2026-05-01",
   "cast_revision": 3,
-  "cast_agent": "claude (manual transcription, no LLM cast prompt)",
   "cast_history": [
-    { "rev": 1, "date": "2026-05-01", "note": "initial hand-cast against mold rev 2 / schema rev 1" },
-    { "rev": 2, "date": "2026-05-01", "note": "regenerated after first run on nf-core/demo. mold rev 3 + schema rev 2 incorporate gaps logged in content/log.md (ternary container resolver, file-path conda, channel topics, multi-workflow selection rule, utility-vs-pipeline subworkflow split, Wave registry)" },
-    { "rev": 3, "date": "2026-05-01", "note": "regenerated after second run on nf-core/bacass. mold rev 4 + schema rev 3 add Process.aliases for include-as multiplexing and a structured nf_tests[]/SnapshotFixture for per-.nf.test-file fixtures" }
+    {
+      "rev": 1,
+      "date": "2026-05-01",
+      "note": "initial hand-cast against mold rev 2 / schema rev 1"
+    },
+    {
+      "rev": 2,
+      "date": "2026-05-01",
+      "note": "regenerated after first run on nf-core/demo. mold rev 3 + schema rev 2 incorporate gaps logged in content/log.md (ternary container resolver, file-path conda, channel topics, multi-workflow selection rule, utility-vs-pipeline subworkflow split, Wave registry)"
+    },
+    {
+      "rev": 3,
+      "date": "2026-05-01",
+      "note": "regenerated after second run on nf-core/bacass. mold rev 4 + schema rev 3 add Process.aliases for include-as multiplexing and a structured nf_tests[]/SnapshotFixture for per-.nf.test-file fixtures"
+    }
   ],
-  "references": {
-    "schemas": [
-      {
-        "src": "content/schemas/summary-nextflow.schema.json",
-        "dst": "references/schemas/summary-nextflow.schema.json",
-        "mode": "verbatim",
-        "slot": ["cast-time", "runtime"]
-      }
-    ],
-    "notes": [
-      {
-        "src": "content/research/component-nextflow-pipeline-anatomy.md",
-        "dst": "references/notes/nextflow-pipeline-anatomy.md",
-        "mode": "verbatim",
-        "slot": ["runtime"],
-        "status": "stub"
-      },
-      {
-        "src": "content/research/component-nextflow-containers-and-envs.md",
-        "dst": "references/notes/nextflow-containers-and-envs.md",
-        "mode": "verbatim",
-        "slot": ["runtime"],
-        "status": "stub"
-      },
-      {
-        "src": "content/research/component-nextflow-testing.md",
-        "dst": "references/notes/nextflow-testing.md",
-        "mode": "verbatim",
-        "slot": ["runtime"],
-        "status": "stub"
-      }
-    ]
-  },
+  "refs": [
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-containers-and-envs]]",
+      "src": "content/research/component-nextflow-containers-and-envs.md",
+      "dst": "references/notes/component-nextflow-containers-and-envs.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence.",
+      "trigger": "When extracting tools, versions, containers, conda directives, or environment equivalences.",
+      "verification": "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves tool/container/environment extraction.",
+      "src_hash": "cc2e4c9b565364238183d08b50becc7533355d82774b2cdc9c45e6959b4cba8e",
+      "dst_hash": "cc2e4c9b565364238183d08b50becc7533355d82774b2cdc9c45e6959b4cba8e",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-pipeline-anatomy]]",
+      "src": "content/research/component-nextflow-pipeline-anatomy.md",
+      "dst": "references/notes/component-nextflow-pipeline-anatomy.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology.",
+      "trigger": "When walking pipeline structure or resolving process aliases and channel flow.",
+      "verification": "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves process/channel topology extraction.",
+      "src_hash": "f5ee738730c777be218ef5c5832382db799a85c300c38b4db52f2e1645ad0656",
+      "dst_hash": "f5ee738730c777be218ef5c5832382db799a85c300c38b4db52f2e1645ad0656",
+      "source": "deterministic"
+    },
+    {
+      "kind": "research",
+      "mode": "verbatim",
+      "ref": "[[component-nextflow-testing]]",
+      "src": "content/research/component-nextflow-testing.md",
+      "dst": "references/notes/component-nextflow-testing.md",
+      "used_at": "runtime",
+      "load": "on-demand",
+      "evidence": "hypothesis",
+      "purpose": "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions.",
+      "trigger": "When filling test_fixtures or nf_tests sections of the summary.",
+      "verification": "Run the generated summarize-nextflow skill against nf-core/bacass and confirm this reference improves nf_tests and snapshot fixture extraction.",
+      "src_hash": "17dea731c0fb8b6ddb4a98f3f2d804e1a639f7abaaf400daede9d0a21713f5f9",
+      "dst_hash": "17dea731c0fb8b6ddb4a98f3f2d804e1a639f7abaaf400daede9d0a21713f5f9",
+      "source": "deterministic"
+    },
+    {
+      "kind": "schema",
+      "mode": "verbatim",
+      "ref": "content/schemas/summary-nextflow.schema.json",
+      "src": "content/schemas/summary-nextflow.schema.json",
+      "dst": "references/schemas/summary-nextflow.schema.json",
+      "used_at": "both",
+      "load": "upfront",
+      "evidence": "cast-validated",
+      "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
+      "src_hash": "8c47e5ec11c0b3f166820e2a6b5a220c370fe82ac1ac3bdd1442ccf79ecc4fdc",
+      "dst_hash": "8c47e5ec11c0b3f166820e2a6b5a220c370fe82ac1ac3bdd1442ccf79ecc4fdc",
+      "source": "deterministic"
+    }
+  ],
   "open_questions": [
     "Slot annotations (cast-time / runtime) are recorded here but not yet declared in the mold frontmatter — see issue #16.",
     "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17.",

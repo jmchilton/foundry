@@ -1,16 +1,12 @@
 #!/usr/bin/env tsx
-// Deterministic half of mold casting — the "small program" the mold's own §Method
-// describes, but applied to casting itself: copy declared references verbatim,
-// hash them, refresh forensic fields in _provenance.json, validate any runs/*.json
-// against the schema. The LLM-driven half (authoring SKILL.md, deciding what
-// survives the cast-time/runtime cut) lives in a separate cast skill.
+// Deterministic cast assembly. Reads the Mold's `index.md` frontmatter as the
+// source of truth for `references:` and resolves each ref to a concrete file
+// op against `casts/<target>/<mold>/`. Writes `_provenance.json` (schema v2)
+// recording every resolved ref, its hash, and whether it was produced
+// deterministically or is pending an LLM step.
 //
 // Usage:
 //   tsx scripts/cast-mold.ts <mold-name> [--target=claude] [--check] [--note="..."]
-//
-// Reads casts/<target>/<mold-name>/_provenance.json for declared references
-// (transitional: see issue #16 — mold schema does not yet declare research notes
-// as typed references). Writes back the same file with refreshed forensics.
 
 import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -19,37 +15,19 @@ import path from "node:path";
 import process from "node:process";
 import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
+import yaml from "js-yaml";
+
+import { readMarkdown } from "./lib/frontmatter.js";
+import type { Frontmatter } from "./lib/types.js";
+import { fileSlug, findMdFiles } from "./lib/walk.js";
+import { resolveWikiLink, slugify, stripBrackets, WIKI_LINK_RE } from "./lib/wiki-links.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Ajv = ((AjvImport as any).default ?? AjvImport) as typeof AjvImport;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addFormats = ((addFormatsImport as any).default ?? addFormatsImport) as typeof addFormatsImport;
 
-interface RefEntry {
-  src: string;
-  dst: string;
-  mode: string;
-  slot?: string[];
-  status?: string;
-  hash?: string;
-}
-
-interface Provenance {
-  cast_target: string;
-  mold: { name: string; path: string; revision?: number };
-  schema?: { path: string; note_revision?: number };
-  cast_method?: string;
-  cast_date?: string;
-  cast_revision?: number;
-  cast_agent?: string;
-  cast_history?: Array<{ rev: number; date: string; note: string }>;
-  references: { schemas?: RefEntry[]; notes?: RefEntry[]; examples?: RefEntry[]; patterns?: RefEntry[] };
-  open_questions?: string[];
-  // Forensic fields (per docs/COMPILATION_PIPELINE.md)
-  mold_content_hash?: string;
-  mold_commit?: string;
-  cast_at?: string;
-}
+// ---- argv ----
 
 interface Args {
   moldName: string;
@@ -71,20 +49,193 @@ function parseArgs(argv: string[]): Args {
     else throw new Error(`unknown flag: ${a}`);
   }
   if (positional.length !== 1) {
-    throw new Error("usage: cast-mold <mold-name> [--target=claude] [--check] [--note=\"...\"]");
+    throw new Error('usage: cast-mold <mold-name> [--target=claude] [--check] [--note="..."]');
   }
   return { moldName: positional[0]!, target, check, note };
 }
+
+// ---- target config ----
+
+interface TargetKindConfig {
+  dst_dir: string;
+  dst_extension: string;
+  modes: string[];
+}
+
+interface TargetConfig {
+  name: string;
+  provenance_schema_version: number;
+  required_outputs: string[];
+  kinds: Record<string, TargetKindConfig>;
+  condense_prompts: Record<string, string>;
+  skill_constraints: {
+    frontmatter_required: string[];
+    forbidden_runtime_paths: string[];
+    forbid_packaged_files: string[];
+  };
+}
+
+function loadTargetConfig(repoRoot: string, target: string): TargetConfig {
+  const p = path.join(repoRoot, "casts", target, "_target.yml");
+  if (!existsSync(p)) throw new Error(`missing target config: ${p}`);
+  const data = yaml.load(readFileSync(p, "utf8")) as TargetConfig;
+  if (!data || typeof data !== "object") throw new Error(`invalid target config: ${p}`);
+  return data;
+}
+
+// ---- slug map (shared with validator semantics) ----
+
+function buildSlugMap(repoRoot: string): { slugMap: Map<string, string>; metaByPath: Map<string, Frontmatter> } {
+  const slugMap = new Map<string, string>();
+  const metaByPath = new Map<string, Frontmatter>();
+  const contentRoot = path.join(repoRoot, "content");
+  for (const abs of findMdFiles(contentRoot)) {
+    const parsed = readMarkdown(abs);
+    if (!parsed.hasFrontmatter) continue;
+    const rel = path.relative(repoRoot, abs);
+    const slug = fileSlug(rel);
+    slugMap.set(slugify(slug), rel);
+    metaByPath.set(rel, parsed.meta);
+    if (parsed.meta.type === "cli-command" && typeof parsed.meta.tool === "string" && typeof parsed.meta.command === "string") {
+      slugMap.set(slugify(`${parsed.meta.tool} ${parsed.meta.command}`), rel);
+    }
+  }
+  return { slugMap, metaByPath };
+}
+
+// ---- ref resolution ----
+
+interface MoldRef {
+  kind: string;
+  ref: string;
+  used_at?: string;
+  load?: string;
+  mode?: string;
+  evidence?: string;
+  purpose?: string;
+  trigger?: string;
+  verification?: string;
+}
+
+interface ResolvedRef {
+  kind: "schema" | "research" | "pattern" | "cli-command";
+  mode: "verbatim" | "condense" | "sidecar";
+  ref: string;
+  src: string;
+  dst: string;
+  used_at: "cast-time" | "runtime" | "both";
+  load: "upfront" | "on-demand";
+  evidence?: string;
+  purpose?: string;
+  trigger?: string;
+  verification?: string;
+}
+
+const SUPPORTED_KINDS = new Set(["schema", "research", "pattern", "cli-command"]);
+const NOT_IMPLEMENTED_KINDS = new Set(["example", "prompt"]);
+
+function deriveDst(kind: string, src: string, mode: string, kindCfg: TargetKindConfig): string {
+  // 1:1 strict slug mapping. For verbatim copies, preserve the source basename
+  // (avoids double-extension hazards like `.schema.json`). For sidecars,
+  // derive a new file from the source slug with the target's dst_extension.
+  if (mode === "verbatim") {
+    return path.posix.join(kindCfg.dst_dir, path.basename(src));
+  }
+  const ext = path.extname(src);
+  const base = path.basename(src, ext);
+  const slug = base === "index" ? path.basename(path.dirname(src)) : base;
+  return path.posix.join(kindCfg.dst_dir, `${slug}${kindCfg.dst_extension}`);
+}
+
+function resolveMoldRef(
+  raw: unknown,
+  index: number,
+  moldPath: string,
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+  target: TargetConfig,
+): { resolved?: ResolvedRef; error?: string } {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
+    return { error: `references[${index}]: not an object` };
+  }
+  const ref = raw as Record<string, unknown>;
+  const kind = typeof ref.kind === "string" ? ref.kind : "";
+  const refStr = typeof ref.ref === "string" ? ref.ref : "";
+
+  if (NOT_IMPLEMENTED_KINDS.has(kind)) {
+    return { error: `references[${index}]: kind=${kind} not implemented in v1 (no real consumers; first Mold to need this defines the contract)` };
+  }
+  if (!SUPPORTED_KINDS.has(kind)) {
+    return { error: `references[${index}]: unknown kind=${kind}` };
+  }
+  const kindCfg = target.kinds[kind];
+  if (!kindCfg) {
+    return { error: `references[${index}]: target=${target.name} does not declare kind=${kind}` };
+  }
+
+  // Default mode by kind: schema/research/pattern → verbatim, cli-command → sidecar.
+  const defaultMode = kind === "cli-command" ? "sidecar" : "verbatim";
+  const mode = (typeof ref.mode === "string" ? ref.mode : defaultMode) as ResolvedRef["mode"];
+  if (!kindCfg.modes.includes(mode)) {
+    return { error: `references[${index}]: kind=${kind} does not support mode=${mode} (allowed: ${kindCfg.modes.join(", ")})` };
+  }
+
+  // Resolve src.
+  let src: string;
+  if (kind === "schema") {
+    if (WIKI_LINK_RE.test(refStr)) return { error: `references[${index}]: schema ref must be a path, not a wiki link` };
+    if (!refStr.startsWith("content/schemas/") || !refStr.endsWith(".schema.json")) {
+      return { error: `references[${index}]: schema ref must be content/schemas/*.schema.json (got ${refStr})` };
+    }
+    src = refStr;
+  } else {
+    const tp = resolveWikiLink(refStr, slugMap);
+    if (!tp) return { error: `references[${index}]: ${kind} ref ${refStr} did not resolve` };
+    const expected = kind === "cli-command" ? "cli-command" : kind;
+    const targetType = metaByPath.get(tp)?.type;
+    if (targetType !== expected) {
+      return { error: `references[${index}]: ${kind} ref ${refStr} resolves to type=${targetType ?? "(none)"}, expected ${expected}` };
+    }
+    src = tp;
+  }
+
+  const dst = deriveDst(kind, src, mode, kindCfg);
+
+  const used_at = (typeof ref.used_at === "string" ? ref.used_at : "runtime") as ResolvedRef["used_at"];
+  const load = (typeof ref.load === "string" ? ref.load : "on-demand") as ResolvedRef["load"];
+
+  return {
+    resolved: {
+      kind: kind as ResolvedRef["kind"],
+      mode,
+      ref: refStr,
+      src,
+      dst,
+      used_at,
+      load,
+      evidence: typeof ref.evidence === "string" ? ref.evidence : undefined,
+      purpose: typeof ref.purpose === "string" ? ref.purpose : undefined,
+      trigger: typeof ref.trigger === "string" ? ref.trigger : undefined,
+      verification: typeof ref.verification === "string" ? ref.verification : undefined,
+    },
+  };
+}
+
+// ---- file ops ----
 
 function sha256(filePath: string): string {
   return createHash("sha256").update(readFileSync(filePath)).digest("hex");
 }
 
-function gitHead(repoRoot: string): string | undefined {
+function sha256OfBuffer(buf: Buffer | string): string {
+  return createHash("sha256").update(buf).digest("hex");
+}
+
+function gitHead(repoRoot: string): string | null {
   try {
     return execSync("git rev-parse HEAD", { cwd: repoRoot, encoding: "utf8" }).trim();
   } catch {
-    return undefined;
+    return null;
   }
 }
 
@@ -93,42 +244,31 @@ function copyVerbatim(srcAbs: string, dstAbs: string): void {
   copyFileSync(srcAbs, dstAbs);
 }
 
-interface RefDrift {
-  ref: RefEntry;
-  reason: string;
+interface CliSidecar {
+  type: "cli-command";
+  tool: string;
+  command: string;
+  summary?: string;
+  source_path: string;
+  source_revision?: number;
+  body: string;
 }
 
-function processRefs(
-  refs: RefEntry[] | undefined,
-  repoRoot: string,
-  bundleRoot: string,
-  check: boolean,
-): { updated: RefEntry[]; drift: RefDrift[]; errors: string[] } {
-  const drift: RefDrift[] = [];
-  const errors: string[] = [];
-  const updated: RefEntry[] = [];
-  for (const ref of refs ?? []) {
-    const srcAbs = path.join(repoRoot, ref.src);
-    const dstAbs = path.join(bundleRoot, ref.dst);
-    if (!existsSync(srcAbs)) {
-      errors.push(`ref source missing: ${ref.src}`);
-      updated.push(ref);
-      continue;
-    }
-    const srcHash = sha256(srcAbs);
-    const dstExists = existsSync(dstAbs);
-    const dstHash = dstExists ? sha256(dstAbs) : null;
-    if (dstHash !== srcHash) {
-      drift.push({ ref, reason: dstExists ? "dst hash differs from src" : "dst missing" });
-      if (!check) copyVerbatim(srcAbs, dstAbs);
-    }
-    if (ref.hash && ref.hash !== srcHash) {
-      drift.push({ ref, reason: `recorded hash ${ref.hash.slice(0, 12)}… differs from src ${srcHash.slice(0, 12)}…` });
-    }
-    updated.push({ ...ref, hash: srcHash });
-  }
-  return { updated, drift, errors };
+function buildCliSidecar(srcAbs: string, srcRel: string, meta: Frontmatter): CliSidecar {
+  const parsed = readMarkdown(srcAbs);
+  const sidecar: CliSidecar = {
+    type: "cli-command",
+    tool: typeof meta.tool === "string" ? meta.tool : "",
+    command: typeof meta.command === "string" ? meta.command : "",
+    summary: typeof meta.summary === "string" ? meta.summary : undefined,
+    source_path: srcRel,
+    source_revision: typeof meta.revision === "number" ? meta.revision : undefined,
+    body: parsed.body.trim(),
+  };
+  return sidecar;
 }
+
+// ---- runs/*/summary.json schema validation ----
 
 function loadAjvForSchema(schemaPath: string): ReturnType<InstanceType<typeof Ajv>["compile"]> {
   const ajv = new Ajv({ allErrors: true, strict: false });
@@ -154,91 +294,323 @@ function validateRuns(bundleRoot: string, schemaAbs: string): string[] {
   return errors;
 }
 
+// ---- provenance ----
+
+interface ProvenanceRefEntry {
+  kind: string;
+  mode: string;
+  ref: string;
+  src: string;
+  dst: string;
+  used_at: string;
+  load: string;
+  evidence?: string;
+  purpose?: string;
+  trigger?: string;
+  verification?: string;
+  src_hash: string | null;
+  dst_hash: string | null;
+  source: "deterministic" | "llm";
+  pending_llm?: boolean;
+  prompt?: { origin: string; identity: string; hash?: string };
+  model?: { name: string; version?: string };
+}
+
+interface Provenance {
+  provenance_schema_version: number;
+  cast_target: string;
+  mold: { name: string; path: string; revision?: number; content_hash: string; commit: string | null };
+  cast_method?: string;
+  cast_agent?: string;
+  cast_at: string;
+  cast_date?: string;
+  cast_revision?: number;
+  cast_history?: Array<{ rev: number; date: string; note: string }>;
+  refs: ProvenanceRefEntry[];
+  open_questions?: string[];
+}
+
+interface LegacyProvenanceCarryOver {
+  cast_method?: string;
+  cast_agent?: string;
+  cast_date?: string;
+  cast_revision?: number;
+  cast_history?: Array<{ rev: number; date: string; note: string }>;
+  open_questions?: string[];
+  prior_refs?: Map<string, ProvenanceRefEntry>;
+}
+
+function readExistingProvenance(provenancePath: string): LegacyProvenanceCarryOver {
+  if (!existsSync(provenancePath)) return {};
+  const data = JSON.parse(readFileSync(provenancePath, "utf8")) as Record<string, unknown>;
+  const carry: LegacyProvenanceCarryOver = {
+    cast_method: typeof data.cast_method === "string" ? data.cast_method : undefined,
+    cast_agent: typeof data.cast_agent === "string" ? data.cast_agent : undefined,
+    cast_date: typeof data.cast_date === "string" ? data.cast_date : undefined,
+    cast_revision: typeof data.cast_revision === "number" ? data.cast_revision : undefined,
+    cast_history: Array.isArray(data.cast_history) ? (data.cast_history as Array<{ rev: number; date: string; note: string }>) : undefined,
+    open_questions: Array.isArray(data.open_questions) ? (data.open_questions as string[]) : undefined,
+  };
+  // For schema v2 provenance, capture prior refs by src so condense LLM output and prompt provenance carry over.
+  if (data.provenance_schema_version === 2 && Array.isArray(data.refs)) {
+    const prior = new Map<string, ProvenanceRefEntry>();
+    for (const r of data.refs as ProvenanceRefEntry[]) {
+      if (typeof r?.src === "string") prior.set(`${r.kind}:${r.src}`, r);
+    }
+    carry.prior_refs = prior;
+  }
+  return carry;
+}
+
+// ---- cast assembly ----
+
+interface CastPlanResult {
+  refs: ProvenanceRefEntry[];
+  drift: Array<{ src: string; reason: string }>;
+  errors: string[];
+}
+
+function castOneRef(
+  resolved: ResolvedRef,
+  repoRoot: string,
+  bundleRoot: string,
+  prior: Map<string, ProvenanceRefEntry> | undefined,
+  check: boolean,
+): { entry: ProvenanceRefEntry; drift?: string; error?: string } {
+  const srcAbs = path.join(repoRoot, resolved.src);
+  if (!existsSync(srcAbs)) {
+    return {
+      entry: { ...skeleton(resolved), src_hash: null, dst_hash: null, source: "deterministic" },
+      error: `ref source missing: ${resolved.src}`,
+    };
+  }
+  const srcHash = sha256(srcAbs);
+  const dstAbs = path.join(bundleRoot, resolved.dst);
+
+  if (resolved.mode === "verbatim") {
+    const dstExists = existsSync(dstAbs);
+    const dstHash = dstExists ? sha256(dstAbs) : null;
+    let drift: string | undefined;
+    if (dstHash !== srcHash) {
+      drift = dstExists ? "dst hash differs from src" : "dst missing";
+      if (!check) copyVerbatim(srcAbs, dstAbs);
+    }
+    return {
+      entry: {
+        ...skeleton(resolved),
+        src_hash: srcHash,
+        dst_hash: drift && check ? dstHash : srcHash,
+        source: "deterministic",
+      },
+      drift,
+    };
+  }
+
+  if (resolved.mode === "sidecar" && resolved.kind === "cli-command") {
+    const parsed = readMarkdown(srcAbs);
+    const sidecar = buildCliSidecar(srcAbs, resolved.src, parsed.meta);
+    const text = JSON.stringify(sidecar, null, 2) + "\n";
+    const expectedHash = sha256OfBuffer(text);
+    const dstExists = existsSync(dstAbs);
+    const dstHash = dstExists ? sha256(dstAbs) : null;
+    let drift: string | undefined;
+    if (dstHash !== expectedHash) {
+      drift = dstExists ? "sidecar content differs" : "sidecar missing";
+      if (!check) {
+        mkdirSync(path.dirname(dstAbs), { recursive: true });
+        writeFileSync(dstAbs, text);
+      }
+    }
+    return {
+      entry: {
+        ...skeleton(resolved),
+        src_hash: srcHash,
+        dst_hash: drift && check ? dstHash : expectedHash,
+        source: "deterministic",
+      },
+      drift,
+    };
+  }
+
+  if (resolved.mode === "condense") {
+    // Two-phase. Deterministic phase records placeholder; LLM phase fills in.
+    const priorEntry = prior?.get(`${resolved.kind}:${resolved.src}`);
+    if (priorEntry && priorEntry.pending_llm !== true && priorEntry.src_hash === srcHash && priorEntry.dst_hash) {
+      // Source hasn't drifted; carry forward prior LLM output entry.
+      const dstExists = existsSync(dstAbs);
+      const dstHash = dstExists ? sha256(dstAbs) : null;
+      const drift = dstHash === priorEntry.dst_hash ? undefined : (dstExists ? "condense output drifted vs recorded dst_hash" : "condense output missing");
+      return {
+        entry: {
+          ...priorEntry,
+          ...skeleton(resolved),
+          src_hash: srcHash,
+          dst_hash: priorEntry.dst_hash,
+          source: "llm",
+          prompt: priorEntry.prompt,
+          model: priorEntry.model,
+        },
+        drift,
+      };
+    }
+    // Either no prior LLM output, or source drifted — re-mark pending.
+    return {
+      entry: {
+        ...skeleton(resolved),
+        src_hash: srcHash,
+        dst_hash: null,
+        source: "llm",
+        pending_llm: true,
+      },
+      drift: priorEntry ? "source drift requires re-condense" : "condense output not yet produced",
+    };
+  }
+
+  return {
+    entry: { ...skeleton(resolved), src_hash: srcHash, dst_hash: null, source: "deterministic" },
+    error: `unsupported (kind=${resolved.kind}, mode=${resolved.mode})`,
+  };
+}
+
+function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_hash" | "source"> {
+  return {
+    kind: r.kind,
+    mode: r.mode,
+    ref: r.ref,
+    src: r.src,
+    dst: r.dst,
+    used_at: r.used_at,
+    load: r.load,
+    evidence: r.evidence,
+    purpose: r.purpose,
+    trigger: r.trigger,
+    verification: r.verification,
+  };
+}
+
+// ---- main ----
+
 function main(): void {
   const args = parseArgs(process.argv.slice(2));
   const repoRoot = process.cwd();
-  const bundleRoot = path.join(repoRoot, "casts", args.target, args.moldName);
-  const provenancePath = path.join(bundleRoot, "_provenance.json");
 
-  if (!existsSync(provenancePath)) {
-    console.error(`no provenance at ${provenancePath} — initial cast must be hand-authored (see SKILL.md)`);
+  const target = loadTargetConfig(repoRoot, args.target);
+  const moldDir = path.join(repoRoot, "content", "molds", args.moldName);
+  const moldRel = path.posix.join("content", "molds", args.moldName, "index.md");
+  const moldAbs = path.join(repoRoot, moldRel);
+  if (!existsSync(moldAbs)) {
+    console.error(`mold source missing: ${moldRel}`);
     process.exit(2);
   }
-  const prov = JSON.parse(readFileSync(provenancePath, "utf8")) as Provenance;
 
-  const moldAbs = path.join(repoRoot, prov.mold.path);
-  if (!existsSync(moldAbs)) {
-    console.error(`mold source missing: ${prov.mold.path}`);
+  const moldParsed = readMarkdown(moldAbs);
+  if (moldParsed.meta.type !== "mold") {
+    console.error(`${moldRel}: type is not 'mold' (got ${String(moldParsed.meta.type)})`);
     process.exit(2);
   }
   const moldHash = sha256(moldAbs);
 
-  const allErrors: string[] = [];
-  const allDrift: RefDrift[] = [];
+  const bundleRoot = path.join(repoRoot, "casts", args.target, args.moldName);
+  mkdirSync(bundleRoot, { recursive: true });
+  const provenancePath = path.join(bundleRoot, "_provenance.json");
+  const carry = readExistingProvenance(provenancePath);
 
-  if (prov.mold_content_hash && prov.mold_content_hash !== moldHash) {
-    allDrift.push({ ref: { src: prov.mold.path, dst: "(mold)", mode: "verbatim" }, reason: `mold hash drifted from recorded` });
+  const { slugMap, metaByPath } = buildSlugMap(repoRoot);
+
+  const rawRefs = Array.isArray(moldParsed.meta.references) ? (moldParsed.meta.references as unknown[]) : [];
+  const resolved: ResolvedRef[] = [];
+  const errors: string[] = [];
+  rawRefs.forEach((r, i) => {
+    const out = resolveMoldRef(r, i, moldRel, slugMap, metaByPath, target);
+    if (out.error) errors.push(out.error);
+    if (out.resolved) resolved.push(out.resolved);
+  });
+
+  // Stable ordering: by (kind, src).
+  resolved.sort((a, b) => (a.kind === b.kind ? a.src.localeCompare(b.src) : a.kind.localeCompare(b.kind)));
+
+  const refEntries: ProvenanceRefEntry[] = [];
+  const drift: Array<{ src: string; reason: string }> = [];
+
+  for (const r of resolved) {
+    const result = castOneRef(r, repoRoot, bundleRoot, carry.prior_refs, args.check);
+    refEntries.push(result.entry);
+    if (result.error) errors.push(result.error);
+    if (result.drift) drift.push({ src: r.src, reason: result.drift });
   }
 
-  const schemaResult = processRefs(prov.references.schemas, repoRoot, bundleRoot, args.check);
-  const notesResult = processRefs(prov.references.notes, repoRoot, bundleRoot, args.check);
-  const examplesResult = processRefs(prov.references.examples, repoRoot, bundleRoot, args.check);
-  const patternsResult = processRefs(prov.references.patterns, repoRoot, bundleRoot, args.check);
-  allErrors.push(...schemaResult.errors, ...notesResult.errors, ...examplesResult.errors, ...patternsResult.errors);
-  allDrift.push(...schemaResult.drift, ...notesResult.drift, ...examplesResult.drift, ...patternsResult.drift);
-
-  // Schema validation of any runs/*/summary.json
-  const firstSchema = (prov.references.schemas ?? [])[0];
-  if (firstSchema) {
-    const schemaAbs = path.join(bundleRoot, firstSchema.dst);
+  // runs/*/summary.json validation — find a schema ref for this mold and validate any committed runs.
+  const schemaRefEntry = refEntries.find((r) => r.kind === "schema");
+  if (schemaRefEntry) {
+    const schemaAbs = path.join(bundleRoot, schemaRefEntry.dst);
     if (existsSync(schemaAbs)) {
-      allErrors.push(...validateRuns(bundleRoot, schemaAbs));
+      errors.push(...validateRuns(bundleRoot, schemaAbs));
     }
   }
 
-  // Report
-  for (const e of allErrors) console.error(`error: ${e}`);
-  for (const d of allDrift) console.error(`drift: ${d.ref.src} — ${d.reason}`);
+  // Report.
+  for (const e of errors) console.error(`error: ${e}`);
+  for (const d of drift) console.error(`drift: ${d.src} — ${d.reason}`);
 
   if (args.check) {
-    if (allErrors.length || allDrift.length) {
-      console.error(`check failed: ${allErrors.length} error(s), ${allDrift.length} drift(s)`);
+    if (errors.length || drift.length) {
+      console.error(`check failed: ${errors.length} error(s), ${drift.length} drift(s)`);
+      process.exit(1);
+    }
+    if (refEntries.some((r) => r.pending_llm)) {
+      const pending = refEntries.filter((r) => r.pending_llm).map((r) => r.src).join(", ");
+      console.error(`check failed: pending_llm refs: ${pending}`);
       process.exit(1);
     }
     console.log("clean: no drift, no errors");
     return;
   }
 
-  if (allErrors.length) {
-    console.error(`refusing to update provenance: ${allErrors.length} error(s)`);
+  if (errors.length) {
+    console.error(`refusing to update provenance: ${errors.length} error(s)`);
     process.exit(1);
   }
 
-  // Refresh provenance
   const next: Provenance = {
-    ...prov,
-    references: {
-      ...(prov.references.schemas !== undefined && { schemas: schemaResult.updated }),
-      ...(prov.references.notes !== undefined && { notes: notesResult.updated }),
-      ...(prov.references.examples !== undefined && { examples: examplesResult.updated }),
-      ...(prov.references.patterns !== undefined && { patterns: patternsResult.updated }),
+    provenance_schema_version: target.provenance_schema_version,
+    cast_target: args.target,
+    mold: {
+      name: args.moldName,
+      path: moldRel,
+      revision: typeof moldParsed.meta.revision === "number" ? moldParsed.meta.revision : undefined,
+      content_hash: moldHash,
+      commit: gitHead(repoRoot),
     },
-    mold_content_hash: moldHash,
-    mold_commit: gitHead(repoRoot),
+    cast_method: carry.cast_method,
+    cast_agent: carry.cast_agent,
     cast_at: new Date().toISOString(),
+    cast_date: carry.cast_date,
+    cast_revision: carry.cast_revision,
+    cast_history: carry.cast_history,
+    refs: refEntries,
+    open_questions: carry.open_questions,
   };
 
   if (args.note) {
     const today = new Date().toISOString().slice(0, 10);
-    const lastRev = (prov.cast_history ?? []).reduce((m, h) => Math.max(m, h.rev), 0);
-    next.cast_history = [...(prov.cast_history ?? []), { rev: lastRev + 1, date: today, note: args.note }];
+    const lastRev = (carry.cast_history ?? []).reduce((m, h) => Math.max(m, h.rev), 0);
+    next.cast_history = [...(carry.cast_history ?? []), { rev: lastRev + 1, date: today, note: args.note }];
     next.cast_revision = lastRev + 1;
     next.cast_date = today;
   }
 
   writeFileSync(provenancePath, JSON.stringify(next, null, 2) + "\n");
   console.log(`wrote ${path.relative(repoRoot, provenancePath)}`);
-  if (allDrift.length) console.log(`reconciled ${allDrift.length} drifted ref(s)`);
+  if (drift.length) console.log(`reconciled ${drift.length} drifted ref(s)`);
+  if (refEntries.some((r) => r.pending_llm)) {
+    const pending = refEntries.filter((r) => r.pending_llm).map((r) => r.src);
+    console.log(`pending LLM steps for ${pending.length} ref(s):`);
+    for (const s of pending) console.log(`  - ${s}`);
+  }
 }
+
+// Silence unused-import warnings while keeping the module symbols for external use.
+void stripBrackets;
+void statSync;
 
 main();

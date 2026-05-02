@@ -8,14 +8,29 @@ A Mold source unit is a directory under `content/molds/<slug>/`.
 
 Required files:
 
-- `index.md` — the only frontmatter-bearing Mold source file.
-- `eval.md` — Foundry-maintainer evaluation plan, not included in cast artifacts.
+- `index.md` — the only frontmatter-bearing Mold source file. Owns the Mold contract and the operational `references:` manifest.
+
+Strongly recommended (warning-only for now):
+
+- `eval.md` — Foundry-maintainer evaluation plan. Never packaged into cast artifacts.
 
 Optional files:
 
+- `casting.md` — Mold-owned guidance read by casting itself (skill assembly notes, condensation prompts). Not packaged into the generated skill runtime unless explicitly incorporated by the cast.
+- `cast-skill-verification.md` — Mold-owned dynamic-review checklist for a generated skill. Used after casting by reviewers or verification agents; not packaged into runtime artifacts.
 - `examples/` — local examples or small fixtures referenced by `index.md` or `eval.md`.
 
 Non-`index.md` Markdown files inside a Mold directory must not contain frontmatter. If a supporting note needs frontmatter, move it to the appropriate content collection and reference it from the Mold.
+
+### File roles at a glance
+
+| File                          | Audience                          | Packaged into cast?            |
+| ----------------------------- | --------------------------------- | ------------------------------ |
+| `index.md`                    | Mold contract + casting manifest  | Driver only; body not packaged |
+| `eval.md`                     | Foundry maintainers               | Never                          |
+| `casting.md`                  | Cast skill / casting LLM          | Read at cast time              |
+| `cast-skill-verification.md`  | Post-cast reviewer / agent        | Never                          |
+| `examples/`                   | `index.md`, `eval.md`             | Only if referenced explicitly  |
 
 ## Index Contract
 
@@ -61,8 +76,8 @@ The validator should expose the same facts a UI Mold-health panel needs:
 - `evidence: hypothesis` refs have verification.
 - CLI command refs resolve to `type: cli-command` notes.
 - CLI command notes include install, synopsis, output, exit-code, example, and gotcha/failure guidance.
-- `eval.md` exists.
-- `eval.md` declares at least one evaluation case.
+- `eval.md` exists (warning-only).
+- `eval.md` declares at least one evaluation case (warning-only).
 - eval cases identify deterministic vs LLM-judged checks.
 - referenced example files exist.
 - pipelines reference real Molds.

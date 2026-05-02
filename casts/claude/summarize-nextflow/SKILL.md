@@ -29,7 +29,7 @@ Schema-typed enums and paths are deterministic. Free-text fields are LLM. The sc
 ### 1. Detect pipeline shape
 
 - **nf-core**: `nextflow.config` declares `manifest.name = 'nf-core/...'`; `modules/nf-core/`, `subworkflows/nf-core/`, and `nextflow_schema.json` present. Prefer `meta.yml` as IO ground truth.
-- **Ad-hoc DSL2**: no `nextflow_schema.json`, no module `meta.yml`. Fall back to `script:`-block IO inference. **Consult `references/notes/nextflow-pipeline-anatomy.md`** when ad-hoc layout differs from nf-core conventions in ways the rules below don't cover.
+- **Ad-hoc DSL2**: no `nextflow_schema.json`, no module `meta.yml`. Fall back to `script:`-block IO inference. **Consult `references/notes/component-nextflow-pipeline-anatomy.md`** when ad-hoc layout differs from nf-core conventions in ways the rules below don't cover.
 - **DSL1**: detected by absence of DSL2 `workflow { ... }` block. Emit `source` + a single `warnings[]` entry and exit. Out of scope.
 
 Real pipelines have **multiple named workflow blocks** — typically an anonymous `workflow {}` entrypoint in `main.nf` that wires `PIPELINE_INITIALISATION → NFCORE_<NAME> → PIPELINE_COMPLETION`, plus a substantive named workflow under `workflows/<name>.nf`. Selection rule for the primary `workflow`: pick the named workflow that invokes the most pipeline processes (typically `workflows/<name>.nf`). The anonymous `workflow {}` glue and the `NFCORE_<NAME>` wrapper land in `subworkflows[]`.
@@ -71,7 +71,7 @@ For each `process <NAME> { ... }` in `main.nf`, `workflows/`, `modules/**`, `sub
 
 Tool name and version are derivable from any of the resolved fields (biocontainer/bioconda/wave/docker image string). Deduplicate by `(name, version)`. `processes[].tool` is FK into `tools[].name`.
 
-**Consult `references/notes/nextflow-containers-and-envs.md`** when a directive does not fit any of the patterns above (e.g. mulled-v2 multi-package containers, custom registry, env modules, or a non-trivial environment.yml with multiple dependencies).
+**Consult `references/notes/component-nextflow-containers-and-envs.md`** when a directive does not fit any of the patterns above (e.g. mulled-v2 multi-package containers, custom registry, env modules, or a non-trivial environment.yml with multiple dependencies).
 
 ### 6. Reconcile the workflow DAG
 
@@ -113,7 +113,7 @@ Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field 
   - `snap_path` = repo-relative path of the corresponding `.nf.test.snap`.
 - `prose_assertions[]` = other complex/non-snapshot assertions summarized to prose. Empty for snapshot-only tests, which is the common nf-core case.
 
-**Consult `references/notes/nextflow-testing.md`** when fixtures use a layout outside `conf/test.config` + nf-test (e.g. legacy `test/` scripts, external test harnesses) or when assertions don't fit the snapshot+success-flag pattern.
+**Consult `references/notes/component-nextflow-testing.md`** when fixtures use a layout outside `conf/test.config` + nf-test (e.g. legacy `test/` scripts, external test harnesses) or when assertions don't fit the snapshot+success-flag pattern.
 
 ### 8. Validate and emit
 
@@ -139,8 +139,8 @@ Validate the assembled object against `references/schemas/summary-nextflow.schem
 ## Reference dispatch
 
 - `references/schemas/summary-nextflow.schema.json` — **always** validate output against this before emitting.
-- `references/notes/nextflow-pipeline-anatomy.md` — consult on ad-hoc DSL2 layouts that don't match nf-core conventions, or on workflow-block patterns the multi-workflow selection rule in §1 doesn't resolve.
-- `references/notes/nextflow-containers-and-envs.md` — consult on container/conda directives outside the resolver patterns in §5 (mulled-v2, custom registries, env modules, multi-dependency `environment.yml`).
-- `references/notes/nextflow-testing.md` — consult on test fixture layouts outside `conf/test.config` + nf-test, or on snapshot-fixture patterns the prose-summary fallback in §7 doesn't capture well.
+- `references/notes/component-nextflow-pipeline-anatomy.md` — consult on ad-hoc DSL2 layouts that don't match nf-core conventions, or on workflow-block patterns the multi-workflow selection rule in §1 doesn't resolve.
+- `references/notes/component-nextflow-containers-and-envs.md` — consult on container/conda directives outside the resolver patterns in §5 (mulled-v2, custom registries, env modules, multi-dependency `environment.yml`).
+- `references/notes/component-nextflow-testing.md` — consult on test fixture layouts outside `conf/test.config` + nf-test, or on snapshot-fixture patterns the prose-summary fallback in §7 doesn't capture well.
 
 The notes are stubs today; they grow from contact with real pipelines (see foundry issue #17). When you hit a gap a note doesn't cover, log it — that gap becomes the note's next paragraph.

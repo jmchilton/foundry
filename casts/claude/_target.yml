@@ -1,0 +1,52 @@
+# Claude cast target.
+#
+# Read by scripts/cast-mold.ts and scripts/cast-skill-verify.ts.
+# Defines the deterministic side of cast assembly: where each kind of
+# reference lands, what files the generated skill must produce, and the
+# provenance schema this target writes.
+
+name: claude
+
+provenance_schema_version: 2
+
+# Required runtime artifacts the generated skill must produce.
+# The deterministic verifier checks these before any agentic review.
+required_outputs:
+  - SKILL.md
+  - _provenance.json
+
+# Per-reference-kind dst conventions.
+# `dst` is computed from the source slug; the verifier enforces 1:1.
+# Kinds not listed here are rejected as "not implemented in v1".
+kinds:
+  schema:
+    dst_dir: references/schemas/
+    dst_extension: .schema.json
+    modes: [verbatim]
+  research:
+    dst_dir: references/notes/
+    dst_extension: .md
+    modes: [verbatim, condense]
+  pattern:
+    dst_dir: references/patterns/
+    dst_extension: .md
+    modes: [verbatim, condense]
+  cli-command:
+    dst_dir: references/cli/
+    dst_extension: .json
+    modes: [sidecar]
+
+# Default condensation prompts per reference kind.
+# Empty for v1 — Molds that need condense must declare a prompt
+# in their casting.md (## Condensation Prompts) until target defaults exist.
+condense_prompts: {}
+
+# Generated-skill constraints checked by cast-skill-verify.ts.
+skill_constraints:
+  frontmatter_required: [name, description]
+  forbidden_runtime_paths:
+    - content/molds/
+    - content/research/
+    - content/schemas/
+  forbid_packaged_files:
+    - eval.md

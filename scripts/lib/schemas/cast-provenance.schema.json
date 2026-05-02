@@ -1,0 +1,121 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "cast-provenance.schema.json",
+  "title": "Cast Provenance",
+  "description": "Forensic record of a cast: what got produced, from which Mold revision, by which method, and what each ref's deterministic vs LLM provenance looks like.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["provenance_schema_version", "cast_target", "mold", "refs"],
+  "properties": {
+    "provenance_schema_version": { "type": "integer", "const": 2 },
+    "cast_target": { "type": "string" },
+    "mold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "path"],
+      "properties": {
+        "name": { "type": "string" },
+        "path": { "type": "string" },
+        "revision": { "type": "integer" },
+        "content_hash": { "type": "string" },
+        "commit": { "type": ["string", "null"] }
+      }
+    },
+    "cast_method": { "type": "string" },
+    "cast_agent": { "type": "string" },
+    "cast_at": { "type": "string", "format": "date-time" },
+    "cast_date": { "type": "string" },
+    "cast_revision": { "type": "integer" },
+    "cast_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rev", "date", "note"],
+        "properties": {
+          "rev": { "type": "integer" },
+          "date": { "type": "string" },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "refs": {
+      "type": "array",
+      "description": "One entry per resolved reference, sorted by (kind, src) for stability.",
+      "items": { "$ref": "#/definitions/refEntry" }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "definitions": {
+    "refEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "mode", "src", "dst", "source", "used_at", "load"],
+      "properties": {
+        "kind": { "enum": ["schema", "research", "pattern", "cli-command"] },
+        "mode": { "enum": ["verbatim", "condense", "sidecar"] },
+        "ref": {
+          "type": "string",
+          "description": "The original Mold ref (wiki-link or path)."
+        },
+        "src": { "type": "string", "description": "Resolved repo-relative source path." },
+        "dst": { "type": "string", "description": "Bundle-relative destination path." },
+        "used_at": { "enum": ["cast-time", "runtime", "both"] },
+        "load": { "enum": ["upfront", "on-demand"] },
+        "evidence": { "enum": ["hypothesis", "corpus-observed", "cast-validated"] },
+        "purpose": { "type": "string" },
+        "trigger": { "type": "string" },
+        "verification": { "type": "string" },
+        "src_hash": {
+          "type": ["string", "null"],
+          "description": "sha256 of source file at cast time. Null only when pending_llm and source is a generated artifact."
+        },
+        "dst_hash": {
+          "type": ["string", "null"],
+          "description": "sha256 of destination file at cast time. Null when pending_llm."
+        },
+        "source": {
+          "enum": ["deterministic", "llm"],
+          "description": "Whether this ref's dst content was produced deterministically or by an LLM step."
+        },
+        "pending_llm": {
+          "type": "boolean",
+          "description": "True when mode=condense and the LLM phase has not yet filled this entry. Verifier rejects committed provenance with any pending_llm=true."
+        },
+        "prompt": {
+          "type": "object",
+          "description": "Required when source=llm. Identifies the prompt used so casts can be reproduced.",
+          "additionalProperties": false,
+          "required": ["origin", "identity"],
+          "properties": {
+            "origin": { "enum": ["target_default", "casting_md", "mold_manifest"] },
+            "identity": { "type": "string", "description": "Stable name or path of the prompt." },
+            "hash": { "type": "string", "description": "sha256 of the prompt text used." }
+          }
+        },
+        "model": {
+          "type": "object",
+          "description": "LLM identity when source=llm. Optional but strongly recommended.",
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "source": { "const": "llm" } }, "required": ["source"] },
+          "then": { "required": ["prompt"] }
+        },
+        {
+          "if": { "properties": { "pending_llm": { "const": true } }, "required": ["pending_llm"] },
+          "then": { "properties": { "source": { "const": "llm" } } }
+        }
+      ]
+    }
+  }
+}
