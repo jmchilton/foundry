@@ -15,6 +15,8 @@ related_notes:
   - "[[galaxy-apply-rules-dsl]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
+  - "[[galaxy-tool-job-failure-reference]]"
+  - "[[galaxy-workflow-invocation-failure-reference]]"
 sources:
   - "https://github.com/galaxyproject/galaxy/blob/7765fae934fbfdee77e3be5f5b235e43735273ae/lib/galaxy/model/dataset_collections/types/collection_semantics.yml"
 summary: "Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references."

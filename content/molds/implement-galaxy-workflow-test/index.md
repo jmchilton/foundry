@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 related_notes:
   - "[[iwc-test-data-conventions]]"
@@ -42,6 +42,14 @@ references:
     evidence: corpus-observed
     purpose: "Flag assertion shortcuts that are acceptable in IWC versus shortcuts that should be avoided."
     trigger: "When considering existence-only, size-only, image-only, checksum, output-label, or negative-test patterns."
+  - kind: research
+    ref: "[[planemo-workflow-test-architecture]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Write tests with stable labels and artifacts that Planemo can connect back to Galaxy invocations, jobs, and outputs."
+    trigger: "When adding or revising workflow tests that will be iterated with Planemo or generated from existing invocations."
 ---
 # implement-galaxy-workflow-test
 
