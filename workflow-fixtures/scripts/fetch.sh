@@ -6,26 +6,16 @@
 #   scripts/fetch.sh nf-core/demo    # fetch one
 #   VERIFY=1 scripts/fetch.sh        # also verify HEAD matches pinned SHA
 #
-# Deps: git, yq (https://github.com/mikefarah/yq). Falls back to python3 if yq absent.
+# Deps: git, node.
 
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-manifest="$root/fixtures.yaml"
 dest_root="$root/pipelines"
 mkdir -p "$dest_root"
 
 parse() {
-  if command -v yq >/dev/null 2>&1; then
-    yq -o=tsv '.pipelines[] | [.name, .repo, .sha, .tag] | @tsv' "$manifest"
-  else
-    python3 - "$manifest" <<'PY'
-import sys, yaml
-m = yaml.safe_load(open(sys.argv[1]))
-for p in m["pipelines"]:
-    print("\t".join([p["name"], p["repo"], p["sha"], p["tag"]]))
-PY
-  fi
+  node "$root/scripts/read-fixture-manifest.mjs" pipelines
 }
 
 want="${1:-}"

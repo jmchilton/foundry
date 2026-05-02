@@ -78,7 +78,7 @@ The survey *must* support these moves; section titles and ordering are your call
 
 If the survey note already exists:
 
-- Re-run greps. Update inventory tables and citation file:line ranges (corpus drifts).
+- Re-run greps. Update inventory tables and prefer durable citations by workflow path plus step label/tool name; use line ranges only for stable snippets that need them.
 - **Preserve everything below the open-questions section** — the act-command may have written into the anti-pattern note based on this survey's prior open Qs. Do not delete or rewrite §Open questions; *append* new questions surfaced this run.
 - New idioms or new candidate patterns surfaced by the refresh go in their respective sections, marked with the revision date.
 - Bump `revision:` and `revised:` in frontmatter.
