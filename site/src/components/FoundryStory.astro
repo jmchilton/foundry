@@ -1,0 +1,132 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const imageSrc = `${base}/images/casting-molds-story.png`;
+---
+
+<section class="foundry-story" aria-labelledby="foundry-story-heading">
+  <div class="section-rule">
+    <h2 id="foundry-story-heading">Foundry story</h2>
+    <span class="section-tail">/ why this shape</span>
+  </div>
+
+  <div class="story-panel tinted-shadow">
+    <div class="story-copy">
+      <span class="eyebrow">Molds into casts</span>
+      <h3>Make the knowledge base actionable.</h3>
+      <p>
+        The Foundry keeps workflow-construction knowledge as inspectable notes: patterns,
+        research, CLI docs, schemas, and best practices. Molds turn that rich source record
+        into statically validated cast skills, so agents can load portable artifacts without
+        losing the trail back to the documented reasoning.
+      </p>
+      <div class="story-actions">
+        <a href={`${base}/story/`} class="story-primary">
+          Read the full story
+          <span aria-hidden="true">→</span>
+        </a>
+        <a href={`${base}/glossary/`} class="story-secondary">Glossary</a>
+      </div>
+    </div>
+    <div class="story-art">
+      <img
+        src={imageSrc}
+        alt="Infographic showing a knowledge base pressed through Casting Molds into cast skills and actionable pipelines."
+        loading="lazy"
+      />
+    </div>
+  </div>
+</section>
+
+<style>
+  .foundry-story {
+    margin-top: 1.5rem;
+  }
+  .story-panel {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.82fr) minmax(26rem, 1.55fr);
+    gap: 1.25rem;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.5rem;
+    background: var(--color-surface-raised);
+    overflow: hidden;
+  }
+  .story-copy {
+    padding: 0.65rem 0.5rem 0.65rem 0.65rem;
+  }
+  .story-copy h3 {
+    margin: 0.65rem 0 0.7rem;
+    color: var(--color-galaxy-dark);
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+  }
+  .dark .story-copy h3 {
+    color: var(--color-text-primary);
+  }
+  .story-copy p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+  .story-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+  .story-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.52rem 0.9rem;
+    background: var(--color-galaxy-dark);
+    color: var(--color-text-on-dark);
+    border-radius: 0.35rem;
+    text-decoration: none;
+    font-weight: 700;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .story-primary:hover {
+    background: var(--color-galaxy-primary);
+    transform: translateX(2px);
+  }
+  .story-secondary {
+    color: var(--color-link);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-link) 35%, transparent);
+    font-weight: 600;
+  }
+  .story-secondary:hover {
+    color: var(--color-link-hover);
+    border-color: var(--color-accent);
+  }
+  .story-art {
+    min-width: 0;
+  }
+  .story-art img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid color-mix(in srgb, var(--color-border-subtle) 70%, transparent);
+    border-radius: 0.45rem;
+    background: var(--color-surface);
+  }
+  @media (max-width: 980px) {
+    .story-panel {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 560px) {
+    .story-panel {
+      padding: 0.8rem;
+    }
+    .story-copy {
+      padding: 0.3rem;
+    }
+  }
+</style>
