@@ -24,7 +24,7 @@ references:
     ref: "[[component-nextflow-testing]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them."
     trigger: "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into target test plans."
@@ -33,7 +33,7 @@ references:
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Emit Galaxy/IWC-style job input fixtures, remote locations, hashes, and collection input shapes."
     trigger: "When writing job inputs or deciding whether fixtures belong in test-data, Zenodo, ENA/SRA, or CVMFS."
@@ -41,7 +41,7 @@ references:
     ref: "[[planemo-asserts-idioms]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Choose Galaxy workflow-test assertion families and tolerances for translated expected outputs."
     trigger: "When turning Nextflow expected outputs or snapshots into Planemo assertions."
@@ -49,7 +49,7 @@ references:
     ref: "[[iwc-shortcuts-anti-patterns]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests."
     trigger: "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks."

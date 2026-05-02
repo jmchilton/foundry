@@ -17,7 +17,7 @@ references:
     ref: "[[iwc-transformations-survey]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Compare draft collection-shape recipes against corpus-observed IWC examples."
     trigger: "When the draft workflow contains collection reshape, cleanup, relabel, or synchronization sections."
@@ -25,7 +25,7 @@ references:
     ref: "[[iwc-tabular-operations-survey]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Compare draft tabular/text-processing sections against corpus-observed IWC examples."
     trigger: "When the draft workflow contains tabular filtering, projection, join, aggregation, or free-form text-processing sections."
@@ -33,7 +33,7 @@ references:
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Compare test-data placement and fixture shapes against IWC conventions."
     trigger: "When exemplar comparison includes workflow tests or input fixture organization."
@@ -41,7 +41,7 @@ references:
     ref: "[[iwc-shortcuts-anti-patterns]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Flag draft shortcuts that are accepted in IWC versus shortcuts that should be treated as smells."
     trigger: "When reviewing draft tests, assertions, labels, or expected-output comparisons."

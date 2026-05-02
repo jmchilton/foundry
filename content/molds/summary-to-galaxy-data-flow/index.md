@@ -24,7 +24,7 @@ references:
     ref: "[[galaxy-collection-semantics]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Map Nextflow fan-out/fan-in shapes onto Galaxy collection mapping and reduction behavior."
     trigger: "When a channel edge involves collection mapping, reduction, nesting, or paired/list shape changes."
@@ -32,7 +32,7 @@ references:
     ref: "[[galaxy-collection-tools]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Choose Galaxy built-in collection-operation tools for shape-only data-flow transformations."
     trigger: "When the Galaxy data-flow draft needs explicit collection construction, filtering, flattening, zipping, or relabeling."
@@ -40,7 +40,7 @@ references:
     ref: "[[galaxy-apply-rules-dsl]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Represent identifier-derived collection reshaping with Apply Rules when simpler collection tools are insufficient."
     trigger: "When channel identifiers need regex extraction, regrouping, nesting-level swaps, or paired identifier construction."
@@ -48,7 +48,7 @@ references:
     ref: "[[iwc-transformations-survey]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Ground collection-shape translation choices in observed IWC transformation recipes."
     trigger: "When selecting between Galaxy collection-operation recipes or checking whether a proposed shape transform is corpus-attested."
@@ -56,7 +56,7 @@ references:
     ref: "[[iwc-tabular-operations-survey]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Ground tabular bridge choices that appear while translating Nextflow channel/data-flow operations."
     trigger: "When data-flow translation leaves collection-land for tabular projection, filtering, joining, aggregation, or pivoting."

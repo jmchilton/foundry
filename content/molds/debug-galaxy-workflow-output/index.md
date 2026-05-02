@@ -17,7 +17,7 @@ references:
     ref: "[[planemo-asserts-idioms]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Classify whether a failure is an assertion-choice problem, tolerance problem, or real workflow-output regression."
     trigger: "When Planemo reports output assertion failures or generated tests are too strict/too weak."
@@ -25,7 +25,7 @@ references:
     ref: "[[iwc-shortcuts-anti-patterns]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Decide whether a proposed debug fix aligns with accepted IWC testing shortcuts or masks a real failure."
     trigger: "When debugging suggests weakening assertions, widening deltas, switching to existence checks, or changing output labels."
@@ -33,7 +33,7 @@ references:
     ref: "[[galaxy-collection-semantics]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs."
     trigger: "When a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure."

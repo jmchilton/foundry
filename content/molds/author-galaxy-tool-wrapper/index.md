@@ -24,7 +24,7 @@ references:
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Map Nextflow container/conda evidence to Galaxy tool requirements and wrapper provenance."
     trigger: "When a missing Galaxy wrapper must be authored from a Nextflow process with container or conda directives."

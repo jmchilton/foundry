@@ -22,7 +22,7 @@ references:
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Assemble job input fixtures, remote URLs, hashes, collection shapes, and test-data layout in IWC style."
     trigger: "When writing or revising the job/input side of a Galaxy workflow test file."
@@ -30,7 +30,7 @@ references:
     ref: "[[planemo-asserts-idioms]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Choose assertion families, tolerance magnitudes, and the static/Planemo validation loop."
     trigger: "When writing or revising output assertions for a Galaxy workflow test file."
@@ -38,7 +38,7 @@ references:
     ref: "[[iwc-shortcuts-anti-patterns]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Flag assertion shortcuts that are acceptable in IWC versus shortcuts that should be avoided."
     trigger: "When considering existence-only, size-only, image-only, checksum, output-label, or negative-test patterns."

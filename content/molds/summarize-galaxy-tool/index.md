@@ -17,7 +17,7 @@ references:
     ref: "[[component-tool-shed-search]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Resolve Galaxy tool identity, Tool Shed versioning, and changeset context before summarizing a wrapper."
     trigger: "When a tool summary starts from a Tool Shed hit rather than an installed Galaxy tool object."

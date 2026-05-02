@@ -47,7 +47,7 @@ references:
     ref: "[[component-tool-shed-search]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Explain Tool Shed search/indexing limitations that affect hit scoring and fallthrough decisions."
     trigger: "When results are missing, weak, duplicated across owners, stale, or ambiguous."

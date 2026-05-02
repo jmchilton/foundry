@@ -17,7 +17,7 @@ references:
     ref: "[[galaxy-collection-semantics]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Connect concrete Galaxy tool inputs/outputs while preserving collection mapping and reduction semantics."
     trigger: "When implementing a step with data_collection inputs, mapped outputs, reductions, or nested collection wiring."
@@ -25,7 +25,7 @@ references:
     ref: "[[galaxy-collection-tools]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Insert built-in Galaxy collection-operation steps when a direct tool connection cannot express the needed shape."
     trigger: "When a step needs collection construction, filtering, extraction, zipping, unzipping, flattening, merging, or relabeling."
@@ -33,7 +33,7 @@ references:
     ref: "[[galaxy-apply-rules-dsl]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Implement identifier-derived collection reshaping via Apply Rules."
     trigger: "When collection element identifiers need regex parsing, nesting-level swaps, regrouping, or paired identifier assignment."
@@ -41,7 +41,7 @@ references:
     ref: "[[iwc-transformations-survey]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Choose corpus-attested collection recipes when implementing concrete Galaxy steps."
     trigger: "When the implementation needs cleanup-after-fanout, sync-by-identifier, singleton unboxing, relabeling, or collection-to-tabular bridges."
@@ -49,7 +49,7 @@ references:
     ref: "[[iwc-tabular-operations-survey]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Choose corpus-attested tabular/text-processing recipes when implementing concrete Galaxy steps."
     trigger: "When the implementation needs row filtering, column projection, computed columns, joins, grouping, awk, or text-processing wrappers."
