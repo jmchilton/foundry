@@ -13,7 +13,7 @@ External:
 
 Foundry-internal (in the `foundry/` repo):
 - **Pattern pages** — Foundry reference content (collection manipulation, tabular, conditional, custom-tool authoring, …). Hand-authored. Wiki-linked from Molds. **IWC is referenced by URL in pattern bodies**, not mirrored — see `CORPUS_INGESTION.md`.
-- **CLI manual pages** — per-command/subcommand reference content for the CLIs Molds wrap (`gxwf`, `planemo`, …). Hand-authored or seeded from `--help` then humanized. Wiki-linked from per-action Molds (e.g., `validate-with-gxwf` → `cli/gxwf/validate`) and aggregated by whole-CLI Molds (`gxwf-cli`, `planemo-cli`). Cast to JSON sidecars, not inlined as prose.
+- **CLI manual pages** — per-command/subcommand reference content for the CLIs Molds wrap (`gxwf`, `planemo`, …). Hand-authored or seeded from `--help` then humanized. Wiki-linked from action Molds (e.g., `validate-galaxy-step` → `cli/gxwf/validate`). Cast to JSON sidecars, not inlined as prose.
 - **Research / reference notes** — background syntheses (e.g., Nextflow testing, CWL conformance) that aren't actions and aren't Galaxy patterns.
 - **Molds** — directory-per-Mold (`molds/<name>/`), with `index.md` source artifact, `eval.md` evaluation plan, optional companions. Authored as **typed reference manifests** (frontmatter declares typed references to patterns, manpages, schemas, prompts, examples) with a procedural body skeleton.
 - **Schemas (Mold IO)** — JSON Schema Draft 07 files declaring Mold input/output shapes. Live under `content/schemas/`, paired with a `type: schema` content note. Two flavors: **Foundry-authored** (the JSON lives next to the note as `<name>.schema.json`, e.g. `content/schemas/summary-nextflow.schema.json`) and **vendored** (the JSON is imported from an upstream npm package, e.g. `tests-format` from `@galaxy-tool-util/schema`). Per-source summary schemas (`summary-paper`, `summary-nextflow`, `summary-cwl`) are one family; over time, every Mold with structured IO contributes a schema here.
@@ -90,7 +90,7 @@ Validation injects the registry keys into the schema at runtime (`scripts/lib/sc
 Tag families:
 - **Note-type tags** (`mold`, `pattern`, `cli-command`, `pipeline`, `research/*`) — every note carries exactly one. Coherence-checked.
 - **`iwc/*` (IWC domain coverage)** — zero or more on patterns and Molds; the one subject-area family committed for v1. Hand-maintained vocabulary; seeded once from current IWC categories. Drives the `iwc-overview.md` aggregation page (§8) and `tags/iwc/<category>` browse pages. See `CORPUS_INGESTION.md`.
-- **`cli/*` (CLI affiliation)** — every `cli-command` note carries `cli/<tool>` (e.g., `cli/gxwf`, `cli/planemo`). Drives per-tool browse pages and the rollup queries the whole-CLI Molds use to enumerate their references.
+- **`cli/*` (CLI affiliation)** — every `cli-command` note carries `cli/<tool>` (e.g., `cli/gxwf`, `cli/planemo`). Drives per-tool browse pages and action-Mold reference surfaces.
 - **Source/target/tool axis tags** (`source/paper`, `source/nextflow`, `source/cwl`, `target/galaxy`, `target/cwl`, `tool/gxwf`, `tool/planemo`) — for Molds. Whether these graduate into typed frontmatter fields or stay as tags is an open question; tags are cheap to start with.
 
 **Subject-area tags beyond `iwc/*` are deferred.** A general Galaxy code/feature taxonomy (collections, tools, conditionals, …) is *not* committed to up front. The kinds of knowledge the Foundry will hold (background research, gxformat2 syntax notes, custom-tool-authoring detail, etc.) haven't been catalogued yet; locking in a subject-area taxonomy before content lands is premature. Tag families bloom as patterns surface real cross-cutting needs.
@@ -154,7 +154,7 @@ Coherence check (`TYPE_TAG_MAP` + `validate_tag_coherence`) emits a *warning* (n
 **Mold = typed reference manifest.** Beyond the wiki-link fields below, a Mold's frontmatter declares typed references *by reference kind* (sketch — exact field shape pending MOLD_SPEC after a couple of walked Molds):
 
 - `patterns` — wiki links into `content/patterns/`. Cast: LLM-condensed.
-- `cli_commands` — wiki links into `content/cli/<tool>/`. Cast: cast to JSON sidecar by per-action Molds; or rolled up wholesale by whole-CLI Molds (`gxwf-cli`).
+- `cli_commands` — wiki links into `content/cli/<tool>/`. Cast to JSON sidecars by action Molds.
 - `input_schemas` / `output_schemas` — typed *path* arrays (not wiki links) into `content/schemas/<name>.schema.json` for Foundry-authored schemas. (Vendored schemas have no on-disk JSON path inside the repo; their schema notes are referenced via `related_notes` wiki-links instead.) Cast: copied verbatim into the cast bundle's `references/schemas/`.
 - `prompts` — wiki links into `content/prompts/` (new; deferred until first Mold needs it). Cast: inlined verbatim, no LLM rewrite.
 - `examples` — typed path arrays into `content/molds/<slug>/examples/` or shared `content/examples/`. Cast: copied verbatim.
@@ -424,8 +424,8 @@ foundry/
 │   │   │   └── examples/
 │   │   ├── summarize-paper/
 │   │   ├── discover-shed-tool/
-│   │   ├── gxwf-cli/                     # whole-CLI Mold
-│   │   ├── planemo-cli/                  # whole-CLI Mold
+│   │   ├── validate-galaxy-step/
+│   │   ├── validate-galaxy-workflow/
 │   │   └── …
 │   ├── patterns/
 │   │   ├── galaxy-collection-manipulation.md   # body cites IWC URLs
@@ -538,8 +538,8 @@ Schema:
 - **`related_molds` legitimacy.** Mold-to-Mold wiki links are flagged as a smell in `COMPILATION_PIPELINE.md` (recursive casting depth). Keep as a warned-but-allowed field, or forbid outright? v1: allow, warn at cast time. The intended escape valve for "two Molds need shared content" is to factor that content into a pattern page, manpage, or schema — not a Mold-to-Mold link.
 - **Exact shape of the typed-reference manifest.** Field names (`patterns` vs `related_patterns`, `cli_commands` vs `manpages`, `input_schemas` vs nested under a `schemas` object) are sketch-level above; lock in after walking 2-3 Molds end-to-end (suggested order in `MOLDS.md`).
 - **CLI command slug strategy.** `cli-command` notes live two-deep (`content/cli/<tool>/<cmd>.md`). Wiki-link slug should disambiguate across tools — likely `<tool>-<cmd>` or `cli/<tool>/<cmd>` namespacing. Update the shared `wiki-links.ts` resolver when the first `cli-command` notes land.
-- **Manpage authoring source.** Seed from `--help` output (deterministic but thin) or hand-author and use `--help` only for cross-checking? The eval plan for the CLI Mold should pin this.
-- **One whole-CLI Mold per tool, or per-subcommand Molds?** v1: one Mold per tool (`gxwf-cli`, `planemo-cli`); per-command pages are the content layer. Revisit if planemo's surface is too big to cast as one artifact.
+- **Manpage authoring source.** Seed from `--help` output (deterministic but thin) or hand-author and use `--help` only for cross-checking? CLI command pages should pin install/source, invocation, output, failure, examples, and gotchas.
+- **Whole-CLI Mold or command references?** Current direction: CLI command pages are reference content, and action Molds reference exact commands. Revisit only if a real whole-CLI action emerges.
 
 Tooling:
 - **Cast diff hygiene.** LLM output is noisy; even unchanged Molds produce churny diffs. Output-stabilization pass (deterministic re-formatting) deferred until churn is painful.

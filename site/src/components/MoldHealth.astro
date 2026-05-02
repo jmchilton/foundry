@@ -1,0 +1,218 @@
+---
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import type { CollectionEntry } from 'astro:content';
+import { resolveWikiLinkId, type WikiLinkTarget } from '../lib/wiki-links';
+
+interface Props {
+  entry: CollectionEntry<'content'>;
+  linkMap: Map<string, WikiLinkTarget>;
+  entryById: Map<string, CollectionEntry<'content'>>;
+}
+
+interface HealthItem {
+  label: string;
+  state: 'ok' | 'warn' | 'error';
+  detail: string;
+}
+
+const { entry, linkMap, entryById } = Astro.props;
+const data = entry.data as any;
+const evalPath = fileURLToPath(new URL(`../../../content/${entry.id}/eval.md`, import.meta.url));
+const hasEval = existsSync(evalPath);
+const moldDir = fileURLToPath(new URL(`../../../content/${entry.id}/`, import.meta.url));
+
+function hasAxisSpecifier(): boolean {
+  if (data.axis === 'source-specific') return Boolean(data.source);
+  if (data.axis === 'target-specific') return Boolean(data.target);
+  if (data.axis === 'tool-specific') return Boolean(data.tool);
+  return true;
+}
+
+function referenceFindings(): HealthItem[] {
+  const refs = Array.isArray(data.references) ? data.references : [];
+  const items: HealthItem[] = [];
+  const unresolved = refs.filter((ref: any) => {
+    if (typeof ref?.ref !== 'string' || !/^\[\[.+\]\]$/.test(ref.ref)) return false;
+    return !resolveWikiLinkId(ref.ref, linkMap);
+  });
+  const missingTriggers = refs.filter((ref: any) => ref?.load === 'on-demand' && !ref.trigger);
+  const missingVerification = refs.filter((ref: any) => ref?.evidence === 'hypothesis' && !ref.verification);
+  const wrongCliRefs = refs.filter((ref: any) => {
+    if (ref?.kind !== 'cli-command' || typeof ref.ref !== 'string') return false;
+    const id = resolveWikiLinkId(ref.ref, linkMap);
+    if (!id) return false;
+    return entryById.get(id)?.data.type !== 'cli-command';
+  });
+
+  items.push({
+    label: 'Typed refs',
+    state: unresolved.length === 0 && wrongCliRefs.length === 0 ? 'ok' : 'error',
+    detail: refs.length === 0
+      ? 'No typed references yet.'
+      : `${refs.length} typed reference${refs.length === 1 ? '' : 's'}; ${unresolved.length + wrongCliRefs.length} resolver issue${unresolved.length + wrongCliRefs.length === 1 ? '' : 's'}.`,
+  });
+  items.push({
+    label: 'On-demand triggers',
+    state: missingTriggers.length === 0 ? 'ok' : 'warn',
+    detail: missingTriggers.length === 0 ? 'All on-demand references describe triggers.' : `${missingTriggers.length} on-demand reference${missingTriggers.length === 1 ? '' : 's'} missing trigger.`,
+  });
+  items.push({
+    label: 'Evidence checks',
+    state: missingVerification.length === 0 ? 'ok' : 'error',
+    detail: missingVerification.length === 0 ? 'Hypothesis references include verification.' : `${missingVerification.length} hypothesis reference${missingVerification.length === 1 ? '' : 's'} missing verification.`,
+  });
+  return items;
+}
+
+function listMarkdownFiles(dir: string): string[] {
+  const files: string[] = [];
+  if (!existsSync(dir)) return files;
+  for (const item of readdirSync(dir)) {
+    const full = `${dir}/${item}`;
+    const stat = statSync(full);
+    if (stat.isDirectory()) files.push(...listMarkdownFiles(full));
+    else if (item.endsWith('.md')) files.push(full);
+  }
+  return files;
+}
+
+function hasFrontmatter(filePath: string): boolean {
+  return readFileSync(filePath, 'utf8').startsWith('---');
+}
+
+function evalDetail(): HealthItem {
+  if (!hasEval) {
+    return { label: 'Eval plan', state: 'warn', detail: 'eval.md not written yet.' };
+  }
+  const body = readFileSync(evalPath, 'utf8');
+  const hasCase = /^##\s+Case:/m.test(body);
+  const hasCheck = /\b(deterministic|llm-judged)\b/.test(body);
+  if (hasCase && hasCheck) return { label: 'Eval plan', state: 'ok', detail: 'eval.md declares cases and check type.' };
+  return { label: 'Eval plan', state: 'warn', detail: 'eval.md should include a Case section and deterministic or llm-judged check.' };
+}
+
+const nonIndexFrontmatter = listMarkdownFiles(moldDir)
+  .filter(path => !path.endsWith('/index.md'))
+  .filter(hasFrontmatter);
+
+const legacyCount = (data.patterns?.length ?? 0) + (data.cli_commands?.length ?? 0) + (data.prompts?.length ?? 0) + (data.examples?.length ?? 0);
+const items: HealthItem[] = [
+  {
+    label: 'Source layout',
+    state: nonIndexFrontmatter.length === 0 ? 'ok' : 'error',
+    detail: nonIndexFrontmatter.length === 0 ? 'Directory Mold with only index.md frontmatter.' : `${nonIndexFrontmatter.length} non-index Markdown file${nonIndexFrontmatter.length === 1 ? '' : 's'} with frontmatter.`,
+  },
+  {
+    label: 'Axis fields',
+    state: hasAxisSpecifier() ? 'ok' : 'error',
+    detail: hasAxisSpecifier() ? `${data.axis} fields are coherent.` : `${data.axis} Mold is missing its required specifier.`,
+  },
+  evalDetail(),
+  ...referenceFindings(),
+  {
+    label: 'Legacy refs',
+    state: legacyCount === 0 ? 'ok' : 'warn',
+    detail: legacyCount === 0 ? 'Operational references use references:.' : `${legacyCount} legacy top-level reference${legacyCount === 1 ? '' : 's'} still present.`,
+  },
+];
+
+const stateRank = { ok: 0, warn: 1, error: 2 } as const;
+const overall = items.reduce<'ok' | 'warn' | 'error'>((state, item) => stateRank[item.state] > stateRank[state] ? item.state : state, 'ok');
+---
+<section class={`mold-health mold-health-${overall}`} aria-labelledby="mold-health-heading">
+  <div class="mold-health-head">
+    <h2 id="mold-health-heading">Mold health</h2>
+    <span class={`health-pill health-${overall}`}>{overall}</span>
+  </div>
+  <ul class="health-grid">
+    {items.map(item => (
+      <li class={`health-item health-${item.state}`}>
+        <span class="health-dot" aria-hidden="true"></span>
+        <div>
+          <strong>{item.label}</strong>
+          <p>{item.detail}</p>
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .mold-health {
+    margin: 0 0 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-surface-raised);
+  }
+  .mold-health-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .mold-health h2 {
+    margin: 0;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+  .health-pill {
+    border-radius: 999px;
+    padding: 0.2rem 0.55rem;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+  }
+  .health-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .health-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem;
+    padding: 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+    border-radius: 0.75rem;
+    background: var(--color-surface);
+  }
+  .health-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-top: 0.35rem;
+    border-radius: 50%;
+    background: var(--color-text-muted);
+  }
+  .health-item strong {
+    display: block;
+    font-size: 0.85rem;
+  }
+  .health-item p {
+    margin: 0.15rem 0 0;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+  }
+  .health-ok .health-dot,
+  .health-pill.health-ok {
+    background: #18794e;
+    color: white;
+  }
+  .health-warn .health-dot,
+  .health-pill.health-warn {
+    background: #b7791f;
+    color: white;
+  }
+  .health-error .health-dot,
+  .health-pill.health-error {
+    background: #c53030;
+    color: white;
+  }
+</style>

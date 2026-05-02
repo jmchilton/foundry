@@ -146,7 +146,19 @@ const noteSchema = z.discriminatedUnion('type', [
 
 const content = defineCollection({
   loader: glob({
-    pattern: ['**/*.md', '!Dashboard.md', '!Index.md', '!iwc-overview.md', '!log.md', '!glossary.md', '!.obsidian/**'],
+    pattern: [
+      'cli/**/*.md',
+      'molds/**/index.md',
+      'patterns/**/*.md',
+      'pipelines/**/*.md',
+      'research/**/*.md',
+      'schemas/**/*.md',
+      '!Dashboard.md',
+      '!Index.md',
+      '!iwc-overview.md',
+      '!log.md',
+      '!glossary.md',
+    ],
     base: '../content',
     generateId({ entry }) {
       let id = slugifyPath(entry);

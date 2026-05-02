@@ -4,6 +4,7 @@ import Base from '../layouts/Base.astro';
 import NoteHeader from '../components/NoteHeader.astro';
 import NoteMeta from '../components/NoteMeta.astro';
 import IncomingRefs from '../components/IncomingRefs.astro';
+import MoldHealth from '../components/MoldHealth.astro';
 import MoldBody from '../components/MoldBody.astro';
 import PipelineBody from '../components/PipelineBody.astro';
 import PatternBody from '../components/PatternBody.astro';
@@ -73,6 +74,7 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
     <NoteHeader entry={entry} pageTitle={pageTitle} typeLabel={typeLabel} eyebrow={eyebrow} showActions={showActions} />
     {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
 
+    {data.type === 'mold' && <MoldHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
     {data.type === 'mold' && <MoldBody entry={entry} linkMap={linkMap} />}
     {data.type === 'pipeline' && <PipelineBody entry={entry} linkMap={linkMap} />}
     {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} />}

@@ -31,7 +31,7 @@ Use these exact main labels and avoid adding unrelated labels.
 Left zone label: "Knowledge base"
 Left zone contents: linked note cards and reference plates labeled exactly: "Patterns", "Research", "CLI Docs", "Schemas", "Best Practices".
 Center hero label: "Casting Molds"
-Center visual: an old-timey casting mold / letterpress chase / metal type press, simplified into clean vector-like geometry. Show one prominent structured Mold card entering the press, labeled "Mold manifest". Include tiny etched Mold examples on metal slugs or plates: "summarize-nextflow", "implement-galaxy-tool-step", "validate-with-gxwf", "planemo-cli". Highlight "planemo-cli" slightly more than the others, as the CLI documentation example.
+Center visual: an old-timey casting mold / letterpress chase / metal type press, simplified into clean vector-like geometry. Show one prominent structured Mold card entering the press, labeled "Mold manifest". Include tiny etched Mold examples on metal slugs or plates: "summarize-nextflow", "implement-galaxy-tool-step", "validate-galaxy-step", "discover-shed-tool". Highlight "validate-galaxy-step" slightly more than the others, as the CLI-backed action example.
 Right zone label: "Cast skills"
 Right zone contents: cooled portable artifact cards/bundles labeled exactly: "Claude skill", "web artifact", "generic skill". One visible example tag: "summarize-nextflow / SKILL.md".
 
