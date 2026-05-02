@@ -18,6 +18,39 @@ cli_commands:
   - "[[tool-revisions]]"
 related_notes:
   - "[[component-tool-shed-search]]"
+references:
+  - kind: cli-command
+    ref: "[[tool-search]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Search the Tool Shed for candidate wrappers matching a step's tool need."
+    trigger: "When resolving a workflow step to an installable Galaxy tool wrapper."
+  - kind: cli-command
+    ref: "[[tool-versions]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "List available Tool Shed versions for a selected candidate."
+    trigger: "After a Tool Shed search candidate is selected and before pinning a version."
+  - kind: cli-command
+    ref: "[[tool-revisions]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Resolve a Tool Shed tool version to an installable changeset revision."
+    trigger: "After selecting a candidate version that needs a reproducible changeset pin."
+  - kind: research
+    ref: "[[component-tool-shed-search]]"
+    used_at: runtime
+    load: on-demand
+    mode: condense
+    evidence: corpus-observed
+    purpose: "Explain Tool Shed search/indexing limitations that affect hit scoring and fallthrough decisions."
+    trigger: "When results are missing, weak, duplicated across owners, stale, or ambiguous."
 ---
 
 # discover-shed-tool
