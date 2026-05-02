@@ -23,3 +23,9 @@
 - check: llm-judged
 - fixture: data-flow draft with at least one uncertain tool need, placeholder transformation, conditional branch, collection reshape, or tabular bridge.
 - expectation: assigns ownership to data-flow, template, concrete step implementation, or follow-up research; does not hide unresolved semantics in prose-only TODOs.
+
+## Case: failure modality forecast
+
+- check: llm-judged
+- fixture: data-flow draft that includes a tool need, workflow-level route, collection mapping, and expected workflow outputs.
+- expectation: records which later failures would be tool/job failures, workflow invocation failures, Planemo assertion failures, or missing-reference gaps; links each forecast to the artifact or API surface that should verify it during a run.
