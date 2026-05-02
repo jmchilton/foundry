@@ -23,3 +23,9 @@
 - check: llm-judged
 - fixture: any real template-generation run that exposes a reusable skeleton idiom, awkward placeholder, missing pattern, or unclear mold boundary.
 - expectation: records how the observation should be captured: new or revised pattern note, research issue, schema/eval update, mold-reference update, or documentation task; includes concrete evidence required to verify it.
+
+## Case: failure surface preservation
+
+- check: llm-judged
+- fixture: gxformat2 skeleton with unresolved tool placeholders, workflow outputs, collection outputs, and at least one conditional or optional path.
+- expectation: preserves labels, outputs, and TODO context needed to trace later Planemo failures back to tool/job state, workflow invocation state, or assertion/output mismatch without relying only on terminal logs.
