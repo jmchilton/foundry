@@ -36,7 +36,7 @@ Working trees:
 - `iwc-format2/` — final `.gxwf.yml` corpus, mirrors IWC `workflows/` tree.
 - `iwc-skeletons/` — structural-only views of `iwc-format2/`, mirrors that tree.
 
-The IWC pipeline shells out to `gxwf` via `npx -p @galaxy-tool-util/cli` (no global install needed; cached after first run).
+The fixture scripts read `fixtures.yaml` with Node + `js-yaml`. The IWC pipeline shells out to `gxwf` via `npx -p @galaxy-tool-util/cli` (no global install needed; cached after first run).
 
 ## Skeletons
 

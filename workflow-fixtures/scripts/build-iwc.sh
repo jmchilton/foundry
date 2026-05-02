@@ -10,26 +10,17 @@
 #   scripts/build-iwc.sh
 #   VERIFY=1 scripts/build-iwc.sh   # assert HEAD matches pinned SHA
 #
-# Deps: git, npx (node), python3 (or yq).
+# Deps: git, node, npx.
 
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-manifest="$root/fixtures.yaml"
 src="$root/iwc-src"
 cleaned="$root/iwc-cleaned"
 out="$root/iwc-format2"
 
-read_iwc() {
-  if command -v yq >/dev/null 2>&1; then
-    yq -r ".iwc.$1" "$manifest"
-  else
-    python3 -c "import sys,yaml; print(yaml.safe_load(open('$manifest'))['iwc']['$1'])"
-  fi
-}
-
-repo="$(read_iwc repo)"
-sha="$(read_iwc sha)"
+repo="$(node "$root/scripts/read-fixture-manifest.mjs" iwc repo)"
+sha="$(node "$root/scripts/read-fixture-manifest.mjs" iwc sha)"
 
 if [ ! -d "$src/.git" ]; then
   echo ">> cloning $repo into $src"
