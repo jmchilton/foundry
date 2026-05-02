@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 summary: "Abstract DAG with Galaxy collection / scatter / branching idioms surfaced."
 references:
@@ -28,6 +28,31 @@ references:
     evidence: corpus-observed
     purpose: "Map Nextflow fan-out/fan-in shapes onto Galaxy collection mapping and reduction behavior."
     trigger: "When a channel edge involves collection mapping, reduction, nesting, or paired/list shape changes."
+  - kind: research
+    ref: "[[nextflow-to-galaxy-channel-shape-mapping]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Translate Nextflow channel, tuple, and path shapes into Galaxy dataset and collection shapes."
+    trigger: "When reading source-summary channel shapes and deciding File/list/paired/list:paired/list:list topology."
+  - kind: research
+    ref: "[[nextflow-operators-to-galaxy-collection-recipes]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Classify Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers."
+    trigger: "When source-summary edges mention map, join, groupTuple, branch, mix, combine, multiMap, or related channel operators."
+  - kind: research
+    ref: "[[galaxy-data-flow-draft-contract]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Keep the data-flow draft boundary separate from gxformat2 templating and concrete step implementation."
+    trigger: "When deciding what belongs in the abstract Galaxy data-flow draft versus later Molds."
+    verification: "Promote after two worked Galaxy translations use the boundary without moving fields between Molds."
   - kind: research
     ref: "[[galaxy-collection-tools]]"
     used_at: runtime

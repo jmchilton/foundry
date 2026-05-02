@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
 references:
@@ -21,6 +21,22 @@ references:
     evidence: corpus-observed
     purpose: "Connect concrete Galaxy tool inputs/outputs while preserving collection mapping and reduction semantics."
     trigger: "When implementing a step with data_collection inputs, mapped outputs, reductions, or nested collection wiring."
+  - kind: research
+    ref: "[[nextflow-to-galaxy-channel-shape-mapping]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Check whether a concrete tool input/output can preserve the intended source-derived Galaxy collection shape."
+    trigger: "When implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs."
+  - kind: research
+    ref: "[[nextflow-operators-to-galaxy-collection-recipes]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Turn operator-derived abstract transforms into concrete Galaxy wiring, collection operations, or review requests."
+    trigger: "When a concrete step implements behavior traced to map, join, groupTuple, branch, mix, combine, or multiMap."
   - kind: research
     ref: "[[galaxy-collection-tools]]"
     used_at: runtime

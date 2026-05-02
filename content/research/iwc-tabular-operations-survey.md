@@ -6,13 +6,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 related_notes:
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-asserts-idioms]]"
+  - "[[nextflow-operators-to-galaxy-collection-recipes]]"
+  - "[[iwc-nearest-exemplar-selection]]"
 summary: "Corpus survey of tabular tools and operations across IWC workflows; map for the leaf pattern hierarchy on row/column data manipulation."
 ---
 
