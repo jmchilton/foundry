@@ -12,11 +12,12 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps."
 related_notes:
   - "[[iwc-conditionals-survey]]"
+  - "[[iwc-parameter-derivation-survey]]"
 related_patterns:
   - "[[conditional-run-optional-step]]"
   - "[[conditional-route-between-alternative-outputs]]"
@@ -77,6 +78,14 @@ Authoring-relevant fields:
 - collection boolean shim: count identifiers and convert `count != 0` to boolean;
 - text-like dataset content shim: map empty text to `false` and non-empty text to `true`.
 
+## Boolean Derivation Mechanics
+
+For collections, the observed IWC recipe is explicit: extract collection element identifiers, count those identifier lines, compute `c1 != 0`, then read that one-cell result as a boolean parameter.
+
+In MGnify, the embedded subworkflow labeled `Map empty/not empty collection to boolean` uses `collection_element_identifiers`, `wc_gnu` with `options: [lines]`, `column_maker` with `ops.header_lines_select: no` and `cond: c1 != 0`, then `param_value_from_file` with `param_type: boolean` and `remove_newlines: true`.
+
+For text-like datasets, the VGP Hi-C workflow reads the dataset with `param_value_from_file` as `text`, then maps `"" -> false` with `map_param_value`; unmapped non-empty text defaults to `true`.
+
 Observed MGnify collection recipe:
 
 ```text
@@ -129,7 +138,7 @@ These snippets are summaries of observed IWC shapes. Do not simplify the MGnify 
 - `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1358-1483` — embedded subworkflow labeled `Map empty/not empty collection to boolean`; uses `collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file`.
 - `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1330-1357` — boolean gates Krona output generation.
 - `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1484-1659` — same boolean gates BIOM conversion/export steps.
-- `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3057-3218`, `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3289-3346` — text-like dataset-content variant: telomere BED text is mapped to a boolean before gating Pretext graph steps.
+- `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3057-3218`, `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3289-3346`, `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3458-3510` — text-like dataset-content variant: telomere BED text is mapped to a boolean before gating Pretext graph steps.
 
 ## Verification TODO
 
@@ -142,6 +151,7 @@ Issue: <https://github.com/jmchilton/foundry/issues/84>.
 ## See Also
 
 - [[iwc-conditionals-survey]] — Candidate C decision record and verification TODO.
+- [[iwc-parameter-derivation-survey]] — parameter-derivation survey that merges non-empty boolean mechanics into this page.
 - [[galaxy-conditionals-patterns]] — conditionals MOC.
 - [[conditional-run-optional-step]] — primitive `when:` branch for user booleans.
 - [[conditional-route-between-alternative-outputs]] — route alternatives and merge with `pick_value`.
