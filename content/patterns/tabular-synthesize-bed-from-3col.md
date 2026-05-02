@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Tabular: synthesize BED from 3-column input"
 tags:
   - pattern

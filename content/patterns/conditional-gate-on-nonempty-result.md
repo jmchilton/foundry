@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-and-verified
 title: "Conditional: gate on non-empty result"
 aliases:
   - "gate on nonempty result"
@@ -23,6 +24,8 @@ related_patterns:
   - "[[collection-cleanup-after-mapover-failure]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verifications:
+  - "[[conditional-gate-on-nonempty-result-verification]]"
 ---
 
 # Conditional: gate on non-empty result
@@ -37,9 +40,7 @@ The corpus-backed collection recipe is:
 collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file -> when
 ```
 
-MGnify proves this shape in IWC, but it is clunky: four shim steps to produce one boolean. Treat it as verified precedent and fallback evidence, not as the final preferred authoring target.
-
-A shorter route might be possible with a Galaxy-native `when` expression or a smaller expression-tool boolean shim, but that needs validation in a small verified-pattern workflow before it becomes the lead recommendation.
+MGnify proves this shape in IWC, and [[conditional-gate-on-nonempty-result-verification]] verifies the same operation against Galaxy `release_25.1`. It is clunky: four shim steps to produce one boolean. Treat it as the known-good recipe until a shorter route validates cleanly.
 
 ## When to reach for it
 
@@ -114,7 +115,7 @@ Conceptual text-like dataset-content shim:
 dataset -> param_value_from_file -> map_param_value(empty string = false, non-empty default = true)
 ```
 
-These snippets are summaries of observed IWC shapes. Do not simplify the MGnify chain in a generated workflow until the shorter route validates.
+These snippets summarize observed and verified shapes. Do not simplify the MGnify chain in a generated workflow until a shorter route validates.
 
 ## Pitfalls
 
@@ -131,17 +132,15 @@ These snippets are summaries of observed IWC shapes. Do not simplify the MGnify 
 - `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1484-1659` — same boolean gates BIOM conversion/export steps.
 - `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3057-3218`, `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3289-3346` — text-like dataset-content variant: telomere BED text is mapped to a boolean before gating Pretext graph steps.
 
-## Verification TODO
+## Verification
 
-Add a small verified-pattern workflow for this operation. Test whether a shorter Galaxy-native `when` expression or expression-tool boolean shim validates and roundtrips cleanly.
+[[conditional-gate-on-nonempty-result-verification]] passes under Planemo against Galaxy `release_25.1` using the MGnify-style shim. The fixture rejected two shorter candidates first: direct `when` over a collection-derived value failed with `when_not_boolean`, and an embedded CWL `ExpressionTool` shim failed gxformat2 validation.
 
-If it works, make the shorter verified route the lead recommendation and keep the MGnify recipe as corpus-observed fallback evidence. If it fails, keep the MGnify route as the known-good corpus-backed recipe despite the clunkiness.
-
-Issue: <https://github.com/jmchilton/foundry/issues/84>.
+The verified result keeps the MGnify chain as the lead known-good recipe despite the clunkiness.
 
 ## See Also
 
-- [[iwc-conditionals-survey]] — Candidate C decision record and verification TODO.
+- [[iwc-conditionals-survey]] — Candidate C decision record and verification outcome.
 - [[galaxy-conditionals-patterns]] — conditionals MOC.
 - [[conditional-run-optional-step]] — primitive `when:` branch for user booleans.
 - [[conditional-route-between-alternative-outputs]] — route alternatives and merge with `pick_value`.

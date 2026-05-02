@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Conditional: route between alternative outputs"
 aliases:
   - "when-gated alternatives with pick_value"

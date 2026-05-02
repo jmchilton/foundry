@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Tabular: split taxonomy string"
 tags:
   - pattern

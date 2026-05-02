@@ -10,7 +10,7 @@ required: [type, tags, status, created, revised, revision, ai_generated, summary
 properties:
   type:
     type: string
-    enum: [mold, pattern, cli-command, pipeline, research, schema]
+    enum: [mold, pattern, cli-command, pipeline, research, schema, verification]
   tags:
     type: array
     items:
@@ -46,6 +46,9 @@ properties:
   pattern_kind:
     type: string
     enum: [leaf, moc]
+  evidence:
+    type: string
+    enum: [corpus-observed, structurally-verified, corpus-and-verified, hypothesis]
   sources:
     type: array
     minItems: 1
@@ -72,6 +75,14 @@ properties:
     items:
       type: string
       pattern: "^\\[\\[.+\\]\\]$"
+  verifies_pattern:
+    type: string
+    pattern: "^\\[\\[.+\\]\\]$"
+  verifications:
+    type: array
+    items:
+      type: string
+      pattern: "^\\[\\[.+\\]\\]$"
 
   # --- Mold fields ---
   name:
@@ -85,6 +96,11 @@ properties:
   target:
     type: string
     enum: [galaxy, cwl, web, generic]
+  workflow_path:
+    type: string
+  verification_status:
+    type: string
+    enum: [passing, failing, skipped]
   tool:
     type: string
     enum: [gxwf, planemo]
@@ -216,13 +232,13 @@ allOf:
     then:
       required: [tool]
 
-  # pattern requires title + pattern_kind
+  # pattern requires title + pattern_kind + evidence
   - if:
       properties:
         type: { const: pattern }
       required: [type]
     then:
-      required: [title, pattern_kind]
+      required: [title, pattern_kind, evidence]
 
   # cli-command requires tool + command
   - if:
@@ -258,6 +274,14 @@ allOf:
       required: [type]
     then:
       required: [name, title]
+
+  # verification requires workflow path + pattern target
+  - if:
+      properties:
+        type: { const: verification }
+      required: [type]
+    then:
+      required: [title, workflow_path, target, verification_status, verifies_pattern]
 
 # Strict mode: unknown fields are rejected to catch typos and schema drift.
 additionalProperties: false

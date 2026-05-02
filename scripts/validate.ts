@@ -34,6 +34,7 @@ const TYPE_TAG_MAP: Record<string, string> = {
   "research|design-problem": "research/design-problem",
   "research|design-spec": "research/design-spec",
   "schema|": "schema",
+  "verification|": "verification",
 };
 
 /** Single-value vs array wiki-link fields. Schema's regex catches missing brackets; this catches whitespace-only inner text. */
@@ -42,6 +43,8 @@ const WIKI_LINK_FIELDS: Record<string, "single" | "array"> = {
   related_notes: "array",
   related_patterns: "array",
   related_molds: "array",
+  verifies_pattern: "single",
+  verifications: "array",
   patterns: "array",
   cli_commands: "array",
   prompts: "array",
@@ -576,6 +579,125 @@ function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
   return findings;
 }
 
+function validateVerificationRefs(
+  files: FileMeta[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    if (f.meta.type === "verification") {
+      validateVerificationNote(f, slugMap, metaByPath, findings);
+    }
+    if (f.meta.type === "pattern") {
+      validatePatternVerificationEvidence(f, slugMap, metaByPath, findings);
+    }
+  }
+  return findings;
+}
+
+function validateVerificationNote(
+  file: FileMeta,
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+  findings: CrossFileFinding[],
+): void {
+  const workflowPath = file.meta.workflow_path;
+  if (typeof workflowPath === "string") {
+    const abs = path.resolve(process.cwd(), workflowPath);
+    if (!existsSync(abs)) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `workflow_path: file does not exist: ${workflowPath}`,
+      });
+    } else if (!statSync(abs).isFile()) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `workflow_path: path is not a file: ${workflowPath}`,
+      });
+    }
+  }
+
+  const verifiesPattern = file.meta.verifies_pattern;
+  if (typeof verifiesPattern !== "string") return;
+  const targetPath = resolveWikiLink(verifiesPattern, slugMap);
+  if (!targetPath) {
+    findings.push({
+      path: file.path,
+      severity: "error",
+      message: `verifies_pattern: wiki link ${verifiesPattern} did not resolve`,
+    });
+    return;
+  }
+  const targetType = metaByPath.get(targetPath)?.type;
+  if (targetType !== "pattern") {
+    findings.push({
+      path: file.path,
+      severity: "error",
+      message: `verifies_pattern: wiki link ${verifiesPattern} resolves to type=${targetType ?? "(none)"}, expected pattern`,
+    });
+  }
+}
+
+function validatePatternVerificationEvidence(
+  file: FileMeta,
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+  findings: CrossFileFinding[],
+): void {
+  const verifications = Array.isArray(file.meta.verifications) ? file.meta.verifications : [];
+  for (const wl of verifications) {
+    const targetPath = resolveWikiLink(wl, slugMap);
+    if (!targetPath) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `verifications: wiki link ${String(wl)} did not resolve`,
+      });
+      continue;
+    }
+    const targetType = metaByPath.get(targetPath)?.type;
+    if (targetType !== "verification") {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `verifications: wiki link ${String(wl)} resolves to type=${targetType ?? "(none)"}, expected verification`,
+      });
+      continue;
+    }
+
+    const verifiesPattern = metaByPath.get(targetPath)?.verifies_pattern;
+    if (typeof verifiesPattern !== "string") continue;
+    const verifiedPatternPath = resolveWikiLink(verifiesPattern, slugMap);
+    if (verifiedPatternPath !== file.path) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `verifications: wiki link ${String(wl)} verifies ${verifiesPattern}, expected this pattern`,
+      });
+    }
+  }
+
+  const evidence = file.meta.evidence;
+  if (evidence === "structurally-verified" || evidence === "corpus-and-verified") {
+    if (verifications.length === 0) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `evidence=${evidence} requires at least one verification`,
+      });
+    }
+  } else if ((evidence === "corpus-observed" || evidence === "hypothesis") && verifications.length > 0) {
+    findings.push({
+      path: file.path,
+      severity: "error",
+      message: `evidence=${evidence} must not declare verifications`,
+    });
+  }
+}
+
 function listMarkdownFiles(dir: string): string[] {
   const files: string[] = [];
   for (const entry of readdirSync(dir).sort()) {
@@ -670,6 +792,7 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateMoldSourceLayout(opts.directory, validFiles.filter((f) => f.meta.type === "mold")));
   crossFindings.push(...validateCliCommandDocs(validFiles));
+  crossFindings.push(...validateVerificationRefs(validFiles, slugMap, metaByPath));
 
   for (const f of crossFindings) {
     printHeader(f.path);

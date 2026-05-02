@@ -1,0 +1,26 @@
+- doc: "Gate true: non-empty input runs the optional step"
+  job:
+    inputs:
+      class: Collection
+      collection_type: list
+      elements:
+        - identifier: only
+          class: File
+          path: test-data/nonempty.txt
+          filetype: txt
+  outputs:
+    gate_boolean: true
+    gated_marker:
+      file: test-data/expected_ran_marker.txt
+
+- doc: "Gate false: empty input skips the optional step"
+  job:
+    inputs:
+      class: Collection
+      collection_type: list
+      elements: []
+  outputs:
+    false_path_marker:
+      asserts:
+        has_text:
+          text: "False"

@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Tabular: to collection by row"
 aliases:
   - "collection from tabular rows"

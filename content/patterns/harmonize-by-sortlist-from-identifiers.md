@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Collection: harmonize by sortlist from identifiers"
 aliases:
   - "collection harmonize by sortlist from identifiers"

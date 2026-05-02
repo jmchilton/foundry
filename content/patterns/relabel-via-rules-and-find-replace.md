@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Collection: relabel via rules and find/replace"
 aliases:
   - "collection relabel via rules and find replace"

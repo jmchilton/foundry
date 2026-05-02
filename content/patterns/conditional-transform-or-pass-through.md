@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Conditional: transform or pass through"
 aliases:
   - "optional transform with fallback"

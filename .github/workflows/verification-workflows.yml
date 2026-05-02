@@ -1,0 +1,64 @@
+name: Verification workflows
+
+on:
+  pull_request:
+    paths:
+      - "verification/workflows/**"
+      - "content/verification/**"
+      - ".github/workflows/verification-workflows.yml"
+  push:
+    branches: [main]
+    paths:
+      - "verification/workflows/**"
+      - "content/verification/**"
+      - ".github/workflows/verification-workflows.yml"
+
+jobs:
+  planemo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: false
+          channels: conda-forge,bioconda
+          channel-priority: strict
+
+      - name: Install Planemo
+        shell: bash -l {0}
+        run: pip install planemo
+
+      - name: Lint verified workflow
+        shell: bash -l {0}
+        run: |
+          shopt -s nullglob globstar
+          for workflow in verification/workflows/**/*.gxwf.yml; do
+            planemo lint "$workflow"
+          done
+
+      - name: Test verified workflow
+        shell: bash -l {0}
+        run: |
+          shopt -s nullglob globstar
+          mkdir -p upload
+          for workflow in verification/workflows/**/*.gxwf.yml; do
+            name="${workflow#verification/workflows/}"
+            name="${name//\//-}"
+            name="${name%.gxwf.yml}"
+            planemo test "$workflow" \
+              --galaxy_branch release_25.1 \
+              --test_output_json "upload/${name}.json" \
+              --test_output "upload/${name}.html" \
+              --summary minimal
+          done
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification-workflows-planemo
+          path: upload/

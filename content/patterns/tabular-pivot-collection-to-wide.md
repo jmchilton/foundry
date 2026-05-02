@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Tabular: pivot collection to wide"
 aliases:
   - "collection-to-wide-table-with-collection_column_join"

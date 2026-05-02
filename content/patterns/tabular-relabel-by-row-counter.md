@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Tabular: relabel by row counter"
 aliases:
   - "sample_N relabel"

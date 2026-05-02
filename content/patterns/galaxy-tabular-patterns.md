@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: moc
+evidence: corpus-observed
 title: "Galaxy: tabular patterns"
 aliases:
   - "Galaxy tabular pattern MOC"

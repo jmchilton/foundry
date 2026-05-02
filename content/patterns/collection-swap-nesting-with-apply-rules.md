@@ -1,6 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
+evidence: corpus-observed
 title: "Collection: swap nesting with Apply Rules"
 aliases:
   - "regroup list:list by inner identifier"
