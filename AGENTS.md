@@ -18,6 +18,7 @@
 - **Frontmatter is contract.** `meta_schema.yml` is JSON Schema Draft 07 with `additionalProperties: false`. Unknown fields are rejected. Add a property declaration in the schema before adding a frontmatter field anywhere.
 - **Tags must be registered.** Every tag a note uses lives in `meta_tags.yml`. Vocabulary changes touch one file.
 - **Wiki-link fields use `[[Target]]`.** Single-value fields (`parent_pattern`) and array fields (`related_notes`, `related_patterns`, `related_molds`, `patterns`, `cli_commands`, `prompts`).
+- **IWC citations should survive corpus churn.** Prefer workflow-path citations plus step label/tool name over brittle line precision when cleaned/converted workflow files are likely to move. Use line ranges only when they clarify a stable local snippet.
 - **Validate before commit.** `npm run validate` checks schema + cross-file resolution. Errors block; warnings are advisory.
 - **Don't edit generated files by hand.** `Dashboard.md`, `Index.md`, `iwc-overview.md` are produced by `scripts/generate-*.ts`. `glossary.md` is hand-curated and skipped by the validator. `log.md` is append-only.
 

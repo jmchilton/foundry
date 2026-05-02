@@ -34,6 +34,7 @@ Examples:
 ## Decide the page identity
 
 - Filename and title are operation-anchored. Tool names belong in `## Tool`, not the slug, unless the operation is inseparable from one named Galaxy primitive.
+- Keep title prefixes coherent within a family (`Tabular: ...`, `Collection: ...`) even when slugs reflect bridge operations or survey wording.
 - Use `aliases` for old survey candidate names, tool-anchored names, or terms users are likely to search for.
 - If `$2` looks like a typo or an outlier against `docs/PATTERNS.md`, the survey, or nearby slugs, stop and ask. Recommend the correction.
 
@@ -65,8 +66,18 @@ Drop sections that do not earn their space. A thin “None surfaced” legacy se
 - The survey is the audit trail; the pattern page is the actionable reference.
 - Preserve pinned decisions from the survey. If a decision looks wrong, surface it as a question; do not silently override it.
 - Cite corpus examples tightly. Prefer 2-4 exemplars that teach distinct shapes over citation density.
+- Prefer workflow-path citations plus step label/tool name when line numbers are brittle because cleaning/conversion output changes. Use exact line ranges only when they clarify a stable snippet.
 - Prefer concrete prescriptive language where the corpus justifies it: “set `one_header: true` when...” not “consider headers.”
 - Avoid speculative capabilities. No IWC exemplar means no pattern page.
+
+## Cohesion pass
+
+Before reporting back, reread the drafted page against its 1-3 nearest siblings and fix drift:
+
+- Title prefix and slug family should feel intentional.
+- State the boundary against close siblings in the body, not only `See also`.
+- For conceptual workflow shapes, label snippets as conceptual. For observed gxformat2, cite the exemplar and avoid simplifying silently.
+- Keep membership sync, order sync, relabeling, and structural reshape pages distinct when working with collection identifiers.
 
 ## Validation
 
