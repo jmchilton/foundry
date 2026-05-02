@@ -8,6 +8,7 @@ export interface SummarizeNextflowOptions {
   out?: string;
   withNextflow: boolean;
   fetchTestData: boolean;
+  testDataDir?: string;
   validate: boolean;
 }
 
@@ -31,5 +32,6 @@ export async function buildSummary(
     profile: options.profile,
     withNextflow: options.withNextflow,
     fetchTestData: options.fetchTestData,
+    testDataDir: options.testDataDir,
   });
 }

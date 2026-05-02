@@ -513,7 +513,7 @@ export const summaryNextflowSchema = {
             "string",
             "null"
           ],
-          "description": "Repo-relative path when the fixture lives in-tree."
+          "description": "Repo-relative path when the fixture lives in-tree, or local filesystem path when the CLI fetched the remote fixture into a caller-provided test-data directory."
         },
         "url": {
           "type": [

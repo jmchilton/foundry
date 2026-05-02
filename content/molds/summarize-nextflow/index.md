@@ -8,8 +8,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-01
-revision: 4
+revised: 2026-05-02
+revision: 5
 ai_generated: true
 output_schemas:
   - "content/schemas/summary-nextflow.schema.json"
@@ -68,6 +68,7 @@ The Mold expects:
 - A **path or git URL** to the NF pipeline. Local clone is preferred; a git URL triggers a shallow clone the cast skill manages.
 - Optional **pin**: tag, branch, or commit SHA. Mirrors `SketchSource` semantics from gxy-sketches.
 - Optional **profile hint** (`test`, `test_full`, …) selecting which `conf/<profile>.config` to read for fixtures. Defaults to `test`.
+- Optional **test-data directory**. When provided with fixture fetching, remote samplesheets and referenced files are downloaded under that directory and their local paths are recorded in `test_fixtures.inputs[].path`.
 
 The Mold does **not** accept "summarize this single subworkflow" subset hints; whole-pipeline summary is the unit. Subset summarization is an open question — see Non-goals.
 
@@ -237,7 +238,9 @@ Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVe
 
 **`test_fixtures`** — read `conf/<profile>.config` (default `conf/test.config`) for `params.input` (samplesheet URL) and any other URL-shaped params. For nf-core pipelines, follow the samplesheet URL into the `nf-core/test-datasets` repo if a single fetch is enough to enumerate the file paths it references; otherwise emit the samplesheet URL alone as the input. The samplesheet URL may be a runtime concatenation (`params.pipelines_testdata_base_path + 'foo.csv'`); resolve at config-load semantics and record the resolved URL.
 
-Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field names verbatim. The `path` vs `url` rules from gxy-sketches' `TestDataRef` carry over; the "must be under `test_data/`" constraint does **not** — see [[GXY_SKETCHES_ALIGNMENT]] §1.
+When fixture fetching is enabled, hash each fetched remote file with SHA-1. When a test-data directory is provided, write the samplesheet and every referenced remote file under that directory using a deterministic URL-derived path and record that local filesystem path in `path` while preserving the original `url`.
+
+Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field names verbatim. The `path` vs `url` rules from gxy-sketches' `TestDataRef` carry over, with one extension: `path` may be the local fetched path for a remote URL. The "must be under `test_data/`" constraint does **not** — see [[GXY_SKETCHES_ALIGNMENT]] §1.
 
 **`nf_tests[]`** — enumerate every `tests/*.nf.test` file. Real pipelines have one .nf.test per test profile (bacass has 9). For each:
 
@@ -262,6 +265,7 @@ Validate the assembled object against `schemas/summary-nextflow.schema.json` bef
 
 ## Revision history
 
+- **rev 5 (2026-05-02)** — CLI package hardened against `nf-core/bacass` profile config expressions: resolves `params.pipelines_testdata_base_path + '...'`, fetches samplesheet-referenced remote files, hashes them, and optionally localizes them under `--test-data-dir` while preserving original URLs.
 - **rev 4 (2026-05-01)** — second cast against `nf-core/bacass @ 2.5.0` (33 processes, 9 nf-test files, 11 test profiles) exposed two patterns the first cast couldn't see: process aliasing via `include { X as Y }` (six distinct alias-rename patterns in bacass) and the per-test-file structure of nf-test fixtures. §4 grew the alias-sweep rule; §7 split into `test_fixtures` + `nf_tests[]` with structured snapshot extraction. Schema bumped to rev 3 in lockstep. Cast log: `content/log.md` second 2026-05-01 entry.
 - **rev 3 (2026-05-01)** — first cast against `nf-core/demo @ 1.1.0` exposed the gaps now folded into §1 (multi-workflow selection rule), §4 (verbatim directive capture, channel topics), §5 (ternary container resolver, file-path conda directives, Wave registry), §6 (utility-vs-pipeline subworkflow split, free-function calls). Schema bumped to rev 2 in lockstep — see `[[summary-nextflow]]`'s revision-2 section. Cast log: `content/log.md` 2026-05-01 entry.
 - **rev 2 (2026-04-30)** — substantive body added; output schema declared.
@@ -276,7 +280,7 @@ The procedure assumes — and the cast skill must surface in `warnings[]` when r
 - **Channel shapes are strings, not structured types.** `"tuple(meta, [path,path])"` is enough for downstream Molds to reason about; structured channel typing is a research project. Downstream Molds that need structure must parse the string.
 - **Operator chains are summarized, not executed.** The LLM reconciliation pass is best-effort. Workflows with deeply nested closures (`map { ... }` with substantial Groovy logic) may produce edges flagged with low confidence in `notes`.
 - **`include` aliasing is followed one level.** `include { FASTP as TRIM_PROC } from '...'` resolves to `FASTP` in `processes[].name` and the alias is recorded in the call graph. Multi-level aliasing chains are not chased.
-- **Test-fixture URLs are not fetched for content validation.** The Mold records URL, role, filetype, and (when present) expected SHA-1; it does not download files to verify they exist.
+- **Test-fixture fetching is bounded.** The CLI fetches selected-profile URL params and direct remote URLs discovered in fetched samplesheets. It does not recursively crawl archives or arbitrary generated paths.
 
 ## Non-goals
 

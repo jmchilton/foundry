@@ -21,6 +21,7 @@ program
   .option("--out <path>", "Write JSON to this path instead of stdout")
   .option("--no-with-nextflow", "Disable Nextflow shell-out; static parse only (default: enabled)")
   .option("--fetch-test-data", "Resolve and hash referenced test data", false)
+  .option("--test-data-dir <path>", "Write fetched test data under this directory")
   .option("--no-validate", "Skip schema validation of the emitted summary (default: enabled)")
   .action(async (pathOrUrl: string, options: SummarizeNextflowOptions) => {
     try {
