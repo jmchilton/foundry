@@ -25,7 +25,7 @@ references:
     ref: "[[component-nextflow-pipeline-anatomy]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology."
     trigger: "When walking pipeline structure or resolving process aliases and channel flow."
@@ -34,7 +34,7 @@ references:
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence."
     trigger: "When extracting tools, versions, containers, conda directives, or environment equivalences."
@@ -43,7 +43,7 @@ references:
     ref: "[[component-nextflow-testing]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: hypothesis
     purpose: "Extract nf-test files, snapshot fixtures, test profiles, and Nextflow test-data conventions."
     trigger: "When filling test_fixtures or nf_tests sections of the summary."
