@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-01
-revised: 2026-05-01
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 related_notes:
   - "[[galaxy-collection-tools]]"
@@ -15,6 +15,9 @@ related_notes:
   - "[[galaxy-apply-rules-dsl]]"
   - "[[iwc-tabular-operations-survey]]"
   - "[[iwc-shortcuts-anti-patterns]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
+  - "[[nextflow-operators-to-galaxy-collection-recipes]]"
+  - "[[iwc-nearest-exemplar-selection]]"
 summary: "Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over."
 ---
 

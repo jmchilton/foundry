@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 summary: "Triage failing Galaxy run outputs; classify failure modes; propose fixes."
 references:
@@ -37,6 +37,14 @@ references:
     evidence: corpus-observed
     purpose: "Diagnose collection shape, mapping, reduction, and element-identifier mismatches in failed Galaxy runs."
     trigger: "When a failing output is a collection, a mapped output, or an unexpectedly nested/flattened structure."
+  - kind: research
+    ref: "[[nextflow-operators-to-galaxy-collection-recipes]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Trace collection output failures back to possibly lossy operator translations."
+    trigger: "When debugging wrong nesting, missing elements, branch merges, bad joins, or gather/reduction mismatches."
 ---
 # debug-galaxy-workflow-output
 

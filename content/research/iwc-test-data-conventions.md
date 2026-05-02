@@ -6,14 +6,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 related_notes:
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-asserts-idioms]]"
   - "[[implement-galaxy-workflow-test]]"
   - "[[tests-format]]"
+  - "[[iwc-nearest-exemplar-selection]]"
 summary: "How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas."
 ---
 

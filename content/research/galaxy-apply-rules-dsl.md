@@ -7,12 +7,14 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-02
+revision: 2
 ai_generated: true
 related_notes:
   - "[[galaxy-collection-tools]]"
   - "[[galaxy-collection-semantics]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
+  - "[[nextflow-operators-to-galaxy-collection-recipes]]"
 sources:
   - "https://github.com/jmchilton/galaxy-agentic-collection-transform (initial research seed)"
   - "https://github.com/galaxyproject/galaxy/blob/main/lib/galaxy/util/rules_dsl.py"

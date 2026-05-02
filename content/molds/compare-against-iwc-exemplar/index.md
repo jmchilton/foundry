@@ -13,6 +13,23 @@ revision: 2
 ai_generated: true
 summary: "Find nearest IWC exemplar(s) and surface a structural diff against a draft."
 references:
+  - kind: research
+    ref: "[[iwc-nearest-exemplar-selection]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Rank IWC exemplar candidates by domain, collection topology, tool families, DAG motifs, outputs, and tests."
+    trigger: "When selecting nearest IWC workflows for structural comparison against a Galaxy draft."
+  - kind: research
+    ref: "[[galaxy-data-flow-draft-contract]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Compare against the draft's abstract intent without turning exemplar comparison into tool resolution."
+    trigger: "When deciding whether to compare abstract data-flow, gxformat2 skeleton structure, or concrete implementation details."
+    verification: "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata."
   - kind: pattern
     ref: "[[galaxy-collection-patterns]]"
     used_at: runtime

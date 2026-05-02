@@ -66,6 +66,8 @@ make fixtures-clean    # remove generated fixture dirs
 
 Before launching or acting as a research subagent that needs corpus evidence, check whether the needed generated dirs exist. If they are missing, use the top-level fixture targets above. If you cannot materialize them, stop and report the missing target instead of inventing evidence.
 
+When launching research subagents, ask for evidence quality explicitly. Reports should separate corpus-observed claims, architectural or design inferences, external-doc claims, and speculative or low-confidence claims. Do not let plausible mappings stand as corpus evidence unless they cite fixtures or existing Foundry notes.
+
 For IWC survey work, prefer `make fixtures-iwc fixtures-skeletons` before mining `$IWC_FORMAT2` or `$IWC_SKELETONS`. For Nextflow example work, prefer `make fixtures-nextflow` before reading `workflow-fixtures/pipelines/`.
 
 ## Package layout

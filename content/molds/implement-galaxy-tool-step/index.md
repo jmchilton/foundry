@@ -22,6 +22,22 @@ references:
     purpose: "Connect concrete Galaxy tool inputs/outputs while preserving collection mapping and reduction semantics."
     trigger: "When implementing a step with data_collection inputs, mapped outputs, reductions, or nested collection wiring."
   - kind: research
+    ref: "[[nextflow-to-galaxy-channel-shape-mapping]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Check whether a concrete tool input/output can preserve the intended source-derived Galaxy collection shape."
+    trigger: "When implementing concrete steps for source-derived File/list/paired/list:paired/list:list inputs or outputs."
+  - kind: research
+    ref: "[[nextflow-operators-to-galaxy-collection-recipes]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Turn operator-derived abstract transforms into concrete Galaxy wiring, collection operations, or review requests."
+    trigger: "When a concrete step implements behavior traced to map, join, groupTuple, branch, mix, combine, or multiMap."
+  - kind: research
     ref: "[[galaxy-collection-tools]]"
     used_at: runtime
     load: on-demand
