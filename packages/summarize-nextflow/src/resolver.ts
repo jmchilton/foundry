@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve } from "node:path";
+import YAML from "yaml";
 
 interface Summary {
   source: Record<string, unknown>;
@@ -101,6 +102,7 @@ export async function resolveNextflowSummary(
   const processes = discoverProcessFiles(pipelineRoot).map((path) =>
     parseProcessFile(pipelineRoot, path),
   );
+  const aliases = discoverProcessAliases(pipelineRoot);
   const tools = buildTools(pipelineRoot, processes);
 
   const summary: Summary = {
@@ -120,6 +122,7 @@ export async function resolveNextflowSummary(
     tools,
     processes: processes.map((process) => ({
       ...process,
+      aliases: aliases.get(process.name) ?? [],
       tool:
         tools.find((tool) => process.name.toLowerCase().includes(tool.name))?.name ?? process.tool,
     })),
@@ -287,6 +290,30 @@ function parseProcessFile(pipelineRoot: string, path: string): Process {
   };
 }
 
+function discoverProcessAliases(pipelineRoot: string): Map<string, string[]> {
+  const aliases = new Map<string, Set<string>>();
+  for (const path of walk(pipelineRoot).filter((candidate) => candidate.endsWith(".nf"))) {
+    for (const include of parseIncludeItems(readText(path))) {
+      if (!include.alias || include.alias === include.name) continue;
+      const existing = aliases.get(include.name) ?? new Set<string>();
+      existing.add(include.alias);
+      aliases.set(include.name, existing);
+    }
+  }
+  return new Map([...aliases.entries()].map(([name, values]) => [name, [...values].sort()]));
+}
+
+function parseIncludeItems(text: string): { name: string; alias: string | null }[] {
+  const items: { name: string; alias: string | null }[] = [];
+  for (const match of text.matchAll(/include\s*\{([^}]+)\}\s*from\s*['"][^'"]+['"]/gu)) {
+    for (const item of match[1]!.split(";")) {
+      const include = /^\s*([A-Za-z0-9_]+)(?:\s+as\s+([A-Za-z0-9_]+))?\s*$/u.exec(item);
+      if (include) items.push({ name: include[1]!, alias: include[2] ?? null });
+    }
+  }
+  return items;
+}
+
 function normalizeDirective(value: string | null): string | null {
   if (!value) return null;
   return value.replace(/\s+/gu, " ").trim();
@@ -325,31 +352,49 @@ function buildTools(pipelineRoot: string, processes: Process[]): Tool[] {
   const tools = new Map<string, Tool>();
   for (const process of processes) {
     const envPath = join(pipelineRoot, dirname(process.module_path), "environment.yml");
-    const bioconda = existsSync(envPath)
-      ? matchOne(readText(envPath), /-\s*(bioconda::([A-Za-z0-9_.-]+)=([^\s]+))/u)
-      : null;
-    const name = bioconda ? matchOne(bioconda, /bioconda::([A-Za-z0-9_.-]+)=/u) : null;
-    const version = bioconda ? matchOne(bioconda, /=([^\s]+)/u) : null;
-    if (!name || !version) continue;
     const containerStrings = [...(process.container ?? "").matchAll(/'([^']+)'/gu)]
       .map((match) => match[1]!)
       .filter((value) => value.includes(":") || value.includes("/"));
-    tools.set(name, {
-      name,
-      version,
-      biocontainer: containerStrings.find((value) => value.includes("biocontainers/")) ?? null,
-      bioconda,
-      docker: containerStrings.find((value) => !isKnownContainer(value)) ?? null,
-      singularity:
-        containerStrings.find(
-          (value) =>
-            value.includes("depot.galaxyproject.org/singularity") ||
-            value.includes("community-cr-prod.seqera.io"),
-        ) ?? null,
-      wave: containerStrings.find((value) => value.includes("community.wave.seqera.io")) ?? null,
-    });
+    for (const dependency of existsSync(envPath)
+      ? parseBiocondaDependencies(readText(envPath))
+      : []) {
+      tools.set(dependency.name, {
+        name: dependency.name,
+        version: dependency.version,
+        biocontainer: containerStrings.find((value) => value.includes("biocontainers/")) ?? null,
+        bioconda: dependency.spec,
+        docker: containerStrings.find((value) => !isKnownContainer(value)) ?? null,
+        singularity:
+          containerStrings.find(
+            (value) =>
+              value.includes("depot.galaxyproject.org/singularity") ||
+              value.includes("community-cr-prod.seqera.io"),
+          ) ?? null,
+        wave: containerStrings.find((value) => value.includes("community.wave.seqera.io")) ?? null,
+      });
+    }
   }
   return [...tools.values()];
+}
+
+function parseBiocondaDependencies(
+  text: string,
+): { name: string; version: string; spec: string }[] {
+  const data = YAML.parse(text) as { dependencies?: unknown[] } | null;
+  return (data?.dependencies ?? [])
+    .filter((dependency): dependency is string => typeof dependency === "string")
+    .map(parseBiocondaDependency)
+    .filter((dependency): dependency is { name: string; version: string; spec: string } =>
+      Boolean(dependency),
+    );
+}
+
+function parseBiocondaDependency(
+  spec: string,
+): { name: string; version: string; spec: string } | null {
+  const match = /^bioconda::([A-Za-z0-9_.-]+)(?:=([^=\s]+))?/u.exec(spec);
+  if (!match) return null;
+  return { name: match[1]!, version: match[2] ?? "unknown", spec };
 }
 
 function isKnownContainer(value: string): boolean {

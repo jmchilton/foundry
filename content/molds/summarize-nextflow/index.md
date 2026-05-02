@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-02
-revision: 5
+revision: 7
 ai_generated: true
 output_schemas:
   - "content/schemas/summary-nextflow.schema.json"
@@ -216,7 +216,7 @@ Walk per-process `container` and `conda` directives. **Container directives are 
   - `community.wave.seqera.io/library/<name>:<version>--<digest>` or `https://community-cr-prod.seqera.io/.../sha256/<digest>/data` → `tools[].wave`.
   - Anything else → `tools[].docker`.
 
-**Conda directives are usually file references** to `${moduleDir}/environment.yml`; read the file and extract its `dependencies:` list. When the list contains a single `bioconda::<name>=<version>` entry, that string becomes `tools[].bioconda`. Legacy literal-string directives (`conda "bioconda::<name>=<version>"`) feed the same field.
+**Conda directives are usually file references** to `${moduleDir}/environment.yml`; read the file and extract its `dependencies:` list. Each `bioconda::<name>=<version>` entry becomes a `tools[]` entry with `tools[].bioconda` set to the original dependency string. Multi-tool environments are common (`minimap2` + `samtools` + `htslib`, `racon` + `multiqc`); keep every Bioconda dependency rather than selecting the first. Legacy literal-string directives (`conda "bioconda::<name>=<version>"`) feed the same field.
 
 Tool name and version are typically derivable from any of the resolved fields. Deduplicate by `(name, version)` across processes; one entry per tool. `processes[].tool` is a foreign key into `tools[].name`. This block is the bridge to `[[author-galaxy-tool-wrapper]]` — it consumes container/conda info to translate into Galaxy `<requirements>`.
 
@@ -265,6 +265,8 @@ Validate the assembled object against `schemas/summary-nextflow.schema.json` bef
 
 ## Revision history
 
+- **rev 7 (2026-05-02)** — CLI package now sweeps `include { X as Y } from ...` statements across workflow and subworkflow files to populate `processes[].aliases`, tested against bacass repeated imports (`MINIMAP2_ALIGN`, `FASTQC`).
+- **rev 6 (2026-05-02)** — CLI package now parses multi-dependency module `environment.yml` files into separate Bioconda-backed `tools[]` entries, tested against bacass modules such as `minimap2/align` and `samtools/sort`.
 - **rev 5 (2026-05-02)** — CLI package hardened against `nf-core/bacass` profile config expressions: resolves `params.pipelines_testdata_base_path + '...'`, fetches samplesheet-referenced remote files, hashes them, and optionally localizes them under `--test-data-dir` while preserving original URLs.
 - **rev 4 (2026-05-01)** — second cast against `nf-core/bacass @ 2.5.0` (33 processes, 9 nf-test files, 11 test profiles) exposed two patterns the first cast couldn't see: process aliasing via `include { X as Y }` (six distinct alias-rename patterns in bacass) and the per-test-file structure of nf-test fixtures. §4 grew the alias-sweep rule; §7 split into `test_fixtures` + `nf_tests[]` with structured snapshot extraction. Schema bumped to rev 3 in lockstep. Cast log: `content/log.md` second 2026-05-01 entry.
 - **rev 3 (2026-05-01)** — first cast against `nf-core/demo @ 1.1.0` exposed the gaps now folded into §1 (multi-workflow selection rule), §4 (verbatim directive capture, channel topics), §5 (ternary container resolver, file-path conda directives, Wave registry), §6 (utility-vs-pipeline subworkflow split, free-function calls). Schema bumped to rev 2 in lockstep — see `[[summary-nextflow]]`'s revision-2 section. Cast log: `content/log.md` 2026-05-01 entry.
