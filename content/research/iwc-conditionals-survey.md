@@ -7,11 +7,17 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 1
+revision: 2
 ai_generated: true
 related_notes:
   - "[[iwc-transformations-survey]]"
   - "[[iwc-shortcuts-anti-patterns]]"
+related_patterns:
+  - "[[galaxy-conditionals-patterns]]"
+  - "[[conditional-run-optional-step]]"
+  - "[[conditional-route-between-alternative-outputs]]"
+  - "[[conditional-gate-on-nonempty-result]]"
+  - "[[conditional-transform-or-pass-through]]"
 summary: "Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection."
 ---
 
@@ -149,6 +155,10 @@ Evidence:
 
 Call: **keep**. This is distinct from generic optional branching because the boolean is computed from data shape/content.
 
+User story: a generated Galaxy workflow needs to skip optional reporting/export steps when an upstream dataset or collection is empty. The corpus-backed MGnify recipe proves the shape by turning collection membership into a boolean through `collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file`, then using that boolean as `inputs.when`. This is structurally useful but clunky: it is a four-step shim for one boolean, so the pattern page should present it as verified IWC precedent, not necessarily the preferred authoring target.
+
+TODO: revisit this candidate after adding a small verified-pattern workflow that tests the non-empty gate directly. If a shorter Galaxy-native `when` expression or expression-tool boolean shim validates cleanly, lead with the smaller verified pattern and keep the MGnify shape as corpus-observed fallback evidence.
+
 ### Candidate D: `conditional-transform-or-pass-through`
 
 Scope: optionally transform an input, then choose transformed output if present or original input otherwise.
@@ -158,7 +168,7 @@ Evidence:
 - Optional haplotype suffixing then fallback to original haplotypes: `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:338-479`.
 - Optional masking action report then fallback to original report: `$IWC_FORMAT2/VGP-assembly-v2/Assembly-decontamination-VGP9/Assembly-decontamination-VGP9.gxwf.yml:243-409`.
 
-Call: **merge or keep**. Merge into Candidate B if the pattern hierarchy wants one `pick_value` route page; keep separately if pass-through is common enough to warrant a named recipe.
+Call: **keep separately for now**. It shares `pick_value` with Candidate B, but the authoring decision is different: Candidate B routes among peer alternatives, while this recipe preserves one original value unless an optional transform runs. Merge later only if the page proves too thin after use.
 
 ### Candidate E: `conditional-filter-null-outputs`
 
@@ -180,10 +190,10 @@ Call: **merge** into the collection-cleanup pattern family; do not create a cond
 
 1. Should conditionals get a MOC page (`galaxy-conditionals-patterns.md`) now, or wait until at least two leaf pages are authored?
 
-2. Should `conditional-transform-or-pass-through` stay separate from `conditional-route-between-alternative-outputs`, or should both live on one route-with-`pick_value` page?
+2. Answered for now: keep `conditional-transform-or-pass-through` separate from `conditional-route-between-alternative-outputs`. The boundary is "same value optionally modified" vs "peer alternatives routed to one output". Revisit only if the separate page proves too thin.
 
-3. Should `conditional-gate-on-nonempty-result` recommend the MGnify `collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file` recipe as-is, or flag it as corpus-backed but clunky and prefer a smaller boolean shim if one exists?
+3. Verification TODO: add a small verified-pattern workflow for `conditional-gate-on-nonempty-result` and use it to decide whether a shorter Galaxy-native `when` expression or expression-tool boolean shim should supersede the MGnify `collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file` recipe as the lead recommendation.
 
-4. Should the anti-pattern note add `__FILTER_NULL__` as "catalog capability, no IWC uptake; do not lead with it", or is a survey drop call enough?
+4. No. Do not add `__FILTER_NULL__` to the anti-pattern note from zero uptake alone. Lack of uptake does not make a Galaxy feature an anti-pattern; users can be slow to adopt newer or esoteric features. Keep the survey call as "catalog capability, no IWC-backed pattern candidate" unless separate evidence shows a concrete reason not to endorse it.
 
 5. Does the Foundry need a background reference note for Galaxy `when:` syntax and nullable downstream behavior before leaf pattern pages are useful?
