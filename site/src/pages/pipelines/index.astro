@@ -7,14 +7,34 @@ const all = await getCollection('content');
 const pipelines = all
   .filter(n => n.data.type === 'pipeline' && n.data.status !== 'archived')
   .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
+const totalPhases = pipelines.reduce((sum, p) => sum + phaseCount((p.data as any).phases), 0);
 
 function phaseCount(phases: unknown): number {
   return Array.isArray(phases) ? phases.length : 0;
 }
 ---
 <Base title="Pipelines">
-  <h1 class="mb-4 text-2xl font-bold">Pipelines <span class="text-sm font-normal text-(--color-text-muted)">({pipelines.length})</span></h1>
-  <p class="mb-6 text-(--color-text-secondary)">Ordered Mold sequences composing a harness journey.</p>
+  <section class="page-hero bg-grain" aria-labelledby="pipelines-heading">
+    <span class="eyebrow mb-3">Harness Pipelines</span>
+    <div class="page-hero-grid">
+      <div>
+        <h1 id="pipelines-heading" class="page-title text-balance">Ordered Mold sequences.</h1>
+        <p class="page-lede text-pretty">
+          Pipelines compose Molds into harness journeys and make the Foundry navigable from source to target.
+        </p>
+      </div>
+      <dl class="page-stats" aria-label="Pipeline stats">
+        <div>
+          <dt>Total</dt>
+          <dd>{pipelines.length}</dd>
+        </div>
+        <div>
+          <dt>Phases</dt>
+          <dd>{totalPhases}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
 
   <table class="data-table">
     <thead><tr><th>Pipeline</th><th>Summary</th><th>Phases</th><th>Status</th></tr></thead>
