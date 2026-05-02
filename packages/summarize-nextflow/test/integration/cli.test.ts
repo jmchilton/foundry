@@ -117,6 +117,112 @@ profiles { test {} }
       globalThis.fetch = originalFetch;
     }
   });
+
+  itIfBuilt("extracts all bioconda dependencies from module environments", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
+    const moduleDir = join(root, "modules", "local", "align");
+    mkdirSync(moduleDir, { recursive: true });
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'nf-core/synthetic' }
+profiles { test {} }
+`,
+    );
+    writeFileSync(
+      join(moduleDir, "main.nf"),
+      `process MINIMAP2_ALIGN {
+  conda "\${moduleDir}/environment.yml"
+  input:
+  path reads
+  output:
+  path "*.bam", emit: bam
+  script:
+  """
+  minimap2 | samtools sort
+  """
+}
+`,
+    );
+    writeFileSync(
+      join(moduleDir, "environment.yml"),
+      `name: synthetic
+dependencies:
+  - bioconda::minimap2=2.24
+  - bioconda::samtools=1.18
+  - bioconda::htslib=1.18
+  - conda-forge::pigz=2.6
+`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    });
+    const validation = validateSummary(summary);
+    expect(validation.valid).toBe(true);
+
+    const tools = (summary as { tools: { name: string; version: string; bioconda: string }[] })
+      .tools;
+    expect(tools.map((tool) => tool.name)).toEqual(
+      expect.arrayContaining(["minimap2", "samtools", "htslib"]),
+    );
+    expect(tools.find((tool) => tool.name === "htslib")?.bioconda).toBe("bioconda::htslib=1.18");
+    expect(tools.some((tool) => tool.name === "pigz")).toBe(false);
+  });
+
+  itIfBuilt("extracts process aliases from include statements", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
+    const moduleDir = join(root, "modules", "local", "align");
+    mkdirSync(join(root, "workflows"), { recursive: true });
+    mkdirSync(moduleDir, { recursive: true });
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'nf-core/synthetic' }
+profiles { test {} }
+`,
+    );
+    writeFileSync(
+      join(root, "workflows", "synthetic.nf"),
+      `include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS } from '../modules/local/align'
+include { MINIMAP2_ALIGN as MINIMAP2_POLISH } from '../modules/local/align'
+include { FASTQC } from '../modules/local/fastqc'
+`,
+    );
+    writeFileSync(
+      join(moduleDir, "main.nf"),
+      `process MINIMAP2_ALIGN {
+  output:
+  path "*.paf", emit: paf
+  script:
+  """
+  minimap2
+  """
+}
+`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    });
+    const validation = validateSummary(summary);
+    expect(validation.valid).toBe(true);
+
+    const process = (
+      summary as { processes: { name: string; aliases: string[] }[] }
+    ).processes.find((candidate) => candidate.name === "MINIMAP2_ALIGN");
+    expect(process?.aliases).toEqual(["MINIMAP2_CONSENSUS", "MINIMAP2_POLISH"]);
+  });
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
@@ -232,6 +338,38 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     expect(inputs.find((input) => input.role === "samplesheet")?.url).toBe(
       "https://raw.githubusercontent.com/nf-core/test-datasets/refs/heads/bacass/bacass_short.tsv",
     );
+  });
+
+  itIfBacassFixture("extracts multi-dependency bioconda tools from bacass modules", () => {
+    const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+    });
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    const validation = validateSummary(data);
+    expect(validation.valid).toBe(true);
+    expect(data.tools.map((tool: { name: string }) => tool.name)).toEqual(
+      expect.arrayContaining(["samtools", "htslib", "minimap2", "multiqc", "racon"]),
+    );
+    expect(data.tools.find((tool: { name: string }) => tool.name === "htslib")?.bioconda).toMatch(
+      /^bioconda::htslib=/u,
+    );
+  });
+
+  itIfBacassFixture("extracts repeated module aliases from bacass includes", () => {
+    const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+    });
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    const minimap2 = data.processes.find(
+      (process: { name: string }) => process.name === "MINIMAP2_ALIGN",
+    );
+    const fastqc = data.processes.find((process: { name: string }) => process.name === "FASTQC");
+    expect(minimap2.aliases).toEqual(["MINIMAP2_CONSENSUS", "MINIMAP2_POLISH"]);
+    expect(fastqc.aliases).toEqual(["FASTQC_RAW", "FASTQC_TRIM"]);
   });
 });
 
