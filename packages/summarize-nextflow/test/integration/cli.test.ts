@@ -381,6 +381,149 @@ workflow SYNTHETIC {
     expect(prep?.inputs).toHaveLength(1);
     expect(prep?.outputs).toHaveLength(1);
   });
+
+  itIfBuilt("emits valid JSON with warnings for off-template anonymous workflows", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-ad-hoc-nextflow-"));
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'example/ad-hoc' }
+profiles { test {} }
+`,
+    );
+    writeFileSync(
+      join(root, "main.nf"),
+      `process SAY_HELLO {
+  output:
+  path "hello.txt", emit: txt
+  script:
+  """
+  printf hello > hello.txt
+  """
+}
+
+workflow {
+  Channel.of('hello').set { ch_words }
+  SAY_HELLO(ch_words)
+}
+`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    });
+    const validation = validateSummary(summary);
+    expect(validation.valid).toBe(true);
+
+    const data = summary as { workflow: { name: string }; warnings: string[] };
+    expect(data.workflow.name).toBe("AD-HOC");
+    expect(data.warnings).toEqual(
+      expect.arrayContaining([
+        "no named workflow blocks found; summary uses manifest-derived workflow name",
+        "no module process files found under modules/; process extraction may be incomplete",
+      ]),
+    );
+  });
+
+  itIfBuilt("extracts operator channels and conditionals from workflow bodies", async () => {
+    const root = mkdtempSync(join(os.tmpdir(), "foundry-synthetic-nextflow-"));
+    mkdirSync(join(root, "modules", "local", "align"), { recursive: true });
+    mkdirSync(join(root, "modules", "local", "qc"), { recursive: true });
+    mkdirSync(join(root, "workflows"), { recursive: true });
+    writeFileSync(
+      join(root, "nextflow.config"),
+      `manifest { name = 'nf-core/synthetic' }
+profiles { test {} }
+`,
+    );
+    writeFileSync(
+      join(root, "modules", "local", "align", "main.nf"),
+      `process ALIGN { script: "align" }
+`,
+    );
+    writeFileSync(
+      join(root, "modules", "local", "qc", "main.nf"),
+      `process QC { script: "qc" }
+`,
+    );
+    writeFileSync(
+      join(root, "workflows", "synthetic.nf"),
+      `include { ALIGN } from '../modules/local/align'
+include { QC } from '../modules/local/qc'
+workflow SYNTHETIC {
+  take:
+  ch_reads
+  main:
+  ch_reads
+    .filter { meta, reads -> meta.keep }
+    .map { meta, reads -> tuple(meta, reads) }
+    .set { ch_filtered }
+  ch_filtered.join(ch_reference).set { ch_joined }
+  ch_joined.mix(ch_extra).set { ch_mixed }
+  ch_mixed.branch { meta, reads -> pass: true }.set { ch_branched }
+  if (params.run_qc) {
+    QC(ch_filtered)
+  } else {
+    ALIGN(ch_joined)
+  }
+  ALIGN(ch_branched.pass)
+}
+`,
+    );
+
+    const { buildSummary } = (await import("../../dist/index.js")) as {
+      buildSummary: typeof import("../../src/index.js").buildSummary;
+    };
+    const summary = await buildSummary(root, {
+      profile: "test",
+      withNextflow: false,
+      fetchTestData: false,
+      validate: false,
+    });
+    const validation = validateSummary(summary);
+    expect(validation.valid).toBe(true);
+
+    const data = summary as {
+      workflow: {
+        channels: { name: string; source: string; shape: string }[];
+        edges: { from: string; to: string; via: string[] }[];
+        conditionals: { guard: string; branch: string; affects: string[] }[];
+      };
+    };
+    expect(data.workflow.channels).toEqual(
+      expect.arrayContaining([
+        {
+          name: "ch_filtered",
+          source:
+            "ch_reads.filter { meta, reads -> meta.keep }.map { meta, reads -> tuple(meta, reads) }",
+          shape: "filter|map",
+        },
+        { name: "ch_joined", source: "ch_filtered.join(ch_reference)", shape: "join" },
+        { name: "ch_mixed", source: "ch_joined.mix(ch_extra)", shape: "mix" },
+        {
+          name: "ch_branched",
+          source: "ch_mixed.branch { meta, reads -> pass: true }",
+          shape: "branch",
+        },
+      ]),
+    );
+    expect(data.workflow.edges).toEqual(
+      expect.arrayContaining([
+        { from: "ch_filtered", to: "QC", via: [] },
+        { from: "ch_joined", to: "ALIGN", via: [] },
+        { from: "ch_branched.pass", to: "ALIGN", via: [] },
+      ]),
+    );
+    expect(data.workflow.conditionals).toEqual([
+      { guard: "params.run_qc", branch: "default", affects: ["QC"] },
+      { guard: "params.run_qc", branch: "alternate", affects: ["ALIGN"] },
+    ]);
+  });
 });
 
 describe("summarize-nextflow CLI — real pipeline tree (nf-core/demo)", () => {
@@ -559,6 +702,36 @@ describe("summarize-nextflow CLI — real pipeline tree (nf-core/bacass)", () =>
     expect(trim?.path).toBe("subworkflows/nf-core/fastq_trim_fastp_fastqc/main.nf");
     expect(trim?.kind).toBe("pipeline");
     expect(trim?.calls).toEqual(["FASTP", "FASTQC_RAW", "FASTQC_TRIM"]);
+  });
+
+  itIfBacassFixture("extracts bacass graph operators and conditionals", () => {
+    const r = spawnSync("node", [CLI, BACASS_PIPELINE, "--no-with-nextflow", "--no-validate"], {
+      encoding: "utf8",
+    });
+    expect(r.status).toBe(0);
+
+    const data = JSON.parse(r.stdout);
+    expect(data.workflow.channels).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "ch_shortreads_fastqs", shape: "branch" }),
+        expect.objectContaining({ name: "ch_shortreads_concat", shape: "mix" }),
+        expect.objectContaining({ name: "ch_for_assembly", shape: "dump|cross|map|dump" }),
+      ]),
+    );
+    expect(data.workflow.conditionals).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          guard: "params.assembly_type in ['short', 'hybrid']",
+          branch: "default",
+          affects: ["CAT_FASTQ_SHORT"],
+        }),
+        expect.objectContaining({
+          guard: "params.assembly_type != 'long'",
+          branch: "default",
+          affects: ["FASTQ_TRIM_FASTP_FASTQC"],
+        }),
+      ]),
+    );
   });
 });
 

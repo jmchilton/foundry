@@ -11,7 +11,7 @@ interface Summary {
   tools: Tool[];
   processes: Process[];
   subworkflows: Subworkflow[];
-  workflow: { name: string; channels: Channel[]; edges: Edge[]; conditionals: unknown[] };
+  workflow: { name: string; channels: Channel[]; edges: Edge[]; conditionals: Conditional[] };
   test_fixtures: { profile: string; inputs: TestDataRef[]; outputs: unknown[] };
   nf_tests: NfTest[];
   warnings: string[];
@@ -40,6 +40,12 @@ interface Edge {
   from: string;
   to: string;
   via?: string[];
+}
+
+interface Conditional {
+  guard: string;
+  branch: "default" | "alternate";
+  affects: string[];
 }
 
 interface Param {
@@ -134,6 +140,7 @@ export async function resolveNextflowSummary(
     processes.map((process) => process.name),
   );
   const primaryWorkflow = selectPrimaryWorkflow(workflows);
+  const warnings = buildWarnings(processes, workflows);
 
   const summary: Summary = {
     source: {
@@ -163,16 +170,31 @@ export async function resolveNextflowSummary(
       name: primaryWorkflow?.name ?? workflowName.split("/").at(-1)?.toUpperCase() ?? "WORKFLOW",
       channels: primaryWorkflow ? parseWorkflowChannels(primaryWorkflow.body) : [],
       edges: primaryWorkflow ? parseWorkflowEdges(primaryWorkflow.body, primaryWorkflow.calls) : [],
-      conditionals: [],
+      conditionals: primaryWorkflow
+        ? parseWorkflowConditionals(primaryWorkflow.body, primaryWorkflow.calls)
+        : [],
     },
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
     nf_tests: parseNfTests(pipelineRoot),
-    warnings: ["workflow graph extraction is intentionally minimal in resolver v0"],
+    warnings,
   };
 
   if (options.withNextflow) mergeNextflowInspect(summary, pipelineRoot, options.profile);
   if (options.fetchTestData) await fetchTestData(summary, options.testDataDir);
   return summary;
+}
+
+function buildWarnings(processes: Process[], workflows: ParsedWorkflow[]): string[] {
+  const warnings = ["workflow graph extraction is intentionally partial in resolver v1"];
+  if (processes.length === 0) {
+    warnings.push(
+      "no module process files found under modules/; process extraction may be incomplete",
+    );
+  }
+  if (workflows.length === 0) {
+    warnings.push("no named workflow blocks found; summary uses manifest-derived workflow name");
+  }
+  return warnings;
 }
 
 function readText(path: string): string {
@@ -400,23 +422,98 @@ function parseWorkflowCalls(body: string, knownNames: Set<string>): string[] {
 
 function parseWorkflowChannels(body: string): Channel[] {
   const channels = new Map<string, Channel>();
-  for (const match of body.matchAll(/^\s*(ch_[A-Za-z0-9_]+)\s*=\s*([^\n]+)/gmu)) {
-    channels.set(match[1]!, {
-      name: match[1]!,
-      source: match[2]!.trim(),
-      shape: "channel",
-    });
+  for (const assignment of extractChannelAssignments(body)) {
+    setPreferredChannel(channels, channelFromSource(assignment.name, assignment.source));
   }
-  for (const match of body.matchAll(
-    /([A-Za-z0-9_.()\s]+)\s*\.set\s*\{\s*(ch_[A-Za-z0-9_]+)\s*\}/gu,
-  )) {
-    channels.set(match[2]!, {
-      name: match[2]!,
-      source: match[1]!.replace(/\s+/gu, " ").trim(),
-      shape: "channel",
-    });
+  for (const setChain of extractSetChains(body)) {
+    setPreferredChannel(channels, channelFromSource(setChain.name, setChain.source));
   }
   return [...channels.values()].sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function setPreferredChannel(channels: Map<string, Channel>, candidate: Channel): void {
+  const existing = channels.get(candidate.name);
+  if (
+    !existing ||
+    parseOperators(candidate.source).length > parseOperators(existing.source).length
+  ) {
+    channels.set(candidate.name, candidate);
+  }
+}
+
+function extractChannelAssignments(body: string): { name: string; source: string }[] {
+  const assignments: { name: string; source: string }[] = [];
+  const lines = body.split("\n");
+  for (let index = 0; index < lines.length; index += 1) {
+    const start = /^\s*(ch_[A-Za-z0-9_]+)\s*=\s*(.+)$/u.exec(lines[index]!);
+    if (!start) continue;
+    const sourceLines = [start[2]!];
+    for (let next = index + 1; next < lines.length; next += 1) {
+      const line = lines[next]!;
+      if (!/^\s*\./u.test(line)) break;
+      sourceLines.push(line.trim());
+      index = next;
+    }
+    assignments.push({
+      name: start[1]!,
+      source: normalizeWorkflowExpression(sourceLines.join(" ")),
+    });
+  }
+  return assignments;
+}
+
+function extractSetChains(body: string): { name: string; source: string }[] {
+  const chains: { name: string; source: string }[] = [];
+  const lines = body.split("\n");
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!/^\s*(?:ch_|Channel\.)/u.test(lines[index]!)) continue;
+    const sourceLines: string[] = [];
+    for (let next = index; next < lines.length; next += 1) {
+      const line = lines[next]!;
+      if (
+        next > index &&
+        (/^\s*(?:take|main|emit):/u.test(line) ||
+          /^\s*(?:if|else|[A-Z][A-Z0-9_]+\s*\()/u.test(line))
+      ) {
+        break;
+      }
+      sourceLines.push(line.trim());
+      const setMatch = /\.set\s*\{\s*(ch_[A-Za-z0-9_]+)\s*\}/u.exec(line);
+      if (setMatch) {
+        const rawSource = sourceLines
+          .join(" ")
+          .replace(/\.set\s*\{\s*ch_[A-Za-z0-9_]+\s*\}.*/u, "");
+        chains.push({ name: setMatch[1]!, source: normalizeWorkflowExpression(rawSource) });
+        index = next;
+        break;
+      }
+      if (next - index > 80) break;
+    }
+  }
+  return chains;
+}
+
+function channelFromSource(name: string, source: string): Channel {
+  const operators = parseOperators(source);
+  return {
+    name,
+    source,
+    shape: operators.length > 0 ? operators.join("|") : "channel",
+  };
+}
+
+function parseOperators(source: string): string[] {
+  return [...source.matchAll(/\.(branch|cross|dump|filter|join|map|mix|multiMap)\b/gu)].map(
+    (match) => match[1]!,
+  );
+}
+
+function normalizeWorkflowExpression(source: string): string {
+  return source
+    .replace(/\s+/gu, " ")
+    .replace(/\s+\./gu, ".")
+    .replace(/\s*,\s*/gu, ", ")
+    .trim();
 }
 
 function parseWorkflowEdges(body: string, calls: string[]): Edge[] {
@@ -429,6 +526,42 @@ function parseWorkflowEdges(body: string, calls: string[]): Edge[] {
     }
   }
   return edges;
+}
+
+function parseWorkflowConditionals(body: string, calls: string[]): Conditional[] {
+  const conditionals: Conditional[] = [];
+  const callNames = new Set(calls);
+  for (const block of extractIfBlocks(body)) {
+    const defaultAffects = parseWorkflowCalls(block.defaultBody, callNames);
+    if (defaultAffects.length > 0) {
+      conditionals.push({ guard: block.guard, branch: "default", affects: defaultAffects });
+    }
+    const alternateAffects = block.alternateBody
+      ? parseWorkflowCalls(block.alternateBody, callNames)
+      : [];
+    if (alternateAffects.length > 0) {
+      conditionals.push({ guard: block.guard, branch: "alternate", affects: alternateAffects });
+    }
+  }
+  return conditionals;
+}
+
+function extractIfBlocks(
+  body: string,
+): { guard: string; defaultBody: string; alternateBody: string | null }[] {
+  const blocks: { guard: string; defaultBody: string; alternateBody: string | null }[] = [];
+  for (const match of body.matchAll(/\bif\s*\(([^\n)]+)\)\s*\{/gu)) {
+    const openIndex = match.index + match[0].lastIndexOf("{");
+    const defaultBody = extractBlockAt(body, openIndex);
+    if (defaultBody === null) continue;
+    const closeIndex = openIndex + defaultBody.length + 1;
+    const elseMatch = /^\s*else\s*\{/u.exec(body.slice(closeIndex + 1));
+    const alternateBody = elseMatch
+      ? extractBlockAt(body, closeIndex + 1 + elseMatch[0].lastIndexOf("{"))
+      : null;
+    blocks.push({ guard: normalizeWorkflowExpression(match[1]!), defaultBody, alternateBody });
+  }
+  return blocks;
 }
 
 function extractCallInvocations(body: string): { name: string; arguments: string[] }[] {
