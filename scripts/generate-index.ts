@@ -8,6 +8,7 @@ const TYPE_LABELS: Record<string, string> = {
   pipeline: "Pipelines",
   mold: "Molds",
   pattern: "Patterns",
+  "source-pattern": "Source Patterns",
   "cli-command": "CLI Commands",
   schema: "Schemas",
   "research/component": "Component Research",

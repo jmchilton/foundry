@@ -10,7 +10,7 @@ required: [type, tags, status, created, revised, revision, ai_generated, summary
 properties:
   type:
     type: string
-    enum: [mold, pattern, cli-command, pipeline, research, schema]
+    enum: [mold, pattern, source-pattern, cli-command, pipeline, research, schema]
   tags:
     type: array
     items:
@@ -52,6 +52,20 @@ properties:
   sources:
     type: array
     minItems: 1
+    items:
+      type: string
+      minLength: 1
+  source_pattern_kind:
+    type: string
+    enum: [moc, channel-shape, operator, lifecycle, review-trigger]
+  implemented_by_patterns:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      pattern: "^\\[\\[.+\\]\\]$"
+  review_triggers:
+    type: array
     items:
       type: string
       minLength: 1
@@ -122,7 +136,7 @@ properties:
     enum: [source-specific, target-specific, tool-specific, generic]
   source:
     type: string
-    enum: [paper, nextflow, cwl]
+    enum: [paper, nextflow, cwl, snakemake]
   target:
     type: string
     enum: [galaxy, cwl, web, generic]
@@ -267,6 +281,14 @@ allOf:
       required: [type]
     then:
       required: [title, pattern_kind, evidence]
+
+  # source-pattern requires source + target + source pattern metadata
+  - if:
+      properties:
+        type: { const: source-pattern }
+      required: [type]
+    then:
+      required: [title, source, target, source_pattern_kind, implemented_by_patterns]
 
   # cli-command requires tool + command
   - if:

@@ -28,6 +28,7 @@ interface CliArgs {
 const TYPE_TAG_MAP: Record<string, string> = {
   "mold|": "mold",
   "pattern|": "pattern",
+  "source-pattern|": "source-pattern",
   "cli-command|": "cli-command",
   "pipeline|": "pipeline",
   "research|component": "research/component",
@@ -42,6 +43,7 @@ const WIKI_LINK_FIELDS: Record<string, "single" | "array"> = {
   related_notes: "array",
   related_patterns: "array",
   related_molds: "array",
+  implemented_by_patterns: "array",
   patterns: "array",
   cli_commands: "array",
   prompts: "array",
@@ -240,6 +242,39 @@ function validateMoldRefs(
       typedRefs.forEach((ref, i) => {
         validateTypedReference(ref, i, f.path, contentRoot, slugMap, metaByPath, findings);
       });
+    }
+  }
+  return findings;
+}
+
+function validateSourcePatternRefs(
+  files: FileMeta[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    if (f.meta.type !== "source-pattern") continue;
+    const refs = f.meta.implemented_by_patterns;
+    if (!Array.isArray(refs)) continue;
+    for (const wl of refs) {
+      const tp = resolveWikiLink(wl, slugMap);
+      if (!tp) {
+        findings.push({
+          path: f.path,
+          severity: "error",
+          message: `implemented_by_patterns: wiki link ${wl} did not resolve`,
+        });
+        continue;
+      }
+      const targetType = metaByPath.get(tp)?.type;
+      if (targetType !== "pattern") {
+        findings.push({
+          path: f.path,
+          severity: "error",
+          message: `implemented_by_patterns: wiki link ${wl} resolves to type=${targetType ?? "(none)"}, expected pattern`,
+        });
+      }
     }
   }
   return findings;
@@ -776,6 +811,7 @@ export function validateDirectory(opts: ValidateOptions): {
   const crossFindings: CrossFileFinding[] = [];
   crossFindings.push(...validateBidirectionalRelatedNotes(validFiles, slugMap));
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
+  crossFindings.push(...validateSourcePatternRefs(validFiles, slugMap, metaByPath));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateMoldSourceLayout(opts.directory, validFiles.filter((f) => f.meta.type === "mold")));
   crossFindings.push(...validateCliCommandDocs(validFiles));

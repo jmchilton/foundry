@@ -93,7 +93,7 @@ const moldSchema = z.object({
   type: z.literal('mold'),
   name: z.string(),
   axis: z.enum(['source-specific', 'target-specific', 'tool-specific', 'generic']),
-  source: z.enum(['paper', 'nextflow', 'cwl']).optional(),
+  source: z.enum(['paper', 'nextflow', 'cwl', 'snakemake']).optional(),
   target: z.enum(['galaxy', 'cwl', 'web', 'generic']).optional(),
   tool: z.enum(['gxwf', 'planemo']).optional(),
   patterns: z.array(wikiLink).optional(),
@@ -107,6 +107,7 @@ const moldSchema = z.object({
 }).strict();
 
 const patternSchema = z.object({
+  ...baseFields,
   type: z.literal('pattern'),
   pattern_kind: z.enum(['leaf', 'moc']),
   evidence: z.enum(['corpus-observed', 'structurally-verified', 'corpus-and-verified', 'hypothesis']),
@@ -114,7 +115,17 @@ const patternSchema = z.object({
   parent_pattern: wikiLink.optional(),
   verification_paths: z.array(z.string()).optional(),
   iwc_exemplars: z.array(iwcExemplar).optional(),
+}).strict();
+
+const sourcePatternSchema = z.object({
   ...baseFields,
+  type: z.literal('source-pattern'),
+  title: z.string(),
+  source: z.enum(['nextflow', 'cwl', 'snakemake']),
+  target: z.enum(['galaxy', 'cwl', 'web', 'generic']),
+  source_pattern_kind: z.enum(['moc', 'channel-shape', 'operator', 'lifecycle', 'review-trigger']),
+  implemented_by_patterns: z.array(wikiLink).min(1),
+  review_triggers: z.array(z.string().min(1)).optional(),
 }).strict();
 
 const cliCommandSchema = z.object({
@@ -125,10 +136,10 @@ const cliCommandSchema = z.object({
 }).strict();
 
 const pipelineSchema = z.object({
+  ...baseFields,
   type: z.literal('pipeline'),
   title: z.string(),
   phases: z.array(phase).min(1),
-  ...baseFields,
 }).strict();
 
 const researchSchema = z.object({
@@ -139,18 +150,19 @@ const researchSchema = z.object({
 }).strict();
 
 const schemaNoteSchema = z.object({
+  ...baseFields,
   type: z.literal('schema'),
   name: z.string(),
   title: z.string(),
   package: z.string().optional(),
   upstream: z.string().optional(),
   package_export: z.string().optional(),
-  ...baseFields,
 }).strict();
 
 const noteSchema = z.discriminatedUnion('type', [
   moldSchema,
   patternSchema,
+  sourcePatternSchema,
   cliCommandSchema,
   pipelineSchema,
   researchSchema,
@@ -168,6 +180,7 @@ const content = defineCollection({
       'cli/**/*.md',
       'molds/**/index.md',
       'patterns/**/*.md',
+      'source-patterns/**/*.md',
       'pipelines/**/*.md',
       'research/**/*.md',
       'schemas/**/*.md',

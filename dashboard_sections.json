@@ -2,6 +2,7 @@
   { "label": "Pipelines", "tag": "pipeline" },
   { "label": "Molds", "tag": "mold" },
   { "label": "Patterns", "tag": "pattern" },
+  { "label": "Source Patterns", "tag": "source-pattern" },
   { "label": "CLI Commands", "tag": "cli-command" },
   { "label": "Schemas", "tag": "schema" },
   { "label": "Project Infrastructure Research", "tag": "research/infrastructure" },

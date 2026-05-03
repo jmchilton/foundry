@@ -84,6 +84,12 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-conditionals-patterns]] | Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns. | draft | 2026-05-02 | 1 |
 | [[galaxy-tabular-patterns]] | Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns. | draft | 2026-05-02 | 1 |
 
+## Source Patterns
+
+| Name | Summary | Status | Revised | Rev |
+| --- | --- | --- | --- | --- |
+| [[nextflow-patterns]] | Use this source-pattern map to route recurring Nextflow channel and operator idioms to Galaxy implementation patterns. | draft | 2026-05-03 | 1 |
+
 ## CLI Commands
 
 | Name | Summary | Status | Revised | Rev |

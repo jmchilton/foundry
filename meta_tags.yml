@@ -8,6 +8,8 @@ mold:
   description: "Mold note (source artifact for casting)"
 pattern:
   description: "Pattern reference page (Galaxy workflow construction patterns)"
+source-pattern:
+  description: "Source-system pattern page that maps an input workflow idiom to target implementation patterns"
 cli-command:
   description: "CLI command reference page (one note per command/subcommand)"
 pipeline:
@@ -35,6 +37,8 @@ source/nextflow:
   description: "Mold consumes Nextflow-shaped input"
 source/cwl:
   description: "Mold consumes CWL-shaped input"
+source/snakemake:
+  description: "Source-pattern or Mold consumes Snakemake-shaped input"
 target/galaxy:
   description: "Mold targets Galaxy"
 target/cwl:

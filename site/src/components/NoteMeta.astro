@@ -25,6 +25,7 @@ function resolveAll(arr: string[] | undefined) {
 const parentPattern = data.parent_pattern ? resolveWikiLink(data.parent_pattern, linkMap, base) : null;
 const relatedNotes = resolveAll(data.related_notes);
 const relatedPatterns = resolveAll(data.related_patterns);
+const implementedByPatterns = resolveAll(data.implemented_by_patterns);
 const relatedMolds = resolveAll(data.related_molds);
 const hasSources = data.sources && data.sources.length > 0;
 const hasAnything =
@@ -32,6 +33,7 @@ const hasAnything =
   parentPattern ||
   (showRevision && hasSources) ||
   relatedPatterns.length > 0 ||
+  implementedByPatterns.length > 0 ||
   relatedMolds.length > 0 ||
   relatedNotes.length > 0;
 ---
@@ -87,6 +89,22 @@ const hasAnything =
               ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
               : <span class="dangling">{l.label}</span>}
             {i < relatedPatterns.length - 1 ? ', ' : ''}
+          </>
+        ))}
+      </dd>
+    </div>
+  )}
+
+  {implementedByPatterns.length > 0 && (
+    <div class="meta-pair">
+      <dt>Implemented By</dt>
+      <dd>
+        {implementedByPatterns.map((l, i) => (
+          <>
+            {l.href
+              ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
+              : <span class="dangling">{l.label}</span>}
+            {i < implementedByPatterns.length - 1 ? ', ' : ''}
           </>
         ))}
       </dd>
