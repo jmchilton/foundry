@@ -1,0 +1,21 @@
+- doc: "True boolean runs optional step"
+  job:
+    input_text:
+      class: File
+      path: test-data/marker.txt
+      filetype: txt
+    run_optional: true
+  outputs:
+    optional_marker:
+      file: test-data/marker.txt
+
+- doc: "False boolean skips optional step"
+  job:
+    input_text:
+      class: File
+      path: test-data/marker.txt
+      filetype: txt
+    run_optional: false
+  outputs:
+    skipped_marker:
+      file: test-data/marker.txt

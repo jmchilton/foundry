@@ -1,0 +1,32 @@
+class: GalaxyWorkflow
+name: "Compose runtime text parameter"
+inputs:
+  - id: threshold
+    type: integer
+outputs:
+  - id: predicate
+    outputSource: compose_predicate/out1
+steps:
+  - id: compose_predicate
+    label: compose_predicate
+    tool_id: toolshed.g2.bx.psu.edu/repos/iuc/compose_text_param/compose_text_param/0.1.1
+    tool_version: 0.1.1
+    tool_shed_repository:
+      changeset_revision: e188c9826e0f
+      name: compose_text_param
+      owner: iuc
+      tool_shed: toolshed.g2.bx.psu.edu
+    in:
+      - id: components_1|param_type|component_value
+        source: threshold
+    out:
+      - id: out1
+    tool_state:
+      components:
+        - param_type:
+            select_param_type: text
+            component_value: "c4 >= "
+        - param_type:
+            select_param_type: integer
+            component_value:
+              __class__: ConnectedValue

@@ -1,0 +1,43 @@
+class: GalaxyWorkflow
+name: "Run optional step"
+inputs:
+  - id: input_text
+    type: data
+  - id: run_optional
+    type: boolean
+outputs:
+  - id: optional_marker
+    outputSource: optional_marker/out_file1
+  - id: skipped_marker
+    outputSource: skipped_marker/out_file1
+steps:
+  - id: optional_marker
+    label: optional_marker
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: input_text
+      - id: when
+        source: run_optional
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(inputs.when)
+  - id: skipped_marker
+    label: skipped_marker
+    tool_id: cat1
+    tool_version: 1.0.0
+    in:
+      - id: input1
+        source: input_text
+      - id: when
+        source: run_optional
+    out:
+      - id: out_file1
+    tool_state:
+      input1:
+        __class__: ConnectedValue
+    when: $(!inputs.when)

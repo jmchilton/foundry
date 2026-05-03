@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Parameter: compose runtime text parameter"
 aliases:
   - "compose_text_param"
@@ -13,7 +13,7 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Use compose_text_param to build connected text expressions from constants plus runtime scalar values."
 related_notes:
@@ -25,6 +25,8 @@ related_patterns:
   - "[[tabular-cut-and-reorder-columns]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/compose-runtime-text-parameter/compose-runtime-text.gxwf-test.yml
 ---
 
 # Parameter: compose runtime text parameter

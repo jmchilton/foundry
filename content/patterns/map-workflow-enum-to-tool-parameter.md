@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Parameter: map workflow enum to tool parameter"
 aliases:
   - "map_param_value"
@@ -13,7 +13,7 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets."
 related_notes:
@@ -26,6 +26,8 @@ related_patterns:
   - "[[tabular-split-taxonomy-string]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/map-workflow-enum-to-tool-parameter/map-enum-to-text.gxwf-test.yml
 ---
 
 # Parameter: map workflow enum to tool parameter

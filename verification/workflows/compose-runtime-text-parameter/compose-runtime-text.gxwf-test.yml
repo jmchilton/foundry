@@ -1,0 +1,5 @@
+- doc: "Compose literal prefix plus runtime integer"
+  job:
+    threshold: 5
+  outputs:
+    predicate: "c4 >= 5"

@@ -1,7 +1,7 @@
 ---
 type: pattern
 pattern_kind: leaf
-evidence: corpus-observed
+evidence: corpus-and-verified
 title: "Conditional: run optional step"
 aliases:
   - "boolean-gated optional step"
@@ -13,7 +13,7 @@ tags:
 status: draft
 created: 2026-05-02
 revised: 2026-05-02
-revision: 2
+revision: 3
 ai_generated: true
 summary: "Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch."
 related_notes:
@@ -26,6 +26,8 @@ related_patterns:
   - "[[collection-cleanup-after-mapover-failure]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+verification_paths:
+  - verification/workflows/conditional-run-optional-step/run-optional-step.gxwf-test.yml
 ---
 
 # Conditional: run optional step
