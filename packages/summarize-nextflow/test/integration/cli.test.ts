@@ -24,7 +24,7 @@ const DEMO_PIPELINE = resolve(FIXTURES, "nf-core__demo");
 const BACASS_PIPELINE = resolve(FIXTURES, "nf-core__bacass");
 const DEMO_SUMMARY = resolve(
   FOUNDRY_ROOT,
-  "casts/claude/summarize-nextflow/runs/nf-core__demo/summary.json",
+  "casts/claude/skills/summarize-nextflow/runs/nf-core__demo/summary.json",
 );
 
 function cliBuilt(): boolean {
