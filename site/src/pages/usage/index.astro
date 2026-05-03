@@ -1,0 +1,123 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { listAllCasts } from '../../lib/casts';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const casts = listAllCasts();
+
+// Resolve mold backlinks by name → entry slug.
+const molds = (await getCollection('content')).filter(e => e.data.type === 'mold');
+const moldByName = new Map<string, string>();
+for (const m of molds) {
+  const name = (m.data as any).name;
+  if (name) moldByName.set(name, m.id);
+}
+
+const TARGET_ORDER: Array<'claude' | 'web' | 'generic'> = ['claude', 'web', 'generic'];
+const TARGET_LABEL: Record<string, string> = {
+  claude: 'Claude skills',
+  web: 'Web skills',
+  generic: 'Generic skills',
+};
+
+const byTarget = new Map<string, typeof casts>();
+for (const c of casts) {
+  const list = byTarget.get(c.target) ?? [];
+  list.push(c);
+  byTarget.set(c.target, list);
+}
+
+const claudeCount = (byTarget.get('claude') ?? []).length;
+---
+<Base title="Usage">
+  <section class="page-hero bg-grain" aria-labelledby="usage-heading">
+    <span class="eyebrow mb-3">Usage</span>
+    <div class="page-hero-grid">
+      <div>
+        <h1 id="usage-heading" class="page-title text-balance">Use cast Claude skills with Claude Code.</h1>
+        <p class="page-lede text-pretty">
+          The Foundry casts each Mold into a self-contained skill. Casts are committed to this repo
+          under <code class="font-mono">casts/</code> and surfaced as a Claude Code plugin marketplace.
+          Install once; every cast skill becomes available to your agent.
+        </p>
+      </div>
+      <dl class="page-stats" aria-label="Cast inventory stats">
+        <div>
+          <dt>Claude</dt>
+          <dd>{claudeCount}</dd>
+        </div>
+        <div>
+          <dt>Targets</dt>
+          <dd>{[...byTarget.values()].filter(l => l.length > 0).length}</dd>
+        </div>
+        <div>
+          <dt>Total</dt>
+          <dd>{casts.length}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="mb-10" aria-labelledby="install-heading">
+    <div class="section-rule">
+      <h2 id="install-heading">Install</h2>
+      <span class="section-tail">/ Claude Code plugin marketplace</span>
+    </div>
+
+    <p class="mb-3">
+      In Claude Code, add the marketplace and install the plugin:
+    </p>
+    <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/plugin marketplace add jmchilton/foundry
+/plugin install foundry-skills@galaxy-workflow-foundry</code></pre>
+
+    <p class="mt-4 mb-2">
+      Skills are namespaced under the plugin. Invoke a cast skill in a session like:
+    </p>
+    <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>/foundry-skills:summarize-nextflow</code></pre>
+
+    <p class="mt-4 mb-2 text-sm text-(--color-text-secondary)">
+      Or skip the marketplace and copy a single skill into <code class="font-mono">~/.claude/skills/</code>:
+    </p>
+    <pre class="p-3 rounded-lg bg-(--color-surface-raised) text-sm font-mono overflow-x-auto"><code>git clone https://github.com/jmchilton/foundry
+cp -r foundry/casts/claude/skills/&lt;name&gt; ~/.claude/skills/&lt;name&gt;</code></pre>
+
+    <p class="mt-4 text-sm text-(--color-text-secondary)">
+      Update later with <code class="font-mono">/plugin update foundry-skills@galaxy-workflow-foundry</code>.
+    </p>
+  </section>
+
+  {TARGET_ORDER.map(target => {
+    const list = byTarget.get(target) ?? [];
+    if (list.length === 0) return null;
+    return (
+      <section class="mb-10" aria-labelledby={`target-${target}-heading`}>
+        <div class="section-rule">
+          <h2 id={`target-${target}-heading`}>{TARGET_LABEL[target]}</h2>
+          <span class="section-tail">/ {list.length} cast{list.length === 1 ? '' : 's'}</span>
+        </div>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 list-none p-0 m-0">
+          {list.map(c => {
+            const moldId = moldByName.get(c.moldSlug);
+            const skillHref = target === 'claude' ? `${base}/usage/claude/${c.moldSlug}/` : null;
+            return (
+              <li class="p-4 rounded-lg border border-(--color-border) hover:border-(--color-galaxy-primary) transition-colors">
+                <div class="flex items-baseline justify-between gap-2 mb-1">
+                  {skillHref
+                    ? <a href={skillHref} class="font-mono font-semibold text-(--color-link) hover:underline">{c.moldSlug}</a>
+                    : <span class="font-mono font-semibold">{c.moldSlug}</span>}
+                  {moldId && (
+                    <a href={`${base}/${moldId.replace(/\/index$/, '')}/`} class="text-xs text-(--color-text-secondary) hover:underline">
+                      Source mold →
+                    </a>
+                  )}
+                </div>
+                {c.description && <p class="text-sm text-(--color-text-secondary) m-0">{c.description}</p>}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    );
+  })}
+</Base>

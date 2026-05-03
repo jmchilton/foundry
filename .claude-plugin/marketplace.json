@@ -1,0 +1,16 @@
+{
+  "name": "galaxy-workflow-foundry",
+  "description": "Cast Claude skills produced by the Galaxy Workflow Foundry.",
+  "owner": {
+    "name": "John Chilton",
+    "email": "jmchilton@gmail.com",
+    "url": "https://github.com/jmchilton"
+  },
+  "plugins": [
+    {
+      "name": "foundry-skills",
+      "source": "./casts/claude",
+      "description": "All cast Claude skills from the Foundry, namespaced as /foundry-skills:<skill>."
+    }
+  ]
+}

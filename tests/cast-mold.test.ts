@@ -35,7 +35,7 @@ describe("cast-mold (summarize-nextflow integration)", () => {
   });
 
   it("provenance is schema v2 and lists deterministic refs", () => {
-    const provPath = path.join(repoRoot, "casts", "claude", "summarize-nextflow", "_provenance.json");
+    const provPath = path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow", "_provenance.json");
     const prov = JSON.parse(readFileSync(provPath, "utf8"));
     expect(prov.provenance_schema_version).toBe(2);
     expect(prov.cast_target).toBe("claude");
@@ -53,7 +53,7 @@ describe("cast-mold (summarize-nextflow integration)", () => {
   });
 
   it("dst paths use strict 1:1 source basename for verbatim refs", () => {
-    const provPath = path.join(repoRoot, "casts", "claude", "summarize-nextflow", "_provenance.json");
+    const provPath = path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow", "_provenance.json");
     const prov = JSON.parse(readFileSync(provPath, "utf8"));
     for (const r of prov.refs) {
       if (r.mode !== "verbatim") continue;
@@ -70,7 +70,7 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
   });
 
   it("required outputs present", () => {
-    const bundle = path.join(repoRoot, "casts", "claude", "summarize-nextflow");
+    const bundle = path.join(repoRoot, "casts", "claude", "skills", "summarize-nextflow");
     expect(existsSync(path.join(bundle, "SKILL.md"))).toBe(true);
     expect(existsSync(path.join(bundle, "_provenance.json"))).toBe(true);
   });

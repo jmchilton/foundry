@@ -87,7 +87,10 @@ function main(): void {
   if (!existsSync(targetCfgPath)) fail(`missing target config: ${targetCfgPath}`);
   const target = yaml.load(readFileSync(targetCfgPath, "utf8")) as TargetConfig;
 
-  const bundleRoot = path.join(repoRoot, "casts", args.target, args.moldName);
+  // Claude target casts live under skills/ (plugin layout).
+  const bundleRoot = args.target === "claude"
+    ? path.join(repoRoot, "casts", args.target, "skills", args.moldName)
+    : path.join(repoRoot, "casts", args.target, args.moldName);
   if (!existsSync(bundleRoot)) fail(`missing bundle: ${bundleRoot}`);
 
   const errors: string[] = [];

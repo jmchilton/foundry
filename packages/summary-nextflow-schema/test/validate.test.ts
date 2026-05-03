@@ -6,11 +6,11 @@ import { summaryNextflowSchema, validateSummary } from "../src/index.js";
 const FOUNDRY_ROOT = resolve(__dirname, "..", "..", "..");
 const DEMO_SUMMARY = resolve(
   FOUNDRY_ROOT,
-  "casts/claude/summarize-nextflow/runs/nf-core__demo/summary.json",
+  "casts/claude/skills/summarize-nextflow/runs/nf-core__demo/summary.json",
 );
 const BACASS_SUMMARY = resolve(
   FOUNDRY_ROOT,
-  "casts/claude/summarize-nextflow/runs/nf-core__bacass/summary.json",
+  "casts/claude/skills/summarize-nextflow/runs/nf-core__bacass/summary.json",
 );
 
 describe("summaryNextflowSchema", () => {
