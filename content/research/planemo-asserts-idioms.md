@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 3
+revised: 2026-05-03
+revision: 4
 ai_generated: true
 related_notes:
   - "[[iwc-test-data-conventions]]"
@@ -231,6 +231,6 @@ clustered_anndata:
 - [[iwc-shortcuts-anti-patterns]] — accepted-vs-smell catalog and corpus prevalence; this note's mirror image.
 - Test-format schema (`@galaxy-tool-util/schema` npm package) — authoritative vocabulary; will be vendored into a Foundry-rendered schema note. See `docs/COMPILATION_PIPELINE.md` for the casting story.
 - Planemo test-format spec: [planemo.readthedocs.io/en/latest/test_format.html](https://planemo.readthedocs.io/en/latest/test_format.html).
-- Galaxy XSD (assertion source of truth): [galaxy/lib/galaxy/tool_util/xsd/galaxy.xsd](https://github.com/galaxyproject/galaxy/blob/dev/lib/galaxy/tool_util/xsd/galaxy.xsd).
+- [[galaxy-xsd]] — Galaxy XSD assertion source of truth, vendored from upstream.
 - Tightening of the schema and Pydantic source: [galaxyproject/galaxy#22566](https://github.com/galaxyproject/galaxy/pull/22566).
 - TS schema sync into npm: [jmchilton/galaxy-tool-util-ts#75](https://github.com/jmchilton/galaxy-tool-util-ts/pull/75).

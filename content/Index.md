@@ -103,6 +103,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-collection-semantics]] — Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references.
 - [[galaxy-collection-tools]] — Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics.
 - [[galaxy-tool-job-failure-reference]] — Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces.
+- [[galaxy-xsd]] — Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax.
 - [[galaxy-workflow-invocation-failure-reference]] — Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces.
 - [[iwc-conditionals-survey]] — Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection.
 - [[iwc-nearest-exemplar-selection]] — Defines a feature hierarchy for selecting useful IWC exemplar workflows for structural comparison.

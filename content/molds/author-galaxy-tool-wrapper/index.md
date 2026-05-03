@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable."
 references:
@@ -20,6 +20,14 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Read process tool, container, conda, inputs, outputs, script summary, and test fixture evidence from the source pipeline summary."
+  - kind: research
+    ref: "[[galaxy-xsd]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Use Galaxy's upstream XML schema as the contract for wrapper elements, parameters, outputs, tests, assertions, and metadata blocks."
+    trigger: "When selecting or validating Galaxy tool XML syntax for a new wrapper."
   - kind: research
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
