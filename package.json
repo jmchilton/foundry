@@ -47,5 +47,8 @@
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.59.1",
     "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "@galaxy-tool-util/schema": "^1.1.0"
   }
 }

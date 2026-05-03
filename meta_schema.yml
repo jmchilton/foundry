@@ -186,6 +186,9 @@ properties:
   upstream:
     type: string
     description: "URL to the source-of-truth schema upstream"
+  package_export:
+    type: string
+    description: "For package-vendored schemas: the named runtime export from `package` that returns the JSON Schema object (e.g. `testsSchema`). cast-mold imports and stringifies this when resolving a typed `kind: schema` reference."
 
 allOf:
   # mold requires name + axis

@@ -18,6 +18,13 @@ related_notes:
   - "[[tests-format]]"
 summary: "Assemble Galaxy workflow test fixtures and assertions."
 references:
+  - kind: schema
+    ref: "[[tests-format]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it."
   - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime

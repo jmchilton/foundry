@@ -3,6 +3,7 @@ type: schema
 name: tests-format
 title: Galaxy workflow test format
 package: "@galaxy-tool-util/schema"
+package_export: "testsSchema"
 upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/blob/main/packages/schema/src/test-format/tests.schema.json"
 tags:
   - schema
