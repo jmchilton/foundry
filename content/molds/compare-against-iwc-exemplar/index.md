@@ -191,7 +191,7 @@ Each finding should name the authoring surface most likely to own the fix:
 - Template/data-flow issue: missing node, wrong collection shape, wrong branch, placeholder too vague.
 - Pattern issue: recurring Galaxy idiom should become or update a pattern page.
 - Tool-step issue: exact wrapper or parameterization will be handled later.
-- Test issue: defer to `nextflow-test-to-target-tests` or `implement-galaxy-workflow-test`.
+- Test issue: defer to `nextflow-test-to-galaxy-test-plan` or `implement-galaxy-workflow-test`.
 
 Do not block downstream authoring on low-confidence exemplar mismatches. Report them as review guidance.
 

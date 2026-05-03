@@ -21,7 +21,7 @@ phases:
     loop: true
   - mold: "[[validate-cwl]]"
     loop: true
-  - mold: "[[nextflow-test-to-target-tests]]"
+  - mold: "[[nextflow-test-to-cwl-test-plan]]"
   - mold: "[[implement-cwl-workflow-test]]"
   - mold: "[[validate-cwl]]"
   - mold: "[[run-workflow-test]]"
@@ -32,4 +32,4 @@ phases:
 
 Direct path. Lifted from `docs/HARNESS_PIPELINES.md` §"NEXTFLOW → CWL".
 
-NF brings real test fixtures, so `nextflow-test-to-target-tests` replaces the `[branch] test-data-resolution` chain that paper-sourced pipelines need.
+NF brings real test fixtures, so `nextflow-test-to-cwl-test-plan` replaces the `[branch] test-data-resolution` chain that paper-sourced pipelines need.

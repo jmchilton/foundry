@@ -82,14 +82,15 @@ Two-step shape (translation/derivation, then assembly):
 **Derivation** (gets the raw fixtures):
 - `paper-to-test-data` — derive workflow test inputs from a paper (sample data, expected outputs, parameter values). Source-specific (paper), target-agnostic. Fails often because papers rarely ship usable fixtures; falls through to `find-test-data`.
 - `find-test-data` — fallback when derivation from a source fails. Search IWC test fixtures, public databases, sibling workflows for usable test data matching a data-flow description (input shapes, expected output shapes, organism / data type). Source-agnostic, target-agnostic. The harness escalates to a user-supplied-data gate if `find-test-data` also fails.
-- `nextflow-test-to-target-tests` — translate NF test fixtures (inputs, expected outputs, parameters) into target-shaped equivalents. Source × target.
-- `cwl-test-to-target-tests` — translate CWL test fixtures into target-shaped equivalents. Source × target.
+- `nextflow-test-to-galaxy-test-plan` — translate NF test fixtures, profiles, params, expected outputs, and snapshot evidence into a Galaxy workflow test plan. Source × target.
+- `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan. Source × target.
+- `nextflow-test-to-cwl-test-plan` — translate NF test fixtures into a CWL workflow test plan. Source × target.
 
 **Assembly** (turns fixtures into the final test artifact):
-- `implement-galaxy-workflow-test` — assemble the Galaxy workflow test JSON (or `.gxwf-tests.yml`) from translated/derived fixtures, with assertions.
+- `implement-galaxy-workflow-test` — assemble the Galaxy workflow test JSON (or `.gxwf-tests.yml`) from a translated/derived test plan, with assertions.
 - `implement-cwl-workflow-test` — assemble CWL job file(s) and expected-output assertions from translated/derived fixtures.
 
-The derivation Molds and assembly Molds are complementary, not redundant: derivation produces fixtures; assembly produces the test artifact. Both fire in NF→Galaxy, CWL→Galaxy, etc.
+The derivation/test-plan Molds and assembly Molds are complementary, not redundant: derivation produces fixtures or a reviewable test plan; assembly produces the test artifact. Both fire in NF→Galaxy, CWL→Galaxy, etc.
 
 Open question: whether the `<source>-test-to-<target>-tests` family factors cleanly through a generic intermediate, or stays per-pair.
 

@@ -113,14 +113,14 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
   a wrapper-shaped requirement are surfaced as evaluation gaps, not
   silently dropped.
 
-## Case: nf-test to Planemo assertions translation
+## Case: nf-test to Galaxy test-plan translation
 
 - bucket: utility
 - check: llm-judged
 - fixture: a pipeline with a representative `nf_tests[]` entry containing
   `snapshot.captures[]`.
-- expectation: `nextflow-test-to-target-tests` (or its successor) maps each
-  capture to a Planemo assertion or to an explicit "untranslatable" entry;
+- expectation: `nextflow-test-to-galaxy-test-plan` maps each
+  capture to Galaxy assertion intent or to an explicit "untranslatable" entry;
   no captures are silently elided.
 
 ## Case: bacass hand-cast diff is reproduced

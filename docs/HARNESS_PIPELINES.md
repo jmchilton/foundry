@@ -88,7 +88,7 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 4. `[loop]` `summarize-cwl-tool`
 5. `[loop]` `implement-cwl-tool-step`
 6. `[loop]` `validate-cwl` — inline schema validation per step; loop back on red.
-7. `nextflow-test-to-target-tests` — translate NF test data and expectations to the target's test format (here: CWL).
+7. `nextflow-test-to-cwl-test-plan` — translate NF test data and expectations into a CWL workflow test plan.
 8. `validate-cwl` — terminal pass on the assembled workflow.
 9. `run-workflow-test` — execute via Planemo.
 10. `debug-cwl-workflow-output`
@@ -103,8 +103,8 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 6. `[loop]` `summarize-galaxy-tool`
 7. `[loop]` `implement-galaxy-tool-step`
 8. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
-9. `nextflow-test-to-target-tests` — target = Galaxy.
-10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated tests.
+9. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
+10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
 11. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
 12. `run-workflow-test` — execute via Planemo.
 13. `debug-galaxy-workflow-output`
@@ -121,8 +121,8 @@ CWL is already structured; the upstream extraction work is much lighter.
 6. `[loop]` `summarize-galaxy-tool`
 7. `[loop]` `implement-galaxy-tool-step`
 8. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
-9. `cwl-test-to-target-tests` — target = Galaxy.
-10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated tests.
+9. `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan.
+10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
 11. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
 12. `run-workflow-test` — execute via Planemo.
 13. `debug-galaxy-workflow-output`
@@ -138,7 +138,7 @@ CWL is already structured; the upstream extraction work is much lighter.
   - Validate: `validate-galaxy-step`, `validate-galaxy-workflow`, `validate-cwl`.
   - Debug: `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`.
 - **Cross-target (Planemo-backed)**: `run-workflow-test`.
-- **Source × target (test translation)**: `nextflow-test-to-target-tests`, `cwl-test-to-target-tests`. May or may not factor cleanly into a single `<source>-test-to-<target>-tests` Mold family vs. a per-pair Mold; defer.
+- **Source × target (test-plan translation)**: `nextflow-test-to-galaxy-test-plan`, `cwl-test-to-galaxy-test-plan`, `nextflow-test-to-cwl-test-plan`. These produce reviewable test plans, not final test artifacts. May or may not factor cleanly through a shared intermediate; defer.
 - **Test data extraction (source-specific, target-agnostic)**: `paper-to-test-data` is its own thing because a paper rarely ships a test bundle the way NF/CWL pipelines do.
 
 ## Pattern pages, not Molds

@@ -15,6 +15,7 @@ revision: 2
 ai_generated: true
 related_notes:
   - "[[implement-galaxy-workflow-test]]"
+  - "[[nextflow-test-to-galaxy-test-plan]]"
   - "[[planemo-asserts-idioms]]"
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"
