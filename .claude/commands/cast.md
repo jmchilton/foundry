@@ -20,7 +20,7 @@ Resolve `$1` to `<mold-name>`. Default `--target=claude` unless the user overrod
 Run validate scoped to this Mold. The full repo validate is too broad; only this Mold's frontmatter and ref resolution must be clean before casting.
 
 ```sh
-npx tsx scripts/validate.ts --path content/molds/<mold-name>/index.md
+npm run validate
 ```
 
 If validate is not yet path-scoped, fall back to `npm run validate` and grep for findings on this Mold's path. Stop on errors; warnings are advisory.

@@ -6,14 +6,14 @@
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "validate": "tsx scripts/validate.ts",
+    "validate": "tsx packages/build-cli/src/bin/foundry-build.ts validate --root .",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "dashboard": "tsx scripts/generate-dashboard.ts",
-    "check:dashboard": "tsx scripts/generate-dashboard.ts --check",
-    "index": "tsx scripts/generate-index.ts",
-    "check:index": "tsx scripts/generate-index.ts --check",
+    "dashboard": "tsx packages/build-cli/src/bin/foundry-build.ts generate-dashboard --root .",
+    "check:dashboard": "tsx packages/build-cli/src/bin/foundry-build.ts generate-dashboard --root . --check",
+    "index": "tsx packages/build-cli/src/bin/foundry-build.ts generate-index --root .",
+    "check:index": "tsx packages/build-cli/src/bin/foundry-build.ts generate-index --root . --check",
     "check:vendored": "tsx scripts/sync-vendored-upstreams.ts --check",
     "sync:vendored": "tsx scripts/sync-vendored-upstreams.ts --update",
     "cast": "tsx scripts/cast-mold.ts",
@@ -32,6 +32,7 @@
     "site:preview": "npm --prefix site run preview"
   },
   "devDependencies": {
+    "@galaxy-foundry/build-cli": "workspace:*",
     "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",

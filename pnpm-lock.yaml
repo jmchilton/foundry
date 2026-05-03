@@ -24,6 +24,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.3.0)
+      '@galaxy-foundry/build-cli':
+        specifier: workspace:*
+        version: link:packages/build-cli
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -60,6 +63,31 @@ importers:
       vitest:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.17)
+
+  packages/build-cli:
+    dependencies:
+      ajv:
+        specifier: ^8.17.1
+        version: 8.20.0
+      ajv-formats:
+        specifier: ^3.0.1
+        version: 3.0.1(ajv@8.20.0)
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.1
+    devDependencies:
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.17
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/summarize-nextflow:
     dependencies:

@@ -2,8 +2,8 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { loadSchema, loadTags } from "../scripts/lib/schema.js";
-import { validateData, validateDirectory } from "../scripts/validate.js";
+import { loadSchema, loadTags } from "../packages/build-cli/src/lib/schema.js";
+import { validateData, validateDirectory } from "../packages/build-cli/src/commands/validate.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");

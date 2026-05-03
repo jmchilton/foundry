@@ -72,4 +72,4 @@ For IWC survey work, prefer `make fixtures-iwc fixtures-skeletons` before mining
 
 ## Package layout
 
-Publishable CLIs live under `packages/<name>/` as a pnpm workspace; mirrors `galaxy-tool-util-ts`'s structure. First package: `@galaxy-foundry/summarize-nextflow`. Foundry-internal scripts stay under `scripts/` (not workspace packages — they support content authoring, not external consumers). pnpm 10.x is the package manager (`packageManager` field is contractual). The npm wrappers above invoke `pnpm -r` under the hood.
+Publishable CLIs live under `packages/<name>/` as a pnpm workspace; mirrors `galaxy-tool-util-ts`'s structure. Runtime packages include `@galaxy-foundry/summarize-nextflow`; build/authoring tooling lives in `@galaxy-foundry/build-cli` with the `foundry-build` bin. Top-level `scripts/` files are compatibility wrappers or repo-local one-offs. pnpm 10.x is the package manager (`packageManager` field is contractual). The npm wrappers above invoke `pnpm -r` under the hood.
