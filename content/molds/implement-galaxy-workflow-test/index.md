@@ -8,10 +8,11 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 3
+revised: 2026-05-03
+revision: 4
 ai_generated: true
 related_notes:
+  - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-asserts-idioms]]"
@@ -35,6 +36,14 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "JSON Schema contract for the Galaxy workflow test format. Output of this Mold must validate against it."
+  - kind: research
+    ref: "[[galaxy-workflow-testability-design]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Revise workflow inputs, outputs, labels, checkpoints, and collection identifiers so meaningful tests can be authored."
+    trigger: "When test authoring reveals missing labels, omitted workflow-level outputs, unstable collection identifiers, weakly assertable final outputs, or fixture-shape pressure on workflow inputs."
   - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime

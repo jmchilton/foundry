@@ -8,10 +8,11 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 related_notes:
+  - "[[galaxy-workflow-testability-design]]"
   - "[[galaxy-tool-job-failure-reference]]"
   - "[[galaxy-workflow-invocation-failure-reference]]"
   - "[[planemo-asserts-idioms]]"
@@ -95,6 +96,8 @@ Important operations:
 
 For workflows, Planemo invokes Galaxy using input labels/names. Stable generated labels are therefore important for both test execution and debugging.
 
+Workflow testability design guidance lives in [[galaxy-workflow-testability-design]]. This architecture note only records why Planemo makes labels and workflow-level outputs operationally important.
+
 ## Structured Artifacts
 
 Useful Planemo artifacts and fields:
@@ -135,6 +138,7 @@ For [[run-workflow-test]]:
 For [[debug-galaxy-workflow-output]]:
 
 - Start from structured Planemo output.
+- For missing-output failures, check label drift and omitted workflow-level outputs before assuming tool failure.
 - If the failure is job-level, inspect Galaxy job APIs described in [[galaxy-tool-job-failure-reference]].
 - If the failure is invocation-level, inspect Galaxy invocation APIs described in [[galaxy-workflow-invocation-failure-reference]].
 - If only assertions failed, use [[planemo-asserts-idioms]] before deciding to rerun.

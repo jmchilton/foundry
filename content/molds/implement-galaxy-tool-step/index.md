@@ -8,11 +8,19 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 3
+revised: 2026-05-03
+revision: 4
 ai_generated: true
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
 references:
+  - kind: research
+    ref: "[[galaxy-workflow-testability-design]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Preserve testable output labels and collection element identifiers while replacing abstract steps with concrete gxformat2 steps."
+    trigger: "When a concrete step changes output labels, emits collection outputs, creates a diagnostic checkpoint, or makes a final output too weakly assertable."
   - kind: research
     ref: "[[galaxy-collection-semantics]]"
     used_at: runtime

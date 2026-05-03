@@ -7,9 +7,10 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-03
-revision: 4
+revision: 5
 ai_generated: true
 related_notes:
+  - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[implement-galaxy-workflow-test]]"
@@ -21,7 +22,7 @@ summary: "Decision and idiom guide for picking planemo workflow-test assertions:
 
 # Planemo asserts: idiom and decision guide
 
-Companion to [[iwc-test-data-conventions]] (input shapes) and [[iwc-shortcuts-anti-patterns]] (what's accepted vs smell). This note is forward-looking: when authoring a new `<workflow>-tests.yml`, which assertion family fits which output, and what the recommended tolerances and operators are.
+Companion to [[iwc-test-data-conventions]] (input shapes), [[galaxy-workflow-testability-design]] (workflow structure before test YAML exists), and [[iwc-shortcuts-anti-patterns]] (what's accepted vs smell). This note is forward-looking: when authoring a new `<workflow>-tests.yml`, which assertion family fits which output, and what the recommended tolerances and operators are.
 
 The **vocabulary itself is not restated here** — every assertion's parameter list, types, defaults, required fields, and Python docstring is rendered from the test-format JSON Schema at [[tests-format]]. Assertion names below deep-link into that page (e.g. `[[tests-format#has_text_model|has_text]]` jumps straight to that `$def`).
 
@@ -50,6 +51,15 @@ The single most useful decision table. Pick the row that matches the file format
 | **Cool / HiC matrices** | `compare: sim_size` with multi-MB `delta:` | Binary, run-to-run variance | [[tests-format#has_archive_member_model|has_archive_member]] for HDF5 component |
 
 When in doubt: start with [[tests-format#has_size_model|has_size]] + `delta_frac: 0.1`. It catches the catastrophic failure mode (empty / 10x bigger output). Then add a content probe.
+
+### 1a. If the assertion is too weak, revisit the workflow output
+
+Assertion choice sometimes reveals a workflow-design problem. If the only available output can support only a size check or image-dimension smoke test, check whether the workflow should expose a stronger checkpoint before settling for the weak assertion.
+
+- Scanpy's plot outputs use size and image-dimension assertions, but the same workflow also exposes AnnData HDF5 checkpoints and a cluster-count table (`$IWC/workflows/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy-tests.yml:33-205`).
+- RNA-seq paired-end uses coarse size bands for coverage/mapped-read outputs, but expression/count tables get stronger regex and exact-line checks (`$IWC/workflows/transcriptomics/rnaseq-pe/rnaseq-pe-tests.yml:48-97`).
+
+Rule: if a translated workflow exposes only weakly assertable final reports, consult [[galaxy-workflow-testability-design]] and consider promoting a table/text/HDF5 checkpoint before writing the final assertions.
 
 ## 2. The `compare:` operators
 
@@ -227,6 +237,7 @@ clustered_anndata:
 
 ## 10. Cross-references
 
+- [[galaxy-workflow-testability-design]] — decide which workflow outputs and checkpoints to expose before choosing assertions.
 - [[iwc-test-data-conventions]] — input-side conventions (job inputs, collection shapes, `hashes:`, CVMFS).
 - [[iwc-shortcuts-anti-patterns]] — accepted-vs-smell catalog and corpus prevalence; this note's mirror image.
 - Test-format schema (`@galaxy-tool-util/schema` npm package) — authoritative vocabulary; will be vendored into a Foundry-rendered schema note. See `docs/COMPILATION_PIPELINE.md` for the casting story.
