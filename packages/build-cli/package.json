@@ -1,0 +1,54 @@
+{
+  "name": "@galaxy-foundry/build-cli",
+  "version": "0.0.0",
+  "description": "Build and authoring CLI for Galaxy Workflow Foundry source trees.",
+  "type": "module",
+  "bin": {
+    "foundry-build": "dist/bin/foundry-build.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmchilton/foundry.git",
+    "directory": "packages/build-cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "tsc --noEmit"
+  },
+  "keywords": [
+    "galaxy",
+    "foundry",
+    "build",
+    "cli"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
