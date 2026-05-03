@@ -280,6 +280,38 @@ function validateTypedReference(
   };
 
   if (ref.kind === "schema") {
+    // Wiki-link form: must resolve to a `type: schema` note that has both
+    // `package` and `package_export` (cast-mold imports the named export).
+    if (WIKI_LINK_RE.test(ref.ref)) {
+      const tp = resolveWikiLink(ref.ref, slugMap);
+      if (!tp) {
+        findings.push({
+          path: filePath,
+          severity: "error",
+          message: `references[${index}]: schema ref ${ref.ref} did not resolve`,
+        });
+        return;
+      }
+      const noteMeta = metaByPath.get(tp);
+      if (noteMeta?.type !== "schema") {
+        findings.push({
+          path: filePath,
+          severity: "error",
+          message: `references[${index}]: schema ref ${ref.ref} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema`,
+        });
+        return;
+      }
+      const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
+      const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
+      if (!pkg || !exp) {
+        findings.push({
+          path: filePath,
+          severity: "error",
+          message: `references[${index}]: schema wiki-link ref requires the target note to declare both 'package' and 'package_export' (got package=${pkg ?? "(none)"}, package_export=${exp ?? "(none)"})`,
+        });
+      }
+      return;
+    }
     validatePathReference(ref.ref, index, filePath, contentRoot, findings, "content/schemas/", true);
     return;
   }

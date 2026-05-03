@@ -129,6 +129,8 @@ interface ResolvedRef {
   purpose?: string;
   trigger?: string;
   verification?: string;
+  /** Set when src is an npm package export rather than a repo file. */
+  package_source?: { spec: string; exportName: string };
 }
 
 const SUPPORTED_KINDS = new Set(["schema", "research", "pattern", "cli-command"]);
@@ -182,12 +184,34 @@ function resolveMoldRef(
 
   // Resolve src.
   let src: string;
+  let dstOverride: string | undefined;
+  let packageSource: { spec: string; exportName: string } | undefined;
   if (kind === "schema") {
-    if (WIKI_LINK_RE.test(refStr)) return { error: `references[${index}]: schema ref must be a path, not a wiki link` };
-    if (!refStr.startsWith("content/schemas/") || !refStr.endsWith(".schema.json")) {
-      return { error: `references[${index}]: schema ref must be content/schemas/*.schema.json (got ${refStr})` };
+    if (WIKI_LINK_RE.test(refStr)) {
+      // Wiki-link form: resolves to a `type: schema` note. Supports package-vendored
+      // schemas (note has `package` + `package_export`) — caster imports the
+      // runtime export, JSON.stringifies it, and writes to the bundle.
+      const tp = resolveWikiLink(refStr, slugMap);
+      if (!tp) return { error: `references[${index}]: schema ref ${refStr} did not resolve` };
+      const noteMeta = metaByPath.get(tp);
+      if (noteMeta?.type !== "schema") {
+        return { error: `references[${index}]: schema ref ${refStr} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema` };
+      }
+      const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
+      const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
+      if (!pkg || !exp) {
+        return { error: `references[${index}]: schema ref ${refStr} resolves to a foundry-authored schema note; use the path form (content/schemas/${path.basename(path.dirname(tp))}.schema.json or similar)` };
+      }
+      const noteSlug = path.basename(tp, ".md");
+      src = `package://${pkg}#${exp}`;
+      dstOverride = path.posix.join(kindCfg.dst_dir, `${noteSlug}.schema.json`);
+      packageSource = { spec: pkg, exportName: exp };
+    } else {
+      if (!refStr.startsWith("content/schemas/") || !refStr.endsWith(".schema.json")) {
+        return { error: `references[${index}]: schema ref must be content/schemas/*.schema.json or a [[wiki-link]] to a schema note (got ${refStr})` };
+      }
+      src = refStr;
     }
-    src = refStr;
   } else {
     const tp = resolveWikiLink(refStr, slugMap);
     if (!tp) return { error: `references[${index}]: ${kind} ref ${refStr} did not resolve` };
@@ -199,7 +223,7 @@ function resolveMoldRef(
     src = tp;
   }
 
-  const dst = deriveDst(kind, src, mode, kindCfg);
+  const dst = dstOverride ?? deriveDst(kind, src, mode, kindCfg);
 
   const used_at = (typeof ref.used_at === "string" ? ref.used_at : "runtime") as ResolvedRef["used_at"];
   const load = (typeof ref.load === "string" ? ref.load : "on-demand") as ResolvedRef["load"];
@@ -217,6 +241,7 @@ function resolveMoldRef(
       purpose: typeof ref.purpose === "string" ? ref.purpose : undefined,
       trigger: typeof ref.trigger === "string" ? ref.trigger : undefined,
       verification: typeof ref.verification === "string" ? ref.verification : undefined,
+      package_source: packageSource,
     },
   };
 }
@@ -370,13 +395,63 @@ interface CastPlanResult {
   errors: string[];
 }
 
-function castOneRef(
+async function castOneRef(
   resolved: ResolvedRef,
   repoRoot: string,
   bundleRoot: string,
   prior: Map<string, ProvenanceRefEntry> | undefined,
   check: boolean,
-): { entry: ProvenanceRefEntry; drift?: string; error?: string } {
+): Promise<{ entry: ProvenanceRefEntry; drift?: string; error?: string }> {
+  const dstAbs = path.join(bundleRoot, resolved.dst);
+
+  // Package-vendored schema: import the named export, JSON.stringify, write verbatim.
+  // No file `src` exists; src_hash and dst_hash are both the hash of the synthesized JSON.
+  if (resolved.package_source) {
+    if (resolved.kind !== "schema" || resolved.mode !== "verbatim") {
+      return {
+        entry: { ...skeleton(resolved), src_hash: null, dst_hash: null, source: "deterministic" },
+        error: `package_source ref must be kind=schema mode=verbatim (got ${resolved.kind}/${resolved.mode})`,
+      };
+    }
+    let json: string;
+    try {
+      const mod = (await import(resolved.package_source.spec)) as Record<string, unknown>;
+      const exported = mod[resolved.package_source.exportName];
+      if (exported === undefined) {
+        return {
+          entry: { ...skeleton(resolved), src_hash: null, dst_hash: null, source: "deterministic" },
+          error: `package ${resolved.package_source.spec} has no export '${resolved.package_source.exportName}'`,
+        };
+      }
+      json = JSON.stringify(exported, null, 2) + "\n";
+    } catch (e) {
+      return {
+        entry: { ...skeleton(resolved), src_hash: null, dst_hash: null, source: "deterministic" },
+        error: `failed to import ${resolved.package_source.spec}: ${(e as Error).message}`,
+      };
+    }
+    const expectedHash = sha256OfBuffer(json);
+    const dstExists = existsSync(dstAbs);
+    const dstHash = dstExists ? sha256(dstAbs) : null;
+    let drift: string | undefined;
+    if (dstHash !== expectedHash) {
+      drift = dstExists ? "package schema content drifted" : "package schema missing";
+      if (!check) {
+        mkdirSync(path.dirname(dstAbs), { recursive: true });
+        writeFileSync(dstAbs, json);
+      }
+    }
+    return {
+      entry: {
+        ...skeleton(resolved),
+        src_hash: expectedHash,
+        dst_hash: drift && check ? dstHash : expectedHash,
+        source: "deterministic",
+      },
+      drift,
+    };
+  }
+
   const srcAbs = path.join(repoRoot, resolved.src);
   if (!existsSync(srcAbs)) {
     return {
@@ -385,7 +460,6 @@ function castOneRef(
     };
   }
   const srcHash = sha256(srcAbs);
-  const dstAbs = path.join(bundleRoot, resolved.dst);
 
   if (resolved.mode === "verbatim") {
     const dstExists = existsSync(dstAbs);
@@ -490,7 +564,7 @@ function skeleton(r: ResolvedRef): Omit<ProvenanceRefEntry, "src_hash" | "dst_ha
 
 // ---- main ----
 
-function main(): void {
+async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const repoRoot = process.cwd();
 
@@ -533,7 +607,7 @@ function main(): void {
   const drift: Array<{ src: string; reason: string }> = [];
 
   for (const r of resolved) {
-    const result = castOneRef(r, repoRoot, bundleRoot, carry.prior_refs, args.check);
+    const result = await castOneRef(r, repoRoot, bundleRoot, carry.prior_refs, args.check);
     refEntries.push(result.entry);
     if (result.error) errors.push(result.error);
     if (result.drift) drift.push({ src: r.src, reason: result.drift });
@@ -613,4 +687,4 @@ function main(): void {
 void stripBrackets;
 void statSync;
 
-main();
+main().catch((e) => { console.error(e); process.exit(1); });
