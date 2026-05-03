@@ -6,10 +6,11 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 related_notes:
+  - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-test-data-conventions]]"
   - "[[planemo-asserts-idioms]]"
   - "[[implement-galaxy-workflow-test]]"
@@ -22,6 +23,8 @@ summary: "What IWC test suites cut corners on (accepted) vs what's a code smell 
 ## Purpose
 
 When an agent translates or authors a Galaxy workflow for IWC submission, the test suite it writes will be reviewed against IWC's *de facto* style — not against an idealized assertion ladder. That style routinely tolerates assertions that look weak in isolation. This note distinguishes the corner-cutting that is **normal and accepted** in the corpus from the patterns that an agent should treat as **smells** worth flagging.
+
+This note owns accepted-vs-smell calls. For positive workflow-structure guidance behind label stability, checkpoint promotion, and collection identifier design, use [[galaxy-workflow-testability-design]].
 
 Grounding: 115 `*-tests.yml` files under `workflow-fixtures/iwc-src/workflows/` (mirror of `galaxyproject/iwc`), prior synthesis in `galaxy-brain/vault/projects/workflow_state/skills/COMPONENT_GALAXY_WORKFLOW_TESTING.md`. Path citations below are relative to `iwc-src/workflows/` unless absolute.
 
@@ -189,6 +192,8 @@ Renaming an output label in the `.ga` without updating the sibling `-tests.yml` 
 
 **Smell:** a translated workflow with unlabeled outputs that later need test coverage. Agent should label every output it intends to assert on, before writing assertions.
 
+Positive design guidance now lives in [[galaxy-workflow-testability-design]]: pick stable labels before test authoring and treat renames as test-breaking API changes.
+
 ---
 
 ## 7. Intermediate-step output gap
@@ -205,6 +210,8 @@ Observed workaround across the corpus: **promote the intermediate to a workflow 
 **Accepted shortcut:** promoting an intermediate to a workflow output for test purposes. Not a smell.
 
 **Smell:** asserting on a step output via some side-channel (e.g., relying on Galaxy collection ordering, indexing into `tool_state`). The corpus does not do this and an agent should not invent it.
+
+Positive design guidance now lives in [[galaxy-workflow-testability-design]]: promote assertable checkpoints deliberately, especially when final reports or plots can only support weak smoke tests.
 
 ---
 
@@ -316,6 +323,7 @@ Synthesized from the COMPONENT_GALAXY_WORKFLOW_TESTING.md analysis (sections 9 a
 
 ## Sources
 
+- Positive workflow-structure guidance: [[galaxy-workflow-testability-design]].
 - Prior synthesis: `/Users/jxc755/projects/repositories/galaxy-brain/vault/projects/workflow_state/skills/COMPONENT_GALAXY_WORKFLOW_TESTING.md` (sections 2c, 2d, 2e, 9).
 - Corpus root: `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-src/workflows/` (115 `*-tests.yml` files across 22 categories).
 - Specific files cited:
