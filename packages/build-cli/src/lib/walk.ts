@@ -5,12 +5,7 @@ import { readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
 export const SKIP_DIRS = new Set([".obsidian", "casts"]);
-export const SKIP_FILES = new Set([
-  "Dashboard.md",
-  "Index.md",
-  "log.md",
-  "glossary.md",
-]);
+export const SKIP_FILES = new Set(["Dashboard.md", "Index.md", "log.md", "glossary.md"]);
 /** Note types that use directory-note semantics: only `<type>/<slug>/index.md` is validated. */
 export const DIR_NOTE_TYPES = new Set(["molds"]);
 

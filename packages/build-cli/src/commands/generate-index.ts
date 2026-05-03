@@ -1,6 +1,12 @@
 #!/usr/bin/env tsx
 
-import { loadContentNotes, sortByTitle, wikiLink, writeOrCheck, type ContentNote } from "../lib/content-notes.js";
+import {
+  loadContentNotes,
+  sortByTitle,
+  wikiLink,
+  writeOrCheck,
+  type ContentNote,
+} from "../lib/content-notes.js";
 
 const OUTPUT = "content/Index.md";
 
@@ -73,7 +79,8 @@ function parseGenerateIndexArgs(argv: string[]): GenerateIndexArgs {
 function groupByType(notes: ContentNote[]): Map<string, ContentNote[]> {
   const grouped = new Map<string, ContentNote[]>();
   for (const note of notes) {
-    const key = note.type === "research" && note.subtype ? `${note.type}/${note.subtype}` : note.type;
+    const key =
+      note.type === "research" && note.subtype ? `${note.type}/${note.subtype}` : note.type;
     const bucket = grouped.get(key) ?? [];
     bucket.push(note);
     grouped.set(key, bucket);

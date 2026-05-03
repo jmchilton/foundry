@@ -100,7 +100,9 @@ export function markdownTable(rows: string[][]): string {
   if (rows.length === 0) return "";
   const header = rows[0] ?? [];
   const sep = header.map(() => "---");
-  return [header, sep, ...rows.slice(1)].map((row) => `| ${row.map(escapeTableCell).join(" | ")} |`).join("\n");
+  return [header, sep, ...rows.slice(1)]
+    .map((row) => `| ${row.map(escapeTableCell).join(" | ")} |`)
+    .join("\n");
 }
 
 function noteTitle(meta: Record<string, unknown>, slug: string): string {
@@ -124,5 +126,7 @@ function numberValue(value: unknown): number | undefined {
 }
 
 function arrayOfStrings(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 }

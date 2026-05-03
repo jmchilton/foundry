@@ -28,12 +28,17 @@ export function findReferenceContractPath(startDir = process.cwd()): string {
   }
 }
 
-export function loadReferenceContract(contractPath = findReferenceContractPath()): ReferenceContract {
+export function loadReferenceContract(
+  contractPath = findReferenceContractPath(),
+): ReferenceContract {
   const data = yaml.load(readFileSync(contractPath, "utf8")) as ReferenceContract | null;
   if (!data) throw new Error(`empty reference contract: ${contractPath}`);
   return data;
 }
 
-export function contractKeys(contract: ReferenceContract, group: keyof ReferenceContract): string[] {
+export function contractKeys(
+  contract: ReferenceContract,
+  group: keyof ReferenceContract,
+): string[] {
   return Object.keys(contract[group]);
 }

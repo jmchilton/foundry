@@ -1,6 +1,13 @@
 #!/usr/bin/env tsx
 
-import { loadContentNotes, loadDashboardSections, markdownTable, sortByRevisedDesc, wikiLink, writeOrCheck } from "../lib/content-notes.js";
+import {
+  loadContentNotes,
+  loadDashboardSections,
+  markdownTable,
+  sortByRevisedDesc,
+  wikiLink,
+  writeOrCheck,
+} from "../lib/content-notes.js";
 
 const OUTPUT = "content/Dashboard.md";
 
@@ -23,7 +30,13 @@ export function runGenerateDashboardCommand(argv = process.argv.slice(2)): void 
     parts.push(
       markdownTable([
         ["Name", "Summary", "Status", "Revised", "Rev"],
-        ...sectionNotes.map((note) => [wikiLink(note), note.summary, note.status, note.revised, String(note.revision)]),
+        ...sectionNotes.map((note) => [
+          wikiLink(note),
+          note.summary,
+          note.status,
+          note.revised,
+          String(note.revision),
+        ]),
       ]),
       "",
     );

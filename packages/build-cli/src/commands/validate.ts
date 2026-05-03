@@ -17,7 +17,10 @@ import { resolveWikiLink, slugify, stripBrackets, WIKI_LINK_RE } from "../lib/wi
 type AjvValidator = {
   compile: (schema: unknown) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
 };
-const Ajv = AjvImport as unknown as new (opts: { allErrors: boolean; strict: boolean }) => AjvValidator;
+const Ajv = AjvImport as unknown as new (opts: {
+  allErrors: boolean;
+  strict: boolean;
+}) => AjvValidator;
 const addFormats = addFormatsImport as unknown as (ajv: AjvValidator) => unknown;
 
 interface CliArgs {
@@ -73,9 +76,7 @@ function validateSchema(data: Frontmatter, schema: JsonSchema): string[] {
   return errors.map((e: ErrorObject) => {
     const loc = e.instancePath.replace(/^\//, "").replace(/\//g, ".") || "(root)";
     const params = e.params as Record<string, unknown> | undefined;
-    const extra = params?.additionalProperty
-      ? ` ('${String(params.additionalProperty)}')`
-      : "";
+    const extra = params?.additionalProperty ? ` ('${String(params.additionalProperty)}')` : "";
     return `${loc}: ${e.message ?? "validation failed"}${extra}`;
   });
 }
@@ -119,7 +120,9 @@ function validateWikiLinks(data: Frontmatter): ValidationResult {
       if (!m) return;
       const inner = m[1];
       if (inner !== undefined && inner.trim() === "") {
-        result.errors.push(`references[${i}].ref: wiki link has whitespace-only inner text: '${value}'`);
+        result.errors.push(
+          `references[${i}].ref: wiki link has whitespace-only inner text: '${value}'`,
+        );
       }
     });
   }
@@ -138,7 +141,9 @@ function validateTagCoherence(data: Frontmatter): string[] {
     (t) => typeof t === "string" && (t === expected || t.startsWith(expected + "/")),
   );
   if (matches) return [];
-  return [`tags: expected '${expected}' tag for type=${noteType}${subtype ? `, subtype=${subtype}` : ""} but tags are ${JSON.stringify(tags)}`];
+  return [
+    `tags: expected '${expected}' tag for type=${noteType}${subtype ? `, subtype=${subtype}` : ""} but tags are ${JSON.stringify(tags)}`,
+  ];
 }
 
 // ---- cross-file validation ----
@@ -153,7 +158,11 @@ function buildSlugMap(files: FileMeta[]): Map<string, string> {
   const m = new Map<string, string>();
   for (const f of files) {
     m.set(slugify(f.slug), f.path);
-    if (f.meta.type === "cli-command" && typeof f.meta.tool === "string" && typeof f.meta.command === "string") {
+    if (
+      f.meta.type === "cli-command" &&
+      typeof f.meta.tool === "string" &&
+      typeof f.meta.command === "string"
+    ) {
       m.set(slugify(`${f.meta.tool} ${f.meta.command}`), f.path);
     }
   }
@@ -314,7 +323,15 @@ function validateTypedReference(
       }
       return;
     }
-    validatePathReference(ref.ref, index, filePath, contentRoot, findings, "content/schemas/", true);
+    validatePathReference(
+      ref.ref,
+      index,
+      filePath,
+      contentRoot,
+      findings,
+      "content/schemas/",
+      true,
+    );
     return;
   }
   if (ref.kind === "example") {
@@ -621,7 +638,8 @@ function validatePatternVerificationEvidence(files: FileMeta[]): CrossFileFindin
   return findings;
 }
 
-const GENERATED_IWC_REF_RE = /(?:^|\/)(?:\$IWC_FORMAT2|\$IWC_SKELETONS|workflow-fixtures\/iwc-(?:format2|skeletons)|iwc-(?:format2|skeletons)\/)|\.(?:ga|gxwf\.ya?ml)$/;
+const GENERATED_IWC_REF_RE =
+  /(?:^|\/)(?:\$IWC_FORMAT2|\$IWC_SKELETONS|workflow-fixtures\/iwc-(?:format2|skeletons)|iwc-(?:format2|skeletons)\/)|\.(?:ga|gxwf\.ya?ml)$/;
 const LINE_REF_RE = /:\d+(?:-\d+)?$/;
 
 function validatePatternIwcExemplars(file: FileMeta, findings: CrossFileFinding[]): void {
@@ -650,7 +668,9 @@ function validatePatternIwcExemplars(file: FileMeta, findings: CrossFileFinding[
 }
 
 function validatePatternVerificationPaths(file: FileMeta, findings: CrossFileFinding[]): void {
-  const verificationPaths = Array.isArray(file.meta.verification_paths) ? file.meta.verification_paths : [];
+  const verificationPaths = Array.isArray(file.meta.verification_paths)
+    ? file.meta.verification_paths
+    : [];
   for (const verificationPath of verificationPaths) {
     if (typeof verificationPath !== "string") continue;
     const abs = path.resolve(process.cwd(), verificationPath);
@@ -678,7 +698,10 @@ function validatePatternVerificationPaths(file: FileMeta, findings: CrossFileFin
         message: `evidence=${evidence} requires at least one verification path`,
       });
     }
-  } else if ((evidence === "corpus-observed" || evidence === "hypothesis") && verificationPaths.length > 0) {
+  } else if (
+    (evidence === "corpus-observed" || evidence === "hypothesis") &&
+    verificationPaths.length > 0
+  ) {
     findings.push({
       path: file.path,
       severity: "error",
@@ -782,7 +805,12 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateBidirectionalRelatedNotes(validFiles, slugMap));
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
-  crossFindings.push(...validateMoldSourceLayout(opts.directory, validFiles.filter((f) => f.meta.type === "mold")));
+  crossFindings.push(
+    ...validateMoldSourceLayout(
+      opts.directory,
+      validFiles.filter((f) => f.meta.type === "mold"),
+    ),
+  );
   crossFindings.push(...validateCliCommandDocs(validFiles));
   crossFindings.push(...validatePatternVerificationEvidence(validFiles));
 
@@ -798,7 +826,9 @@ export function validateDirectory(opts: ValidateOptions): {
   }
 
   process.stdout.write(`\n${"=".repeat(50)}\n`);
-  process.stdout.write(`Files: ${filesChecked}  Errors: ${errorCount}  Warnings: ${warningCount}\n`);
+  process.stdout.write(
+    `Files: ${filesChecked}  Errors: ${errorCount}  Warnings: ${warningCount}\n`,
+  );
   return { errors: errorCount, warnings: warningCount, filesChecked };
 }
 

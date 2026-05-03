@@ -26,10 +26,7 @@ export function stripBrackets(wikiLink: unknown): string | null {
   return m && m[1] ? m[1].trim() : null;
 }
 
-export function resolveWikiLink(
-  wikiLink: unknown,
-  slugToPath: Map<string, string>,
-): string | null {
+export function resolveWikiLink(wikiLink: unknown, slugToPath: Map<string, string>): string | null {
   const label = stripBrackets(wikiLink);
   if (!label) return null;
   const hashIdx = label.indexOf("#");
