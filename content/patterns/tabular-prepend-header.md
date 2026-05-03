@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row."
 related_notes:
@@ -19,6 +19,16 @@ related_patterns:
   - "[[tabular-concatenate-collection-to-table]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: microbiome/mags-building/MAGs-generation
+    why: "Uses multiline awk to prepend genome/completeness/contamination, skip the old first row, and normalize genome suffixes."
+    confidence: high
+  - workflow: VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b
+    why: "Shows one-line awk header injection for alternate and primary metrics."
+    confidence: high
+  - workflow: VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8
+    why: "Shows one-line awk header injection for contig metrics and notes."
+    confidence: high
 ---
 
 # Tabular: prepend header
@@ -55,7 +65,7 @@ tool_state:
   variables: []
 ```
 
-Cited at `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:846-858`.
+Anchored by the VGP purge-duplicates IWC exemplar.
 
 Prepend a header, skip the old first row, and normalize rows:
 
@@ -73,7 +83,7 @@ tool_state:
   variables: []
 ```
 
-Cited at `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:1078-1099`.
+Anchored by the MAGs generation IWC exemplar.
 
 ## Pitfalls
 
@@ -82,13 +92,6 @@ Cited at `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:1078-10
 - **Quoted and multiline `code` both occur.** Use one-line quoted strings only for simple pass-through. Use multiline `|-` for `NR > 1`, conditionals, or field rewriting.
 - **Do not name this awk.** The page is operation-named per the survey decision. Sibling awk recipes get their own operation pages.
 - **Header injection is not collection header dedupe.** Collection-wide header dedupe belongs to [[tabular-concatenate-collection-to-table]].
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:1078-1099` — multiline awk, prepends `genome\tcompleteness\tcontamination`, skips existing first row, appends `.fasta` when missing.
-- `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:846-858` — one-liner `Metric\tAlternate`.
-- `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:1622-1634` — sibling one-liner `Metric\tPrimary`.
-- `$IWC_FORMAT2/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.gxwf.yml:2150-2161` — one-liner `Metric\tContigs\tNotes`.
 
 ## Legacy alternative
 

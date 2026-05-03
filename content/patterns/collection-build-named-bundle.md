@@ -11,8 +11,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in."
 related_notes:
@@ -22,6 +22,13 @@ related_patterns:
   - "[[tabular-concatenate-collection-to-table]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: amplicon/qiime2/qiime2-III-VI-downsteam/QIIME2-VI-diversity-metrics-and-estimations
+    why: "Groups QIIME2 plots, PCoA results, distance matrices, and richness vectors into named output collections."
+    confidence: high
+  - workflow: microbiome/mags-building/MAGs-generation
+    why: "Assembles bin-table outputs from multiple binners into one collection for binette."
+    confidence: high
 ---
 
 # Collection: build named bundle
@@ -69,11 +76,6 @@ tool_state:
 - Manual bundles group outputs; they do not align rows, merge contents, or validate common keys.
 - Use inherited identifiers only when source names are meaningful.
 - Prefer `__MERGE_COLLECTION__` only when inputs are already collections.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/amplicon/qiime2/qiime2-III-VI-downsteam/QIIME2-VI-diversity-metrics-and-estimations.gxwf.yml:340` — QIIME2 Emperor plots, PCoA results, distance matrices, and richness vectors grouped into named output collections.
-- `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:961` — bin-table outputs from multiple binners assembled into one collection for `binette`.
 
 ## See also
 

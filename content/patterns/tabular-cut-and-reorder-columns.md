@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom."
 related_notes:
@@ -19,6 +19,16 @@ related_patterns:
   - "[[tabular-sql-query]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
+    steps:
+      - label: "Long projection and reorder with c20 last"
+      - label: "Sibling Cut1 steps with different column lists"
+    why: "Shows pure projection and reordering with long explicit column lists."
+    confidence: high
+  - workflow: genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences
+    why: "Shows a legacy Paste1 plus Cut1 chain that should usually be replaced by column_maker for new work."
+    confidence: medium
 ---
 
 # Tabular: cut and reorder columns
@@ -59,7 +69,7 @@ tool_state:
   delimiter: T
 ```
 
-Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782`.
+Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 
 ## Pitfalls
 
@@ -68,13 +78,6 @@ Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting
 - **Cut breaks Galaxy column metadata.** The wrapper warns: re-cutting may invalidate column-assignment metadata (chrom/start/end for interval/BED). Re-establish via the dataset's "edit attributes" if downstream tools need it.
 - **Reorder-then-rename** is *not* `Cut1`'s job. Renaming columns means rewriting the header row — handle that with [[tabular-compute-new-column]] or with a `tp_replace_in_line` pass.
 - **Adding a constant column** belongs to [[tabular-compute-new-column]] (`column_maker/Add_a_column1`), not `Cut1` + `Paste1`. The latter is legacy.
-
-## Exemplars (IWC)
-
-
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:782` — long projection + reorder (17 columns, `c20` last).
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:830`, `:878` — sibling Cut1 steps in the same workflow, different column lists.
-- `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:733` — `Paste1`+`Cut1` chain (legacy idiom; prefer [[tabular-compute-new-column]] today).
 
 ## Legacy alternative
 

@@ -5,6 +5,7 @@ import NoteHeader from '../components/NoteHeader.astro';
 import NoteMeta from '../components/NoteMeta.astro';
 import IncomingRefs from '../components/IncomingRefs.astro';
 import MoldHealth from '../components/MoldHealth.astro';
+import PatternHealth from '../components/PatternHealth.astro';
 import MoldBody from '../components/MoldBody.astro';
 import PipelineBody from '../components/PipelineBody.astro';
 import PatternBody from '../components/PatternBody.astro';
@@ -75,9 +76,10 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
     {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
 
     {data.type === 'mold' && <MoldHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
+    {data.type === 'pattern' && data.pattern_kind === 'leaf' && <PatternHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
     {data.type === 'mold' && <MoldBody entry={entry} linkMap={linkMap} />}
     {data.type === 'pipeline' && <PipelineBody entry={entry} linkMap={linkMap} />}
-    {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} />}
+    {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} placement="before" />}
     {data.type === 'cli-command' && <CliCommandBody entry={entry} />}
     {data.type === 'research' && <ResearchBody entry={entry} />}
     {data.type === 'schema' && <SchemaBody entry={entry} />}
@@ -85,6 +87,8 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
     <article class="prose prose-slate max-w-none dark:prose-invert">
       <Content />
     </article>
+
+    {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} placement="after" />}
 
     <IncomingRefs incoming={incoming} />
   </div>

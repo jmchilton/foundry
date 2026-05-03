@@ -10,8 +10,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use Apply Rules regex columns to split one collection identifier into nested list identifiers."
 related_notes:
@@ -22,6 +22,10 @@ related_patterns:
   - "[[collection-build-list-paired-with-apply-rules]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: epigenetics/average-bigwig-between-replicates/average-bigwig-between-replicates
+    why: "Splits flat bigWig identifiers into sample-prefix and replicate-suffix nesting with two regex-derived columns."
+    confidence: high
 ---
 
 # Collection: split identifier via rules
@@ -68,10 +72,6 @@ tool_state:
 - Target the original identifier column both times.
 - `^(.*)_([^_]*)$` splits on the last underscore; use a stricter regex if identifiers can contain multiple separators.
 - Validate unmatched behavior instead of silently creating empty nesting keys.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/epigenetics/average-bigwig-between-replicates/average-bigwig-between-replicates.gxwf.yml` — splits flat bigWig identifiers into sample-prefix and replicate-suffix nesting with two regex-derived columns.
 
 ## See also
 

@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions."
 related_notes:
@@ -20,6 +20,20 @@ related_patterns:
   - "[[tabular-join-on-key]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
+    steps:
+      - label: "Grouped collapse with regex cleanup"
+      - label: "Grouped countunique, min, and max"
+      - label: "Single countunique operation"
+    why: "Shows multi-column grouping, grouped summaries, and cleanup after collapsed datamash output."
+    confidence: high
+  - workflow: VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b
+    why: "Shows whole-file absmax reduction with no grouping."
+    confidence: high
+  - workflow: microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation
+    why: "Shows legacy Grouping1 occurrences preserved as inherited workflow context."
+    confidence: medium
 ---
 
 # Tabular: group and aggregate
@@ -78,7 +92,7 @@ tool_state:
   print_full_line: false
 ```
 
-Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:333-373`.
+Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 
 Grouped multi-stat summary in one pass:
 
@@ -106,7 +120,7 @@ tool_state:
   print_full_line: false
 ```
 
-Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:562-596`.
+Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 
 ## Pitfalls
 
@@ -118,21 +132,13 @@ Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting
 - **Empty `grouping: ""` is a whole-file aggregate.** Valid, but a different operation than grouped summary.
 - **Version pins vary.** Prefer the newest available pin in the workflow context; do not downgrade just to match an old exemplar.
 
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:333-373` — 10-column grouping with 7 `collapse` operations.
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:375-407` — regex cleanup after collapsed datamash output.
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:562-596` — `countunique`, `min`, and `max` in one grouped step.
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:632-657` — single `countunique` operation.
-- `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:601-626` — `1.9+galaxy0`, whole-file `absmax` reduction with no grouping.
-
 ## Legacy alternative
 
 `Grouping1` (Galaxy core; display name "Group data by a column") survives in older microbiome workflows. Preserve it when reading old workflows, but prefer `datamash_ops` for new authoring.
 
 Distinguishing fields: `groupcol`, `ignorecase`, `ignorelines`, `operations[].optype`, `operations[].opcol`, `operations[].opround`, and `operations[].opdefault`. Do not translate `Grouping1.operations[].optype` directly into datamash without checking names; datamash uses `op_name`.
 
-Cited at `$IWC_FORMAT2/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:324-340` and `:1087-1103`.
+Anchored by the PathoGFAIR sample aggregation IWC exemplar.
 
 ## See also
 

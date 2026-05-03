@@ -11,8 +11,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use tp_awk_tool to replace each row or label with deterministic sample_N values from awk NR."
 related_notes:
@@ -23,6 +23,10 @@ related_patterns:
   - "[[tabular-concatenate-collection-to-table]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: microbiome/binning-evaluation/MAGs-binning-evaluation
+    why: "Uses tp_awk_tool to replace each row with zero-based sample_N labels derived from NR."
+    confidence: high
 ---
 
 # Tabular: relabel by row counter
@@ -57,7 +61,7 @@ tool_state:
   variables: []
 ```
 
-Cited at `$IWC_FORMAT2/microbiome/binning-evaluation/MAGs-binning-evaluation.gxwf.yml:420-436`.
+Anchored by the MAGs binning evaluation IWC exemplar.
 
 Clearer equivalent for new whole-row replacement:
 
@@ -94,10 +98,6 @@ tool_state:
 - **Whole-row replacement destroys original columns.** Only use when downstream wants labels only.
 - **Row order becomes semantic.** Any upstream sort or filter changes assigned sample numbers.
 - **No collection provenance.** If labels should come from element identifiers, do not synthesize them from row order.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/microbiome/binning-evaluation/MAGs-binning-evaluation.gxwf.yml:420-436` — `tp_awk_tool/9.5+galaxy3`, `code: '{gsub( $0 ,"sample_" (NR-1)); print}'`.
 
 ## See also
 

@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-03
+revision: 3
 ai_generated: true
 summary: "Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value."
 related_notes:
@@ -26,6 +26,16 @@ related_patterns:
   - "[[collection-cleanup-after-mapover-failure]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy
+    why: "Shows a binary 10x import route with legacy and v3 AnnData branches merged by pick_value."
+    confidence: high
+  - workflow: genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences
+    why: "Shows one enum input mapped into mode booleans, fan-out across eggNOG modes, then pick_value merge."
+    confidence: high
+  - workflow: microbiome/mags-building/MAGs-generation
+    why: "Routes among individual, co-assembly, and custom assembly alternatives, including an embedded subworkflow branch."
+    confidence: high
 ---
 
 # Conditional: route between alternative outputs
@@ -147,14 +157,6 @@ These snippets are conceptual. Use the cited gxformat2 exemplars for exact seria
 - Hiding the route in one wrapper. IWC evidence favors graph-visible `when` branches plus merge for these route operations.
 - Duplicating enum comparisons inside every downstream tool. Normalize once with `map_param_value`, then connect the resulting boolean to `id: when`.
 - Confusing route merge with collection cleanup. `__FILTER_EMPTY_DATASETS__` and `__FILTER_FAILED_DATASETS__` clean mapped collection elements; they are not the observed IWC mechanism for one-of-N conditional routing.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:180-211`, `$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:337-399` — binary 10x import route: legacy vs v3 `anndata_import`, then `pick_value` selects the present AnnData output.
-- `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:244-395`, `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:396-429` — one-of-N eggNOG mapper mode fan-out, then `pick_value` collapses the selected annotation output.
-- `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:295-410`, `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:411-439` — alternative assembly route including an embedded subworkflow branch, then `pick_value` chooses among individual, co-assembly, or custom assemblies.
-- `$IWC_FORMAT2/scRNAseq/scanpy-clustering/Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy.gxwf.yml:173-241` — binary route uses direct boolean for one branch and `map_param_value` inversion for the other.
-- `$IWC_FORMAT2/genome_annotation/functional-annotation/functional-annotation-of-sequences/Functional_annotation_of_sequences.gxwf.yml:55-195` — one enum input maps into one boolean per eggNOG mode before the gated branches.
 
 ## See Also
 

@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 3
+revised: 2026-05-03
+revision: 4
 ai_generated: true
 summary: "Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch."
 related_notes:
@@ -28,6 +28,24 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 verification_paths:
   - verification/workflows/conditional-run-optional-step/run-optional-step.gxwf-test.yml
+iwc_exemplars:
+  - workflow: genome_annotation/annotation-braker3/Genome_annotation_with_braker3
+    steps:
+      - label: "Gate BUSCO on predicted protein sequences"
+      - label: "Gate genome BUSCO from the same user boolean"
+    why: "Shows repeated optional assessment branches controlled by one workflow boolean."
+    confidence: high
+  - workflow: transcriptomics/rnaseq-pe/rnaseq-pe
+    steps:
+      - label: "Gate optional StringTie FPKM branch"
+      - label: "Gate optional Cufflinks FPKM branch"
+    why: "Shows peer optional quantification branches gated by workflow choices."
+    confidence: high
+  - workflow: VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation
+    steps:
+      - label: "Gate multi-step suffixing branch"
+    why: "Shows a multi-step optional branch where downstream fallback belongs to a separate transform-or-pass-through pattern."
+    confidence: high
 ---
 
 # Conditional: run optional step
@@ -118,16 +136,7 @@ The second shape is conceptual, derived from the VGP Hi-C suffixing branch. The 
 - Consuming a missing optional output unconditionally. If downstream requires a value regardless of the boolean, add an explicit merge/fallback with `pick_value`.
 - Confusing user choice with data-derived choice. Empty/non-empty result checks need a separate boolean-producing shim before `when:`.
 - Duplicating normalization logic inside optional tools. If the gate depends on a derived boolean, compute it once and connect that boolean as `id: when`.
-- Leading with `__FILTER_NULL__` as conditional cleanup. The survey found zero `__FILTER_NULL__` hits in `$IWC_FORMAT2`; keep it as catalog knowledge, not the corpus-backed authoring path.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/genome_annotation/annotation-braker3/Genome_annotation_with_braker3.gxwf.yml:110-141` — BRAKER3 gates BUSCO on predicted protein sequences with the `Include BUSCO` boolean connected as `when`.
-- `$IWC_FORMAT2/genome_annotation/annotation-braker3/Genome_annotation_with_braker3.gxwf.yml:341-385` — same workflow gates genome BUSCO from the same user-facing boolean, showing repeated optional assessment branches.
-- `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1082-1140` — RNA-seq gates the optional StringTie FPKM branch with `Compute StringTie FPKM`.
-- `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1141-1214` — RNA-seq gates the optional Cufflinks FPKM branch separately with `Compute Cufflinks FPKM`.
-- `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:338-459` — VGP Hi-C gates a multi-step suffixing branch with a user boolean; downstream fallback uses `pick_value`, marking the boundary with [[conditional-transform-or-pass-through]].
-- `$IWC_FORMAT2/VGP-assembly-v2/Assembly-decontamination-VGP9/Assembly-decontamination-VGP9.gxwf.yml:205-305` — integer-derived value is normalized with `map_param_value`, then the boolean gates optional filtering steps.
+- Leading with `__FILTER_NULL__` as conditional cleanup. The survey found zero `__FILTER_NULL__` hits in the IWC corpus; keep it as catalog knowledge, not the corpus-backed authoring path.
 
 ## See Also
 

@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-03
+revision: 3
 ai_generated: true
 summary: "Derive a boolean from empty or non-empty data, then use when to skip reporting or export steps."
 related_notes:
@@ -27,6 +27,17 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 verification_paths:
   - verification/workflows/conditional-gate-on-nonempty-result/gate-on-nonempty.gxwf-test.yml
+iwc_exemplars:
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
+    steps:
+      - label: "Map empty/not empty collection to boolean"
+      - label: "Gate Krona output generation"
+      - label: "Gate BIOM conversion and export steps"
+    why: "Shows the verified collection-to-boolean shim feeding downstream when gates."
+    confidence: high
+  - workflow: VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation
+    why: "Shows text-like dataset content mapped to a boolean before gating Pretext graph steps."
+    confidence: high
 ---
 
 # Conditional: gate on non-empty result
@@ -58,7 +69,7 @@ This is not a generic user toggle. If the user chooses whether to run an optiona
 
 This is not map-over cleanup. If the need is to drop empty or failed elements inside a collection before the next collection consumer, use [[collection-cleanup-after-mapover-failure]].
 
-This is not `__FILTER_NULL__`. The conditionals survey found zero `__FILTER_NULL__` usage in `$IWC_FORMAT2`, but zero uptake alone is not an anti-pattern call.
+This is not `__FILTER_NULL__`. The conditionals survey found zero `__FILTER_NULL__` usage in the IWC corpus, but zero uptake alone is not an anti-pattern call.
 
 ## Operation Boundary
 
@@ -133,13 +144,6 @@ These snippets summarize observed and verified shapes. Do not simplify the MGnif
 - Do not use this when the choice is user-controlled. Direct boolean `when` gates are simpler.
 - Do not replace collection cleanup with a workflow gate. Cleanup changes collection members; this pattern skips whole downstream steps.
 - Do not cite `__FILTER_NULL__` as an IWC-backed conditional pattern. Survey found no corpus uptake.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1358-1483` — embedded subworkflow labeled `Map empty/not empty collection to boolean`; uses `collection_element_identifiers -> wc_gnu -> column_maker -> param_value_from_file`.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1330-1357` — boolean gates Krona output generation.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1484-1659` — same boolean gates BIOM conversion/export steps.
-- `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3057-3218`, `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3289-3346`, `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:3458-3510` — text-like dataset-content variant: telomere BED text is mapped to a boolean before gating Pretext graph steps.
 
 ## Verification
 

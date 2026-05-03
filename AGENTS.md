@@ -18,7 +18,7 @@
 - **Frontmatter is contract.** `meta_schema.yml` is JSON Schema Draft 07 with `additionalProperties: false`. Unknown fields are rejected. Add a property declaration in the schema before adding a frontmatter field anywhere.
 - **Tags must be registered.** Every tag a note uses lives in `meta_tags.yml`. Vocabulary changes touch one file.
 - **Wiki-link fields use `[[Target]]`.** Single-value fields (`parent_pattern`) and array fields (`related_notes`, `related_patterns`, `related_molds`, `patterns`, `cli_commands`, `prompts`).
-- **IWC citations should survive corpus churn.** Prefer workflow-path citations plus step label/tool name over brittle line precision when cleaned/converted workflow files are likely to move. Use line ranges only when they clarify a stable local snippet.
+- **Polished IWC references should survive corpus churn.** Pattern pages, Mold pages, and other polished content should cite abstract IWC workflow IDs without generated extensions or fixture roots, e.g. `transcriptomics/rnaseq-pe/rnaseq-pe`, plus step labels or step IDs when needed. Do not cite generated `.ga`/`.gxwf.yml` paths or line numbers in polished pages; reserve those for surveys, ad-hoc research notes, and local debugging evidence.
 - **Validate before commit.** `npm run validate` checks schema + cross-file resolution. Errors block; warnings are advisory.
 - **Don't edit generated files by hand.** `Dashboard.md` and `Index.md` are produced by `scripts/generate-*.ts`. `glossary.md` is hand-curated and skipped by the validator. `log.md` is append-only.
 
@@ -61,8 +61,8 @@ make fixtures-clean    # remove generated fixture dirs
 - `workflow-fixtures/pipelines/` — pinned Nextflow pipeline clones from `workflow-fixtures/fixtures.yaml`.
 - `workflow-fixtures/iwc-src/` — pinned IWC clone.
 - `workflow-fixtures/iwc-cleaned/` — intermediate cleaned Galaxy workflows.
-- `workflow-fixtures/iwc-format2/` — cleaned gxformat2 IWC corpus, cited as `$IWC_FORMAT2/...`.
-- `workflow-fixtures/iwc-skeletons/` — structural-only views, cited as `$IWC_SKELETONS/...`.
+- `workflow-fixtures/iwc-format2/` — cleaned gxformat2 IWC corpus, cited as `$IWC_FORMAT2/...` in surveys and ad-hoc research only.
+- `workflow-fixtures/iwc-skeletons/` — structural-only views, cited as `$IWC_SKELETONS/...` in surveys and ad-hoc research only.
 
 Before launching or acting as a research subagent that needs corpus evidence, check whether the needed generated dirs exist. If they are missing, use the top-level fixture targets above. If you cannot materialize them, stop and report the missing target instead of inventing evidence.
 

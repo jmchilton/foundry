@@ -11,8 +11,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections."
 related_notes:
@@ -22,6 +22,16 @@ related_patterns:
   - "[[harmonize-by-sortlist-from-identifiers]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
+    why: "Cleaned SSU and LSU BED identifiers drive filtering of processed sequence collections."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-its/mgnify-amplicon-pipeline-v5-its
+    why: "Shows a compact clean, identify, and filter sibling collection shape."
+    confidence: high
+  - workflow: microbiome/metagenomic-raw-reads-amr-analysis/metagenomic-raw-reads-amr-analysis
+    why: "Uses identifier extraction and relabeling to restore per-sample identity downstream."
+    confidence: high
 ---
 
 # Collection: sync collections by identifier
@@ -76,12 +86,6 @@ tool_state:
 - Extract identifiers from the collection that represents truth after cleanup. In MGnify examples, BED hits drive filtering of processed sequences, not the reverse.
 - Relabeling can hide mismatches when strict checks are off. Use only when the upstream shape guarantees correspondence.
 - `__FILTER_FROM_FILE__` filters by names in a file; it does not inspect whether files are empty or failed.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:12-18` — cleaned SSU/LSU BED identifiers drive filtering of processed sequence collections.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-its/mgnify-amplicon-pipeline-v5-its.gxwf.yml:2-4` — compact version of the same clean, identify, filter sibling shape.
-- `$IWC_FORMAT2/microbiome/metagenomic-raw-reads-amr-analysis/metagenomic-raw-reads-amr-analysis.gxwf.yml:11,19` — identifier extraction and relabel variant used to restore per-sample identity downstream.
 
 ## See also
 

@@ -11,8 +11,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key."
 related_notes:
@@ -22,6 +22,16 @@ related_patterns:
   - "[[sync-collections-by-identifier]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs
+    why: "Splits one-column SRA accessions so fasterq_dump can run once per accession."
+    confidence: high
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
+    why: "Splits a combined per-clade VCF table into per-clade collection elements."
+    confidence: high
+  - workflow: epigenetics/consensus-peaks/consensus-peaks-chip-sr
+    why: "Turns a sample-list tabular into a collection-shaped input for downstream processing."
+    confidence: high
 ---
 
 # Tabular: to collection by row
@@ -63,13 +73,6 @@ tool_state:
 - Pick a stable, unique identifier column; duplicate values produce ambiguous collection elements.
 - Regex cleanup is downstream metadata cleanup, not cosmetic only.
 - Headers matter. Ensure each split element gets the header behavior the downstream tool expects.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.gxwf.yml` — splits one-column SRA accessions so `fasterq_dump` runs once per accession.
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:895` — splits a combined per-clade VCF table into per-clade elements.
-- `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-chip-sr.gxwf.yml:415` — turns a sample-list tabular into a collection-shaped input.
-- `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:440` — same row-fan-out shape in the ATAC/CUT&RUN variant.
 
 ## See also
 

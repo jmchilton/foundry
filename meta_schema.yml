@@ -79,6 +79,40 @@ properties:
     type: array
     items:
       type: string
+  iwc_exemplars:
+    type: array
+    items:
+      type: object
+      required: [workflow, why, confidence]
+      additionalProperties: false
+      properties:
+        workflow:
+          type: string
+          minLength: 1
+        steps:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            anyOf:
+              - required: [label]
+              - required: [id]
+            properties:
+              label:
+                type: string
+                minLength: 1
+              id:
+                oneOf:
+                  - type: string
+                    minLength: 1
+                  - type: integer
+        why:
+          type: string
+          minLength: 1
+        confidence:
+          type: string
+          enum: [high, medium, low]
 
   # --- Mold fields ---
   name:

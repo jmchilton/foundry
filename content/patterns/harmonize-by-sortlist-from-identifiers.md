@@ -11,8 +11,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers."
 related_notes:
@@ -22,6 +22,13 @@ related_patterns:
   - "[[collection-flatten-after-fanout]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: virology/pox-virus-amplicon/pox-virus-half-genome
+    why: "Uses identifiers from Pool1 to drive SORTLIST ordering of Pool2."
+    confidence: high
+  - workflow: VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8
+    why: "Uses multiple file-driven SORTLIST steps to align sibling collections by identifier order."
+    confidence: high
 ---
 
 # Collection: harmonize by sortlist from identifiers
@@ -62,11 +69,6 @@ The `sort_file` must be the identifiers of the collection whose order should be 
 - The reference collection defines truth. If the identifier file comes from the wrong sibling, downstream pairing silently follows the wrong axis.
 - Extract identifiers after upstream relabel, filter, or flatten operations, not before.
 - Mention `__HARMONIZELISTS__` only as the absent catalog alternative; do not recommend it from corpus evidence.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/virology/pox-virus-amplicon/pox-virus-half-genome.gxwf.yml:541-562` — identifiers from Pool1 drive `__SORTLIST__` on Pool2.
-- `$IWC_FORMAT2/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.gxwf.yml` — subworkflow uses multiple file-driven `__SORTLIST__` steps to align sibling collections by identifier order.
 
 ## See also
 

@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants."
 related_notes:
@@ -19,6 +19,13 @@ related_patterns:
   - "[[tabular-compute-new-column]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
+    why: "Synthesizes SSU and LSU forward/reverse BED files from three-column interval outputs."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-complete/mgnify-amplicon-pipeline-v5-complete
+    why: "Uses the same BED synthesis idiom embedded in the complete workflow with an older text-processing pin."
+    confidence: high
 ---
 
 # Tabular: synthesize BED from 3-column input
@@ -88,12 +95,6 @@ out:
 - **BED datatype matters.** Corpus sets `change_datatype: bed`; do not leave the output as generic tabular if downstream expects BED.
 - **Name and score are constants.** This pattern does not derive BED name or score from input columns.
 - **Forward and reverse are separate steps.** Do not emit both strands from one row unless downstream expects duplicate intervals in one file.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:205-245` — SSU forward/reverse BED.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:251-291` — LSU forward/reverse BED.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-complete/mgnify-amplicon-pipeline-v5-complete.gxwf.yml:2084-2170` — same idiom embedded in the complete workflow with older `9.3+galaxy1` pin.
 
 ## See also
 

@@ -11,8 +11,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use Apply Rules, identifier extraction, find/replace, and relabeling for structural fan-out cleanup."
 related_notes:
@@ -23,6 +23,13 @@ related_patterns:
   - "[[collection-swap-nesting-with-apply-rules]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping
+    steps:
+      - label: "BAM split by reference relabel chain"
+      - label: "Repeated Apply Rules swap-nesting around sample and segment collections"
+    why: "Shows the dense chain of Apply Rules, identifier extraction, find/replace, relabeling, and Apply Rules regrouping."
+    confidence: high
 ---
 
 # Collection: relabel via rules and find/replace
@@ -71,11 +78,6 @@ Conceptual chain:
 - Extract identifiers at the right level; extracting before the first Apply Rules step can capture the wrong labels.
 - Rewrite only tool-added noise. A broad regex can merge distinct segment/sample identifiers.
 - `__RELABEL_FROM_FILE__` changes names only. Apply Rules carries the shape change.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:34-38` — canonical dense segment: `bamtools_split_ref` output goes through Apply Rules, identifier extraction, find/replace, relabeling, then Apply Rules again.
-- `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:14,39,43` — same workflow repeatedly uses the Apply Rules swap-nesting shape around sample/segment collections.
 
 ## See also
 

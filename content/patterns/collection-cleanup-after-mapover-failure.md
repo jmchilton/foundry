@@ -11,8 +11,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps."
 related_notes:
@@ -21,6 +21,16 @@ related_patterns:
   - "[[sync-collections-by-identifier]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation
+    why: "Shows multiple collection inputs passing through FILTER_FAILED before downstream aggregation."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
+    why: "Uses repeated FILTER_EMPTY steps after awk/search reshapes before the next consumer."
+    confidence: high
+  - workflow: microbiome/metagenomic-raw-reads-amr-analysis/metagenomic-raw-reads-amr-analysis
+    why: "Shows rare replacement form that preserves shape with a sentinel file."
+    confidence: medium
 ---
 
 # Collection: cleanup after map-over failure
@@ -86,12 +96,6 @@ in:
 - Dropping changes collection length. If a downstream zip or sibling comparison assumes one-to-one alignment, resync siblings or use a replacement sentinel.
 - Replacement changes data semantics. The sentinel becomes real downstream input, so choose a value the next tool treats as controlled no-result data.
 - Do not confuse this with `__FILTER_FROM_FILE__`; that tool filters by identifier list and does not inspect dataset state.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:10-14` — five collection inputs pass through `__FILTER_FAILED_DATASETS__` before downstream aggregation.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml` — repeated `__FILTER_EMPTY_DATASETS__` uses after awk/search reshapes before the next consumer.
-- `$IWC_FORMAT2/microbiome/metagenomic-raw-reads-amr-analysis/metagenomic-raw-reads-amr-analysis.gxwf.yml:225` — rare replacement form, preserving shape with a sentinel file.
 
 ## See also
 

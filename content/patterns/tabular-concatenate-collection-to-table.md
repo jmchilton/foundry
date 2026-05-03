@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe."
 related_notes:
@@ -24,6 +24,19 @@ related_patterns:
   - "[[tabular-group-and-aggregate-with-datamash]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
+    why: "Shows the canonical row-provenance triad with add_name, same_multiple, and one_header."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2
+    why: "Shows collection concatenation without element-name or header handling."
+    confidence: high
+  - workflow: virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping
+    why: "Shows headerless outputs with per-row provenance and repeated bridge use before filtering."
+    confidence: high
+  - workflow: microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation
+    why: "Shows the same collection-to-tabular bridge in a pathogen aggregation workflow."
+    confidence: high
 ---
 
 # Tabular: concatenate collection to table
@@ -70,7 +83,7 @@ tool_state:
   one_header: true
 ```
 
-Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:414-433`.
+Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 
 Collection concat with no element identifier:
 
@@ -82,7 +95,7 @@ tool_state:
   one_header: false
 ```
 
-Cited at `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:178-198`.
+Anchored by the MAPseq-to-ampvis2 IWC exemplar.
 
 Headerless outputs with row provenance:
 
@@ -95,7 +108,7 @@ tool_state:
   one_header: false
 ```
 
-Cited at `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:715-734`.
+Anchored by the influenza consensus and subtyping IWC exemplar.
 
 ## Pitfalls
 
@@ -105,14 +118,6 @@ Cited at `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influ
 - **`place_name: same_multiple` is the row-provenance idiom.** It repeats the element name so each output row carries identity.
 - **`same_once` is a different shape.** Use it only when downstream expects block labels, not per-row identity.
 - **This is row-bind, not wide pivot.** If each collection element should become a column, use [[tabular-pivot-collection-to-wide]].
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:414-433` — canonical triad: `add_name: true`, `place_name: same_multiple`, `one_header: true`.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:178-198` — concat without name/header handling: `add_name: false`, `one_header: false`.
-- `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:715-734` — `add_name: true`, `same_multiple`, `one_header: false`.
-- `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:1195-1240` — repeated bridge pattern before tabular filtering.
-- `$IWC_FORMAT2/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:509-548` — collection bridge in a pathogen workflow.
 
 ## Legacy alternative
 

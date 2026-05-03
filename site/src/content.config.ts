@@ -34,6 +34,20 @@ const typedReference = z.object({
   }
 });
 
+const iwcExemplarStep = z.object({
+  label: z.string().min(1).optional(),
+  id: z.union([z.string().min(1), z.number().int()]).optional(),
+}).strict().refine((step: any) => step.label || step.id !== undefined, {
+  message: 'step needs `label` or `id`',
+});
+
+const iwcExemplar = z.object({
+  workflow: z.string().min(1),
+  steps: z.array(iwcExemplarStep).min(1).optional(),
+  why: z.string().min(1),
+  confidence: z.enum(['high', 'medium', 'low']),
+}).strict();
+
 const baseFields = {
   tags: z.array(z.string()).min(1),
   status: z.enum(['draft', 'reviewed', 'revised', 'stale', 'archived']),
@@ -99,6 +113,7 @@ const patternSchema = z.object({
   title: z.string(),
   parent_pattern: wikiLink.optional(),
   verification_paths: z.array(z.string()).optional(),
+  iwc_exemplars: z.array(iwcExemplar).optional(),
   ...baseFields,
 }).strict();
 
