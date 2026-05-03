@@ -196,8 +196,16 @@ process SECOND {
   test("captures module meta.yml and module nf-tests on canonical process", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/module-meta' }\n");
-    write(root, "main.nf", "include { ALIGN } from './modules/nf-core/minimap2/align'\nworkflow MODULE_META { ALIGN() }\n");
-    write(root, "modules/nf-core/minimap2/align/main.nf", "process ALIGN {\n  script:\n  'align'\n}\n");
+    write(
+      root,
+      "main.nf",
+      "include { ALIGN } from './modules/nf-core/minimap2/align'\nworkflow MODULE_META { ALIGN() }\n",
+    );
+    write(
+      root,
+      "modules/nf-core/minimap2/align/main.nf",
+      "process ALIGN {\n  script:\n  'align'\n}\n",
+    );
     write(
       root,
       "modules/nf-core/minimap2/align/meta.yml",
@@ -273,7 +281,11 @@ test("align module") {
     write(root, "nextflow.config", "manifest { name = 'nf-core/subworkflow-tests' }\n");
     write(root, "modules/local/local.nf", "process LOCAL {\n  script:\n  'local'\n}\n");
     write(root, "modules/local/meta.yml", "description: Local metadata should not be promoted\n");
-    write(root, "modules/local/tests/local.nf.test", "test(\"local\") { then { assert workflow.success } }\n");
+    write(
+      root,
+      "modules/local/tests/local.nf.test",
+      'test("local") { then { assert workflow.success } }\n',
+    );
     write(root, "modules/local/other.nf", "process OTHER {\n  script:\n  'other'\n}\n");
     write(
       root,
@@ -285,7 +297,11 @@ test("align module") {
       "workflows/pipeline.nf",
       "workflow PIPELINE {\n  take:\n  reads\n  main:\n  LOCAL(reads)\n  OTHER(reads)\n}\n",
     );
-    write(root, "main.nf", "include { LOCAL } from './modules/local/local'\ninclude { OTHER } from './modules/local/other'\ninclude { TRIM } from './subworkflows/nf-core/trim'\ninclude { PIPELINE } from './workflows/pipeline'\nworkflow { PIPELINE(Channel.of('x')) }\n");
+    write(
+      root,
+      "main.nf",
+      "include { LOCAL } from './modules/local/local'\ninclude { OTHER } from './modules/local/other'\ninclude { TRIM } from './subworkflows/nf-core/trim'\ninclude { PIPELINE } from './workflows/pipeline'\nworkflow { PIPELINE(Channel.of('x')) }\n",
+    );
     write(
       root,
       "subworkflows/nf-core/trim/tests/main.nf.test",
