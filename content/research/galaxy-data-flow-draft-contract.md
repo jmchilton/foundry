@@ -7,10 +7,11 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 related_notes:
+  - "[[iwc-exemplar-runtime-discovery]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
   - "[[iwc-nearest-exemplar-selection]]"
