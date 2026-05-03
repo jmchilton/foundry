@@ -273,7 +273,7 @@ The Foundry is not an Obsidian vault by intent; agent-driven authoring through s
 Foundry slash commands (sketch — see open questions):
 - **`/draft-mold`** — scaffold a new Mold (`molds/<slug>/index.md` + `eval.md`) from a name and axis; cross-ref pass against existing patterns.
 - **`/draft-pattern`** — scaffold a pattern page; convention (not enforced) that the page cite at least one IWC workflow URL in `## Exemplars` (corpus-first principle).
-- **`/cast`** — wraps `scripts/cast-mold.ts`; classify Mold → resolve refs → call casting LLM → write `casts/<target>/<name>/` → record `_provenance.json` → append to `log.md`.
+- **`/cast`** — wraps `foundry-build cast`; classify Mold → resolve refs → call casting LLM → write `casts/<target>/<name>/` → record `_provenance.json` → append to `log.md`.
 
 There is no IWC ingestion command. IWC is referenced by URL in pattern bodies (see `CORPUS_INGESTION.md`); no ingest-iwc script exists. Background research lands as hand-authored `research/component` notes.
 
@@ -336,7 +336,7 @@ Deployment: minimal two-job GitHub Actions on push to `main` (`withastro/action@
 
 One ingestion spine — Mold casting. There is no IWC ingestion (see `CORPUS_INGESTION.md`).
 
-**Mold casting** (`scripts/cast-mold.ts`, driven by `/cast`). Covered in `COMPILATION_PIPELINE.md`. Reads from `content/molds/`, `content/patterns/`, `content/schemas/`; writes only to `casts/<target>/<name>/`.
+**Mold casting** (`foundry-build cast`, driven by `/cast`). Covered in `COMPILATION_PIPELINE.md`. Reads from `content/molds/`, `content/patterns/`, `content/schemas/`; writes only to `casts/<target>/<name>/`.
 
 **`content/log.md`** — append-only, excluded from validator and Astro collections, Obsidian-visible. Reserved entry types: `cast`, planned `lint` and `query`. Format:
 
@@ -367,7 +367,7 @@ Stack:
 
 **Validation.** Two layers:
 - *Static* — `validate.ts` checks frontmatter against schema, wiki link integrity, tag coherence, bidirectional `related_notes`, `iwc/*` tag declaration, and Mold ref checks.
-- *Casting-time* — `cast-mold.ts` refuses to cast a Mold that fails static validation, and validates resolved refs conform to their schemas.
+- *Casting-time* — `foundry-build cast` refuses to cast a Mold that fails static validation, and validates resolved refs conform to their schemas.
 
 **Versioning.** No semver on Molds, no semver on casts. Identity = name + content hash. Re-casting is the migration path. See `COMPILATION_PIPELINE.md`.
 
@@ -465,7 +465,7 @@ foundry/
 │   ├── generate-dashboard.ts           # compatibility wrapper for foundry-build
 │   ├── generate-index.ts               # compatibility wrapper for foundry-build
 │   ├── seed-iwc-tags.ts                  # one-time, then archived
-│   ├── cast-mold.ts
+│   ├── cast-mold.ts                    # compatibility wrapper for foundry-build
 │   ├── status.ts                         # cast drift detection
 │   └── lib/
 │       ├── schema.ts                     # load + tag-enum injection

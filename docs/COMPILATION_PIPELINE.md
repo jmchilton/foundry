@@ -90,11 +90,11 @@ The casting process is itself expected to evolve. Today: an LLM with a target-sp
 
 Three triggers, in increasing automation:
 
-1. **Manual.** Today: `npx tsx scripts/cast-mold.ts <mold-name> --target=<target>` for the deterministic prepare, plus the `/cast` slash command for the full validate → prepare → LLM → verify loop. Future: `foundry cast <mold-name> --target=<target>` once the CLI surface stabilizes.
+1. **Manual.** Today: `npm run cast -- <mold-name> --target=<target>` for the deterministic prepare, plus the `/cast` slash command for the full validate → prepare → LLM → verify loop.
 2. **CI on Mold change.** When a PR touches `molds/<name>/`, CI re-casts that Mold against all configured targets and surfaces the diff in review. (Not wired yet — cast artifacts are committed manually.)
 3. **Watch-on-change** (dev convenience). Future.
 
-Drift surfaces today via `cast-mold.ts <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, pending LLM entries). A repo-wide `foundry status` is future work.
+Drift surfaces today via `foundry-build cast <mold> --check` (per-Mold) and `cast-skill-verify.ts <mold>` (verifier rejects hash drift, missing dst, pending LLM entries). A repo-wide `foundry status` is future work.
 
 ## Input contract
 
@@ -255,7 +255,7 @@ cast_mold(mold_name, target):
                           prompt + model identity for LLM-produced entries)
 ```
 
-The deterministic phase (`scripts/cast-mold.ts`) handles verbatim copies, sidecars, and condense placeholders without invoking an LLM. The LLM phase lives in the `/cast` slash command: it reads the Mold and any `casting.md` guidance, fills in `pending_llm` entries, updates SKILL.md, and rewrites `_provenance.json`. The deterministic verifier (`scripts/cast-skill-verify.ts`) enforces the contract on the result.
+The deterministic phase (`foundry-build cast`) handles verbatim copies, sidecars, and condense placeholders without invoking an LLM. The LLM phase lives in the `/cast` slash command: it reads the Mold and any `casting.md` guidance, fills in `pending_llm` entries, updates SKILL.md, and rewrites `_provenance.json`. The deterministic verifier (`scripts/cast-skill-verify.ts`) enforces the contract on the result.
 
 ## Drift detection
 

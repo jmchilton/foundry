@@ -1,3 +1,4 @@
+export { runCastMoldCommand } from "./commands/cast-mold.js";
 export { runGenerateDashboardCommand } from "./commands/generate-dashboard.js";
 export { runGenerateIndexCommand } from "./commands/generate-index.js";
 export {

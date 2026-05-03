@@ -16,7 +16,7 @@
     "check:index": "tsx packages/build-cli/src/bin/foundry-build.ts generate-index --root . --check",
     "check:vendored": "tsx scripts/sync-vendored-upstreams.ts --check",
     "sync:vendored": "tsx scripts/sync-vendored-upstreams.ts --update",
-    "cast": "tsx scripts/cast-mold.ts",
+    "cast": "tsx packages/build-cli/src/bin/foundry-build.ts cast --root .",
     "packages-build": "pnpm -r build",
     "packages-test": "pnpm -r test",
     "packages-typecheck": "pnpm --filter @galaxy-foundry/summary-nextflow-schema build && pnpm -r typecheck",

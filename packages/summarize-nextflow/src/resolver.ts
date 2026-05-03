@@ -24,6 +24,7 @@ interface Subworkflow {
   calls: string[];
   inputs?: ChannelIO[];
   outputs?: ChannelIO[];
+  tests: NfTest[];
 }
 
 interface ParsedWorkflow extends Subworkflow {
@@ -78,6 +79,8 @@ interface Process {
   name: string;
   aliases: string[];
   module_path: string;
+  meta: ModuleMeta | null;
+  module_tests: NfTest[];
   tool: string | null;
   container: string | null;
   conda: string | null;
@@ -86,6 +89,29 @@ interface Process {
   when: string | null;
   script_summary: string;
   publish_dir: string | null;
+}
+
+interface ModuleMeta {
+  description?: string;
+  keywords: string[];
+  authors: string[];
+  maintainers: string[];
+  tools: ModuleMetaEntry[];
+  input: ModuleMetaEntry[];
+  output: ModuleMetaEntry[];
+}
+
+interface ModuleMetaEntry {
+  name: string;
+  description?: string;
+  homepage?: string;
+  documentation?: string;
+  tool_dev_url?: string;
+  doi?: string;
+  licence?: string[];
+  identifier?: string;
+  type?: string;
+  pattern?: string;
 }
 
 interface TestDataRef {
@@ -407,6 +433,9 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
     const body = extractBlockAt(text, openIndex);
     if (body === null) return [];
     const name = match[1]!;
+    const moduleDir = dirname(path);
+    const modulePath = relative(pipelineRoot, path);
+    const isLocalModule = modulePath.startsWith(`modules${sep}local${sep}`);
     const container = normalizeDirective(
       matchOne(
         body,
@@ -417,7 +446,9 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
     return {
       name,
       aliases: [],
-      module_path: relative(pipelineRoot, path),
+      module_path: modulePath,
+      meta: isLocalModule ? null : parseModuleMeta(join(moduleDir, "meta.yml")),
+      module_tests: isLocalModule ? [] : parseNfTestsInDir(pipelineRoot, join(moduleDir, "tests")),
       tool: null,
       container,
       conda,
@@ -428,6 +459,53 @@ function parseProcessFile(pipelineRoot: string, path: string): Process[] {
       publish_dir: normalizeDirective(matchOne(body, /publishDir\s+([^\n]+)/u)),
     };
   });
+}
+
+function parseModuleMeta(path: string): ModuleMeta | null {
+  if (!existsSync(path)) return null;
+  const data = YAML.parse(readText(path)) as Record<string, unknown> | null;
+  if (!data || typeof data !== "object") return null;
+  return {
+    description: typeof data.description === "string" ? data.description : undefined,
+    keywords: stringArray(data.keywords),
+    authors: stringArray(data.authors),
+    maintainers: stringArray(data.maintainers),
+    tools: parseNamedMetaEntries(data.tools),
+    input: parseNamedMetaEntries(data.input),
+    output: parseNamedMetaEntries(data.output),
+  };
+}
+
+function parseNamedMetaEntries(value: unknown): ModuleMetaEntry[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    return Object.entries(item as Record<string, unknown>).flatMap(([name, details]) => {
+      if (!details || typeof details !== "object" || Array.isArray(details)) return [];
+      const record = details as Record<string, unknown>;
+      return {
+        name,
+        description: stringValue(record.description),
+        homepage: stringValue(record.homepage),
+        documentation: stringValue(record.documentation),
+        tool_dev_url: stringValue(record.tool_dev_url),
+        doi: stringValue(record.doi),
+        licence: stringArray(record.licence),
+        identifier: stringValue(record.identifier),
+        type: stringValue(record.type),
+        pattern: stringValue(record.pattern),
+      };
+    });
+  });
+}
+
+function stringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
 }
 
 function selectEntrypoint(pipelineRoot: string): string | null {
@@ -486,6 +564,7 @@ function parseWorkflows(pipelineRoot: string, processNames: string[]): ParsedWor
         calls,
         inputs: parseWorkflowIoBlock(block.body, "take"),
         outputs: parseWorkflowIoBlock(block.body, "emit"),
+        tests: parseNfTestsInDir(pipelineRoot, join(dirname(path), "tests")),
         body: block.body,
       });
     }
@@ -1019,7 +1098,10 @@ function formatError(err: unknown): string {
 }
 
 function parseNfTests(pipelineRoot: string): NfTest[] {
-  const testsRoot = join(pipelineRoot, "tests");
+  return parseNfTestsInDir(pipelineRoot, join(pipelineRoot, "tests"));
+}
+
+function parseNfTestsInDir(pipelineRoot: string, testsRoot: string): NfTest[] {
   return walk(testsRoot)
     .filter((path) => path.endsWith(".nf.test"))
     .flatMap((path) => {

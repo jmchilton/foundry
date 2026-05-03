@@ -92,6 +92,28 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 - expectation: `processes[].aliases[]` contains every `include { X as Y }`
   rename for `MINIMAP2_ALIGN` and `FASTQC`.
 
+## Case: nf-core module metadata and unit tests are process-local
+
+- bucket: fidelity
+- check: deterministic
+- fixture: `workflow-fixtures/pipelines/nf-core__bacass`.
+- expectation: every `processes[]` row with `module_path` under
+  `modules/nf-core/` has `meta != null`; `meta.tools[]`, `meta.input[]`,
+  and `meta.output[]` are normalized from the vendored `meta.yml`; and
+  `module_tests[].length` equals the count of `*.nf.test` files under that
+  module's `tests/` directory. Every `processes[]` row under
+  `modules/local/` has `meta == null` and `module_tests == []`.
+
+## Case: subworkflow unit tests are enumerated without semantics
+
+- bucket: fidelity
+- check: deterministic
+- fixture: `workflow-fixtures/pipelines/nf-core__bacass`.
+- expectation: every `subworkflows[]` row whose `path` lives under
+  `subworkflows/nf-core/` has `tests[].length` matching on-disk
+  `*.nf.test` files under that subworkflow directory; local or untested
+  subworkflows emit `tests == []`. No snapshot contents are inlined.
+
 ## Case: tool registry covers every container directive
 
 - bucket: fidelity
@@ -149,6 +171,17 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
   `<requirements>` block for every `tools[]` row; rows that don't yield
   a wrapper-shaped requirement are surfaced as evaluation gaps, not
   silently dropped.
+
+## Case: tool-wrapper Mold can consume one process row standalone
+
+- bucket: utility
+- check: llm-judged
+- fixture: `processes[]` row for `MINIMAP2_ALIGN` from a bacass summary.
+- expectation: `author-galaxy-tool-wrapper` produces a Galaxy tool wrapper
+  using only that process object (`meta`, `module_tests`, `container`,
+  `conda`, declared IO); it does not consult summary-level `tools[]`,
+  `workflow`, or `params`. Missing fields become logged gaps rather than
+  implicit lookups into the parent summary.
 
 ## Case: nf-test to Galaxy test-plan translation
 
