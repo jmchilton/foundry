@@ -10,14 +10,24 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use __EXTRACT_DATASET__ with which: first when a one-element collection must become a dataset."
 related_notes:
   - "[[iwc-transformations-survey]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8
+    why: "Repeatedly unboxes singleton QC/report outputs such as alignment scores, alignment stats, and snapshots."
+    confidence: high
+  - workflow: VGP-assembly-v2/Assembly-Hifi-HiC-phasing-VGP4/Assembly-Hifi-HiC-phasing-VGP4
+    why: "Shows repeated singleton extraction for Merqury and PNG outputs."
+    confidence: high
+  - workflow: VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b
+    why: "Uses the same VGP reporting and QC singleton extraction shape."
+    confidence: high
 ---
 
 # Collection: unbox singleton
@@ -60,12 +70,6 @@ Read this as an assertion: this collection has exactly one useful element here.
 - Do not use it as collection filtering; selecting a named element is a different operation.
 - Check conditional branches. Singleton extraction often follows single-sample vs multi-sample routing.
 - Once unboxed, collection element identifiers are no longer available as collection metadata.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.gxwf.yml:27,29,48,58,60` — repeated unboxing of singleton QC/report outputs such as alignment scores, alignment stats, and snapshots.
-- `$IWC_FORMAT2/VGP-assembly-v2/Assembly-Hifi-HiC-phasing-VGP4/Assembly-Hifi-HiC-phasing-VGP4.gxwf.yml` — repeated singleton extraction for Merqury and PNG outputs.
-- `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml` — same VGP reporting/QC shape.
 
 ## See also
 

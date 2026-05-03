@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-03
+revision: 3
 ai_generated: true
 summary: "Use compose_text_param to build connected text expressions from constants plus runtime scalar values."
 related_notes:
@@ -27,6 +27,19 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 verification_paths:
   - verification/workflows/compose-runtime-text-parameter/compose-runtime-text.gxwf-test.yml
+iwc_exemplars:
+  - workflow: epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun
+    why: "Composes a Filter1 predicate from a literal comparison and a workflow integer input."
+    confidence: high
+  - workflow: data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs
+    why: "Composes dynamic Cut1 column lists from connected column identifiers."
+    confidence: high
+  - workflow: computational-chemistry/gromacs-dctmd/gromacs-dctmd
+    why: "Composes GROMACS config lines from float and integer parameters for add_line_to_file."
+    confidence: high
+  - workflow: virology/pox-virus-amplicon/pox-virus-half-genome
+    why: "Composes genomic range and pool suffix strings for downstream regions and read-group parameters."
+    confidence: high
 ---
 
 # Parameter: compose runtime text parameter
@@ -99,13 +112,6 @@ These snippets are conceptual; use the gxformat2 exemplars for exact serialized 
 - Connected text is not a dataset. Connect `out1` to a tool parameter, not a dataset input.
 - Do not replace [[map-workflow-enum-to-tool-parameter]]. If the operation is mapping `stranded` to a flag or snippet, map first; compose only when the final task is concatenation.
 - Do not confuse row-wise string construction with runtime parameter composition. If each input row needs a computed string, use tabular tools.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:102-128`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:318-336` — composes `c4 >= ` plus a workflow integer input, then connects `out1` to `Filter1.cond`.
-- `$IWC_FORMAT2/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.gxwf.yml:61-113` — composes `c<id>,c<id>` and connects it to `Cut1.columnList`.
-- `$IWC_FORMAT2/computational-chemistry/gromacs-dctmd/gromacs-dctmd.gxwf.yml:553-654`, `$IWC_FORMAT2/computational-chemistry/gromacs-dctmd/gromacs-dctmd.gxwf.yml:720-999` — composes GROMACS config lines from float/integer parameters and feeds them into `add_line_to_file.text_input`.
-- `$IWC_FORMAT2/virology/pox-virus-amplicon/pox-virus-half-genome.gxwf.yml:560-669`, `$IWC_FORMAT2/virology/pox-virus-amplicon/pox-virus-half-genome.gxwf.yml:680-819` — composes genomic ranges and pool suffix strings for EMBOSS `regions` and BWA read-group IDs.
 
 ## See Also
 

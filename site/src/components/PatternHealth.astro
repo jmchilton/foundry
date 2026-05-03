@@ -1,0 +1,78 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import HealthPanel from './HealthPanel.astro';
+import { resolveWikiLinkId, type WikiLinkTarget } from '../lib/wiki-links';
+
+interface Props {
+  entry: CollectionEntry<'content'>;
+  linkMap: Map<string, WikiLinkTarget>;
+  entryById: Map<string, CollectionEntry<'content'>>;
+}
+
+interface HealthItem {
+  label: string;
+  state: 'ok' | 'warn' | 'error';
+  detail: string;
+}
+
+const { entry, linkMap, entryById } = Astro.props;
+const data = entry.data as any;
+const exemplars = Array.isArray(data.iwc_exemplars) ? data.iwc_exemplars : [];
+const verificationPaths = Array.isArray(data.verification_paths) ? data.verification_paths : [];
+const generatedRefPattern = /(?:^|\/)(?:\$IWC_FORMAT2|\$IWC_SKELETONS|workflow-fixtures\/iwc-(?:format2|skeletons)|iwc-(?:format2|skeletons)\/)|\.(?:ga|gxwf\.ya?ml)$/;
+const lineRefPattern = /:\d+(?:-\d+)?$/;
+
+function exemplarState(): HealthItem {
+  const bad = exemplars.filter((exemplar: any) => {
+    const workflow = exemplar?.workflow;
+    return typeof workflow === 'string' && (generatedRefPattern.test(workflow) || lineRefPattern.test(workflow));
+  });
+  if (bad.length > 0) {
+    return { label: 'IWC exemplar anchors', state: 'error', detail: `${bad.length} generated path or line citation${bad.length === 1 ? '' : 's'} in metadata.` };
+  }
+  if (exemplars.length === 0) {
+    return { label: 'IWC exemplar anchors', state: 'warn', detail: 'No structured IWC exemplars yet.' };
+  }
+  return { label: 'IWC exemplar anchors', state: 'ok', detail: `${exemplars.length} abstract workflow anchor${exemplars.length === 1 ? '' : 's'} declared.` };
+}
+
+function verificationState(): HealthItem {
+  if (data.evidence === 'corpus-and-verified' || data.evidence === 'structurally-verified') {
+    return verificationPaths.length > 0
+      ? { label: 'Foundry verification fixture', state: 'ok', detail: `${verificationPaths.length} verification path${verificationPaths.length === 1 ? '' : 's'} declared.` }
+      : { label: 'Foundry verification fixture', state: 'error', detail: `${data.evidence} evidence needs a verification path.` };
+  }
+  return verificationPaths.length === 0
+    ? { label: 'Foundry verification fixture', state: 'warn', detail: 'No structural verification fixture yet.' }
+    : { label: 'Foundry verification fixture', state: 'error', detail: `${data.evidence} should not declare verification paths.` };
+}
+
+function mapCoverageState(): HealthItem {
+  const mocs = Array.from(entryById.values()).filter(candidate => {
+    const candidateData = candidate.data as any;
+    if (candidateData.type !== 'pattern' || candidateData.pattern_kind !== 'moc') return false;
+    const related = Array.isArray(candidateData.related_patterns) ? candidateData.related_patterns : [];
+    return related.some((link: string) => resolveWikiLinkId(link, linkMap) === entry.id);
+  });
+  if (mocs.length === 0) {
+    return { label: 'Pattern map coverage', state: 'warn', detail: 'No pattern map links to this leaf yet.' };
+  }
+  return { label: 'Pattern map coverage', state: 'ok', detail: `${mocs.length} pattern map${mocs.length === 1 ? '' : 's'} link here.` };
+}
+
+function metadataState(): HealthItem {
+  const missing = ['title', 'summary', 'evidence', 'pattern_kind'].filter(field => !data[field]);
+  if (missing.length > 0) {
+    return { label: 'Metadata contract', state: 'error', detail: `Missing ${missing.join(', ')}.` };
+  }
+  return { label: 'Metadata contract', state: 'ok', detail: 'Pattern frontmatter matches the site contract.' };
+}
+
+const items: HealthItem[] = [
+  exemplarState(),
+  verificationState(),
+  mapCoverageState(),
+  metadataState(),
+];
+---
+<HealthPanel title="Pattern health" items={items} />

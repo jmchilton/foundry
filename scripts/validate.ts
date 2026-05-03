@@ -613,9 +613,38 @@ function validatePatternVerificationEvidence(files: FileMeta[]): CrossFileFindin
   for (const f of files) {
     if (f.meta.type === "pattern") {
       validatePatternVerificationPaths(f, findings);
+      validatePatternIwcExemplars(f, findings);
     }
   }
   return findings;
+}
+
+const GENERATED_IWC_REF_RE = /(?:^|\/)(?:\$IWC_FORMAT2|\$IWC_SKELETONS|workflow-fixtures\/iwc-(?:format2|skeletons)|iwc-(?:format2|skeletons)\/)|\.(?:ga|gxwf\.ya?ml)$/;
+const LINE_REF_RE = /:\d+(?:-\d+)?$/;
+
+function validatePatternIwcExemplars(file: FileMeta, findings: CrossFileFinding[]): void {
+  const exemplars = Array.isArray(file.meta.iwc_exemplars) ? file.meta.iwc_exemplars : [];
+  if (file.meta.pattern_kind === "leaf" && exemplars.length === 0) {
+    findings.push({
+      path: file.path,
+      severity: "warning",
+      message: "leaf pattern should declare iwc_exemplars metadata",
+    });
+  }
+
+  exemplars.forEach((raw, index) => {
+    if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return;
+    const exemplar = raw as Record<string, unknown>;
+    if (typeof exemplar.workflow !== "string") return;
+    const workflow = exemplar.workflow;
+    if (GENERATED_IWC_REF_RE.test(workflow) || LINE_REF_RE.test(workflow)) {
+      findings.push({
+        path: file.path,
+        severity: "error",
+        message: `iwc_exemplars[${index}].workflow must use an abstract IWC workflow ID, not a generated path or line citation: ${workflow}`,
+      });
+    }
+  });
 }
 
 function validatePatternVerificationPaths(file: FileMeta, findings: CrossFileFinding[]): void {

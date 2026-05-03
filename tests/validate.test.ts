@@ -174,6 +174,34 @@ describe("validateData (per-file)", () => {
     const r = validateData(patternRequired({ tags: ["mold"] }), schema);
     expect(r.warnings.some((w) => /expected 'pattern'/.test(w))).toBe(true);
   });
+
+  it("accepts iwc_exemplars metadata", () => {
+    const r = validateData(patternRequired({
+      iwc_exemplars: [
+        {
+          workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
+          steps: [{ label: "Map strandedness", id: 12 }],
+          why: "Shows workflow enum values mapped into downstream tool dialect.",
+          confidence: "high",
+        },
+      ],
+    }), schema);
+    expect(r.errors).toEqual([]);
+  });
+
+  it("requires label or id for iwc_exemplars steps", () => {
+    const r = validateData(patternRequired({
+      iwc_exemplars: [
+        {
+          workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
+          steps: [{}],
+          why: "Shows workflow enum values mapped into downstream tool dialect.",
+          confidence: "high",
+        },
+      ],
+    }), schema);
+    expect(r.errors.length).toBeGreaterThan(0);
+  });
 });
 
 // ---- Cross-file integration ----
@@ -274,6 +302,55 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("accepts abstract IWC workflow IDs in iwc_exemplars", () => {
+    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
+      title: "Pattern X",
+      iwc_exemplars: [{
+        workflow: "transcriptomics/rnaseq-pe/rnaseq-pe",
+        steps: [{ label: "Map strandedness", id: "12" }],
+        why: "Shows workflow enum values mapped into downstream tool dialect.",
+        confidence: "high",
+      }],
+    }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+  });
+
+  it("rejects generated IWC paths in iwc_exemplars", () => {
+    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({
+      title: "Pattern X",
+      iwc_exemplars: [{
+        workflow: "$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:270-299",
+        why: "Shows workflow enum values mapped into downstream tool dialect.",
+        confidence: "high",
+      }],
+    }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("warns when leaf patterns omit iwc_exemplars during migration", () => {
+    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({ title: "Pattern X" }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
   });
 
   it("flags pipeline phase resolving to non-Mold", () => {

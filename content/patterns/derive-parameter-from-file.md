@@ -13,8 +13,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-03
+revision: 3
 ai_generated: true
 summary: "Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters."
 related_notes:
@@ -26,6 +26,19 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 verification_paths:
   - verification/workflows/derive-parameter-from-file/derive-integer-from-file.gxwf-test.yml
+iwc_exemplars:
+  - workflow: VGP-assembly-v2/kmer-profiling-hifi-VGP1/kmer-profiling-hifi-VGP1
+    why: "Reads homozygous read coverage as a float and estimated genome size as an integer parameter."
+    confidence: high
+  - workflow: epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun
+    why: "Converts table-derived minima and replicate counts through text and integer parameter ports before downstream subsampling."
+    confidence: high
+  - workflow: virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping
+    why: "Turns line counts into integer parameters used as collection duplication counts."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
+    why: "Counts collection identifiers, converts the count to a boolean, then reads it through boolean_param."
+    confidence: high
 ---
 
 # Parameter: derive from file
@@ -137,14 +150,6 @@ collection -> collection_element_identifiers -> wc_gnu -> column_maker(c1 != 0) 
 - Do not bury the operation under `wc_gnu`; counts are just one upstream scalar-producing recipe.
 - Do not duplicate [[conditional-gate-on-nonempty-result]]. If the user story is "skip when empty," the conditional page owns the recommendation.
 - Do not present MGnify's four-step boolean shim as best. It is corpus-backed but clunky and pending verified-pattern issue #84.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/VGP-assembly-v2/kmer-profiling-hifi-VGP1/kmer-profiling-hifi-VGP1.gxwf.yml:1022-1038` — reads homozygous read coverage as `float_param`.
-- `$IWC_FORMAT2/VGP-assembly-v2/kmer-profiling-hifi-VGP1/kmer-profiling-hifi-VGP1.gxwf.yml:1042-1088` — reads estimated genome size as `integer_param` and connects it to `rdeval.expected_gsize`.
-- `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:263-318`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:372-423`, `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:467-499` — table minimum and replicate count are converted through text/integer parameter ports before downstream subsampling.
-- `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:198-287`, `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:287-346` — line counts become integer parameters used as collection duplication counts.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1358-1463` — collection identifiers are counted, converted with `column_maker(c1 != 0)`, then read as `boolean_param`.
 
 ## See Also
 

@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars."
 related_notes:
@@ -22,6 +22,19 @@ related_patterns:
   - "[[tabular-join-on-key]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2
+    why: "Uses a single-table query with SUM window function for relative abundance."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
+    why: "Shows one input with main query plus multiple addqueries outputs."
+    confidence: high
+  - workflow: proteomics/clinicalmp/clinicalmp-verification/clinicalmp-verification
+    why: "Shows a two-table INNER JOIN with named tables."
+    confidence: high
+  - workflow: proteomics/clinicalmp/clinicalmp-discovery/iwc-clinicalmp-discovery-workflow
+    why: "Shows a three-table anti-join with load filters and indexes."
+    confidence: high
 ---
 
 # Tabular: SQL query
@@ -81,7 +94,7 @@ tool_state:
   workdb: workdb.sqlite
 ```
 
-Cited at `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:33-82`.
+Anchored by the MAPseq-to-ampvis2 IWC exemplar.
 
 Multi-table SQL join with named tables:
 
@@ -117,7 +130,7 @@ tool_state:
   workdb: workdb.sqlite
 ```
 
-Cited at `$IWC_FORMAT2/proteomics/clinicalmp/clinicalmp-verification/clinicalmp-verification.gxwf.yml:359-415`.
+Anchored by the clinical metaproteomics verification IWC exemplar.
 
 ## Pitfalls
 
@@ -128,13 +141,6 @@ Cited at `$IWC_FORMAT2/proteomics/clinicalmp/clinicalmp-verification/clinicalmp-
 - **`comment_char: "35"` means `#`.** The corpus YAML uses the ASCII code string, not the literal `#`.
 - **Extra outputs can hide in `addqueries`.** Some workflows emit multiple query results from one step.
 - **Version pins vary.** `3.3.0` and `3.3.2` appear in corpus. Prefer the newest available pin unless preserving an existing workflow.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:33-82` — single-table relative abundance with `SUM(c3) OVER()`.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:137-201` — one input, main query plus three `addqueries` outputs.
-- `$IWC_FORMAT2/proteomics/clinicalmp/clinicalmp-verification/clinicalmp-verification.gxwf.yml:359-415` — two-table `INNER JOIN` with named tables.
-- `$IWC_FORMAT2/proteomics/clinicalmp/clinicalmp-discovery/iwc-clinicalmp-discovery-workflow.gxwf.yml:724-814` — three-table anti-join with load filters and indexes.
 
 ## See also
 

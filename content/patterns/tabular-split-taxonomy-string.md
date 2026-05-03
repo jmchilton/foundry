@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use tp_awk_tool to split semicolon-delimited taxonomy strings into explicit rank columns with missing-rank handling."
 related_notes:
@@ -20,6 +20,16 @@ related_patterns:
   - "[[tabular-cut-and-reorder-columns]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2
+    why: "Shows canonical eight-rank prefix dispatch from taxonomy strings into explicit rank columns."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-taxonomic-summary-tables/mgnify-amplicon-summary-tables
+    why: "Shows fixed-depth rank splitting, rank cleanup, unassigned filling, and abundance-column preservation."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table
+    why: "Shows rank-depth variants from superkingdom through species."
+    confidence: high
 ---
 
 # Tabular: split taxonomy string
@@ -74,7 +84,7 @@ tool_state:
   variables: []
 ```
 
-Cited at `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:101-135`.
+Anchored by the MAPseq-to-ampvis2 IWC exemplar.
 
 Fixed-depth split when upstream guarantees positional ranks:
 
@@ -97,13 +107,6 @@ NR > 1 {
 - **Handle missing ranks explicitly.** Corpus examples use empty strings or `unassigned` depending on downstream contract.
 - **`for (i in array)` order is undefined.** It is fine for prefix dispatch, not for positional rank emission.
 - **Avoid `class` as a new example variable.** Corpus-style awk may use it, but `tax_class` avoids confusing readers.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:101-135` — canonical 8-rank prefix dispatch from `$3`, emits OTU id plus rank columns.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-taxonomic-summary-tables/mgnify-amplicon-summary-tables.gxwf.yml:101-120` — fixed-depth merge of first three ranks, strips `__`, fills `unassigned`.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-taxonomic-summary-tables/mgnify-amplicon-summary-tables.gxwf.yml:336-367` — splits first column into superkingdom/kingdom/phylum and preserves abundance columns.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table.gxwf.yml:97-111` — rank-depth variants from superkingdom through species.
 
 ## See also
 

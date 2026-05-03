@@ -10,8 +10,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table."
 related_notes:
@@ -21,6 +21,19 @@ related_patterns:
   - "[[tabular-concatenate-collection-to-table]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2
+    why: "Pivots a headerless id/value collection to a wide table with zero fill and element identity in headers."
+    confidence: high
+  - workflow: microbiome/mags-building/MAGs-generation
+    why: "Shows repeated metric pivots over headered inputs with missing values represented as dots."
+    confidence: high
+  - workflow: microbiome/mag-genome-annotation-parallel/MAG-Genome-Annotation-Parallel
+    why: "Merges Bakta output through collection_column_join with headered input and element identity in headers."
+    confidence: high
+  - workflow: microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation
+    why: "Shows defensive empty-dataset filtering upstream of collection_column_join."
+    confidence: high
 ---
 
 # Tabular: pivot collection to wide
@@ -59,7 +72,7 @@ tool_state:
   old_col_in_header: true
 ```
 
-Cited at `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:202-222`.
+Anchored by the MAPseq-to-ampvis2 IWC exemplar.
 
 Headered metric-table pivot:
 
@@ -74,7 +87,7 @@ tool_state:
   old_col_in_header: false
 ```
 
-Cited at `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:1483-1505`, `:1544-1565`, and `:1656-1677`.
+Anchored by the MAGs generation IWC exemplar.
 
 ## Pitfalls
 
@@ -84,14 +97,6 @@ Cited at `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:1483-15
 - **Fill value has meaning.** `"0"` means absent is zero; `.` means missing/unknown. Match downstream semantics.
 - **Header semantics matter.** `old_col_in_header: true` preserves element identity in headers; `false` appears in MAG metric pivots.
 - **Guard empties when plausible.** The transformations survey flags upstream `__FILTER_EMPTY_DATASETS__` as a defensive guard when per-element outputs may be empty, especially small-N or filter-heavy paths. Do not apply it as universal boilerplate; several IWC pivots do not filter first.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mapseq-to-ampvis2/mapseq-to-ampvis2.gxwf.yml:202-222` — headerless id/value collection to wide table, `fill_char: "0"`, `old_col_in_header: true`.
-- `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml:1483-1505`, `:1544-1565`, `:1656-1677` — three metric pivots in one workflow, headered inputs, `fill_char: .`.
-- `$IWC_FORMAT2/microbiome/mag-genome-annotation-parallel/MAG-Genome-Annotation-Parallel.gxwf.yml:811-833` — "Merge Bakta Output", headered input, `old_col_in_header: true`.
-- `$IWC_FORMAT2/microbiome/pathogen-identification/nanopore-pre-processing/Nanopore-Pre-Processing.gxwf.yml:823-843` — upstream tabular sources joined into wide output.
-- `$IWC_FORMAT2/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:444-455`, `:552-571` — defensive `__FILTER_EMPTY_DATASETS__` upstream of `collection_column_join`.
 
 ## Legacy alternative
 

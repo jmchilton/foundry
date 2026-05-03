@@ -11,8 +11,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE."
 related_notes:
@@ -22,6 +22,16 @@ related_patterns:
   - "[[sync-collections-by-identifier]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs
+    why: "Uses a generated relabel table to restore paired and unpaired fasterq_dump output collection labels."
+    confidence: high
+  - workflow: microbiome/metagenomic-raw-reads-amr-analysis/metagenomic-raw-reads-amr-analysis
+    why: "Uses original read identifiers to relabel a downstream collection."
+    confidence: high
+  - workflow: virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping
+    why: "Shows the heavier sibling chain with identifier extraction and find/replace before relabeling."
+    confidence: high
 ---
 
 # Collection: regex relabel via tabular
@@ -80,12 +90,6 @@ tool_state:
 - `collection_element_identifiers` has no header; skipping the first line drops a real identifier.
 - Relabeling does not reorder or filter. Use a filter or sort pattern when membership or order changes.
 - Keep regex cleanup narrow enough that distinct elements do not collapse to the same identifier.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.gxwf.yml` — generated relabel table feeds `__RELABEL_FROM_FILE__` for paired and unpaired `fasterq_dump` output collections.
-- `$IWC_FORMAT2/microbiome/metagenomic-raw-reads-amr-analysis/metagenomic-raw-reads-amr-analysis.gxwf.yml:11-19` — original read identifiers drive relabeling of a downstream collection.
-- `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml:35-38` — heavier sibling chain uses identifier extraction plus `tp_find_and_replace` before relabeling.
 
 ## See also
 

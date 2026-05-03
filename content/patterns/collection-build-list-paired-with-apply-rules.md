@@ -10,8 +10,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use Apply Rules to promote identifier columns into a list:paired collection, with optional cleanup first."
 related_notes:
@@ -22,6 +22,16 @@ related_patterns:
   - "[[collection-split-identifier-via-rules]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: amplicon/dada2/dada2_paired
+    why: "Uses identifier columns, sample sorting, list identifiers, and paired identifiers to promote rows into list:paired structure."
+    confidence: high
+  - workflow: data-fetching/parallel-accession-download/parallel-accession-download
+    why: "Flattens deeper download output into list:paired by promoting an inner identifier to the paired role."
+    confidence: high
+  - workflow: data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs
+    why: "Shows paired promotion with regex cleanup of transient delimiter text before mapping."
+    confidence: high
 ---
 
 # Collection: build list paired with Apply Rules
@@ -65,12 +75,6 @@ For deeper inputs, add the needed identifier columns and map the innermost paire
 - Use `paired_identifier`, not a second list identifier, when the second axis is read direction.
 - Regex rules append new columns; check column numbers after cleanup.
 - Sorting by the wrong column can separate intended pairs.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/amplicon/dada2/dada2_paired.gxwf.yml` — "Sort samples" uses `identifier0` and `identifier1`, sorts by sample, then maps `list_identifiers: [0]` plus `paired_identifier: [1]`.
-- `$IWC_FORMAT2/data-fetching/parallel-accession-download/parallel-accession-download.gxwf.yml` — flattens deeper download output into `list:paired` by promoting an inner identifier to paired role.
-- `$IWC_FORMAT2/data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs.gxwf.yml:12-13` — paired-promotion shape with regex cleanup of transient delimiter text before mapping.
 
 ## Legacy alternative
 

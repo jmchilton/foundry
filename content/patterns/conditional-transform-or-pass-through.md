@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise."
 related_notes:
@@ -25,6 +25,13 @@ related_patterns:
   - "[[collection-cleanup-after-mapover-failure]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation
+    why: "Runs optional haplotype suffixing only when requested, then pick_value selects suffixed or original haplotype output."
+    confidence: high
+  - workflow: VGP-assembly-v2/Assembly-decontamination-VGP9/Assembly-decontamination-VGP9
+    why: "Uses a mapped boolean to gate adaptor filtering/masking/report rewrite, then falls back to the original report when masking does not run."
+    confidence: high
 ---
 
 # Conditional: transform or pass through
@@ -107,11 +114,6 @@ Read this as preserving a downstream contract: later steps consume one value reg
 - Do not duplicate the whole downstream workflow after the optional transform. Merge once with `pick_value`, then continue with one path.
 - Do not model pass-through as a fake transform step. The unmodified value should be connected directly as the fallback candidate.
 - Do not cite `__FILTER_NULL__` as the IWC idiom for this. The survey found zero `__FILTER_NULL__` hits.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:338-479` — optional haplotype suffixing branch runs only when requested; `pick_value` selects the suffixed haplotype when present or the original haplotype otherwise.
-- `$IWC_FORMAT2/VGP-assembly-v2/Assembly-decontamination-VGP9/Assembly-decontamination-VGP9.gxwf.yml:243-409` — mapped boolean gates adaptor filtering/masking/report-rewrite branch; `pick_value` later falls back to the original `Adaptor Action report` when masking does not run.
 
 ## See Also
 

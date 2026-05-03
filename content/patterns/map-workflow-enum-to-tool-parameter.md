@@ -12,8 +12,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-03
+revision: 3
 ai_generated: true
 summary: "Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets."
 related_notes:
@@ -28,6 +28,24 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
 verification_paths:
   - verification/workflows/map-workflow-enum-to-tool-parameter/map-enum-to-text.gxwf-test.yml
+iwc_exemplars:
+  - workflow: transcriptomics/rnaseq-pe/rnaseq-pe
+    steps:
+      - label: "Strandedness to featureCounts codes"
+      - label: "Strandedness to Cufflinks library types"
+      - label: "Strandedness to StringTie flags"
+    why: "Shows one workflow enum normalized into several downstream tool dialects with separate mapper steps."
+    confidence: high
+  - workflow: VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8
+    steps:
+      - label: "Map haplotype labels to suffix abbreviations"
+    why: "Shows label-to-fragment mapping consumed later by runtime text composition."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table
+    steps:
+      - label: "Map taxonomic rank to awk program text"
+    why: "Shows enum mapping into executable text for a downstream text-processing parameter."
+    confidence: high
 ---
 
 # Parameter: map workflow enum to tool parameter
@@ -113,15 +131,6 @@ The same workflow enum maps through sibling `map_param_value` steps into Cufflin
 - Do not silently change quoted numeric codes into numeric output types unless the downstream parameter expects a numeric type.
 - Do not use one mapper output for incompatible tool dialects. One workflow value may need several mapper steps.
 - Treat long generated snippets as brittle. The taxonomy awk examples prove the mechanism, but a clearer wrapper or smaller expression is easier to maintain when available.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:270-299` — `Strandedness` to `featureCounts` codes `1`, `2`, `0` with `unmapped.on_unmapped: fail`.
-- `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:303-332` — same workflow enum mapped to Cufflinks library types `fr-secondstrand`, `fr-firststrand`, `fr-unstranded`.
-- `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:336-365` — same workflow enum mapped to StringTie flags `--fr`, `--rf`, and empty string.
-- `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1017-1081`, `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1082-1140`, `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1141-1152` — mapped outputs connected into `featureCounts`, StringTie, and Cufflinks parameters.
-- `$IWC_FORMAT2/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.gxwf.yml:276-313`, `$IWC_FORMAT2/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.gxwf.yml:1497-1522` — haplotype labels mapped to suffix abbreviations, then consumed by `compose_text_param`.
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table.gxwf.yml:35-72`, `$IWC_FORMAT2/amplicon/amplicon-mgnify/taxonomic-rank-abundance-summary-table/taxonomic-rank-abundance-summary-table.gxwf.yml:118-139` — taxonomic rank mapped to awk program text and connected as `tp_awk_tool.code`.
 
 ## See Also
 

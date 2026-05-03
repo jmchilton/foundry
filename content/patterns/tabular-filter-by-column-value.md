@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC."
 related_notes:
@@ -19,6 +19,16 @@ related_patterns:
   - "[[tabular-sql-query]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
+    why: "Shows a literal Filter1 predicate over a string status column with one header line."
+    confidence: high
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation
+    why: "Shows a connected predicate generated upstream with header_lines set independently."
+    confidence: high
+  - workflow: epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun
+    why: "Shows another connected predicate shape where the filter rule is supplied at runtime."
+    confidence: high
 ---
 
 # Tabular: filter rows by column value
@@ -50,7 +60,7 @@ tool_state:
   header_lines: '1'
 ```
 
-Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545`.
+Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 
 Predicate produced upstream and wired in via `ConnectedValue` (lets a workflow author parameterize the predicate without a runtime parameter). Note that this corpus example has `header_lines: "0"` because the upstream rule already accounts for the header — the `header_lines` setting is independent of the `cond` source:
 
@@ -61,7 +71,7 @@ tool_state:
   header_lines: '0'
 ```
 
-Cited at `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336`.
+Anchored by the consensus peaks ATAC/CUT&RUN IWC exemplar.
 
 ## Pitfalls
 
@@ -70,13 +80,6 @@ Cited at `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandru
 - **Uppercase operators.** `cond: c1=='X' OR c1=='Y'` — `OR` is treated as a name (`NameError`), not a boolean op. Use lowercase `and`, `or`, `not`.
 - **No new columns.** `Filter1` is a *filter*; new or computed columns belong in [[tabular-compute-new-column]].
 - **Implicit column-type coercion.** `cN` values are strings until an operator forces int/float; coercion failures skip the row (counted in the dataset metadata, not surfaced in the output stream). If silent-from-data drops are unacceptable, pre-clean upstream or use [[tabular-sql-query]].
-
-## Exemplars (IWC)
-
-
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545` — literal predicate `c4=='PASS' or c4=='.'`, `header_lines: "1"`.
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:276` — `ConnectedValue` predicate, `header_lines: "0"` (rule generated upstream).
-- `$IWC_FORMAT2/epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320-336` — `ConnectedValue` predicate, `header_lines: "0"`.
 
 All three corpus filters are equality / disjunction over a string column, or a `ConnectedValue` rule. Numeric-range predicates are unattested — if you reach for `cN > X`, you're slightly off the corpus path; verify behavior on a sample.
 

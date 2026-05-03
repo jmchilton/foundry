@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative."
 related_notes:
@@ -19,6 +19,19 @@ related_patterns:
   - "[[tabular-sql-query]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: epigenetics/atacseq/atacseq
+    why: "Drops comment lines from a fragment-length histogram with tp_grep_tool and invert mode."
+    confidence: high
+  - workflow: epigenetics/chipseq-sr/chipseq-sr
+    why: "Keeps MACS2 summary header lines and changes datatype for downstream rendering."
+    confidence: high
+  - workflow: VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b
+    why: "Drops BED rows containing REPEAT with inverted grep."
+    confidence: high
+  - workflow: comparative_genomics/hyphy/capheine-core-and-compare
+    why: "Shows the legacy Grep1 path for keeping FASTA header lines."
+    confidence: medium
 ---
 
 # Tabular: filter rows by regex
@@ -66,7 +79,7 @@ tool_state:
   color: NOCOLOR
 ```
 
-Cited at `$IWC_FORMAT2/epigenetics/atacseq/atacseq.gxwf.yml:469` ("remove comments lines") and `$IWC_FORMAT2/epigenetics/chipseq-sr/chipseq-sr.gxwf.yml:305` (same shape, `invert: ""` to *keep* `^#` summary lines into a MACS2 report).
+Anchored by the ATAC-seq and ChIP-seq single-read IWC exemplars.
 
 Drop rows containing a literal token:
 
@@ -83,7 +96,7 @@ tool_state:
   color: NOCOLOR
 ```
 
-Cited at `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:983` ("Remove REPEATs from BED").
+Anchored by the VGP purge-duplicates IWC exemplar.
 
 ## Pitfalls
 
@@ -93,13 +106,6 @@ Cited at `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purg
 - **PCRE vs ERE.** `regex_type: -P` is the corpus default and matches `Grep1`'s flavor. ERE / BRE are available but unattested in the survey; switching flavors mid-workflow makes patterns harder to reason about.
 - **No column awareness.** A pattern like `\tPASS\t` is the closest you can get to "column 4 equals PASS" — and it's brittle (depends on tab counts, breaks on the first/last column). Use [[tabular-filter-by-column-value]] for column predicates.
 - **Version pin sprawl.** Four pins coexist in the corpus (`1.1.1`, `9.3+galaxy1`, `9.5+galaxy2`, `9.5+galaxy3` — `9.5+galaxy3` dominates) with the same parameter shape. Pick the highest pin already present in the workflow you're touching; do not block PRs for older pins on cleanup grounds.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/epigenetics/atacseq/atacseq.gxwf.yml:469` — drop `^#` comment lines from a fragment-length histogram (`invert: -v`).
-- `$IWC_FORMAT2/epigenetics/chipseq-sr/chipseq-sr.gxwf.yml:305` — keep `^#` MACS2 summary header lines (`invert: ""`); change_datatype to `txt` for downstream rendering.
-- `$IWC_FORMAT2/VGP-assembly-v2/Purge-duplicates-one-haplotype-VGP6b/Purging-duplicates-one-haplotype-VGP6b.gxwf.yml:983` — drop BED rows containing `REPEAT` (`invert: -v`).
-- `$IWC_FORMAT2/comparative_genomics/hyphy/capheine-core-and-compare.gxwf.yml:687` — `Grep1` (legacy) keeping FASTA header lines (`pattern: ^>`, `invert: ""`, `keep_header: false`).
 
 ## Legacy alternative
 

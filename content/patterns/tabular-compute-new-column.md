@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-03
+revision: 3
 ai_generated: true
 summary: "Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule."
 related_notes:
@@ -21,6 +21,19 @@ related_patterns:
   - "[[derive-parameter-from-file]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
+    steps:
+      - label: "Raw cN arithmetic with auto_col_types true"
+      - label: "String concatenation with auto_col_types false"
+    why: "Shows the key auto_col_types split between arithmetic and string concatenation expressions."
+    confidence: high
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation
+    why: "Shows explicit-cast arithmetic with auto_col_types false and skip-non-computable handling."
+    confidence: high
+  - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
+    why: "Computes c1 != 0 before reading the result as a boolean parameter for a non-empty gate."
+    confidence: high
 ---
 
 # Tabular: compute a new column
@@ -76,9 +89,9 @@ Rationale: with `true`, `c5 + c6` performs numeric addition (silently turning a 
 
 Canonical exemplars to memorize:
 
-- Arithmetic on raw `cN`, `auto_col_types: true` — `variation-reporting.gxwf.yml:316-329` (`AF = round((c18 + c19) / c6, 6)` replace at position 7; `AFcaller` insert at position 8).
-- String concat, `auto_col_types: false` — `variation-reporting.gxwf.yml:438-475` (`c5 + '>' + c6` named `change`, `c3 + ':' + c19` named `change_with_pos`; both `mode: ""` append).
-- Explicit-cast arithmetic, `auto_col_types: false` — `consensus-from-variation.gxwf.yml:343-378` (`int(c2) - (len(c3) == 1)` and `int(c2) + ((len(c3) - 1) or 1)`, replace at positions 2 and 3; uses `--skip-non-computable`).
+- Arithmetic on raw `cN`, `auto_col_types: true` — the SARS-CoV-2 variation reporting workflow computes `AF = round((c18 + c19) / c6, 6)` and inserts `AFcaller`.
+- String concat, `auto_col_types: false` — the same workflow appends `change` and `change_with_pos` from string concatenation expressions.
+- Explicit-cast arithmetic, `auto_col_types: false` — the SARS-CoV-2 consensus-from-variation workflow uses `int(...)` expressions with `--skip-non-computable`.
 
 ## Idiomatic shapes
 
@@ -107,7 +120,7 @@ tool_state:
         new_column_name: AF
 ```
 
-Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:307-329`.
+Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 
 String-concat new columns (append), `auto_col_types: false`:
 
@@ -134,7 +147,7 @@ tool_state:
         new_column_name: change_with_pos
 ```
 
-Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:438-475`.
+Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 
 ## Pitfalls
 
@@ -145,14 +158,6 @@ Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting
 - **Skipping `error_handling`.** Wrapper defaults differ from corpus defaults; without explicit `fail_on_non_existent_columns: true`, non-existent column refs may pass through depending on `non_computable.action`.
 - **`add_column.mode` / `pos`.** `I` (insert) and `R` (replace) take a 1-indexed integer `pos`; append uses `mode: ""` and `pos: ""`. Off-by-one in `pos` shifts every downstream `cN` reference in subsequent expressions in the same step.
 - **`Add a column` (`addValue/1.0.1`)** — a different, legacy tool that adds a *constant* column only. Do not confuse with `column_maker/Add_a_column1`.
-
-## Exemplars (IWC)
-
-
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:307-329` — raw-`cN` arithmetic, `auto_col_types: true`, insert + replace pair.
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:438-475` — string concat, `auto_col_types: false`, append (`mode: ""`).
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:343-378` — explicit-cast arithmetic (`int(c2) - …`), `auto_col_types: false`, `--skip-non-computable`. Counter-example to "arithmetic always implies `auto_col_types: true`."
-- `$IWC_FORMAT2/amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction.gxwf.yml:1396-1463` — computes `c1 != 0`, then reads the result as a boolean parameter for a non-empty gate.
 
 ## Legacy alternative
 

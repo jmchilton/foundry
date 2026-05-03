@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use tp_easyjoin_tool for two-tabular key joins; use tp_multijoin_tool for many files and query_tabular for SQL joins."
 related_notes:
@@ -20,6 +20,25 @@ related_patterns:
   - "[[tabular-pivot-collection-to-wide]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting
+    why: "Shows canonical and repeated tp_easyjoin_tool fan-in joins with headered inputs and zero fill."
+    confidence: high
+  - workflow: VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8
+    why: "Shows a newer tp_easyjoin_tool pin joining key 1 to key 1 with dot fill."
+    confidence: high
+  - workflow: microbiome/metagenomic-genes-catalogue/metagenomic-genes-catalogue
+    why: "Shows a headerless easyjoin labeled Join Prodigal to AMR."
+    confidence: high
+  - workflow: microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation
+    why: "Shows tp_multijoin_tool for many same-shaped key/value files."
+    confidence: high
+  - workflow: proteomics/clinicalmp/clinicalmp-verification/clinicalmp-verification
+    why: "Shows query_tabular used for a two-table SQL inner join."
+    confidence: high
+  - workflow: proteomics/clinicalmp/clinicalmp-discovery/iwc-clinicalmp-discovery-workflow
+    why: "Shows SQL anti-join with load filters and indexes."
+    confidence: high
 ---
 
 # Tabular: join on key
@@ -73,7 +92,7 @@ tool_state:
   jointype: " "
 ```
 
-Cited at `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:601-627`.
+Anchored by the SARS-CoV-2 variation reporting IWC exemplar.
 
 Many two-column files joined by a shared key:
 
@@ -90,7 +109,7 @@ tool_state:
   ignore_dups: false
 ```
 
-Cited at `$IWC_FORMAT2/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:796-819`.
+Anchored by the PathoGFAIR sample aggregation IWC exemplar.
 
 SQL join when SQL semantics matter:
 
@@ -115,7 +134,7 @@ tool_state:
         col_names: pep,prot
 ```
 
-Cited at `$IWC_FORMAT2/proteomics/clinicalmp/clinicalmp-verification/clinicalmp-verification.gxwf.yml:359-415`.
+Anchored by the clinical metaproteomics verification IWC exemplar.
 
 ## Pitfalls
 
@@ -126,16 +145,6 @@ Cited at `$IWC_FORMAT2/proteomics/clinicalmp/clinicalmp-verification/clinicalmp-
 - **`tp_easyjoin_tool` is not SQL.** Compound predicates, anti-joins, named-column projection, or indexed joins belong in [[tabular-sql-query]].
 - **`tp_multijoin_tool` assumes uniform shape.** It fits many same-shaped key/value files, not arbitrary heterogeneous tables.
 - **Do not substitute collection joins.** `collection_column_join` is for the collection-to-wide-table idiom, not ordinary two-file joins.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:601-627` — canonical `tp_easyjoin_tool` with `column1: "20"`, `column2: "1"`, `empty_string_filler: "0"`, `header: true`, `jointype: " "`.
-- `$IWC_FORMAT2/sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:722-747`, `:752-777`, `:799-825` — repeated fan-in joins with the same easyjoin shape.
-- `$IWC_FORMAT2/VGP-assembly-v2/Scaffolding-HiC-VGP8/Scaffolding-HiC-VGP8.gxwf.yml:3452-3477` — newer `tp_easyjoin_tool/9.5+galaxy3`, key `1` to `1`, filler `"."`.
-- `$IWC_FORMAT2/microbiome/metagenomic-genes-catalogue/metagenomic-genes-catalogue.gxwf.yml:1013-1041` — headerless easyjoin, labeled "Join Prodigal to AMR".
-- `$IWC_FORMAT2/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:796-819` — `tp_multijoin_tool`, key column `"1"`, value column `"2"`, filler `"0"`.
-- `$IWC_FORMAT2/proteomics/clinicalmp/clinicalmp-verification/clinicalmp-verification.gxwf.yml:359-415` — `query_tabular` `INNER JOIN`.
-- `$IWC_FORMAT2/proteomics/clinicalmp/clinicalmp-discovery/iwc-clinicalmp-discovery-workflow.gxwf.yml:724-814` — SQL anti-join using `WHERE ... NOT IN (SELECT ... JOIN ...)`.
 
 ## Legacy alternative
 

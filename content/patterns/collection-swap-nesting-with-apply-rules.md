@@ -10,8 +10,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use Apply Rules to regroup a list:list collection by swapping outer and inner identifier columns."
 related_notes:
@@ -23,6 +23,12 @@ related_patterns:
   - "[[relabel-via-rules-and-find-replace]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping
+    steps:
+      - label: "Regroup influenza BAM collections between sample and segment axes"
+    why: "Shows repeated pure regrouping of list:list collections by swapping outer and inner identifier columns."
+    confidence: high
 ---
 
 # Collection: swap nesting with Apply Rules
@@ -69,10 +75,6 @@ Treat this as the logical shape, not a complete serialized workflow API blob.
 - Check that the input is actually `list:list`; `identifier1` exists only when there is an inner list level.
 - Keep pure regrouping separate from relabeling unless noisy identifiers force the heavier recipe.
 - Downstream map-over behavior changes after the swap; tools now iterate by the former inner axis.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml` steps 14, 34, 39, 43 — repeated regrouping of influenza BAM collections between sample and segment axes.
 
 Footnote: the same workflow uses `__DUPLICATE_FILE_TO_COLLECTION__` before one Apply Rules step as a broadcast setup. That broadcast is barely attested and should not be treated as the main pattern.
 

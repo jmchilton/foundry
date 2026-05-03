@@ -5,18 +5,21 @@ import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 interface Props {
   entry: CollectionEntry<'content'>;
   linkMap: Map<string, WikiLinkTarget>;
+  placement?: 'before' | 'after';
 }
 
-const { entry, linkMap } = Astro.props;
+const { entry, linkMap, placement = 'before' } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const data = entry.data as any;
 const isMap = data.pattern_kind === 'moc';
+const isLeaf = data.pattern_kind === 'leaf';
+const exemplars = Array.isArray(data.iwc_exemplars) ? data.iwc_exemplars : [];
 const relatedPatterns = (data.related_patterns ?? [])
   .map((link: string) => resolveWikiLink(link, linkMap, base))
   .filter((link: ReturnType<typeof resolveWikiLink>) => link.href);
 ---
 
-{isMap && (
+{placement === 'before' && isMap && (
   <aside class="pattern-map-panel" aria-labelledby="pattern-map-heading">
     <div class="pattern-map-panel-top">
       <span class="badge badge-draft">pattern map</span>
@@ -38,6 +41,37 @@ const relatedPatterns = (data.related_patterns ?? [])
       </div>
     )}
   </aside>
+)}
+
+{placement === 'after' && isLeaf && exemplars.length > 0 && (
+  <section class="iwc-exemplars" aria-labelledby="iwc-exemplars-heading">
+    <div class="iwc-exemplars-top">
+      <span class="badge badge-draft">IWC exemplars</span>
+      <span class="iwc-exemplars-count font-mono">{exemplars.length} anchor{exemplars.length === 1 ? '' : 's'}</span>
+    </div>
+    <h2 id="iwc-exemplars-heading">IWC Exemplars</h2>
+    <div class="iwc-exemplar-list">
+      {exemplars.map((exemplar: any) => (
+        <article class="iwc-exemplar-card">
+          <div class="iwc-exemplar-card-head">
+            <code>{exemplar.workflow}</code>
+            <span class={`confidence confidence-${exemplar.confidence}`}>{exemplar.confidence}</span>
+          </div>
+          <p>{exemplar.why}</p>
+          {Array.isArray(exemplar.steps) && exemplar.steps.length > 0 && (
+            <ul>
+              {exemplar.steps.map((step: any) => (
+                <li>
+                  {step.label && <span>{step.label}</span>}
+                  {step.id !== undefined && <code>step {step.id}</code>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
+    </div>
+  </section>
 )}
 
 <style>
@@ -95,5 +129,78 @@ const relatedPatterns = (data.related_patterns ?? [])
     color: var(--color-text-muted);
     font-size: 0.78rem;
     line-height: 1.35;
+  }
+  .iwc-exemplars {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.85rem;
+    background: var(--color-surface-raised);
+  }
+  .iwc-exemplars-top,
+  .iwc-exemplar-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .iwc-exemplars-count {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+  .iwc-exemplars h2 {
+    margin: 0.7rem 0 0.75rem;
+    color: var(--color-text-primary);
+    font-size: 1.15rem;
+  }
+  .iwc-exemplar-list {
+    display: grid;
+    gap: 0.65rem;
+  }
+  .iwc-exemplar-card {
+    padding: 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+    border-radius: 0.7rem;
+    background: var(--color-surface);
+  }
+  .iwc-exemplar-card code {
+    min-width: 0;
+    color: var(--color-text-primary);
+    font-size: 0.78rem;
+    overflow-wrap: anywhere;
+  }
+  .iwc-exemplar-card p {
+    margin: 0.55rem 0 0;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .iwc-exemplar-card ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.65rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .iwc-exemplar-card li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+  }
+  .confidence {
+    border-radius: 999px;
+    padding: 0.18rem 0.5rem;
+    background: color-mix(in srgb, var(--color-galaxy-primary) 12%, transparent);
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
   }
 </style>

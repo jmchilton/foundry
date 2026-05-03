@@ -11,8 +11,8 @@ tags:
   - pattern
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 summary: "Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters."
 related_notes:
@@ -22,6 +22,16 @@ related_patterns:
   - "[[harmonize-by-sortlist-from-identifiers]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
+iwc_exemplars:
+  - workflow: microbiome/mags-building/MAGs-generation
+    why: "Flattens a list:list of bins from all samples for pool-level processing."
+    confidence: high
+  - workflow: transcriptomics/rnaseq-pe/rnaseq-pe
+    why: "Flattens a paired collection to a flat list for MultiQC."
+    confidence: high
+  - workflow: microbiome/metagenomic-raw-reads-amr-analysis/metagenomic-raw-reads-amr-analysis
+    why: "Flattens list:list output from sylph_profile before relabeling."
+    confidence: high
 ---
 
 # Collection: flatten after fan-out
@@ -56,12 +66,6 @@ The useful authoring decision is input collection type and whether the outer axi
 - Flatten only after the outer axis is done.
 - If flattened identifiers collide or become unreadable, add an explicit relabel step.
 - Do not use Apply Rules for plain flattening; the survey found `__FLATTEN__` dominates simple cases.
-
-## Exemplars (IWC)
-
-- `$IWC_FORMAT2/microbiome/mags-building/MAGs-generation.gxwf.yml` — "Pool Bins from all samples" flattens a `list:list` of bins for pool-level processing.
-- `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:11` — flattens a paired collection to a flat list for MultiQC.
-- `$IWC_FORMAT2/microbiome/metagenomic-raw-reads-amr-analysis/metagenomic-raw-reads-amr-analysis.gxwf.yml:15` — flattens `list:list` output from `sylph_profile` before relabeling.
 
 ## See also
 
