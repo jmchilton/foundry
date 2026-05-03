@@ -2,4 +2,4 @@
 "@galaxy-foundry/build-cli": patch
 ---
 
-Add Foundry build CLI package with validation and generated content commands.
+Add Foundry build CLI package with validation, deterministic casting, and generated content commands.
