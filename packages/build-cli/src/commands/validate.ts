@@ -12,7 +12,7 @@ import { readMarkdown } from "../lib/frontmatter.js";
 import { loadSchema, loadTags } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
-import { resolveWikiLink, slugify, stripBrackets, WIKI_LINK_RE } from "../lib/wiki-links.js";
+import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
 
 type AjvValidator = {
   compile: (schema: unknown) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
