@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import YAML from "yaml";
 
 interface Summary {
@@ -124,15 +124,14 @@ export async function resolveNextflowSummary(
   pipelineRoot: string,
   options: ResolveOptions,
 ): Promise<Summary> {
-  if (!existsSync(join(pipelineRoot, "nextflow.config"))) {
-    throw new Error(`not a Nextflow pipeline root: ${pipelineRoot}`);
-  }
+  const root = detectPipelineRoot(pipelineRoot);
+  pipelineRoot = root.path;
 
-  const config = readText(join(pipelineRoot, "nextflow.config"));
+  const configPath = join(pipelineRoot, "nextflow.config");
+  const config = existsSync(configPath) ? readText(configPath) : "";
   const workflowName = parseWorkflowName(config);
-  const processes = discoverProcessFiles(pipelineRoot).map((path) =>
-    parseProcessFile(pipelineRoot, path),
-  );
+  const processFiles = discoverProcessFiles(pipelineRoot);
+  const processes = processFiles.flatMap((path) => parseProcessFile(pipelineRoot, path));
   const aliases = discoverProcessAliases(pipelineRoot);
   const tools = buildTools(pipelineRoot, processes);
   const workflows = parseWorkflows(
@@ -176,8 +175,11 @@ export async function resolveNextflowSummary(
     },
     test_fixtures: parseTestFixtures(pipelineRoot, options.profile),
     nf_tests: parseNfTests(pipelineRoot),
-    warnings,
+    warnings: [...root.warnings, ...warnings],
   };
+
+  const entrypoint = selectEntrypoint(pipelineRoot);
+  if (entrypoint) summary.warnings.push(`selected Nextflow entrypoint: ${entrypoint}`);
 
   if (options.withNextflow) mergeNextflowInspect(summary, pipelineRoot, options.profile);
   if (options.fetchTestData) await fetchTestData(summary, options.testDataDir);
@@ -186,7 +188,7 @@ export async function resolveNextflowSummary(
 
 function buildWarnings(processes: Process[], workflows: ParsedWorkflow[]): string[] {
   const warnings = ["workflow graph extraction is intentionally partial in resolver v1"];
-  if (processes.length === 0) {
+  if (!processes.some((process) => process.module_path.startsWith(`modules${sep}`))) {
     warnings.push(
       "no module process files found under modules/; process extraction may be incomplete",
     );
@@ -303,45 +305,154 @@ function parseParams(pipelineRoot: string): Param[] {
   return [...params.values()];
 }
 
-function discoverProcessFiles(pipelineRoot: string): string[] {
-  return walk(join(pipelineRoot, "modules")).filter((path) => basename(path) === "main.nf");
+function detectPipelineRoot(path: string): { path: string; warnings: string[] } {
+  const requestedRoot = resolve(path);
+  if (existsSync(join(requestedRoot, "nextflow.config"))) {
+    return { path: requestedRoot, warnings: [] };
+  }
+
+  const configRoots = walk(requestedRoot, { maxDepth: 2 })
+    .filter((candidate) => basename(candidate) === "nextflow.config")
+    .map(dirname)
+    .sort((left, right) =>
+      relative(requestedRoot, left).localeCompare(relative(requestedRoot, right)),
+    );
+  if (configRoots[0]) {
+    const sharedProcessFiles = discoverProcessFiles(requestedRoot).filter(
+      (path) => !configRoots.some((configRoot) => path.startsWith(`${configRoot}${sep}`)),
+    );
+    if (sharedProcessFiles.length > 0) {
+      return {
+        path: requestedRoot,
+        warnings: [
+          `detected child Nextflow configs but kept repository root because shared process files exist outside child roots`,
+          `multiple Nextflow pipeline roots found; selected .`,
+        ],
+      };
+    }
+
+    const warnings = [
+      `auto-detected Nextflow pipeline root: ${relative(requestedRoot, configRoots[0]) || "."}`,
+    ];
+    if (configRoots.length > 1) {
+      warnings.push(
+        `multiple Nextflow pipeline roots found; selected ${relative(requestedRoot, configRoots[0]) || "."}`,
+      );
+    }
+    return {
+      path: configRoots[0],
+      warnings,
+    };
+  }
+
+  const workflowFiles = walk(requestedRoot)
+    .filter(isNextflowSourceFile)
+    .filter((candidate) => extractWorkflowBlocks(readText(candidate)).length > 0)
+    .sort((left, right) => compareEntrypointCandidates(requestedRoot, left, right));
+  if (workflowFiles[0]) {
+    const detectedRoot = dirname(workflowFiles[0]);
+    return {
+      path: detectedRoot,
+      warnings: [
+        `auto-detected Nextflow pipeline root from workflow block: ${relative(requestedRoot, detectedRoot) || "."}`,
+      ],
+    };
+  }
+
+  throw new Error(`not a Nextflow pipeline root: ${path}`);
 }
 
-function walk(root: string): string[] {
+function discoverProcessFiles(pipelineRoot: string): string[] {
+  return walk(pipelineRoot)
+    .filter(isNextflowSourceFile)
+    .filter((path) => /\bprocess\s+[A-Za-z0-9_]+\s*\{/u.test(readText(path)));
+}
+
+function walk(root: string, options: { maxDepth?: number } = {}, depth = 0): string[] {
   if (!existsSync(root)) return [];
   const paths: string[] = [];
-  for (const entry of readdirSync(root)) {
+  for (const entry of readdirSync(root).sort()) {
     const path = join(root, entry);
-    if (statSync(path).isDirectory()) paths.push(...walk(path));
-    else paths.push(path);
+    if (statSync(path).isDirectory()) {
+      if (!shouldSkipDir(entry) && (options.maxDepth === undefined || depth < options.maxDepth)) {
+        paths.push(...walk(path, options, depth + 1));
+      }
+    } else paths.push(path);
   }
   return paths;
 }
 
-function parseProcessFile(pipelineRoot: string, path: string): Process {
+function shouldSkipDir(name: string): boolean {
+  return [
+    ".git",
+    ".nextflow",
+    "work",
+    "node_modules",
+    "BioNextflow",
+    "external-modules",
+    "vendor",
+    "vendors",
+    "third_party",
+  ].includes(name);
+}
+
+function isNextflowSourceFile(path: string): boolean {
+  return path.endsWith(".nf");
+}
+
+function parseProcessFile(pipelineRoot: string, path: string): Process[] {
   const text = readText(path);
-  const name =
-    matchOne(text, /process\s+([A-Za-z0-9_]+)\s*\{/u) ?? basename(dirname(path)).toUpperCase();
-  const container = normalizeDirective(
-    matchOne(
-      text,
-      /container\s+"([\s\S]*?)"\s*(?:\n\s*input:|\n\s*output:|\n\s*when:|\n\s*script:)/u,
-    ),
+  return [...text.matchAll(/\bprocess\s+([A-Za-z0-9_]+)\s*\{/gu)].flatMap((match) => {
+    const openIndex = match.index + match[0].lastIndexOf("{");
+    const body = extractBlockAt(text, openIndex);
+    if (body === null) return [];
+    const name = match[1]!;
+    const container = normalizeDirective(
+      matchOne(
+        body,
+        /container\s+"([\s\S]*?)"\s*(?:\n\s*input:|\n\s*output:|\n\s*when:|\n\s*script:)/u,
+      ) ?? matchOne(body, /container\s+([^\n]+)/u),
+    );
+    const conda = normalizeDirective(matchOne(body, /conda\s+"([\s\S]*?)"/u));
+    return {
+      name,
+      aliases: [],
+      module_path: relative(pipelineRoot, path),
+      tool: null,
+      container,
+      conda,
+      inputs: parseIoBlock(body, "input"),
+      outputs: parseIoBlock(body, "output"),
+      when: normalizeDirective(matchOne(body, /when:\s*\n([\s\S]*?)\n\s*script:/u)),
+      script_summary: summarizeScript(name),
+      publish_dir: normalizeDirective(matchOne(body, /publishDir\s+([^\n]+)/u)),
+    };
+  });
+}
+
+function selectEntrypoint(pipelineRoot: string): string | null {
+  const candidates = walk(pipelineRoot)
+    .filter(isNextflowSourceFile)
+    .filter((candidate) => extractWorkflowBlocks(readText(candidate)).length > 0)
+    .sort((left, right) => compareEntrypointCandidates(pipelineRoot, left, right));
+  return candidates[0] ? relative(pipelineRoot, candidates[0]) : null;
+}
+
+function compareEntrypointCandidates(root: string, left: string, right: string): number {
+  const leftBlocks = extractWorkflowBlocks(readText(left));
+  const rightBlocks = extractWorkflowBlocks(readText(right));
+  const leftAnonymousScore = leftBlocks.some((block) => block.name === null) ? 0 : 1;
+  const rightAnonymousScore = rightBlocks.some((block) => block.name === null) ? 0 : 1;
+  const leftNameScore = basename(left) === "main.nf" ? 0 : 1;
+  const rightNameScore = basename(right) === "main.nf" ? 0 : 1;
+  const leftDepth = relative(root, dirname(left)).split(sep).filter(Boolean).length;
+  const rightDepth = relative(root, dirname(right)).split(sep).filter(Boolean).length;
+  return (
+    leftAnonymousScore - rightAnonymousScore ||
+    leftNameScore - rightNameScore ||
+    leftDepth - rightDepth ||
+    relative(root, left).localeCompare(relative(root, right))
   );
-  const conda = normalizeDirective(matchOne(text, /conda\s+"([\s\S]*?)"/u));
-  return {
-    name,
-    aliases: [],
-    module_path: relative(pipelineRoot, path),
-    tool: null,
-    container,
-    conda,
-    inputs: parseIoBlock(text, "input"),
-    outputs: parseIoBlock(text, "output"),
-    when: normalizeDirective(matchOne(text, /when:\s*\n([\s\S]*?)\n\s*script:/u)),
-    script_summary: summarizeScript(name),
-    publish_dir: normalizeDirective(matchOne(text, /publishDir\s+([^\n]+)/u)),
-  };
 }
 
 function discoverProcessAliases(pipelineRoot: string): Map<string, string[]> {
@@ -724,7 +835,9 @@ function parseTestFixtures(pipelineRoot: string, profile: string): Summary["test
   const configPath = join(pipelineRoot, "conf", `${profile}.config`);
   const text = existsSync(configPath) ? readText(configPath) : "";
   const baseParams = parseParamAssignments(
-    readText(join(pipelineRoot, "nextflow.config")),
+    existsSync(join(pipelineRoot, "nextflow.config"))
+      ? readText(join(pipelineRoot, "nextflow.config"))
+      : "",
     new Map(),
   );
   const profileParams = parseParamAssignments(text, baseParams);

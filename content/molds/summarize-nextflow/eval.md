@@ -40,11 +40,48 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 
 - bucket: fidelity
 - check: deterministic
-- fixture: each pipeline above; ground truth from a shell grep over
-  `main.nf`, `workflows/`, `modules/**`, `subworkflows/**`.
-- expectation: `processes[].length` matches the corpus-observed count
-  modulo aliases (aliases are merged into a single `processes[]` entry
-  with the imports recorded under `aliases[]`).
+- fixture: each tier-tagged fixture in `workflow-fixtures/fixtures.yaml`; ground truth from
+  `grep -c '^process ' <every .nf file>` after excluding generated/vendor dirs
+  (`.git/`, `work/`, `.nextflow/`, known vendored submodules).
+- expectation: `processes[].length` is at least 80% of grep ground truth and
+  ideally exact modulo comments/false-positive grep matches; aliases are merged
+  into a single `processes[]` entry with the imports recorded under `aliases[]`.
+
+## Case: process discovery is layout-agnostic
+
+- bucket: fidelity
+- check: deterministic
+- fixture: every ad-hoc DSL2 fixture in `workflow-fixtures/fixtures.yaml`.
+- expectation: CLI emits non-empty `processes[]` for layouts with root-level
+  `modules.nf`, flat `modules/<name>.nf`, processes inline in `main.nf`, and
+  process files under `workflows/`, `lib/`, or `modules/local/`; no fixture
+  silently succeeds with zero processes when grep sees process blocks. Synthetic
+  package regressions should assert exact counts for each layout class; corpus
+  runs use the 80% threshold above to tolerate grep false positives.
+
+## Case: multi-process-per-file
+
+- bucket: fidelity
+- check: deterministic
+- fixture: `workflow-fixtures/pipelines/CRG-CNAG__CalliNGS-NF`.
+- expectation: summary has 11 `processes[]` entries from root `modules.nf`.
+
+## Case: pipeline-root auto-detect
+
+- bucket: fidelity
+- check: deterministic
+- fixture: `workflow-fixtures/pipelines/biocorecrg__MOP2` and
+  `workflow-fixtures/pipelines/ncbi__egapx`.
+- expectation: CLI exits 0 from the repository root; `warnings[]` surfaces the
+  auto-detected pipeline root so a wrong-root choice is reviewable.
+
+## Case: non-main entrypoint detection
+
+- bucket: fidelity
+- check: deterministic
+- fixture: `workflow-fixtures/pipelines/replikation__What_the_Phage`.
+- expectation: summary exits 0 and `warnings[]` names `phage.nf` as the chosen
+  entrypoint instead of requiring a literal `main.nf`.
 
 ## Case: alias sweep on bacass
 
