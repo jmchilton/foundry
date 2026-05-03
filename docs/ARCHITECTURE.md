@@ -20,7 +20,7 @@ Foundry-internal (in the `foundry/` repo):
 - **Frontmatter schema** — `meta_schema.yml`, JSON Schema Draft 07 in YAML, contract for content notes. Distinct from the Mold IO schemas under `content/schemas/`.
 - **Tag registry** — `meta_tags.yml`, controlled vocabulary injected into the schema at validate time.
 - **Cast skills** — produced by casting from Molds. Per-target output layout under `casts/<target>/<name>/`.
-- **Tooling** — TypeScript scripts run via `tsx` (or compiled): validation, ingestion, casting, generators. One `package.json`; no Python in the toolchain.
+- **Tooling** — TypeScript build/authoring commands ship as `@galaxy-foundry/build-cli` (`foundry-build`): validation and deterministic generators first, casting later. Top-level `scripts/` files remain as compatibility wrappers or repo-local one-offs. No Python in the toolchain.
 - **Slash commands** — `.claude/commands/*.md`, checked into the repo, codify the agent workflows.
 - **Static site** — Astro renderer over the foundry's content collections, deployed to GitHub Pages.
 
@@ -173,7 +173,7 @@ No exemplar-related fields. IWC workflows are referenced by URL in pattern bodie
 
 ## 6. Validation pipeline
 
-`scripts/validate.ts` is the validator entry point, runnable via `tsx scripts/validate.ts` (or compiled). Dependencies: **Ajv** (JSON Schema Draft 07), **gray-matter** (frontmatter parse), **js-yaml** (load schema + tag registry).
+`foundry-build validate` is the validator entry point, with `scripts/validate.ts` kept as a compatibility wrapper. Dependencies: **Ajv** (JSON Schema Draft 07), **gray-matter** (frontmatter parse), **js-yaml** (load schema + tag registry).
 
 Layered validation (`validateData` orchestrates):
 1. **`preprocessFrontmatter`** — normalize parsed dates (gray-matter / js-yaml may produce `Date` objects) to ISO strings before schema check.
@@ -250,7 +250,7 @@ All generated files live under `content/` and are committed to git; CI runs `--c
 
 Pipelines lead the dashboard because they are the **primary task surface** of the Foundry: a contributor or agent landing cold should first see the journeys ("convert a Nextflow workflow to Galaxy"), then drill into Molds / Patterns / CLI as the reference layer beneath. Type-based sections are preserved as the reference surface; pipelines are the journey surface. See §11 for how this propagates to the Astro routes.
 
-`scripts/generate-dashboard.ts` emits Dataview blocks; the Astro page imports the same JSON. Both filter `status !== 'archived'`, sort `revised DESC`.
+`foundry-build generate-dashboard` emits Dataview blocks; the Astro page imports the same JSON. Both filter `status !== 'archived'`, sort `revised DESC`.
 
 **`Index.md`** — flat prose catalog grouped by `type`/`subtype`, alphabetized within each group:
 
@@ -258,7 +258,7 @@ Pipelines lead the dashboard because they are the **primary task surface** of th
 - [[slug]] — {summary} *(stale)*
 ```
 
-`scripts/generate-index.ts` walks `findMdFiles` (reusing the validator's skip logic), groups by type, emits the file. Directory-note slugs use the parent directory name.
+`foundry-build generate-index` walks `findMdFiles` (reusing the validator's skip logic), groups by type, emits the file. Directory-note slugs use the parent directory name.
 
 **Drift detection**: `--check` flag on every generator reads the file and string-compares with re-generation; exit 1 on mismatch. Wired into `npm run check:dashboard` and `check:index`.
 
@@ -361,7 +361,7 @@ Stack:
 - **`tsx`** to run TS scripts directly (no compile step in dev); `tsc --noEmit` for typecheck in CI.
 - **Ajv** for schema validation, **gray-matter** for frontmatter parse, **js-yaml** for YAML loads.
 - **Vitest** for tests.
-- **One `package.json`**, one `tsconfig.json` at repo root; the Astro site (`site/`) inherits via project references or path aliases. Astro and tooling share a single dependency tree — the wiki-link module under `scripts/lib/` is imported by both sides via path alias.
+- **pnpm workspace packages** for published runtime and build tooling; root `package.json` keeps authoring shortcuts. Astro imports shared wiki-link behavior through compatibility wrappers under `scripts/lib/` until the site gets its own package boundary.
 
 ## 13. Cross-cutting concerns
 
@@ -462,8 +462,8 @@ foundry/
 │   └── generic/
 ├── scripts/
 │   ├── validate.ts
-│   ├── generate-dashboard.ts
-│   ├── generate-index.ts
+│   ├── generate-dashboard.ts           # compatibility wrapper for foundry-build
+│   ├── generate-index.ts               # compatibility wrapper for foundry-build
 │   ├── seed-iwc-tags.ts                  # one-time, then archived
 │   ├── cast-mold.ts
 │   ├── status.ts                         # cast drift detection
