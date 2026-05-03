@@ -253,6 +253,8 @@ export const summaryNextflowSchema = {
       "required": [
         "name",
         "module_path",
+        "meta",
+        "module_tests",
         "inputs",
         "outputs"
       ],
@@ -271,6 +273,24 @@ export const summaryNextflowSchema = {
         "module_path": {
           "type": "string",
           "description": "Relative path from the pipeline root to the file declaring the process."
+        },
+        "meta": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ModuleMeta"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Normalized `meta.yml` from the module directory when present. Null for local/ad-hoc processes without module metadata."
+        },
+        "module_tests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NfTest"
+          },
+          "description": "Module-scoped nf-test files under the module's `tests/` directory. Empty for local/ad-hoc modules without unit tests."
         },
         "tool": {
           "type": [
@@ -325,6 +345,105 @@ export const summaryNextflowSchema = {
         }
       }
     },
+    "ModuleMeta": {
+      "title": "ModuleMeta",
+      "description": "Normalized subset of nf-core module `meta.yml`, captured next to a process so module-scoped downstream Molds can consume `processes[i]` without reading the full pipeline summary.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keywords",
+        "authors",
+        "maintainers",
+        "tools",
+        "input",
+        "output"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "maintainers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEntry"
+          }
+        },
+        "input": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEntry"
+          }
+        },
+        "output": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModuleMetaEntry"
+          }
+        }
+      }
+    },
+    "ModuleMetaEntry": {
+      "title": "ModuleMetaEntry",
+      "description": "One named entry from a module `meta.yml` section, normalized from nf-core's single-key YAML maps into `{ name, ...fields }` objects.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "homepage": {
+          "type": "string"
+        },
+        "documentation": {
+          "type": "string"
+        },
+        "tool_dev_url": {
+          "type": "string"
+        },
+        "doi": {
+          "type": "string"
+        },
+        "licence": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        }
+      }
+    },
     "Subworkflow": {
       "title": "Subworkflow",
       "description": "One named `workflow <NAME> { ... }` block other than the primary workflow. Includes nf-core utility wrappers (PIPELINE_INITIALISATION, PIPELINE_COMPLETION, UTILS_NFCORE_PIPELINE) which exist to compose helper-function calls rather than to invoke processes.",
@@ -334,7 +453,8 @@ export const summaryNextflowSchema = {
         "name",
         "path",
         "kind",
-        "calls"
+        "calls",
+        "tests"
       ],
       "properties": {
         "name": {
@@ -370,6 +490,13 @@ export const summaryNextflowSchema = {
           "items": {
             "$ref": "#/$defs/ChannelIO"
           }
+        },
+        "tests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NfTest"
+          },
+          "description": "Subworkflow-scoped nf-test files under the subworkflow's `tests/` directory. Empty when absent."
         }
       }
     },

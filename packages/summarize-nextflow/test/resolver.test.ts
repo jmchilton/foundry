@@ -5,7 +5,22 @@ import { afterEach, describe, expect, test } from "vitest";
 import { buildSummary } from "../src/index.js";
 
 interface SummaryLike {
-  processes: { name: string; module_path: string; inputs: unknown[]; outputs: unknown[] }[];
+  processes: {
+    name: string;
+    module_path: string;
+    meta: {
+      description?: string;
+      keywords: string[];
+      authors: string[];
+      tools: { name: string; description?: string; homepage?: string; licence?: string[] }[];
+      input: { name: string; type?: string; description?: string; pattern?: string }[];
+      output: { name: string; type?: string; description?: string; pattern?: string }[];
+    } | null;
+    module_tests: { name: string; path: string; snapshot: { snap_path: string | null } | null }[];
+    inputs: unknown[];
+    outputs: unknown[];
+  }[];
+  subworkflows: { name: string; path: string; tests: { name: string; path: string }[] }[];
   warnings: string[];
 }
 
@@ -176,6 +191,120 @@ process SECOND {
       "auto-detected Nextflow pipeline root from workflow block: nf",
     );
     expect(summary.warnings).toContain("selected Nextflow entrypoint: ui.nf");
+  });
+
+  test("captures module meta.yml and module nf-tests on canonical process", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/module-meta' }\n");
+    write(root, "main.nf", "include { ALIGN } from './modules/nf-core/minimap2/align'\nworkflow MODULE_META { ALIGN() }\n");
+    write(root, "modules/nf-core/minimap2/align/main.nf", "process ALIGN {\n  script:\n  'align'\n}\n");
+    write(
+      root,
+      "modules/nf-core/minimap2/align/meta.yml",
+      `description: Align reads against a reference
+keywords:
+  - align
+  - reference
+authors:
+  - "@author"
+maintainers:
+  - "@maintainer"
+tools:
+  - minimap2:
+      description: Fast sequence aligner
+      homepage: https://github.com/lh3/minimap2
+      licence:
+        - MIT
+input:
+  - reads:
+      type: file
+      description: Input reads
+      pattern: "*.fastq.gz"
+output:
+  - bam:
+      type: file
+      description: Aligned reads
+      pattern: "*.bam"
+`,
+    );
+    write(
+      root,
+      "modules/nf-core/minimap2/align/tests/main.nf.test",
+      `profile "test"
+test("align module") {
+  when { params { outdir = "results" } }
+  then { assert snapshot(workflow.trace.succeeded().size()).match() }
+}
+`,
+    );
+    write(root, "modules/nf-core/minimap2/align/tests/main.nf.test.snap", "snapshot\n");
+
+    const summary = await summarize(root);
+    const process = summary.processes[0]!;
+
+    expect(process.meta?.description).toBe("Align reads against a reference");
+    expect(process.meta?.keywords).toEqual(["align", "reference"]);
+    expect(process.meta?.authors).toEqual(["@author"]);
+    expect(process.meta?.tools[0]).toEqual(
+      expect.objectContaining({
+        name: "minimap2",
+        description: "Fast sequence aligner",
+        homepage: "https://github.com/lh3/minimap2",
+        licence: ["MIT"],
+      }),
+    );
+    expect(process.meta?.input[0]).toEqual(
+      expect.objectContaining({ name: "reads", type: "file", pattern: "*.fastq.gz" }),
+    );
+    expect(process.module_tests).toHaveLength(1);
+    expect(process.module_tests[0]).toEqual(
+      expect.objectContaining({
+        name: "align module",
+        path: "modules/nf-core/minimap2/align/tests/main.nf.test",
+        snapshot: expect.objectContaining({
+          snap_path: "modules/nf-core/minimap2/align/tests/main.nf.test.snap",
+        }),
+      }),
+    );
+  });
+
+  test("captures subworkflow tests and leaves local process module metadata empty", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/subworkflow-tests' }\n");
+    write(root, "modules/local/local.nf", "process LOCAL {\n  script:\n  'local'\n}\n");
+    write(root, "modules/local/meta.yml", "description: Local metadata should not be promoted\n");
+    write(root, "modules/local/tests/local.nf.test", "test(\"local\") { then { assert workflow.success } }\n");
+    write(root, "modules/local/other.nf", "process OTHER {\n  script:\n  'other'\n}\n");
+    write(
+      root,
+      "subworkflows/nf-core/trim/main.nf",
+      "workflow TRIM {\n  take:\n  reads\n  main:\n  LOCAL(reads)\n}\n",
+    );
+    write(
+      root,
+      "workflows/pipeline.nf",
+      "workflow PIPELINE {\n  take:\n  reads\n  main:\n  LOCAL(reads)\n  OTHER(reads)\n}\n",
+    );
+    write(root, "main.nf", "include { LOCAL } from './modules/local/local'\ninclude { OTHER } from './modules/local/other'\ninclude { TRIM } from './subworkflows/nf-core/trim'\ninclude { PIPELINE } from './workflows/pipeline'\nworkflow { PIPELINE(Channel.of('x')) }\n");
+    write(
+      root,
+      "subworkflows/nf-core/trim/tests/main.nf.test",
+      `test("trim subworkflow") {
+  then { assert workflow.success }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+
+    expect(summary.processes.every((process) => process.meta === null)).toBe(true);
+    expect(summary.processes.every((process) => process.module_tests.length === 0)).toBe(true);
+    expect(summary.subworkflows.find((workflow) => workflow.name === "TRIM")?.tests).toEqual([
+      expect.objectContaining({
+        name: "trim subworkflow",
+        path: "subworkflows/nf-core/trim/tests/main.nf.test",
+      }),
+    ]);
   });
 });
 
