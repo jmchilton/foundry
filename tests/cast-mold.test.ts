@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "..");
 const castMold = path.join(repoRoot, "scripts", "cast-mold.ts");
+const foundryBuild = path.join(repoRoot, "packages", "build-cli", "src", "bin", "foundry-build.ts");
 const castVerify = path.join(repoRoot, "scripts", "cast-skill-verify.ts");
 
 function runTsx(script: string, args: string[]): { code: number; stdout: string; stderr: string } {
@@ -30,6 +31,12 @@ function runTsx(script: string, args: string[]): { code: number; stdout: string;
 describe("cast-mold (summarize-nextflow integration)", () => {
   it("--check passes for the committed cast", () => {
     const r = runTsx(castMold, ["summarize-nextflow", "--target=claude", "--check"]);
+    expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
+    expect(r.stdout).toContain("clean");
+  });
+
+  it("foundry-build cast --check passes for the committed cast", () => {
+    const r = runTsx(foundryBuild, ["cast", "summarize-nextflow", "--target=claude", "--check"]);
     expect(r.code, `stderr: ${r.stderr}\nstdout: ${r.stdout}`).toBe(0);
     expect(r.stdout).toContain("clean");
   });

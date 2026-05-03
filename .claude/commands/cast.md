@@ -28,7 +28,7 @@ If validate is not yet path-scoped, fall back to `npm run validate` and grep for
 ## 2. Deterministic prepare/check
 
 ```sh
-npx tsx scripts/cast-mold.ts <mold-name> --target=<target>
+npm run cast -- <mold-name> --target=<target>
 ```
 
 This:
