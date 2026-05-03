@@ -99,7 +99,7 @@ Drift surfaces today via `cast-mold.ts <mold> --check` (per-Mold) and `cast-skil
 
 To cast a Mold, the casting process consumes:
 
-- **The Mold directory** — `index.md` (frontmatter manifest + procedural body) plus, if the schema permits, casting hints. **Not** `eval.md` — evals stay in the Foundry.
+- **The Mold directory** — `index.md` (frontmatter manifest + procedural body) plus, if the schema permits, casting hints. The cast consumes only the procedural body of `index.md`; sibling files (`eval.md`, `changes.md`, `cast-skill-verification.md`) are Foundry-only and never packaged. Author-facing meta-content (changelog entries, casting open-questions) belongs in those sibling files, not in the body of `index.md` — anything in the body is a candidate for the cast.
 - **All typed references declared in the manifest**, resolved by kind:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.
