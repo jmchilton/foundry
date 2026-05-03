@@ -14,7 +14,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 - [[author-galaxy-tool-wrapper]] — Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable.
 - [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against a draft.
-- [[cwl-test-to-target-tests]] — Translate CWL test fixtures into a target workflow's test format.
+- [[cwl-test-to-galaxy-test-plan]] — Translate CWL test fixtures into a Galaxy workflow test plan.
 - [[debug-cwl-workflow-output]] — Triage failing CWL run outputs; classify failure modes; propose fixes.
 - [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify failure modes; propose fixes.
 - [[discover-shed-tool]] — Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through.
@@ -23,7 +23,8 @@ Generated from content frontmatter. Do not edit by hand.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
 - [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary.
 - [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions.
-- [[nextflow-test-to-target-tests]] — Translate NF test fixtures into a target workflow's test format.
+- [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
+- [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan.
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
 - [[summarize-cwl]] — Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals.

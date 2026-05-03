@@ -17,7 +17,8 @@ related_notes:
   - "[[summary-to-galaxy-data-flow]]"
   - "[[summary-to-cwl-data-flow]]"
   - "[[author-galaxy-tool-wrapper]]"
-  - "[[nextflow-test-to-target-tests]]"
+  - "[[nextflow-test-to-galaxy-test-plan]]"
+  - "[[nextflow-test-to-cwl-test-plan]]"
 summary: "JSON Schema for the structured summary emitted by the summarize-nextflow Mold."
 ---
 
@@ -76,7 +77,7 @@ Second cast against `nf-core/bacass @ 2.5.0` (33 processes, 9 nf-test files, 11 
 
 - **`Process.aliases: string[]` added.** Real pipelines re-import a single module multiple times under different aliases via `include { X as Y }` — bacass has six such patterns (CAT_FASTQ→{SHORT,LONG}, MINIMAP2_ALIGN→{CONSENSUS,POLISH} (3 aliases of one process), KRAKEN2_KRAKEN2→{KRAKEN2,KRAKEN2_LONG}, QUAST→QUAST_BYREFSEQID, plus FASTQC→{RAW,TRIM} inside FASTQ_TRIM_FASTP_FASTQC). Workflow `edges[].from`/`.to` reference alias names; canonical names didn't appear in edges at all. The new field captures the alias→canonical mapping so downstream skills (especially author-galaxy-tool-wrapper, which needs to know "MINIMAP2_CONSENSUS shares MINIMAP2_ALIGN's container/conda but is invoked with different runtime args") can resolve references.
 - **`Summary.nf_tests: NfTest[]` added.** bacass has 9 `tests/*.nf.test` files, one per test profile. The previous schema's `test_fixtures` is singular (one selected profile's data shape); the rest of the test surface was invisible. The new array enumerates every `.nf.test` with structured fields: profile, params overrides, assert_workflow_success, prose_assertions, and a structured `snapshot: SnapshotFixture | null` capturing the `snapshot(...).match()` semantics.
-- **`SnapshotFixture` shape added.** nf-core templates use a near-uniform snapshot pattern: pass succeeded-task-count + version-yaml + stable-name list + stable-path list into snapshot(), pruning via `ignoreFile:` and `ignore:` globs. The new shape records `captures`, `helpers`, `ignore_files`, `ignore_globs`, and the `.snap` path — enough for downstream test-conversion molds (e.g. nextflow-test-to-target-tests) to reconstruct equivalent assertions in target frameworks without re-parsing Groovy.
+- **`SnapshotFixture` shape added.** nf-core templates use a near-uniform snapshot pattern: pass succeeded-task-count + version-yaml + stable-name list + stable-path list into snapshot(), pruning via `ignoreFile:` and `ignore:` globs. The new shape records `captures`, `helpers`, `ignore_files`, `ignore_globs`, and the `.snap` path — enough for downstream test-plan molds (e.g. `nextflow-test-to-galaxy-test-plan`) to reconstruct equivalent assertion intent in target frameworks without re-parsing Groovy.
 
 What was not changed despite biting:
 - TestFixtures stayed singular. Multiple test profiles surfaced via `nf_tests[]` rather than promoting `test_fixtures` to an array — this preserves backward compatibility and keeps the "data shape of the selected profile" abstraction.

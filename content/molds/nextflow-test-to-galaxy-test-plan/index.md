@@ -1,6 +1,6 @@
 ---
 type: mold
-name: nextflow-test-to-target-tests
+name: nextflow-test-to-galaxy-test-plan
 axis: source-specific
 source: nextflow
 tags:
@@ -8,10 +8,10 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
-summary: "Translate NF test fixtures into a target workflow's test format."
+summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 references:
   - kind: schema
     ref: "content/schemas/summary-nextflow.schema.json"
@@ -27,8 +27,8 @@ references:
     mode: verbatim
     evidence: hypothesis
     purpose: "Interpret nf-test profiles, snapshot assertions, and Nextflow fixture conventions before translating them."
-    trigger: "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into target test plans."
-    verification: "Translate nf-core/bacass nf-test snapshots into Galaxy tests and confirm this note improves profile/snapshot extraction."
+    trigger: "When converting nf_tests, snapshot fixtures, test profiles, or source test-data references into a Galaxy workflow test plan."
+    verification: "Translate nf-core/bacass nf-test snapshots into a Galaxy test plan and confirm this note improves profile/snapshot extraction."
   - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime
@@ -43,8 +43,8 @@ references:
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Choose Galaxy workflow-test assertion families and tolerances for translated expected outputs."
-    trigger: "When turning Nextflow expected outputs or snapshots into Planemo assertions."
+    purpose: "Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs."
+    trigger: "When turning Nextflow expected outputs or snapshots into Galaxy test-plan assertions."
   - kind: research
     ref: "[[iwc-shortcuts-anti-patterns]]"
     used_at: runtime
@@ -54,8 +54,9 @@ references:
     purpose: "Distinguish accepted IWC-style test shortcuts from assertion smells while translating tests."
     trigger: "When deciding whether to use existence-only, size-only, image-dimension, or tolerant output checks."
 related_notes:
+  - "[[summary-nextflow]]"
   - "[[tests-format]]"
 ---
-# nextflow-test-to-target-tests
+# nextflow-test-to-galaxy-test-plan
 
-Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
+Translate Nextflow test evidence into a Galaxy workflow test plan. The output is a reviewable handoff, not a concrete `tests-format` file: preserve profile, fixture, snapshot, ignored-file, expected-output, and rationale provenance so [[implement-galaxy-workflow-test]] can author the final Galaxy test artifact with the right labels and assertions.

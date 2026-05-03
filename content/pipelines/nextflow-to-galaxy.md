@@ -27,7 +27,7 @@ phases:
     loop: true
   - mold: "[[validate-galaxy-step]]"
     loop: true
-  - mold: "[[nextflow-test-to-target-tests]]"
+  - mold: "[[nextflow-test-to-galaxy-test-plan]]"
   - mold: "[[implement-galaxy-workflow-test]]"
   - mold: "[[validate-galaxy-workflow]]"
   - mold: "[[run-workflow-test]]"
