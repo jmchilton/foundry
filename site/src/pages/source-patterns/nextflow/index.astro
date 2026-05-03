@@ -1,0 +1,156 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const all = await getCollection('content');
+const sourcePatterns = all
+  .filter(n => n.data.type === 'source-pattern' && (n.data as any).source === 'nextflow' && n.data.status !== 'archived')
+  .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
+
+const maps = sourcePatterns.filter(p => (p.data as any).source_pattern_kind === 'moc');
+const leaves = sourcePatterns.filter(p => (p.data as any).source_pattern_kind !== 'moc');
+
+function formatKind(kind: string): string {
+  return kind.replace(/-/g, ' ');
+}
+---
+<Base title="Nextflow Source Patterns">
+  <section class="page-hero bg-grain" aria-labelledby="source-patterns-heading">
+    <span class="eyebrow mb-3">Source Patterns / Nextflow</span>
+    <div class="page-hero-grid">
+      <div>
+        <h1 id="source-patterns-heading" class="page-title text-balance">Nextflow idioms mapped to Galaxy patterns.</h1>
+        <p class="page-lede text-pretty">
+          Source-pattern pages start from channel and operator shapes found in Nextflow, then point to the Galaxy pattern pages that implement or approximate the conversion.
+        </p>
+      </div>
+      <dl class="page-stats" aria-label="Nextflow source-pattern stats">
+        <div>
+          <dt>Total</dt>
+          <dd>{sourcePatterns.length}</dd>
+        </div>
+        <div>
+          <dt>Leaves</dt>
+          <dd>{leaves.length}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  {maps.length > 0 && (
+    <section class="source-pattern-group" aria-labelledby="source-pattern-maps-heading">
+      <div class="section-rule">
+        <h2 id="source-pattern-maps-heading">Maps</h2>
+        <span class="section-tail">/ start here</span>
+      </div>
+      <div class="source-pattern-grid source-pattern-grid-maps">
+        {maps.map(pattern => {
+          const data = pattern.data as any;
+          return (
+            <article class="source-pattern-card source-pattern-card-map tinted-shadow tinted-shadow-hover">
+              <div class="source-pattern-card-top">
+                <span class="badge badge-draft">{formatKind(data.source_pattern_kind)}</span>
+                <span class="source-pattern-meta font-mono">{data.source} -> {data.target}</span>
+              </div>
+              <h3><a href={`${base}/${pattern.id}/`}>{data.title}</a></h3>
+              <p>{data.summary}</p>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  )}
+
+  <section class="source-pattern-group" aria-labelledby="source-pattern-leaves-heading">
+    <div class="section-rule">
+      <h2 id="source-pattern-leaves-heading">Leaf Patterns</h2>
+      <span class="section-tail">/ {leaves.length} conversion {leaves.length === 1 ? 'idiom' : 'idioms'}</span>
+    </div>
+    {leaves.length === 0 ? (
+      <p class="empty-note">No Nextflow leaf source-pattern pages yet. The map page captures the intended first set.</p>
+    ) : (
+      <div class="source-pattern-grid">
+        {leaves.map(pattern => {
+          const data = pattern.data as any;
+          const implementedBy = data.implemented_by_patterns?.length ?? 0;
+          return (
+            <article class="source-pattern-card tinted-shadow tinted-shadow-hover">
+              <div class="source-pattern-card-top">
+                <span class={`badge badge-${data.status}`}>{formatKind(data.source_pattern_kind)}</span>
+                <span class="source-pattern-meta font-mono">{implementedBy} Galaxy links</span>
+              </div>
+              <h3><a href={`${base}/${pattern.id}/`}>{data.title}</a></h3>
+              <p>{data.summary}</p>
+            </article>
+          );
+        })}
+      </div>
+    )}
+  </section>
+</Base>
+
+<style>
+  .source-pattern-group {
+    margin-bottom: 2rem;
+  }
+  .source-pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: 1rem;
+  }
+  .source-pattern-grid-maps {
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  }
+  .source-pattern-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    min-height: 11rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.7rem;
+    background: var(--color-surface-raised);
+    transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .source-pattern-card-map {
+    border-color: color-mix(in srgb, var(--color-galaxy-primary) 24%, var(--color-border-subtle));
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--color-galaxy-primary) 8%, transparent), transparent 48%),
+      var(--color-surface-raised);
+  }
+  .source-pattern-card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .source-pattern-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .source-pattern-meta {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+  }
+  .source-pattern-card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1.25;
+  }
+  .source-pattern-card h3 a {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+  .source-pattern-card h3 a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+  .source-pattern-card p,
+  .empty-note {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+</style>
