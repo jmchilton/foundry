@@ -129,3 +129,78 @@ Recommended next steps:
 3. Investigate process-count divergence on bacass (34 vs naive 31) before declaring the fidelity case authoritative.
 4. Investigate the uniform 2-warning count — either the warnings system is under-sampling or the corpus genuinely doesn't trigger §"Caveats" predicates.
 5. Run the utility cases (data-flow Mold + tool-wrapper Mold consumers) against bacass output to surface missing fields / open gaps.
+
+## 2026-05-03 — summarize-nextflow ad-hoc fixture sweep (overfitting check)
+
+Issue #110 raised, then 8 ad-hoc DSL2 pipelines added to `workflow-fixtures/fixtures.yaml` (`flavor: adhoc` field new; existing 7 nf-core entries marked `flavor: nf-core`). Stress-test goal: confirm the resolver doesn't silently degrade against pipelines that don't follow the nf-core template.
+
+**Result: severe overfitting. The resolver works only on nf-core layouts.**
+
+### Hard failures (2/8)
+
+- **biocorecrg/MOP2** — multi-pipeline monorepo; no `nextflow.config` at repo root. Resolver throws `not a Nextflow pipeline root`.
+- **ncbi/egapx** — sources under `nf/`, no `nextflow.config` at repo root. Same throw.
+
+Pipeline-root detection (`packages/summarize-nextflow/src/resolver.ts:121`) requires `<root>/nextflow.config` and offers no fallback for nested-pipeline or non-standard-root layouts.
+
+### Silent degradation (6/8)
+
+The other six exit 0 and emit *schema-valid but empty* summaries. Process counts (resolver-emitted vs filesystem grep `^process `):
+
+| pipeline | emitted | fs | gap reason |
+| - | - | - | - |
+| CalliNGS-NF | 0 | 11 | 11 processes in single `modules.nf` file at root |
+| mcmicro | 0 | 17 | flat `modules/<name>.nf` (one file per module, not nf-core's per-dir) |
+| nf-demos | 0 | 9 | no `modules/` dir; processes in `<dir>/<file>.nf` |
+| crispr-process-nf | 0 | 12 | processes inline in `main.nf` itself |
+| What_the_Phage | 0 | 94 | flat `modules/<tool>.nf` + custom `phage.nf` entrypoint |
+| wf-human-variation | 0 | 99 | processes spread across `workflows/`, `lib/`, `modules/local/<name>.nf` |
+
+### Root cause
+
+`discoverProcessFiles()` (resolver.ts:284-286):
+
+```ts
+function discoverProcessFiles(pipelineRoot: string): string[] {
+  return walk(join(pipelineRoot, "modules")).filter((path) => basename(path) === "main.nf");
+}
+```
+
+Two hardcoded nf-core assumptions:
+
+1. **`<root>/modules/` exists.** Half the ad-hoc pipelines have processes elsewhere (`<root>/main.nf`, `<root>/<custom-name>.nf`, `<root>/workflows/`, `<root>/lib/`, flat `<root>/modules/<x>.nf`).
+2. **One process per `main.nf` file.** CalliNGS-NF puts 11 processes in one `modules.nf`; ad-hoc pipelines routinely put multiple processes in a single file. `parseProcessFile` uses `matchOne(/process\s+(...)\{/u)` — single match — so even if the file were found, only the first process would be parsed.
+
+### Surviving fields
+
+- `params` — works for pipelines with `nextflow_schema.json` (nf-core, mcmicro, wf-human-variation). Returns `[]` for pipelines without it. Acceptable; the schema is optional in NF.
+- `profiles` — works (parses `nextflow.config` `profiles { ... }` block). Captured 8/13/10/3/26/0 across the six.
+- `subworkflows` — partial. Picked up some (10 mcmicro, 21 What_the_Phage, 13 wf-human-variation) but missed others. Not yet ground-truthed.
+- `tools` — 0 across all six (downstream of empty `processes[]`).
+- `nf_tests` — 0 across all six (correctly; none use nf-test).
+- `warnings` — uniform 2 across every fixture (same finding as 2026-05-02; warnings appear boilerplate-only).
+
+### Implications for the resolver
+
+The fix-list, ordered by impact:
+
+1. **Walk all `.nf` files** under the pipeline root (excluding `.git/`, `work/`, `.nextflow/`, vendored submodules) and grep each for `^[ \t]*process [A-Z_][A-Z0-9_]*[ \t]*\{`. This single change unblocks 5 of the 6 silent-degradation cases.
+2. **Multi-process-per-file support.** Replace `matchOne` with `matchAll`; emit one `processes[]` entry per match. Each gets its own `module_path` (the file) plus a span/offset into the file for IO/script extraction.
+3. **Pipeline-root auto-detect.** When `<path>/nextflow.config` is absent, walk down looking for one (handles MOP2's `mop_preprocess/`); when none found anywhere, fall back to the nearest dir containing a `.nf` file with a `workflow {` block (handles egapx's `nf/`). Surface the chosen root in `source` or `warnings`.
+4. **Entrypoint detection beyond `main.nf`.** What_the_Phage uses `phage.nf`; egapx uses `ui/main.nf` or similar. The resolver should pick the .nf file containing `workflow { ... }` (named or anonymous) at the chosen root, not require a literal `main.nf`.
+5. **Local-module IO inference.** Once 5/6 pipelines start emitting processes, every one of those processes will be a "local" module without `meta.yml`. The resolver currently leans on `meta.yml` for IO docs; it'll need a script-block IO inference path (already noted in mold §4 but not implemented).
+
+### Implications for the schema
+
+Probably none from this sweep alone — `additionalProperties: false` holds, and the schema's required fields are all already satisfiable as empty arrays. The schema isn't overfit; the **resolver** is.
+
+### Implications for the eval
+
+Two new fidelity cases to add to `content/molds/summarize-nextflow/eval.md`:
+
+- **process-discovery is layout-agnostic** (deterministic): for every fixture, `processes[].length` >= 80% of `grep -c '^process ' <every .nf file>` ground truth. (80% rather than exact to allow for genuine false-positive grep matches in comment blocks.)
+- **pipeline-root auto-detect** (deterministic): MOP2 and egapx are summarized successfully, with the chosen root surfaced in the JSON.
+
+### Recommended next step
+
+File a follow-up issue: "summarize-nextflow resolver: walk all .nf files, support multi-process-per-file, auto-detect pipeline root." This is independent of issue #110 (per-module tests + meta.yml) and should land first — there's no point capturing per-module tests while the resolver finds zero modules.

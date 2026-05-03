@@ -53,19 +53,34 @@ Each skeleton is ~5–20KB instead of ~100KB–1MB; all 120 fit in agent context
 
 ## Adding a Nextflow fixture
 
-1. Append an entry to `fixtures.yaml` with `name`, `tier`, `repo`, `tag`, `sha`, `notes`.
-2. Resolve the SHA for the tag:
+1. Append an entry to `fixtures.yaml` with `name`, `flavor`, `tier`, `repo`, `sha`, `notes`. Add `tag` if the upstream has a release; omit for HEAD-pinned pipelines.
+2. Resolve the SHA:
+
+   For tagged releases:
 
    ```sh
-   gh api repos/<org>/<name>/git/ref/tags/<tag> --jq '.object.sha'
-   # if object.type is "tag" (annotated), dereference:
-   gh api repos/<org>/<name>/git/tags/<sha> --jq '.object.sha'
+   git ls-remote https://github.com/<org>/<name> refs/tags/<tag>
+   # if the tag is annotated, peel it:
+   git ls-remote https://github.com/<org>/<name> refs/tags/<tag>^{}
+   ```
+
+   For HEAD-pinned (no releases):
+
+   ```sh
+   git ls-remote https://github.com/<org>/<name> HEAD
    ```
 
 3. Run `scripts/fetch.sh <org>/<name>` to verify.
 
+## Flavors (Nextflow)
+
+- `nf-core` — follows the nf-core template (`modules/nf-core/`, `subworkflows/nf-core/`, `nextflow_schema.json`, per-module `meta.yml`, nf-test under `tests/`).
+- `adhoc` — any DSL2 pipeline that does not follow the nf-core template. Used to stress-test `summarize-nextflow` against non-nf-core conventions: custom layouts, missing schema/meta, non-`main.nf` entrypoints, alternate test conventions, non-bio domains.
+
 ## Tiers (Nextflow)
+
+Rough size buckets, both flavors:
 
 - `tiny` — minimal, bootstrap / smoke tests
 - `small` — mostly linear, clean patterns
-- `large` — many profiles, complex config; edge-case stress
+- `large` — many processes/profiles or heavy config; edge-case stress
