@@ -10,3 +10,8 @@
   source: $GALAXY/doc/source/dev/collection_semantics.md
   pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
   framing: content/research/galaxy-collection-semantics.md
+
+- local: content/research/galaxy.xsd
+  source: $GALAXY/lib/galaxy/tool_util/xsd/galaxy.xsd
+  pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
+  framing: content/research/galaxy-xsd.md

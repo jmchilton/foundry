@@ -16,6 +16,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[author-galaxy-tool-wrapper]] | Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable. | draft | 2026-05-03 | 2 |
 | [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against a draft. | draft | 2026-05-03 | 4 |
 | [[cwl-test-to-galaxy-test-plan]] | Translate CWL test fixtures into a Galaxy workflow test plan. | draft | 2026-05-03 | 2 |
 | [[nextflow-test-to-cwl-test-plan]] | Translate Nextflow test evidence into a CWL workflow test plan. | draft | 2026-05-03 | 1 |
@@ -30,7 +31,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a data-flow summary. | draft | 2026-05-02 | 2 |
 | [[validate-galaxy-step]] | Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation. | draft | 2026-05-02 | 2 |
 | [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | draft | 2026-05-02 | 2 |
-| [[author-galaxy-tool-wrapper]] | Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable. | draft | 2026-04-30 | 1 |
 | [[debug-cwl-workflow-output]] | Triage failing CWL run outputs; classify failure modes; propose fixes. | draft | 2026-04-30 | 1 |
 | [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | draft | 2026-04-30 | 2 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | draft | 2026-04-30 | 1 |
@@ -106,9 +106,11 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
 | [[component-tool-shed-search]] | Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload | draft | 2026-05-03 | 2 |
+| [[galaxy-collection-semantics]] | Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references. | draft | 2026-05-03 | 3 |
+| [[galaxy-xsd]] | Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax. | draft | 2026-05-03 | 1 |
 | [[iwc-nearest-exemplar-selection]] | Defines a feature hierarchy for selecting useful IWC exemplar workflows for structural comparison. | draft | 2026-05-03 | 2 |
+| [[planemo-asserts-idioms]] | Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate. | draft | 2026-05-03 | 4 |
 | [[galaxy-apply-rules-dsl]] | Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls. | draft | 2026-05-02 | 2 |
-| [[galaxy-collection-semantics]] | Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references. | draft | 2026-05-02 | 2 |
 | [[galaxy-collection-tools]] | Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics. | draft | 2026-05-02 | 2 |
 | [[galaxy-tool-job-failure-reference]] | Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces. | draft | 2026-05-02 | 1 |
 | [[galaxy-workflow-invocation-failure-reference]] | Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces. | draft | 2026-05-02 | 1 |
@@ -119,7 +121,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[iwc-transformations-survey]] | Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over. | draft | 2026-05-02 | 2 |
 | [[nextflow-operators-to-galaxy-collection-recipes]] | Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers. | draft | 2026-05-02 | 1 |
 | [[nextflow-to-galaxy-channel-shape-mapping]] | Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes. | draft | 2026-05-02 | 1 |
-| [[planemo-asserts-idioms]] | Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate. | draft | 2026-05-02 | 3 |
 | [[planemo-workflow-test-architecture]] | Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries. | draft | 2026-05-02 | 1 |
 | [[component-nextflow-containers-and-envs]] | Stub. Biocontainers / bioconda equivalence, Docker/Singularity refs, container directive resolution. Grows from cast contact — see issue #17. | draft | 2026-05-01 | 1 |
 | [[component-nextflow-inspect]] | White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision. | draft | 2026-05-01 | 1 |
