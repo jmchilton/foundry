@@ -82,7 +82,8 @@ Generated from content frontmatter. Do not edit by hand.
 - [[tool-revisions]] — Resolve a Tool Shed tool to changeset revisions for reproducible workflow pinning. Final step in discover-and-pin.
 - [[tool-search]] — Free-text Tool Shed search returning candidate tools as JSON; first step in the discover-and-pin sequence.
 - [[tool-versions]] — List TRS-published versions of a Tool Shed tool, oldest→newest. Second step in the discover-and-pin sequence.
-- [[validate]] — Validate gxformat2 Galaxy workflow structure and emit diagnostics before runtime execution.
+- [[validate]] — Validate Galaxy workflow structure, tool state, and optional connection compatibility before runtime execution.
+- [[validate-tests]] — Validate Galaxy workflow test files and optionally cross-check labels against their workflow.
 
 ## Schemas
 
@@ -100,6 +101,8 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-apply-rules-dsl]] — Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls.
 - [[galaxy-collection-semantics]] — Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references.
 - [[galaxy-collection-tools]] — Catalog of Galaxy's collection-operation tools — purpose, IO, parameters, selection guide. Companion to galaxy-collection-semantics.
+- [[galaxy-tool-job-failure-reference]] — Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces.
+- [[galaxy-workflow-invocation-failure-reference]] — Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces.
 - [[iwc-conditionals-survey]] — Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection.
 - [[iwc-nearest-exemplar-selection]] — Defines a feature hierarchy for selecting useful IWC exemplar workflows for structural comparison.
 - [[iwc-parameter-derivation-survey]] — Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters.
@@ -110,7 +113,10 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-operators-to-galaxy-collection-recipes]] — Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.
 - [[nextflow-to-galaxy-channel-shape-mapping]] — Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes.
 - [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.
+- [[planemo-workflow-test-architecture]] — Reference for Planemo workflow test/run architecture, Galaxy modes, API polling, and noisy failure boundaries.
 
 ## Design Specs
 
 - [[galaxy-data-flow-draft-contract]] — Defines the proposed boundary between Galaxy data-flow drafts, gxformat2 templates, and concrete step implementation.
+- [[galaxy-tool-summary-input-source]] — Decides that summarize-galaxy-tool reads cached ParsedTool JSON as its v1 input source.
+- [[iwc-exemplar-runtime-discovery]] — Resolves runtime IWC exemplar discovery through live IWC URLs plus gxwf processing.

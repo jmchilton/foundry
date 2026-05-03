@@ -129,6 +129,7 @@ const schemaNoteSchema = z.object({
   title: z.string(),
   package: z.string().optional(),
   upstream: z.string().optional(),
+  package_export: z.string().optional(),
   ...baseFields,
 }).strict();
 

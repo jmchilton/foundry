@@ -11,13 +11,14 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-04-30
-revision: 1
+revision: 2
 ai_generated: true
 related_notes:
   - "[[implement-galaxy-workflow-test]]"
   - "[[planemo-asserts-idioms]]"
   - "[[iwc-test-data-conventions]]"
   - "[[iwc-shortcuts-anti-patterns]]"
+  - "[[validate-tests]]"
 summary: "JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`."
 ---
 

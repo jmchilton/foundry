@@ -7,10 +7,11 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-03
+revision: 2
 ai_generated: true
 related_notes:
+  - "[[iwc-exemplar-runtime-discovery]]"
   - "[[galaxy-data-flow-draft-contract]]"
   - "[[iwc-transformations-survey]]"
   - "[[iwc-tabular-operations-survey]]"
@@ -80,9 +81,13 @@ Use `$IWC_FORMAT2/...` for parameter-level evidence and exact `tool_state`. Use 
 - [[compare-against-iwc-exemplar]] should use this as the selection procedure for finding and ranking exemplar candidates.
 - [[summary-to-galaxy-template]] should use this on demand when a skeleton is mature enough to pick comparison targets.
 
+## Runtime Discovery
+
+The default runtime discovery mechanism is defined by [[iwc-exemplar-runtime-discovery]]: live IWC GitHub URLs for retrieval and provenance, with `gxwf` used to normalize selected workflows for structural comparison.
+
 ## TODOs
 
 - Decide whether exemplar comparison should emit one nearest workflow or two to three ranked exemplars.
 - Decide whether confidence should be a single label or a per-axis vector.
 - Decide whether output schema should require source URL plus local fixture citation pairs.
-- Decide whether runtime retrieval uses local fixtures, live IWC listings, `gxwf`, or a user-supplied corpus path.
+- Specify the exact `gxwf` normalization command sequence once CLI manual pages cover it.
