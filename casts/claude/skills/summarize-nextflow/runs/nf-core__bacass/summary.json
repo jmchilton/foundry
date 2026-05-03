@@ -592,7 +592,9 @@
       "aliases": [
         "FASTQC_RAW",
         "FASTQC_TRIM"
-      ]
+      ],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "FASTP",
@@ -664,7 +666,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "CAT_FASTQ",
@@ -694,7 +698,9 @@
       "aliases": [
         "CAT_FASTQ_SHORT",
         "CAT_FASTQ_LONG"
-      ]
+      ],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "PORECHOP_PORECHOP",
@@ -726,7 +732,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "FILTLONG",
@@ -758,7 +766,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "UNICYCLER",
@@ -795,7 +805,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "CANU",
@@ -837,7 +849,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "MINIMAP2_ALIGN",
@@ -892,7 +906,9 @@
       "aliases": [
         "MINIMAP2_CONSENSUS",
         "MINIMAP2_POLISH"
-      ]
+      ],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "MINIASM",
@@ -919,7 +935,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "DRAGONFLYE",
@@ -951,7 +969,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "RACON",
@@ -978,7 +998,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "SAMTOOLS_SORT",
@@ -1010,7 +1032,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "SAMTOOLS_INDEX",
@@ -1042,7 +1066,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "KRAKEN2_KRAKEN2",
@@ -1092,7 +1118,9 @@
       "aliases": [
         "KRAKEN2",
         "KRAKEN2_LONG"
-      ]
+      ],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "QUAST",
@@ -1136,7 +1164,9 @@
       ],
       "aliases": [
         "QUAST_BYREFSEQID"
-      ]
+      ],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "BUSCO_BUSCO",
@@ -1193,7 +1223,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "GUNZIP",
@@ -1220,7 +1252,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "PROKKA",
@@ -1267,7 +1301,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "BAKTA_BAKTA",
@@ -1314,7 +1350,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "BAKTA_BAKTADBDOWNLOAD",
@@ -1335,7 +1373,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "DFAST",
@@ -1367,7 +1407,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "LIFTOFF",
@@ -1404,7 +1446,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "NANOPLOT",
@@ -1436,7 +1480,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "TOULLIGQC",
@@ -1463,7 +1509,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "PYCOQC",
@@ -1490,7 +1538,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "MEDAKA",
@@ -1517,7 +1567,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "NANOPOLISH",
@@ -1544,7 +1596,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "KRAKEN2_DB_PREPARATION",
@@ -1571,7 +1625,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "KMERFINDER_KMERFINDER",
@@ -1603,7 +1659,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "KMERFINDER_SUMMARY",
@@ -1630,7 +1688,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "KMERFINDER_DOWNLOAD_REFERENCE",
@@ -1657,7 +1717,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "CUSTOM_MULTIQC",
@@ -1694,7 +1756,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     },
     {
       "name": "UNTAR",
@@ -1721,7 +1785,9 @@
           "topic": null
         }
       ],
-      "aliases": []
+      "aliases": [],
+      "meta": null,
+      "module_tests": []
     }
   ],
   "subworkflows": [
@@ -1797,7 +1863,8 @@
           "shape": "path",
           "topic": null
         }
-      ]
+      ],
+      "tests": []
     },
     {
       "name": "QC_NANOPLOT_TOULLIGQC",
@@ -1840,7 +1907,8 @@
           "shape": "path",
           "topic": null
         }
-      ]
+      ],
+      "tests": []
     },
     {
       "name": "KMERFINDER_SUMMARY_DOWNLOAD",
@@ -1880,7 +1948,8 @@
           "shape": "path",
           "topic": null
         }
-      ]
+      ],
+      "tests": []
     },
     {
       "name": "BAKTA_DBDOWNLOAD_RUN",
@@ -1919,7 +1988,8 @@
           "shape": "path",
           "topic": null
         }
-      ]
+      ],
+      "tests": []
     },
     {
       "name": "PIPELINE_INITIALISATION",
@@ -1934,7 +2004,8 @@
           "description": "5-column TSV samplesheet validated via samplesheetToList.",
           "topic": null
         }
-      ]
+      ],
+      "tests": []
     },
     {
       "name": "PIPELINE_COMPLETION",
@@ -1942,7 +2013,8 @@
       "kind": "utility",
       "calls": [],
       "inputs": [],
-      "outputs": []
+      "outputs": [],
+      "tests": []
     },
     {
       "name": "NFCORE_BACASS",
@@ -1958,7 +2030,8 @@
           "shape": "path",
           "topic": null
         }
-      ]
+      ],
+      "tests": []
     }
   ],
   "workflow": {
