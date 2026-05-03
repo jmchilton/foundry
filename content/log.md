@@ -105,3 +105,27 @@ Re-cast both pipelines:
 
 Of the 17 bacass gaps logged in the prior entry, 4 are now structurally captured (process aliasing, multi-test-profile enumeration, snapshot helper extraction, snapshot ignore-globs). 13 remain (mulled containers, multi-dep envs, racon env bug, multiMap/.branch/.cross, meta-mutation closures, conditional channel construction, .mix-then-reassign, .dump pervasiveness, exit/log.error, subworkflow-typed-value-inputs, empty-list-literal channel inputs, params runtime concatenation, params runtime existence checks). These hold for the third pipeline.
 
+
+## 2026-05-02 — summarize-nextflow eval.md + 7-fixture sweep
+
+Added `content/molds/summarize-nextflow/eval.md` (14 cases: schema/fidelity/utility/regression buckets). Ran `@galaxy-foundry/summarize-nextflow` against all seven pinned fixtures (demo, fetchngs, hlatyping, bacass, rnaseq, sarek, taxprofiler) for the first time end-to-end.
+
+**Schema-conformance (eval bucket "schema"): PASS for all 7.** Every fixture exits 0 with `--validate` enabled. `additionalProperties: false` holds.
+
+**Fidelity findings (eval bucket "fidelity"):**
+
+- **process counts diverge upward on large pipelines.** demo/fetchngs/hlatyping match a naive `grep -c '^process '` (3/10/12 == fs); bacass/rnaseq/sarek/taxprofiler emit MORE than the naive count (34>31, 76>66, 123>90, 61>51). Two candidate causes: the resolver counts process declarations the regex misses (multi-line, indented), or it includes processes from un-imported modules. Worth confirming before tightening the eval case.
+- **nf_tests is severely under-enumerated.** Spec says "every `tests/*.nf.test`" (top-level) but corpus has many more under `modules/nf-core/*/tests/`, `subworkflows/nf-core/*/tests/`. Counts: demo 1/9, fetchngs 1/29, hlatyping 7/21, bacass 9/36, rnaseq 47/130, sarek 59/62, taxprofiler 8/72. Open question: should nf_tests capture module/subworkflow-level tests too, or is pipeline-level the contract? If the latter, eval case wording needs to say "pipeline-level tests" and add a separate fidelity case for module-level tests if/when they matter.
+- **tools count looks plausible** for the size of pipeline (demo 3, bacass 26, rnaseq 42, sarek 37, taxprofiler 35) but not ground-truthed yet.
+- **warnings count is 2 across every fixture** — suspiciously uniform. Likely the same boilerplate warnings (DSL2-required-version + something else) are emitted unconditionally; the pipeline-specific warnings the mold §"Caveats" predicted (meta.yml-disagreement, low-confidence operator chains) are not surfacing.
+
+**Regression (eval bucket "regression"): FAIL on both committed runs.** demo diff 822 lines, bacass diff 4624 lines. Sampling the head of demo: committed run has hand-curated param descriptions ("Path to a samplesheet CSV.") while the CLI emits the verbatim `nextflow_schema.json` text ("Path to a metadata file containing information about the samples in the experiment."). The committed runs predate the strict-deterministic CLI; they are no longer the right regression baseline. Either re-baseline (commit the new CLI outputs as the canonical run) or drop the regression cases until a "v1 frozen" reference run is established.
+
+**Utility (eval bucket "utility"): not exercised.** Requires running `summary-to-galaxy-data-flow` and `author-galaxy-tool-wrapper` against the new outputs. Open as next step.
+
+Recommended next steps:
+1. Re-baseline `runs/nf-core__{demo,bacass}/summary.json` with the current CLI output, after deciding on the nf_tests scoping question (module-level in or out).
+2. Add the 5 new fixtures (fetchngs, hlatyping, rnaseq, sarek, taxprofiler) as runs under `runs/` if they are intended baselines.
+3. Investigate process-count divergence on bacass (34 vs naive 31) before declaring the fidelity case authoritative.
+4. Investigate the uniform 2-warning count — either the warnings system is under-sampling or the corpus genuinely doesn't trigger §"Caveats" predicates.
+5. Run the utility cases (data-flow Mold + tool-wrapper Mold consumers) against bacass output to surface missing fields / open gaps.
