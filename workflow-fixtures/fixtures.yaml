@@ -1,15 +1,27 @@
-# Nextflow fixture corpus for review-nextflow / gxwf skill research.
+# Nextflow fixture corpus for summarize-nextflow / gxwf skill research.
 #
 # Each entry pins a pipeline at a specific commit SHA so research results
 # are reproducible. Update `tag` + `sha` together when bumping.
 #
-# Tiers:
+# Required fields: name, repo, sha, flavor, tier, notes.
+# Optional fields: tag (omit for HEAD-pinned pipelines without releases).
+#
+# Flavors:
+#   nf-core - follows the nf-core template (modules/nf-core/, subworkflows/nf-core/,
+#             nextflow_schema.json, per-module meta.yml, nf-test under tests/).
+#   adhoc   - any DSL2 pipeline that does not follow the nf-core template.
+#             Used to stress-test summarize-nextflow against non-nf-core
+#             conventions (custom layouts, missing schema/meta, non-`main.nf`
+#             entrypoints, alternate test conventions, non-bio domains).
+#
+# Tiers (rough size buckets, both flavors):
 #   tiny    - minimal, fast to fully review; bootstrap / smoke tests
-#   small   - mostly linear, few branches; clean params/containers/test patterns
-#   large   - many profiles, complex modules.config; stresses edge cases
+#   small   - mostly linear, few branches; clean patterns
+#   large   - many processes/profiles or heavy config; stresses edge cases
 
 pipelines:
   - name: nf-core/demo
+    flavor: nf-core
     tier: tiny
     repo: https://github.com/nf-core/demo.git
     tag: 1.1.0
@@ -19,6 +31,7 @@ pipelines:
       bootstrapping the review skill and regression-testing output format.
 
   - name: nf-core/fetchngs
+    flavor: nf-core
     tier: small
     repo: https://github.com/nf-core/fetchngs.git
     tag: 1.12.0
@@ -28,6 +41,7 @@ pipelines:
       exercises remote data handling and param surface.
 
   - name: nf-core/rnaseq
+    flavor: nf-core
     tier: large
     repo: https://github.com/nf-core/rnaseq.git
     tag: 3.24.0
@@ -37,6 +51,7 @@ pipelines:
       modules.config, many profiles. Hard mode for the review skill.
 
   - name: nf-core/bacass
+    flavor: nf-core
     tier: small
     repo: https://github.com/nf-core/bacass.git
     tag: 2.5.0
@@ -46,6 +61,7 @@ pipelines:
       structure, good mid-tier example between demo and rnaseq.
 
   - name: nf-core/hlatyping
+    flavor: nf-core
     tier: small
     repo: https://github.com/nf-core/hlatyping.git
     tag: 2.2.0
@@ -55,6 +71,7 @@ pipelines:
       for exercising param surface + container mapping without branching.
 
   - name: nf-core/sarek
+    flavor: nf-core
     tier: large
     repo: https://github.com/nf-core/sarek.git
     tag: 3.8.1
@@ -64,6 +81,7 @@ pipelines:
       aligners, heavy config, distinct flavor from rnaseq hard-mode.
 
   - name: nf-core/taxprofiler
+    flavor: nf-core
     tier: large
     repo: https://github.com/nf-core/taxprofiler.git
     tag: 2.0.0
@@ -72,6 +90,104 @@ pipelines:
       Metagenomic taxonomic profiling across many profilers. Heavy
       branching, different domain from rnaseq/sarek — stresses the
       incompatibility report on parallel-tool patterns.
+
+  # ----- ad-hoc DSL2 pipelines (non-nf-core) -----
+  # Pinned to stress-test summarize-nextflow against pipelines that lack
+  # nf-core conventions: no nextflow_schema.json, no per-module meta.yml,
+  # custom layouts, alternate test conventions, non-`main.nf` entrypoints,
+  # non-bio domains.
+
+  - name: CRG-CNAG/CalliNGS-NF
+    flavor: adhoc
+    tier: tiny
+    repo: https://github.com/CRG-CNAG/CalliNGS-NF.git
+    sha: 9e7ebf04455a24877a92c87216b9629ee2b6088d
+    notes: >
+      CRG-authored GATK RNA-seq variant caller. Single-author style, no
+      nextflow_schema.json, no per-module meta.yml, no nf-test, no
+      modules/nf-core/. Stresses the minimal-pipeline path. HEAD-pinned
+      (no upstream releases).
+
+  - name: labsyspharm/mcmicro
+    flavor: adhoc
+    tier: small
+    repo: https://github.com/labsyspharm/mcmicro.git
+    sha: c06c56deb7b87c80e172d38e9321051728cf77f0
+    notes: >
+      Whole-slide microscopy pipeline (image domain, not NGS). Has a
+      nextflow_schema.json but no nf-core module layout, no meta.yml,
+      no nf-test. Multi-entrypoint (roadie.nf, exemplar.nf alongside
+      main.nf). HEAD-pinned.
+
+  - name: JaneliaSciComp/nf-demos
+    flavor: adhoc
+    tier: tiny
+    repo: https://github.com/JaneliaSciComp/nf-demos.git
+    sha: 0c447f1b401b7f43dc3916129448530842e00d4b
+    notes: >
+      Janelia n5/zarr image-processing pipelines. Non-bioinformatics
+      domain. No schema, no modules/nf-core, no meta.yml, no tests.
+      Uses git submodules (external-modules/). HEAD-pinned.
+
+  - name: ZuberLab/crispr-process-nf
+    flavor: adhoc
+    tier: small
+    repo: https://github.com/ZuberLab/crispr-process-nf.git
+    tag: v2.0.0
+    sha: c88efe7486b2667f9c80de787a68ad40c6c7a950
+    notes: >
+      CRISPR screening pipeline (IMP Vienna). Custom test/ dir (not
+      tests/), no schema, no meta.yml, no nf-test. Tag-released.
+
+  - name: biocorecrg/MOP2
+    flavor: adhoc
+    tier: small
+    repo: https://github.com/biocorecrg/MOP2.git
+    sha: 91aea3fd94cd27095a839a3db96c6620a27c06d8
+    notes: >
+      CRG Master-of-Pores 2 ONT pipeline. Multi-pipeline monorepo
+      (mop_preprocess, mop_mod, mop_tail, mop_consensus). Uses git
+      submodule (BioNextflow/), Singularity-first, local_modules.nf
+      pattern. No schema, no meta.yml. Stresses non-`main.nf`-rooted
+      layouts. HEAD-pinned.
+
+  - name: replikation/What_the_Phage
+    flavor: adhoc
+    tier: large
+    repo: https://github.com/replikation/What_the_Phage.git
+    tag: v1.2.4
+    sha: aeb341738c31dabf2129e7d6ce2ed0b9c4cabe83
+    notes: >
+      Phage identification pipeline. Custom phage.nf entrypoint (no
+      main.nf). workflows/ + flat modules/ (not nf-core layout).
+      Per-tool Dockerfiles in phage-tool-Dockerfiles/. ~111 .nf files;
+      large process count. Stresses non-`main.nf` entrypoint detection.
+
+  - name: epi2me-labs/wf-human-variation
+    flavor: adhoc
+    tier: small
+    repo: https://github.com/epi2me-labs/wf-human-variation.git
+    tag: v2.8.0
+    sha: bb8b526d97e0bbb169ba0fa3596eb5d844b927a8
+    notes: >
+      Oxford Nanopore (epi2me-labs) human variant-calling pipeline.
+      Has a nextflow_schema.json plus epi2me-specific
+      output_definition.json, but no nf-core module layout, no
+      meta.yml, no nf-test. Different schema dialect than nf-core —
+      good schema-handling stress.
+
+  - name: ncbi/egapx
+    flavor: adhoc
+    tier: large
+    repo: https://github.com/ncbi/egapx.git
+    tag: v0.5.2
+    sha: 40ec7362576e4b93fa9c5bf0a6c400d9502b8a63
+    notes: >
+      NCBI eukaryotic genome annotation. Sources live under nf/ not
+      project root (entrypoint not at top level). Uses subworkflows/
+      without subworkflows/nf-core/. No schema, no meta.yml, no
+      nf-test. Stresses non-standard root layout from non-academic
+      provenance.
 
 # IWC corpus — single rolling repo, no tag. Pin SHA from main.
 # Materialized into iwc-src/ then cleaned + converted to format2 under iwc-format2/
