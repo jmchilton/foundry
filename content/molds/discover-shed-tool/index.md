@@ -161,8 +161,3 @@ The procedure assumes — and the cast skill must surface in its rationale when 
 - **Caching.** This Mold emits a pin recommendation. The caller (or the next phase) runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <v>` to populate the cache.
 - **Galaxy-instance discovery.** Hitting a running Galaxy server's installed-tool index (EDAM-aware, panel-aware) is a different mechanism — the future `discover-tool-via-galaxy-api` Mold. The contrast is sketched in `[[component-tool-shed-search]]` §4.
 - **Test-data resolution.** Out of scope; handled by the `test-data-resolution` branch elsewhere in the pipeline.
-
-## Reference dispatch (for casting)
-
-- `cli_commands` ([[tool-search]], [[tool-versions]], [[tool-revisions]]) — cast as JSON sidecars per the per-action manpage dispatch (see `COMPILATION_PIPELINE.md`). The cast skill calls these as subprocess commands at runtime.
-- `[[component-tool-shed-search]]` — research note. **Not** packaged into the cast skill. It is the Foundry-internal grounding for the gotchas listed above; casting selects only the operationally relevant slices when condensing the procedural body.

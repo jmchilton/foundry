@@ -18,9 +18,18 @@ Optional files:
 
 - `casting.md` — Mold-owned guidance read by casting itself (skill assembly notes, condensation prompts). Not packaged into the generated skill runtime unless explicitly incorporated by the cast.
 - `cast-skill-verification.md` — Mold-owned dynamic-review checklist for a generated skill. Used after casting by reviewers or verification agents; not packaged into runtime artifacts.
+- `changes.md` — Mold-owned revision history / changelog. Use this for content that documents how the Mold has evolved across casts. Never packaged into cast artifacts.
 - `examples/` — local examples or small fixtures referenced by `index.md` or `eval.md`.
 
 Non-`index.md` Markdown files inside a Mold directory must not contain frontmatter. If a supporting note needs frontmatter, move it to the appropriate content collection and reference it from the Mold.
+
+### `index.md` body discipline
+
+The body of `index.md` is procedural content the cast skill consumes. **Do not put author-facing meta-content in the body** — it leaks into casts. In particular:
+
+- Revision history / changelog → `changes.md`.
+- "Reference dispatch (for casting)" or similar redundant restatements of the `references:` manifest → delete; the metadata is the contract.
+- Open authoring questions about scope or future references → `casting.md` (cast-time) or the Mold's eval/notes, not the body.
 
 ### File roles at a glance
 
@@ -30,6 +39,7 @@ Non-`index.md` Markdown files inside a Mold directory must not contain frontmatt
 | `eval.md`                     | Foundry maintainers               | Never                          |
 | `casting.md`                  | Cast skill / casting LLM          | Read at cast time              |
 | `cast-skill-verification.md`  | Post-cast reviewer / agent        | Never                          |
+| `changes.md`                  | Mold authors / reviewers          | Never                          |
 | `examples/`                   | `index.md`, `eval.md`             | Only if referenced explicitly  |
 
 ## Index Contract
