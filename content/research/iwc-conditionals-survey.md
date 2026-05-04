@@ -12,6 +12,17 @@ ai_generated: true
 related_notes:
   - "[[iwc-transformations-survey]]"
   - "[[iwc-shortcuts-anti-patterns]]"
+  - "[[conditional-gate-on-nonempty-result]]"
+  - "[[conditional-route-between-alternative-outputs]]"
+  - "[[conditional-run-optional-step]]"
+  - "[[conditional-transform-or-pass-through]]"
+  - "[[derive-parameter-from-file]]"
+  - "[[fan-in-bundle-consume-and-flatten]]"
+  - "[[galaxy-collection-patterns]]"
+  - "[[galaxy-conditionals-patterns]]"
+  - "[[iwc-map-over-lifecycle-survey]]"
+  - "[[iwc-parameter-derivation-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[galaxy-conditionals-patterns]]"
   - "[[conditional-run-optional-step]]"

@@ -14,6 +14,7 @@ ai_generated: true
 summary: "Use tp_awk_tool to prepend a constant header line, optionally skipping or reformatting an existing first row."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-compute-new-column]]"
   - "[[tabular-concatenate-collection-to-table]]"

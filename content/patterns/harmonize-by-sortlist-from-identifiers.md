@@ -17,6 +17,7 @@ ai_generated: true
 summary: "Use SORTLIST with sort_type:file to reorder one collection by another collection's identifiers."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[iwc-tabular-operations-survey]]"
 related_patterns:
   - "[[sync-collections-by-identifier]]"
   - "[[collection-flatten-after-fanout]]"

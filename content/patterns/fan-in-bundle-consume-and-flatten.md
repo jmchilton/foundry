@@ -20,6 +20,7 @@ ai_generated: true
 summary: "Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing."
 related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"
+  - "[[iwc-conditionals-survey]]"
 related_patterns:
   - "[[collection-build-named-bundle]]"
   - "[[collection-flatten-after-fanout]]"

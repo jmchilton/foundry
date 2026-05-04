@@ -17,6 +17,7 @@ ai_generated: true
 summary: "Derive collection element identifiers in a tabular mapping, then apply them with RELABEL_FROM_FILE."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[relabel-via-rules-and-find-replace]]"
   - "[[sync-collections-by-identifier]]"

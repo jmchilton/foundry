@@ -15,6 +15,7 @@ related_notes:
   - "[[galaxy-apply-rules-dsl]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
+  - "[[iwc-transformations-survey]]"
 sources:
   - "https://github.com/jmchilton/galaxy-agentic-collection-transform (initial research seed)"
   - "https://github.com/galaxyproject/galaxy/tree/main/lib/galaxy/tools (XML wrappers; source of truth)"

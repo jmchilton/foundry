@@ -17,6 +17,7 @@ ai_generated: true
 summary: "Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[galaxy-apply-rules-dsl]]"
 related_patterns:
   - "[[collection-flatten-after-fanout]]"
   - "[[tabular-concatenate-collection-to-table]]"

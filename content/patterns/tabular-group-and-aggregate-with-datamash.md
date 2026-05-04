@@ -14,6 +14,7 @@ ai_generated: true
 summary: "Use datamash_ops for grouped tabular aggregation: multi-column grouping, collapse, countunique, min/max, and reductions."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-compute-new-column]]"
   - "[[tabular-sql-query]]"

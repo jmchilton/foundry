@@ -18,6 +18,7 @@ ai_generated: true
 summary: "Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-pivot-collection-to-wide]]"
   - "[[tabular-cut-and-reorder-columns]]"

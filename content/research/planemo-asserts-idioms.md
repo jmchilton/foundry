@@ -17,6 +17,7 @@ related_notes:
   - "[[tests-format]]"
   - "[[planemo-workflow-test-architecture]]"
   - "[[validate-tests]]"
+  - "[[iwc-tabular-operations-survey]]"
 summary: "Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate."
 ---
 

@@ -20,6 +20,7 @@ ai_generated: true
 summary: "Use this MOC to choose corpus-grounded Galaxy collection transformation patterns."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[iwc-conditionals-survey]]"
 related_patterns:
   - "[[manifest-to-mapped-collection-lifecycle]]"
   - "[[cleanup-sync-and-publish-nonempty-results]]"

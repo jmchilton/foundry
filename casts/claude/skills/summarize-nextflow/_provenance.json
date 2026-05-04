@@ -4,13 +4,13 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 7,
-    "content_hash": "7c6a3ddfeb36e8ed3f2bd8823450181f06608b8b8db500c32a8a963b1281488c",
-    "commit": "999310334d90346fb4b472a4f8e2b15e85aba147"
+    "revision": 8,
+    "content_hash": "904ba406b81f331bceeacd47b03277080705d1f35bbba70ea06606a43601efa7",
+    "commit": "d556ee18ef789cbe31fda9a1097c41abab887a14"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-03T20:02:14.126Z",
+  "cast_at": "2026-05-04T15:01:10.725Z",
   "cast_date": "2026-05-01",
   "cast_revision": 3,
   "cast_history": [
@@ -43,8 +43,8 @@
       "purpose": "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence.",
       "trigger": "When extracting tools, versions, containers, conda directives, or environment equivalences.",
       "verification": "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves tool/container/environment extraction.",
-      "src_hash": "cc2e4c9b565364238183d08b50becc7533355d82774b2cdc9c45e6959b4cba8e",
-      "dst_hash": "cc2e4c9b565364238183d08b50becc7533355d82774b2cdc9c45e6959b4cba8e",
+      "src_hash": "94cf6897cec62d2f06be19d48c42864fc1df66d4e2d29f44dbf16e573c6c5a53",
+      "dst_hash": "94cf6897cec62d2f06be19d48c42864fc1df66d4e2d29f44dbf16e573c6c5a53",
       "source": "deterministic"
     },
     {
@@ -59,8 +59,8 @@
       "purpose": "Interpret DSL2 layout, includes, workflow/subworkflow/module boundaries, and channel/process topology.",
       "trigger": "When walking pipeline structure or resolving process aliases and channel flow.",
       "verification": "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves process/channel topology extraction.",
-      "src_hash": "f5ee738730c777be218ef5c5832382db799a85c300c38b4db52f2e1645ad0656",
-      "dst_hash": "f5ee738730c777be218ef5c5832382db799a85c300c38b4db52f2e1645ad0656",
+      "src_hash": "99e152bd85000dfcbb1541a055070ba797eaabec766169c90fd64805d7a9c81b",
+      "dst_hash": "99e152bd85000dfcbb1541a055070ba797eaabec766169c90fd64805d7a9c81b",
       "source": "deterministic"
     },
     {

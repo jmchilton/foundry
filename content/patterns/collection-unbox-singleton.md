@@ -16,6 +16,7 @@ ai_generated: true
 summary: "Use __EXTRACT_DATASET__ with which: first when a one-element collection must become a dataset."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[galaxy-apply-rules-dsl]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
 iwc_exemplars:

@@ -17,6 +17,12 @@ related_notes:
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
   - "[[component-nextflow-pipeline-anatomy]]"
+  - "[[cleanup-sync-and-publish-nonempty-results]]"
+  - "[[fan-in-bundle-consume-and-flatten]]"
+  - "[[manifest-to-mapped-collection-lifecycle]]"
+  - "[[reshape-relabel-remap-by-collection-axis]]"
+  - "[[iwc-shortcuts-anti-patterns]]"
+  - "[[nextflow-patterns]]"
 related_patterns:
   - "[[galaxy-collection-patterns]]"
   - "[[galaxy-conditionals-patterns]]"

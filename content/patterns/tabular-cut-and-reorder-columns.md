@@ -14,6 +14,7 @@ ai_generated: true
 summary: "Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-compute-new-column]]"
   - "[[tabular-sql-query]]"

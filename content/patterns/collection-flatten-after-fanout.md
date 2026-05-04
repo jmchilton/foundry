@@ -17,6 +17,7 @@ ai_generated: true
 summary: "Use FLATTEN to collapse nested collection outputs to a flat list once the outer axis no longer matters."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[galaxy-apply-rules-dsl]]"
 related_patterns:
   - "[[collection-build-named-bundle]]"
   - "[[harmonize-by-sortlist-from-identifiers]]"

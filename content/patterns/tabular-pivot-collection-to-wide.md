@@ -16,6 +16,7 @@ ai_generated: true
 summary: "Use collection_column_join to outer-join a collection of 2-column id/value tables into one wide table."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-join-on-key]]"
   - "[[tabular-concatenate-collection-to-table]]"

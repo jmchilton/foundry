@@ -15,6 +15,10 @@ related_notes:
   - "[[planemo-asserts-idioms]]"
   - "[[implement-galaxy-workflow-test]]"
   - "[[tests-format]]"
+  - "[[iwc-conditionals-survey]]"
+  - "[[iwc-map-over-lifecycle-survey]]"
+  - "[[iwc-tabular-operations-survey]]"
+  - "[[iwc-transformations-survey]]"
 summary: "What IWC test suites cut corners on (accepted) vs what's a code smell — existence-only probes, sim_size deltas, image dim checks, label coupling."
 ---
 

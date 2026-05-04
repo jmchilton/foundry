@@ -15,6 +15,7 @@ summary: "Use column_maker (Add_a_column1) with strict error_handling to insert/
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
   - "[[iwc-parameter-derivation-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-cut-and-reorder-columns]]"
   - "[[tabular-sql-query]]"

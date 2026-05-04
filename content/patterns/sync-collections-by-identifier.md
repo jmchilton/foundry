@@ -17,6 +17,7 @@ ai_generated: true
 summary: "Use collection_element_identifiers with FILTER_FROM_FILE or RELABEL_FROM_FILE to align sibling collections."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[collection-cleanup-after-mapover-failure]]"
   - "[[harmonize-by-sortlist-from-identifiers]]"
