@@ -6,11 +6,30 @@ tags:
   - mold
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-04
+revision: 3
 ai_generated: true
 summary: "Execute a workflow's tests via Planemo; emit structured pass/fail and outputs."
+related_notes:
+  - "[[tests-format]]"
+cli_commands:
+  - "[[validate-tests]]"
 references:
+  - kind: schema
+    ref: "content/schemas/tests.schema.json"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate Galaxy workflow test files before starting a Planemo or Galaxy-backed execution."
+  - kind: cli-command
+    ref: "[[validate-tests]]"
+    used_at: runtime
+    load: on-demand
+    mode: sidecar
+    evidence: corpus-observed
+    purpose: "Run static schema and workflow-label checks before expensive workflow execution."
+    trigger: "Before invoking Planemo when a Galaxy workflow test file is present."
   - kind: research
     ref: "[[planemo-asserts-idioms]]"
     used_at: runtime

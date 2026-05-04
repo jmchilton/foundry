@@ -8,8 +8,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-03
-revision: 2
+revised: 2026-05-04
+revision: 3
 ai_generated: true
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 references:
@@ -20,6 +20,14 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Read summarized nf-test profiles, snapshot fixtures, selected test data, params, and expected outputs."
+  - kind: schema
+    ref: "content/schemas/tests.schema.json"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Use the Galaxy workflow tests schema as the assertion vocabulary when translating Nextflow test evidence into a Galaxy test plan."
+    trigger: "When mapping expected outputs, tolerances, snapshots, or fixture assertions into Galaxy workflow-test assertion intent."
   - kind: research
     ref: "[[component-nextflow-testing]]"
     used_at: runtime

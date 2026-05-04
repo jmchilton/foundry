@@ -7,8 +7,8 @@ tags:
   - cli/gxwf
 status: draft
 created: 2026-05-03
-revised: 2026-05-03
-revision: 1
+revised: 2026-05-04
+revision: 2
 ai_generated: true
 summary: "Validate Galaxy workflow test files and optionally cross-check labels against their workflow."
 related_notes:
@@ -22,7 +22,7 @@ Validate a Galaxy workflow test file (`*-tests.yml` or `*.gxwf-tests.yml`) again
 
 ## Install
 
-Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Prefer the project-local executable when running inside a checked-out Foundry or galaxy-tool-util workspace.
+Use the Foundry-supported `gxwf` CLI from `@galaxy-tool-util/cli` or the Python package with the matching interface. Inside this repo, `validate-tests-format` from `@galaxy-foundry/tests-format-schema` exposes the same schema gate plus workflow cross-check for harness and package tests.
 
 ## Synopsis
 
