@@ -101,7 +101,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Component Research
 
-- [[component-nextflow-containers-and-envs]] — Stub. Biocontainers / bioconda equivalence, Docker/Singularity refs, container directive resolution. Grows from cast contact — see issue #17.
+- [[component-nextflow-containers-and-envs]] — Maps Nextflow container and conda evidence to Galaxy package and container requirements.
 - [[component-nextflow-inspect]] — White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision.
 - [[component-nextflow-pipeline-anatomy]] — Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17.
 - [[component-nextflow-testing]] — Stub. conf/test.config, nf-core/test-datasets, nf-test idioms, samplesheet conventions. Grows from cast contact — see issue #17.
