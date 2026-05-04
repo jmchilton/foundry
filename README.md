@@ -62,6 +62,7 @@ Long-form design narrative under `docs/`:
 - `MOLDS.md` — Mold inventory rationale and bucketing axes.
 - `COMPILATION_PIPELINE.md` — casting design.
 - `CORPUS_INGESTION.md` — IWC grounding; pattern-bodies-cite-by-URL principle.
+- `SCHEMA_PACKAGES.md` — standard package shape for Foundry-authored JSON Schemas and CLI validators.
 - `GXY_SKETCHES_ALIGNMENT.md` — field-name parity with `gxy-sketches`.
 - `COMPONENT_ARCHON.md` — research on Archon as a heavyweight harness option.
 

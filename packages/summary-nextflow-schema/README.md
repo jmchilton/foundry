@@ -33,6 +33,8 @@ npx @galaxy-foundry/summary-nextflow-schema validate-summary-nextflow path/to/su
 
 Exit codes: `0` valid, `3` schema-validation failure, `1` input error.
 
+Cast skills should invoke the CLI before returning a summary. Library validation exists for TypeScript consumers, but generated-skill validation should be command-shaped so logs and failure modes are explicit.
+
 ## License
 
 MIT.

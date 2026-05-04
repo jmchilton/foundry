@@ -9,8 +9,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-01
-revision: 3
+revised: 2026-05-04
+revision: 4
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
@@ -28,9 +28,15 @@ This page is auto-rendered from the JSON Schema authored in this repo and shippe
 
 1. `content/schemas/summary-nextflow.schema.json` in this repo — the canonical JSON. Edited as part of the mold/cast loop ([[summarize-nextflow]]).
 2. `packages/summary-nextflow-schema/scripts/sync-schema.mjs` runs at `prebuild`, copying the JSON into `src/` and emitting a typed `summary-nextflow.schema.generated.ts` const wrapper.
-3. Published as `@galaxy-foundry/summary-nextflow-schema` on npm. Site rendering currently reads directly from `content/schemas/`; the published artifact also exports `validateSummary()` and ships a `validate-summary-nextflow` CLI bin for downstream consumers.
+3. Published as `@galaxy-foundry/summary-nextflow-schema` on npm. Site rendering currently reads directly from `content/schemas/`; the published artifact also exports `validateSummary()` and ships a `validate-summary-nextflow` CLI bin for cast skills and downstream consumers.
 
-**At runtime in cast skills:** the same schema is copied verbatim into `references/schemas/summary-nextflow.schema.json` per the casting policy in `docs/COMPILATION_PIPELINE.md`. The package additionally exports `validateSummary` (AJV gate) and the `validate-summary-nextflow` CLI — both pure-JS and used by [[summarize-nextflow]]'s emit-time validation step.
+**At runtime in cast skills:** validation should happen through the CLI command:
+
+```sh
+validate-summary-nextflow summary.json
+```
+
+The same schema is copied verbatim into `references/schemas/summary-nextflow.schema.json` per the casting policy in `docs/COMPILATION_PIPELINE.md`. The package additionally exports `validateSummary` (AJV gate) for TypeScript consumers, but generated skills should prefer command-shaped validation so failures are easy to reproduce outside the agent runtime.
 
 Contrast with [[tests-format]], which is vendored *from* an external npm package (`@galaxy-tool-util/schema`); this schema is *authored here* and shipped *to* npm — the direction of the source-of-truth chain is reversed.
 
@@ -48,7 +54,7 @@ Three sub-shapes mirror gxy-sketches verbatim — see `docs/GXY_SKETCHES_ALIGNME
 
 ## Cast-time role
 
-Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by `[[summarize-nextflow]]` via `output_schemas` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON against it before returning; failure is loud — downstream Molds bind to this shape and would produce worse errors later.
+Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by `[[summarize-nextflow]]` via `output_schemas` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning; failure is loud — downstream Molds bind to this shape and would produce worse errors later.
 
 ## What is intentionally not modeled
 

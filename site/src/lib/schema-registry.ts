@@ -4,6 +4,8 @@
 // Each entry: { schema: <JSON Schema object>, version: <package version string> }.
 
 import { testsSchema } from '@galaxy-tool-util/schema';
+import galaxyToolDiscoverySchema from '../../../content/schemas/galaxy-tool-discovery.schema.json';
+import galaxyToolDiscoverySchemaPkg from '../../../packages/galaxy-tool-discovery-schema/package.json';
 import summaryNextflowSchema from '../../../content/schemas/summary-nextflow.schema.json';
 import summaryNextflowSchemaPkg from '../../../packages/summary-nextflow-schema/package.json';
 import { readInstalledPackageVersion } from './package-version';
@@ -21,5 +23,9 @@ export const schemaRegistry: Record<string, SchemaEntry> = {
   'summary-nextflow': {
     schema: summaryNextflowSchema as unknown as Record<string, unknown>,
     version: (summaryNextflowSchemaPkg as { version?: string }).version ?? '',
+  },
+  'galaxy-tool-discovery': {
+    schema: galaxyToolDiscoverySchema as unknown as Record<string, unknown>,
+    version: (galaxyToolDiscoverySchemaPkg as { version?: string }).version ?? '',
   },
 };
