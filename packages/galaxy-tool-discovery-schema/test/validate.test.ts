@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  galaxyToolDiscoverySchema,
-  validateGalaxyToolDiscovery,
-} from "../src/index.js";
+import { galaxyToolDiscoverySchema, validateGalaxyToolDiscovery } from "../src/index.js";
 
 const VALID_HIT = {
   status: "hit",
@@ -27,9 +24,7 @@ const VALID_HIT = {
 describe("galaxyToolDiscoverySchema", () => {
   it("is a JSON Schema with $schema", () => {
     expect(galaxyToolDiscoverySchema).toBeDefined();
-    expect((galaxyToolDiscoverySchema as { $schema?: string }).$schema).toMatch(
-      /json-schema\.org/,
-    );
+    expect((galaxyToolDiscoverySchema as { $schema?: string }).$schema).toMatch(/json-schema\.org/);
   });
 });
 

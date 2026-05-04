@@ -41,9 +41,7 @@ function toDiagnostic(err: ErrorObject): GalaxyToolDiscoveryDiagnostic {
   };
 }
 
-export function validateGalaxyToolDiscovery(
-  data: unknown,
-): GalaxyToolDiscoveryValidationResult {
+export function validateGalaxyToolDiscovery(data: unknown): GalaxyToolDiscoveryValidationResult {
   const validate = getValidator();
   const valid = validate(data);
   if (valid) return { valid: true, errors: [] };
