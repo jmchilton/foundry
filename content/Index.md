@@ -42,6 +42,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Patterns
 
+- [[cleanup-sync-and-publish-nonempty-results]] — Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results.
 - [[collection-build-list-paired-with-apply-rules]] — Use Apply Rules to promote identifier columns into a list:paired collection, with optional cleanup first.
 - [[collection-build-named-bundle]] — Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in.
 - [[collection-cleanup-after-mapover-failure]] — Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps.
@@ -57,12 +58,15 @@ Generated from content frontmatter. Do not edit by hand.
 - [[conditional-route-between-alternative-outputs]] — Use when-gated alternatives plus pick_value to merge binary or one-of-N routes into one downstream value.
 - [[conditional-run-optional-step]] — Use a workflow boolean connected as inputs.when to skip an optional Galaxy step or branch.
 - [[conditional-transform-or-pass-through]] — Gate an optional transform, then use pick_value to pass transformed data when present or original data otherwise.
+- [[fan-in-bundle-consume-and-flatten]] — Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing.
 - [[galaxy-collection-patterns]] — Use this MOC to choose corpus-grounded Galaxy collection transformation patterns.
 - [[galaxy-conditionals-patterns]] — Use this MOC to choose corpus-grounded Galaxy when and pick_value conditional patterns.
 - [[galaxy-tabular-patterns]] — Use this MOC to choose corpus-grounded Galaxy tabular transformation patterns.
+- [[manifest-to-mapped-collection-lifecycle]] — Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs.
 - [[compose-runtime-text-parameter]] — Use compose_text_param to build connected text expressions from constants plus runtime scalar values.
 - [[derive-parameter-from-file]] — Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters.
 - [[map-workflow-enum-to-tool-parameter]] — Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets.
+- [[reshape-relabel-remap-by-collection-axis]] — Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis.
 - [[tabular-compute-new-column]] — Use column_maker (Add_a_column1) with strict error_handling to insert/replace a computed column. Per-expression-kind auto_col_types rule.
 - [[tabular-concatenate-collection-to-table]] — Use collapse_dataset to row-bind a collection of tabulars into one table, with optional element IDs and header dedupe.
 - [[tabular-cut-and-reorder-columns]] — Use Cut1 with a comma-separated cN list to project — and reorder — columns. Listing out of order is the canonical reorder idiom.
@@ -77,6 +81,10 @@ Generated from content frontmatter. Do not edit by hand.
 - [[tabular-sql-query]] — Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars.
 - [[tabular-synthesize-bed-from-3col]] — Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants.
 - [[tabular-to-collection-by-row]] — Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key.
+
+## Source Patterns
+
+- [[nextflow-patterns]] — Use this source-pattern map to route recurring Nextflow channel and operator idioms to Galaxy implementation patterns.
 
 ## CLI Commands
 
@@ -94,7 +102,7 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Component Research
 
-- [[component-nextflow-containers-and-envs]] — Stub. Biocontainers / bioconda equivalence, Docker/Singularity refs, container directive resolution. Grows from cast contact — see issue #17.
+- [[component-nextflow-containers-and-envs]] — Maps Nextflow container and conda evidence to Galaxy package and container requirements.
 - [[component-nextflow-inspect]] — White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision.
 - [[component-nextflow-pipeline-anatomy]] — Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17.
 - [[component-nextflow-testing]] — Stub. conf/test.config, nf-core/test-datasets, nf-test idioms, samplesheet conventions. Grows from cast contact — see issue #17.
@@ -106,13 +114,16 @@ Generated from content frontmatter. Do not edit by hand.
 - [[galaxy-tool-job-failure-reference]] — Reference for Galaxy tool stdio rules, job failure detection, job states, and job API failure surfaces.
 - [[galaxy-xsd]] — Vendored Galaxy tool XML schema for wrapper structure, parameters, outputs, tests, and assertion syntax.
 - [[galaxy-workflow-invocation-failure-reference]] — Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces.
+- [[galaxy-workflow-testability-design]] — Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible.
 - [[iwc-conditionals-survey]] — Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection.
+- [[iwc-map-over-lifecycle-survey]] — Survey of IWC map-over lifecycle recipes, with a Nextflow-to-Galaxy crosswalk for collection construction, cleanup, reshape, reduce, and publish phases.
 - [[iwc-nearest-exemplar-selection]] — Defines a feature hierarchy for selecting useful IWC exemplar workflows for structural comparison.
 - [[iwc-parameter-derivation-survey]] — Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters.
 - [[iwc-shortcuts-anti-patterns]] — What IWC test suites cut corners on (accepted) vs what's a code smell — existence-only probes, sim_size deltas, image dim checks, label coupling.
-- [[iwc-tabular-operations-survey]] — Corpus survey of tabular tools and operations across IWC workflows; map for the leaf pattern hierarchy on row/column data manipulation.
+- [[iwc-tabular-operations-survey]] — Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation.
 - [[iwc-test-data-conventions]] — How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas.
 - [[iwc-transformations-survey]] — Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over.
+- [[iwc-workflow-testability-survey]] — IWC evidence survey for Galaxy workflow structures that make workflow tests meaningful.
 - [[nextflow-operators-to-galaxy-collection-recipes]] — Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers.
 - [[nextflow-to-galaxy-channel-shape-mapping]] — Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes.
 - [[planemo-asserts-idioms]] — Decision and idiom guide for picking planemo workflow-test assertions: which family per output type, how to size tolerances, when to validate.

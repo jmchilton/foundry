@@ -15,7 +15,7 @@ related_notes:
   - "[[planemo-asserts-idioms]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
   - "[[iwc-nearest-exemplar-selection]]"
-summary: "Corpus survey of tabular tools and operations across IWC workflows; map for the leaf pattern hierarchy on row/column data manipulation."
+summary: "Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation."
 ---
 
 # IWC tabular operations survey
@@ -264,9 +264,9 @@ Not visible at the tabular layer in any sampled file; sampling happens upstream 
 - **query_tabular** (16 steps) — niche but powerful (SQL window functions, multi-table JOINs). Worth a page so users don't reach for awk when SQL is genuinely cleaner.
 - **collection_column_join** (32 steps) — *the* wide-pivot idiom, and unobvious unless you already know about it. Worth a page.
 
-## 4. Candidate leaf-pattern boundaries
+## 4. Candidate operation-pattern boundaries
 
-Proposed leaf pages, each scoped tightly. Where a candidate is weak, I say so.
+Proposed operation pages, each scoped tightly. Where a candidate is weak, I say so.
 
 1. **`tabular-filter-by-column-value`** — `Filter1` with `cond: cN == 'X' or cN > Y`. Cite `sars-cov-2-variant-calling/sars-cov-2-variation-reporting/variation-reporting.gxwf.yml:545`, `epigenetics/consensus-peaks/consensus-peaks-atac-cutandrun.gxwf.yml:320`, `sars-cov-2-variant-calling/sars-cov-2-consensus-from-variation/consensus-from-variation.gxwf.yml:276`. Tools: `Filter1`. *Why:* highest-frequency single operation; the `header_lines:` parameter is an easy-to-miss correctness lever; the `cond:` mini-language is non-obvious (Python with `cN` columns). **Keep.**
 
@@ -317,7 +317,7 @@ Proposed leaf pages, each scoped tightly. Where a candidate is weak, I say so.
 - **Q1.** `Grep1` (47) vs `tp_grep_tool` (43) — semantic difference real? Both take `pattern`, `invert`, `keep_header`. Suggest the regex page recommend one and demote the other; need your call which.
 - **Q2.** `awk-in-galaxy` page depth: one page covering all 195 invocations, or split into 4 sub-pages (`awk-header-injection`, `awk-bed-synthesis`, `awk-taxonomy-split`, `awk-relabel`)? Lean: one page with idiom sections; split only if frontmatter cross-linking gets noisy.
 - **Q3.** Should `Add_a_column1` page warn against `auto_col_types: false`? Many corpus uses set it true, some false (`variation-reporting.gxwf.yml:454`); silent string-vs-numeric coercion is a real bug source. Need your call on prescriptiveness.
-- **Q4.** Is `query_tabular` deep-dive in scope for this hierarchy or its own thing? It overlaps Galaxy's broader "compute over tabular" story (R, Python, csvtk-shaped). Lean: keep it in this hierarchy as the SQL leaf.
+- **Q4.** Is `query_tabular` deep-dive in scope for this hierarchy or its own thing? It overlaps Galaxy's broader "compute over tabular" story (R, Python, csvtk-shaped). Lean: keep it in this hierarchy as the SQL operation.
 - **Q5.** Tabular format conversion is genuinely sparse (no `tab_to_csv`, no `csv_to_tab` ops; `biom_convert` is the only thing close). Write a one-paragraph "gap note" page or skip entirely?
 - **Q6.** Older tool IDs (`Grouping1`, `cat1`, `addValue/1.0.1`, `Remove beginning1`, `Paste1`, `sort1`) — do pages mention them as legacy or only the modern equivalent? Lean: mention with a "newer alternative" pointer; corpus still uses them so doc-blindness is wrong.
 - **Q7.** Out-of-scope in this survey but adjacent: `multiqc` and `tooldistillator_summarize` produce tabular outputs that downstream tabular tools then chew on. Worth a "tabular sources" cross-reference page or skip?
@@ -327,7 +327,7 @@ Proposed leaf pages, each scoped tightly. Where a candidate is weak, I say so.
 
 Resolved via `AskUserQuestion` after this survey landed. Pinned here so the next subagent inherits them without re-litigation.
 
-- **Naming axis (Q8 + general).** Operation-anchored leaf page names. Tool-anchored content is fine inside an operation-named page. Even the awk-split sub-pages get operation names (`tabular-prepend-header`, `tabular-synthesize-bed-from-3col`, `tabular-split-taxonomy-string`, `tabular-relabel-by-row-counter`); awk is the recipe, not the title.
+- **Naming axis (Q8 + general).** Operation-anchored page names. Tool-anchored content is fine inside an operation-named page. Even the awk-split sub-pages get operation names (`tabular-prepend-header`, `tabular-synthesize-bed-from-3col`, `tabular-split-taxonomy-string`, `tabular-relabel-by-row-counter`); awk is the implementation, not the title.
 - **awk page depth (Q2).** Split into 4-5 operation-named sub-pages per the bullet above. No single `awk-in-galaxy` umbrella page; cross-link the awk-as-recipe sub-pages from a §Recipes line in any operation page that uses awk.
 - **Grep1 vs tp_grep_tool (Q1).** Recommend `tp_grep_tool`. Demote `Grep1` to a "legacy alternative" footnote. Consistency with the rest of the `tp_*` family wins over slight corpus-frequency edge of `Grep1`.
 - **Format-conversion gap (Q5).** Skip. Corpus-first principle: no exemplar = no page. The §2m gap note in this survey stands as the only record.

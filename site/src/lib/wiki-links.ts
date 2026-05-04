@@ -80,6 +80,7 @@ export type BacklinkField =
   | 'related_notes'
   | 'related_patterns'
   | 'related_molds'
+  | 'implemented_by_patterns'
   | 'patterns'
   | 'cli_commands'
   | 'prompts'
@@ -121,6 +122,7 @@ export function buildBacklinkMap(
       ['related_notes', data.related_notes],
       ['related_patterns', data.related_patterns],
       ['related_molds', data.related_molds],
+      ['implemented_by_patterns', data.implemented_by_patterns],
       ['patterns', data.patterns],
       ['cli_commands', data.cli_commands],
       ['prompts', data.prompts],

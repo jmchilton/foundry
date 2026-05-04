@@ -42,7 +42,7 @@ Before asking the user anything, suppress questions covered by prior answers:
 Build a compact classification table before user questions:
 
 - `already-authored` — suppress unless the survey adds evidence.
-- `new leaf page` — candidate for issue or immediate `/iwc-survey-pattern` work.
+- `new operation page` — candidate for issue or immediate `/iwc-survey-pattern` work.
 - `refine existing` — existing page needs a section, citation, boundary change, or recommendation update.
 - `merge into existing` — no standalone page; harvest useful mechanics into an existing page.
 - `drop/gap/no page` — corpus-zero, too thin, or not a pattern by policy.

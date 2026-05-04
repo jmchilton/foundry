@@ -6,10 +6,11 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-03
+revision: 3
 ai_generated: true
 related_notes:
+  - "[[galaxy-workflow-testability-design]]"
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-asserts-idioms]]"
   - "[[implement-galaxy-workflow-test]]"
@@ -21,6 +22,8 @@ summary: "How IWC workflows organize and reference test data — Zenodo-first, S
 # IWC test data conventions
 
 Reference for an agent implementing or editing a `<workflow>-tests.yml` in IWC style. All evidence cited from `/Users/jxc755/projects/repositories/workflow-fixtures/iwc-src/workflows/` (raw IWC clone) and `workflows/README.md`. Authoritative spec: [planemo.readthedocs.io/en/latest/test_format.html](https://planemo.readthedocs.io/en/latest/test_format.html). The companion analysis at `/Users/jxc755/projects/repositories/galaxy-brain/vault/projects/workflow_state/skills/COMPONENT_GALAXY_WORKFLOW_TESTING.md` is the synthesized source for several normative claims here.
+
+This note owns **test YAML fixture shapes**. For workflow-structure choices that make those fixtures possible before the test file exists, use [[galaxy-workflow-testability-design]].
 
 ## 1. Where does test data live? Remote vs in-repo
 
@@ -237,6 +240,16 @@ Identifiers are arbitrary strings, used both as the YAML key (`element_tests:`) 
 - **Inline comments after identifier** are legal and used for provenance: `pox-virus-half-genome-tests.yml:23` — `identifier: 20L70   # SRR15145276`.
 - **Whitespace and special chars in workflow input *labels*** survive too — they are job-mapping keys, not collection identifiers, but the same YAML quoting rules apply. Example from the analysis doc: `Manually annotate celltypes?: true` as a job key in `Preprocessing-and-Clustering-of-single-cell-RNA-seq-data-with-Scanpy-tests.yml:23`.
 
+### 4a. Workflow-interface implications
+
+Fixture shape should feed back into workflow input design. Tests supply job inputs by workflow input label, and collection fixtures must match the workflow's declared collection type.
+
+- The 10x CellPlex test uses `fastq PE collection GEX`, `fastq PE collection CMO`, and `sample name and CMO sequence collection` as job keys with `list:paired` and `list` collection fixtures; the workflow declares matching collection inputs at `$IWC_FORMAT2/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex.gxwf.yml:4-72`.
+- CVMFS/data-table shortcuts like `reference genome: dm6` are workflow-interface choices as much as test YAML choices: they require the workflow input to be a string/data-table-backed parameter, not a file input.
+- If a fixture needs stable sample names, decide whether those names should enter through collection element identifiers, a mapping file, or a workflow parameter before writing assertions.
+
+Rule for an agent: when a new workflow input is being designed and the test fixture is already known, check [[galaxy-workflow-testability-design]] before locking the input label/type.
+
 ## 5. CVMFS / `.loc` / built-in-index references
 
 When a workflow input is a Galaxy data-table-backed reference (built-in genome index, dbsnp file, kraken DB, …), the input takes a **plain string** matching the `value` column of a `.loc` file. No `class: File`, no `location:`. Examples:
@@ -289,6 +302,7 @@ Gaps an agent should be aware of:
 
 ## Cross-references
 
+- [[galaxy-workflow-testability-design]] — workflow input/output structure choices that make these fixture shapes testable.
 - `/Users/jxc755/projects/repositories/galaxy-brain/vault/projects/workflow_state/skills/COMPONENT_GALAXY_WORKFLOW_TESTING.md` — full synthesis with assertion-vocabulary table, CI internals, and tooling rundown. Sections 2b, 3, 4, 5, 9 are the direct upstream of this note.
 - planemo test format spec: [planemo.readthedocs.io/en/latest/test_format.html](https://planemo.readthedocs.io/en/latest/test_format.html).
 - planemo best practices: [planemo.readthedocs.io/en/latest/best_practices_workflows.html](https://planemo.readthedocs.io/en/latest/best_practices_workflows.html).

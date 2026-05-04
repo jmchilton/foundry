@@ -75,7 +75,7 @@ references:
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Ground collection-shape choices in curated, corpus-observed leaf patterns."
+    purpose: "Ground collection-shape choices in curated, corpus-observed operation and recipe patterns."
     trigger: "When selecting between collection cleanup, reshape, identifier, or collection-tabular bridge patterns."
   - kind: pattern
     ref: "[[galaxy-tabular-patterns]]"
@@ -83,7 +83,7 @@ references:
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Ground tabular bridge and table-operation choices in curated, corpus-observed leaf patterns."
+    purpose: "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns."
     trigger: "When data-flow translation leaves collection-land for tabular projection, filtering, joining, aggregation, pivoting, or tabular-collection bridges."
 ---
 # summary-to-galaxy-data-flow

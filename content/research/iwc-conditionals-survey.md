@@ -129,7 +129,7 @@ Evidence:
 - Optional StringTie/Cufflinks branches in RNA-seq: `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1082-1140`, `$IWC_FORMAT2/transcriptomics/rnaseq-pe/rnaseq-pe.gxwf.yml:1141-1214`.
 - Optional suffixing branch in VGP Hi-C: `$IWC_FORMAT2/VGP-assembly-v2/hi-c-contact-map-for-assembly-manual-curation/hi-c-map-for-assembly-manual-curation.gxwf.yml:338-459`.
 
-Call: **keep**. This is the leaf-level primitive all other conditional recipes build on.
+Call: **keep**. This is the operation-level primitive all other conditional recipes build on.
 
 ### Candidate B: `conditional-route-between-alternative-outputs`
 
@@ -188,7 +188,7 @@ Call: **merge** into the collection-cleanup pattern family; do not create a cond
 
 ## 6. Open questions
 
-1. Should conditionals get a MOC page (`galaxy-conditionals-patterns.md`) now, or wait until at least two leaf pages are authored?
+1. Should conditionals get a MOC page (`galaxy-conditionals-patterns.md`) now, or wait until at least two operation pages are authored?
 
 2. Answered for now: keep `conditional-transform-or-pass-through` separate from `conditional-route-between-alternative-outputs`. The boundary is "same value optionally modified" vs "peer alternatives routed to one output". Revisit only if the separate page proves too thin.
 
@@ -196,4 +196,4 @@ Call: **merge** into the collection-cleanup pattern family; do not create a cond
 
 4. No. Do not add `__FILTER_NULL__` to the anti-pattern note from zero uptake alone. Lack of uptake does not make a Galaxy feature an anti-pattern; users can be slow to adopt newer or esoteric features. Keep the survey call as "catalog capability, no IWC-backed pattern candidate" unless separate evidence shows a concrete reason not to endorse it.
 
-5. Does the Foundry need a background reference note for Galaxy `when:` syntax and nullable downstream behavior before leaf pattern pages are useful?
+5. Does the Foundry need a background reference note for Galaxy `when:` syntax and nullable downstream behavior before operation pattern pages are useful?

@@ -1,6 +1,6 @@
 ---
 type: pattern
-pattern_kind: leaf
+pattern_kind: recipe
 evidence: corpus-and-verified
 title: "Conditional: gate on non-empty result"
 aliases:
@@ -71,9 +71,9 @@ This is not map-over cleanup. If the need is to drop empty or failed elements in
 
 This is not `__FILTER_NULL__`. The conditionals survey found zero `__FILTER_NULL__` usage in the IWC corpus, but zero uptake alone is not an anti-pattern call.
 
-## Operation Boundary
+## Recipe Boundary
 
-This pattern covers data-derived branch admission:
+This recipe covers data-derived branch admission:
 
 - input fact: "this result is empty/non-empty";
 - output action: "run or skip downstream steps";
@@ -139,7 +139,7 @@ These snippets summarize observed and verified shapes. Do not simplify the MGnif
 
 ## Pitfalls
 
-- Do not lead with the MGnify four-step shim as "best" just because it is corpus-backed. It proves the operation; it may not be the ideal generated-workflow recipe.
+- Do not lead with the MGnify four-step shim as "best" just because it is corpus-backed. It proves the recipe; it may not be the ideal generated-workflow recipe.
 - Do not invent a shorter `when` expression without validation. Galaxy workflow syntax and tool-form roundtripping need a verified-pattern fixture first.
 - Do not use this when the choice is user-controlled. Direct boolean `when` gates are simpler.
 - Do not replace collection cleanup with a workflow gate. Cleanup changes collection members; this pattern skips whole downstream steps.

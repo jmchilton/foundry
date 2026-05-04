@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 2
+revised: 2026-05-03
+revision: 3
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a data-flow summary."
 references:
@@ -20,6 +20,14 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Read source-level process, channel, tool, and test-fixture structure while drafting a Galaxy workflow skeleton."
+  - kind: research
+    ref: "[[galaxy-workflow-testability-design]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Choose stable workflow input/output labels, testable checkpoint outputs, and fixture-compatible workflow interfaces while drafting the skeleton."
+    trigger: "When the template decides workflow inputs, workflow outputs, promoted checkpoints, or collection output identifiers that future tests will need to address."
   - kind: research
     ref: "[[galaxy-collection-semantics]]"
     used_at: runtime
