@@ -206,7 +206,7 @@ Citations:
 - `$IWC_FORMAT2/microbiome/pathogen-identification/pathogen-detection-pathogfair-samples-aggregation-and-visualisation/Pathogen-Detection-PathoGFAIR-Samples-Aggregation-and-Visualisation.gxwf.yml:553` — same shape, with `collection_column_join` downstream.
 - `$IWC_FORMAT2/virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping.gxwf.yml` steps 21, 22, 28, 44, 45 — five distinct `collapse_dataset` steps in one workflow, each immediately followed by a tabular tool (`Grep1`, `tp_find_and_replace`, `Filter1`).
 
-**Cross-reference, do not write again.** [[iwc-tabular-operations-survey]] §candidate 9 already proposes `collection-to-single-tabular-with-collapse_dataset` as a leaf pattern. Do not duplicate; cross-link from this hierarchy to the tabular page once it lands. (The collection-side page may want a one-paragraph "you're entering tabular-land" pointer.)
+**Cross-reference, do not write again.** [[iwc-tabular-operations-survey]] §candidate 9 already proposes `collection-to-single-tabular-with-collapse_dataset` as an operation pattern. Do not duplicate; cross-link from this hierarchy to the tabular page once it lands. (The collection-side page may want a one-paragraph "you're entering tabular-land" pointer.)
 
 ### Recipe E — `__EXTRACT_DATASET__` as "unbox a singleton"
 
@@ -319,7 +319,7 @@ Where a single tool has a *recurring parameter shape* the corpus uses, beyond th
 
 ## 7. Candidate pattern boundaries
 
-Operation-anchored leaf-pattern proposals. Each carries scope sketch, primary corpus citations (file:line), and an explicit keep / drop / merge call. Recipes (multi-step) are first-class candidates per `docs/PATTERNS.md`. Numbering parallels [[iwc-tabular-operations-survey]] §4 and continues from a fresh start since the hierarchies are independent.
+Operation-anchored pattern proposals. Each carries scope sketch, primary corpus citations (file:line), and an explicit keep / drop / merge call. Recipes (multi-step) are first-class candidates per `docs/PATTERNS.md`. Numbering parallels [[iwc-tabular-operations-survey]] §4 and continues from a fresh start since the hierarchies are independent.
 
 ### Keep
 

@@ -21,6 +21,10 @@ summary: "Use this MOC to choose corpus-grounded Galaxy collection transformatio
 related_notes:
   - "[[iwc-transformations-survey]]"
 related_patterns:
+  - "[[manifest-to-mapped-collection-lifecycle]]"
+  - "[[cleanup-sync-and-publish-nonempty-results]]"
+  - "[[reshape-relabel-remap-by-collection-axis]]"
+  - "[[fan-in-bundle-consume-and-flatten]]"
   - "[[collection-cleanup-after-mapover-failure]]"
   - "[[sync-collections-by-identifier]]"
   - "[[harmonize-by-sortlist-from-identifiers]]"
@@ -41,12 +45,19 @@ related_molds:
 
 # Galaxy: collection patterns
 
-This is the runtime-facing map for Galaxy collection transformation choices. Use it before loading raw survey notes. The survey remains evidence backing; the leaf pages are the actionable references.
+This is the runtime-facing map for Galaxy collection transformation choices. Use it before loading raw survey notes. The survey remains evidence backing; the operation and recipe pages are the actionable references.
 
 ## Cleanup
 
 - [[collection-cleanup-after-mapover-failure]] — use `__FILTER_EMPTY_DATASETS__` or `__FILTER_FAILED_DATASETS__` after map-over when empty or errored elements would break downstream steps.
 - [[collection-unbox-singleton]] — use `__EXTRACT_DATASET__` with `which: first` when a known one-element collection must become a dataset.
+
+## Map-over Lifecycle Recipes
+
+- [[manifest-to-mapped-collection-lifecycle]] — build collection elements from manifest/table rows, map a tool over them, then relabel or reshape outputs.
+- [[cleanup-sync-and-publish-nonempty-results]] — clean sparse mapped outputs, sync siblings from surviving identifiers, then gate final reports.
+- [[reshape-relabel-remap-by-collection-axis]] — correct the mapped axis after domain fan-out using Apply Rules and deterministic relabeling.
+- [[fan-in-bundle-consume-and-flatten]] — bundle parallel outputs for a collection consumer, then flatten or aggregate results.
 
 ## Identifiers
 

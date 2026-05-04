@@ -48,6 +48,10 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[cleanup-sync-and-publish-nonempty-results]] | Clean sparse mapped outputs, keep sibling collections aligned, then gate report publishing on non-empty results. | draft | 2026-05-04 | 1 |
+| [[fan-in-bundle-consume-and-flatten]] | Bundle parallel outputs into a collection consumer, then flatten nested results for pooled downstream processing. | draft | 2026-05-04 | 1 |
+| [[manifest-to-mapped-collection-lifecycle]] | Use a manifest or table to build a collection, map a tool per row, then relabel or reshape outputs. | draft | 2026-05-04 | 1 |
+| [[reshape-relabel-remap-by-collection-axis]] | Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis. | draft | 2026-05-04 | 1 |
 | [[collection-build-list-paired-with-apply-rules]] | Use Apply Rules to promote identifier columns into a list:paired collection, with optional cleanup first. | draft | 2026-05-03 | 2 |
 | [[collection-build-named-bundle]] | Use BUILD_LIST to assemble named outputs into a collection bundle for publishing or downstream fan-in. | draft | 2026-05-03 | 2 |
 | [[collection-cleanup-after-mapover-failure]] | Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps. | draft | 2026-05-03 | 2 |
@@ -128,7 +132,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[galaxy-workflow-invocation-failure-reference]] | Reference for Galaxy workflow invocation states, messages, failure reasons, and invocation API surfaces. | draft | 2026-05-02 | 1 |
 | [[iwc-conditionals-survey]] | Corpus survey of Galaxy conditional step usage in IWC, covering when-gates, boolean shims, and routed output selection. | draft | 2026-05-02 | 2 |
 | [[iwc-parameter-derivation-survey]] | Corpus survey of Galaxy workflow recipes that turn upstream data, metadata, or small files into runtime parameters. | draft | 2026-05-02 | 1 |
-| [[iwc-tabular-operations-survey]] | Corpus survey of tabular tools and operations across IWC workflows; map for the leaf pattern hierarchy on row/column data manipulation. | draft | 2026-05-02 | 2 |
+| [[iwc-tabular-operations-survey]] | Corpus survey of tabular tools and operations across IWC workflows; map for the operation pattern hierarchy on row/column data manipulation. | draft | 2026-05-02 | 2 |
 | [[iwc-transformations-survey]] | Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over. | draft | 2026-05-02 | 2 |
 | [[nextflow-operators-to-galaxy-collection-recipes]] | Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers. | draft | 2026-05-02 | 1 |
 | [[nextflow-to-galaxy-channel-shape-mapping]] | Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes. | draft | 2026-05-02 | 1 |

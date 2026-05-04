@@ -36,7 +36,7 @@ summary: "Survey of IWC map-over lifecycle recipes, with a Nextflow-to-Galaxy cr
 
 # IWC map-over lifecycle survey
 
-Source corpus: 120 cleaned `gxformat2` workflows under `$IWC_FORMAT2/`, with structural scans over `$IWC_SKELETONS/`. Nextflow comparison uses local fixtures under `workflow-fixtures/pipelines/` plus existing Foundry notes. This survey is intentionally lifecycle-shaped: it composes existing leaf pattern pages rather than rediscovering each collection tool.
+Source corpus: 120 cleaned `gxformat2` workflows under `$IWC_FORMAT2/`, with structural scans over `$IWC_SKELETONS/`. Nextflow comparison uses local fixtures under `workflow-fixtures/pipelines/` plus existing Foundry notes. This survey is intentionally lifecycle-shaped: it composes existing operation pattern pages rather than rediscovering each collection tool.
 
 Scope is the end-to-end shape around Galaxy collection map-over:
 
@@ -50,7 +50,7 @@ Scope is the end-to-end shape around Galaxy collection map-over:
 Out of scope:
 
 - Re-surveying individual collection operations already covered by [[iwc-transformations-survey]].
-- Rewriting leaf pattern decisions already captured in [[galaxy-collection-patterns]], [[galaxy-conditionals-patterns]], or [[galaxy-tabular-patterns]].
+- Rewriting operation pattern decisions already captured in [[galaxy-collection-patterns]], [[galaxy-conditionals-patterns]], or [[galaxy-tabular-patterns]].
 - Treating domain tools as collection patterns unless their collection lifecycle role is the reusable part.
 - Proposing pages for corpus-zero Galaxy collection capabilities.
 
@@ -102,7 +102,7 @@ Evidence:
 
 Lifecycle recipe: `domain fan-out -> reshape axes -> derive labels -> relabel -> reshape again -> mapped consensus`.
 
-This is high-density but narrow evidence. It probably belongs as a recipe section in a lifecycle MOC before it becomes a standalone leaf page.
+This is high-density but narrow evidence. It probably belongs as a recipe pattern or section in a lifecycle MOC before being treated as a broad operation.
 
 ### Shape D — sibling collection order harmonization before mapped paired processing
 
@@ -173,7 +173,7 @@ The broad Nextflow anatomy note, [[component-nextflow-pipeline-anatomy]], is sti
 
 ### Nextflow-first recipe boundaries
 
-The Nextflow-first layer probably should not replace Galaxy leaf patterns. It should route from source idioms to the Galaxy pages that implement them:
+The Nextflow-first layer probably should not replace Galaxy operation patterns. It should route from source idioms to the Galaxy pages that implement them:
 
 - `samplesheet-to-collection-input` -> [[tabular-to-collection-by-row]], [[collection-build-list-paired-with-apply-rules]], [[galaxy-collection-patterns]].
 - `keyed-join-to-identifier-synchronized-mapover` -> [[sync-collections-by-identifier]], [[harmonize-by-sortlist-from-identifiers]], [[regex-relabel-via-tabular]].
@@ -187,13 +187,13 @@ This is a strong argument for a source-pattern layer above the Galaxy pattern la
 
 ### Keep
 
-1. **`galaxy-map-over-lifecycle-patterns` MOC.** Existing pages are phase-specific. A MOC can route authors through prepare -> map -> cleanup -> sync -> reshape -> aggregate -> publish without duplicating leaf details. Evidence spans MGnify, SRA manifest, influenza, pox-virus, and MAGs.
+1. **`galaxy-map-over-lifecycle-patterns` MOC.** Existing pages are phase-specific. A MOC can route authors through prepare -> map -> cleanup -> sync -> reshape -> aggregate -> publish without duplicating operation details. Evidence spans MGnify, SRA manifest, influenza, pox-virus, and MAGs.
 
 2. **`manifest-to-mapped-collection-lifecycle` recipe.** Scope: a tabular manifest/list becomes a collection, a mapped tool runs once per row/key, and outputs are relabeled or reshaped. Strongest evidence: SRA manifest and pox-virus.
 
 3. **`cleanup-sync-and-publish-nonempty-results` recipe.** Scope: mapped outputs may be empty; clean them, use identifiers to keep siblings aligned, and gate reports on non-empty results. Strongest evidence: MGnify rRNA prediction.
 
-4. **`reshape-relabel-remap-by-collection-axis` recipe.** Scope: domain fan-out creates the wrong axis; use Apply Rules and relabeling to expose the downstream map-over axis. Evidence is dense but mostly influenza; keep as a MOC section or tentative recipe, not a broad leaf yet.
+4. **`reshape-relabel-remap-by-collection-axis` recipe.** Scope: domain fan-out creates the wrong axis; use Apply Rules and relabeling to expose the downstream map-over axis. Evidence is dense but mostly influenza; keep as a recipe page with confidence caveats, not a broad operation.
 
 5. **Nextflow-source-pattern MOC.** Scope: source-facing pages that explain Nextflow channel/operator idioms and list Galaxy pattern pages that implement each idiom. This is not an IWC pattern page in the same sense as collection leaves; it is a translation index over them.
 
@@ -207,13 +207,13 @@ This is a strong argument for a source-pattern layer above the Galaxy pattern la
 ### Drop
 
 10. Tool-anchored lifecycle pages such as `FILTER_EMPTY lifecycle` or `Apply Rules lifecycle`.
-11. Generic `map-over-in-galaxy` as a leaf page. Map-over itself is semantics; corpus-backed reusable value is in the lifecycle recipes around it.
+11. Generic `map-over-in-galaxy` as an operation page. Map-over itself is semantics; corpus-backed reusable value is in the lifecycle recipes around it.
 12. Unkeyed Nextflow `combine` / Cartesian product as a corpus-backed pattern. Treat it as review-trigger until stronger IWC evidence appears.
 
 ## 5. Open questions
 
 1. Should `galaxy-map-over-lifecycle-patterns` be a `pattern_kind: moc` page under `content/patterns/`, or remain a research survey until one conversion workflow uses it?
-2. Should lifecycle recipes be standalone leaf pages, or sections inside the lifecycle MOC that link to existing leaves?
+2. Should lifecycle recipes be standalone recipe pages, or sections inside the lifecycle MOC that link to existing operations?
 3. Is dense single-workflow evidence enough for `reshape-relabel-remap-by-collection-axis`, or should it stay survey-only until a second workflow attests the full sequence?
 4. Should source-pattern pages be a new note type, a `research/component` subtype convention, or ordinary `pattern` pages with source-specific metadata?
 5. If source-pattern pages list `implemented_by` Galaxy pattern pages, should that field be schema-validated as wiki links?

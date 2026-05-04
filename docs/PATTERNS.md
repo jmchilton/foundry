@@ -4,16 +4,25 @@ Project-infrastructure policy for `content/patterns/` notes. Read this before ha
 pattern pages or running survey commands that propose new ones. Pattern-specific rules (for example,
 when to set `auto_col_types: true`) belong on the pattern page itself, not here.
 
-## Naming: operation-anchored
+## Pattern kinds
 
-Leaf pattern pages are named after the **operation** they describe, not the tool that implements it. Tool-anchored content is fine *inside* an operation-named page.
+Use `pattern_kind` to describe the level of organization:
+
+- `operation` — an actionable pattern centered on one workflow-construction operation. It may link to related operations but should not require a multi-step lifecycle to explain its core move.
+- `recipe` — an actionable pattern centered on an ordered composition of operations. Use this when the reusable value is sequencing, handoff, and decision points across multiple lower-level operations.
+- `moc` — a map-of-content page that routes readers to operations and recipes. It should not own a primary construction recipe.
+
+## Naming: operation- and recipe-anchored
+
+Operation pattern pages are named after the **operation** they describe, not the tool that implements it. Recipe pattern pages are named after the lifecycle or composition they describe. Tool-anchored content is fine *inside* an operation- or recipe-named page.
 
 - ✅ `tabular-filter-by-regex.md` — operation; lists `tp_grep_tool` as the recommended tool, `Grep1` as a legacy footnote.
-- ✅ `tabular-prepend-header.md` — operation; recipe is awk, but awk isn't in the title.
+- ✅ `tabular-prepend-header.md` — operation; implementation uses awk, but awk isn't in the title.
+- ✅ `cleanup-sync-and-publish-nonempty-results.md` — recipe; the value is the ordered cleanup, sibling sync, and publish gate.
 - ❌ `tp_grep_tool.md` — tool name in title.
 - ❌ `awk-in-galaxy.md` — tool name in title; split into operation-named sub-pages instead.
 
-Decided 2026-04-30 in the tabular survey (`content/research/iwc-tabular-operations-survey.md` §7). Applies to every pattern hierarchy going forward.
+Operation-anchored naming was decided 2026-04-30 in the tabular survey (`content/research/iwc-tabular-operations-survey.md` §7). Recipe pages extend the same rule to multi-step lifecycle patterns.
 
 ## Corpus-first
 

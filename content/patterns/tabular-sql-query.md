@@ -1,6 +1,6 @@
 ---
 type: pattern
-pattern_kind: leaf
+pattern_kind: operation
 evidence: corpus-observed
 title: "Tabular: SQL query"
 tags:
@@ -41,7 +41,7 @@ iwc_exemplars:
 
 ## Tool
 
-`toolshed.g2.bx.psu.edu/repos/iuc/query_tabular/query_tabular/3.3.2` ("Query Tabular"). 16 step occurrences in the surveyed IWC corpus. This is the SQL leaf in the tabular hierarchy: powerful, but deliberately narrow.
+`toolshed.g2.bx.psu.edu/repos/iuc/query_tabular/query_tabular/3.3.2` ("Query Tabular"). 16 step occurrences in the surveyed IWC corpus. This is the SQL operation in the tabular hierarchy: powerful, but deliberately narrow.
 
 ## When to reach for it
 
@@ -134,7 +134,7 @@ Anchored by the clinical metaproteomics verification IWC exemplar.
 
 ## Pitfalls
 
-- **Do not use SQL for simple filters or cuts.** The survey decision keeps this page narrow; simple row predicates and projections have clearer leaf pages.
+- **Do not use SQL for simple filters or cuts.** The survey decision keeps this page narrow; simple row predicates and projections have clearer operation pages.
 - **Header handling is split across fields.** `query_result.header`, `tables[].tbl_opts.column_names_from_first_line`, and load filters like `skip` are independent.
 - **Line filters run before SQL.** `prepend_dataset_name`, `prepend_line_num`, and `normalize` change column positions before the query sees the table.
 - **Blank `table_name` is meaningful.** Blank means default `t1`; named joins need explicit table names.
@@ -144,7 +144,7 @@ Anchored by the clinical metaproteomics verification IWC exemplar.
 
 ## See also
 
-- [[iwc-tabular-operations-survey]] — corpus survey and §7 decision record for SQL as a narrow tabular leaf.
+- [[iwc-tabular-operations-survey]] — corpus survey and §7 decision record for SQL as a narrow tabular operation.
 - [[tabular-filter-by-column-value]] — one-table row predicates.
 - [[tabular-cut-and-reorder-columns]] — pure projection.
 - [[tabular-compute-new-column]] — simple computed columns.

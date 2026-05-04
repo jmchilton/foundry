@@ -1,6 +1,6 @@
 ---
 type: pattern
-pattern_kind: leaf
+pattern_kind: operation
 evidence: corpus-observed
 title: "Collection: swap nesting with Apply Rules"
 aliases:
