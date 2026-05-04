@@ -16,6 +16,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | draft | 2026-05-04 | 4 |
 | [[author-galaxy-tool-wrapper]] | Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable. | draft | 2026-05-03 | 2 |
 | [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against a draft. | draft | 2026-05-03 | 4 |
 | [[cwl-test-to-galaxy-test-plan]] | Translate CWL test fixtures into a Galaxy workflow test plan. | draft | 2026-05-03 | 2 |
@@ -23,7 +24,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | draft | 2026-05-03 | 4 |
 | [[nextflow-test-to-cwl-test-plan]] | Translate Nextflow test evidence into a CWL workflow test plan. | draft | 2026-05-03 | 1 |
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | draft | 2026-05-03 | 2 |
-| [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | draft | 2026-05-03 | 3 |
 | [[summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a data-flow summary. | draft | 2026-05-03 | 3 |
 | [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | draft | 2026-05-03 | 3 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify failure modes; propose fixes. | draft | 2026-05-02 | 3 |
@@ -111,6 +111,7 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[component-nextflow-containers-and-envs]] | Maps Nextflow container and conda evidence to Galaxy package and container requirements. | draft | 2026-05-04 | 2 |
 | [[component-tool-shed-search]] | Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload | draft | 2026-05-03 | 2 |
 | [[galaxy-collection-semantics]] | Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references. | draft | 2026-05-03 | 3 |
 | [[galaxy-workflow-testability-design]] | Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible. | draft | 2026-05-03 | 1 |
@@ -132,7 +133,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[iwc-transformations-survey]] | Corpus survey of collection-shape transformations across IWC: built-in collection ops, toolshed transformers, and the multi-step recipes that bracket map-over. | draft | 2026-05-02 | 2 |
 | [[nextflow-operators-to-galaxy-collection-recipes]] | Classifies common Nextflow operators as Galaxy wiring, collection semantics, explicit steps, or review triggers. | draft | 2026-05-02 | 1 |
 | [[nextflow-to-galaxy-channel-shape-mapping]] | Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes. | draft | 2026-05-02 | 1 |
-| [[component-nextflow-containers-and-envs]] | Stub. Biocontainers / bioconda equivalence, Docker/Singularity refs, container directive resolution. Grows from cast contact — see issue #17. | draft | 2026-05-01 | 1 |
 | [[component-nextflow-inspect]] | White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision. | draft | 2026-05-01 | 1 |
 | [[component-nextflow-pipeline-anatomy]] | Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17. | draft | 2026-05-01 | 1 |
 | [[component-nextflow-testing]] | Stub. conf/test.config, nf-core/test-datasets, nf-test idioms, samplesheet conventions. Grows from cast contact — see issue #17. | draft | 2026-05-01 | 1 |

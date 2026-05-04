@@ -8,8 +8,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-03
-revision: 3
+revised: 2026-05-04
+revision: 4
 ai_generated: true
 summary: "Pull JSON schema, container, source, inputs/outputs for a Galaxy tool."
 references:
@@ -29,6 +29,14 @@ references:
     evidence: corpus-observed
     purpose: "Resolve Galaxy tool identity, Tool Shed versioning, and changeset context before summarizing a wrapper."
     trigger: "When a tool summary starts from a Tool Shed hit rather than an installed Galaxy tool object."
+  - kind: research
+    ref: "[[component-nextflow-containers-and-envs]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Classify wrapper package and container requirements consistently with Nextflow-derived requirement evidence."
+    trigger: "When comparing an existing Galaxy wrapper's declared requirements against Nextflow container or conda evidence."
 ---
 # summarize-galaxy-tool
 
