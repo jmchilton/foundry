@@ -587,4 +587,154 @@ describe("validateDirectory (cross-file)", () => {
     });
     expect(r.errors).toBe(0);
   });
+
+  it("accepts usage.md and refinement.md siblings without frontmatter", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: x\n",
+    );
+    writeFileSync(path.join(dir, "molds/m/usage.md"), "# m usage\n\nSample run.\n");
+    writeFileSync(
+      path.join(dir, "molds/m/refinement.md"),
+      "# m refinement\n\nIs field x pulling weight?\n",
+    );
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+  });
+
+  it("warns on unexpected files in a Mold directory", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(path.join(dir, "molds/m/scratch.md"), "stray notes\n");
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
+
+  it("warns on unexpected subdirectories in a Mold directory", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    mkdirSync(path.join(dir, "molds/m/scratch"), { recursive: true });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
+
+  it("accepts refinement journal entries with valid frontmatter", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: x\n",
+    );
+    mkdirSync(path.join(dir, "molds/m/refinements"), { recursive: true });
+    writeFileSync(
+      path.join(dir, "molds/m/refinements/2026-05-04-probe.md"),
+      "---\nmold: m\ndate: 2026-05-04\nintent: ablate field foo\ndecision: open-question\n---\n\nNotes.\n",
+    );
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+  });
+
+  it("warns on refinement journal entries missing frontmatter", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: x\n",
+    );
+    mkdirSync(path.join(dir, "molds/m/refinements"), { recursive: true });
+    writeFileSync(
+      path.join(dir, "molds/m/refinements/2026-05-04-probe.md"),
+      "no frontmatter here\n",
+    );
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
+
+  it("warns on refinement journal entries with bad decision vocab", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+      }),
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/eval.md"),
+      "# m eval\n\n## Case: basic\n\n- check: deterministic\n- fixture: x\n",
+    );
+    mkdirSync(path.join(dir, "molds/m/refinements"), { recursive: true });
+    writeFileSync(
+      path.join(dir, "molds/m/refinements/2026-05-04-probe.md"),
+      "---\nmold: m\ndate: 2026-05-04\nintent: x\ndecision: bogus-value\n---\n\n",
+    );
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
 });

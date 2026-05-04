@@ -12,16 +12,19 @@ Required files:
 
 Strongly recommended (warning-only for now):
 
-- `eval.md` — Foundry-maintainer evaluation plan. Never packaged into cast artifacts.
+- `eval.md` — Foundry-maintainer evaluation plan. Pass/fail or judge-able assertions about cast output. Never packaged into cast artifacts.
 
 Optional files:
 
+- `usage.md` — narrative examples / representative invocations of the Mold. Author-facing illustration, not assertion. Never packaged into cast artifacts in v1; may later be cast as `examples/` content.
+- `refinement.md` — open design questions about the Mold itself: schema fields under suspicion, references whose value isn't clear, scope edges. Free-form. Never packaged into cast artifacts.
+- `refinements/` — append-only journal of refinement runs (one file per run, see Refinement Journal). Never packaged.
 - `casting.md` — Mold-owned guidance read by casting itself (skill assembly notes, condensation prompts). Not packaged into the generated skill runtime unless explicitly incorporated by the cast.
 - `cast-skill-verification.md` — Mold-owned dynamic-review checklist for a generated skill. Used after casting by reviewers or verification agents; not packaged into runtime artifacts.
 - `changes.md` — Mold-owned revision history / changelog. Use this for content that documents how the Mold has evolved across casts. Never packaged into cast artifacts.
 - `examples/` — local examples or small fixtures referenced by `index.md` or `eval.md`.
 
-Non-`index.md` Markdown files inside a Mold directory must not contain frontmatter. If a supporting note needs frontmatter, move it to the appropriate content collection and reference it from the Mold.
+Markdown files at the top level of a Mold directory must not contain frontmatter, except `index.md`. Files under `refinements/` are exempt from this rule because each refinement journal entry carries small structured frontmatter (see Refinement Journal). If a supporting note needs frontmatter beyond that, move it to the appropriate content collection and reference it from the Mold.
 
 ### `index.md` body discipline
 
@@ -37,6 +40,9 @@ The body of `index.md` is procedural content the cast skill consumes. **Do not p
 | ----------------------------- | --------------------------------- | ------------------------------ |
 | `index.md`                    | Mold contract + casting manifest  | Driver only; body not packaged |
 | `eval.md`                     | Foundry maintainers               | Never                          |
+| `usage.md`                    | Mold authors / readers            | Never (v1)                     |
+| `refinement.md`               | Mold authors / `/refine-mold`     | Never                          |
+| `refinements/`                | `/refine-mold` journal            | Never                          |
 | `casting.md`                  | Cast skill / casting LLM          | Read at cast time              |
 | `cast-skill-verification.md`  | Post-cast reviewer / agent        | Never                          |
 | `changes.md`                  | Mold authors / reviewers          | Never                          |
@@ -56,6 +62,16 @@ It must declare:
 
 Legacy top-level fields such as `patterns`, `cli_commands`, `prompts`, and `examples` remain supported during migration. New operational dependencies should use `references:`.
 
+## Eval, Usage, Refinement: what goes where
+
+Three sibling files cover the maintainer-facing surface of a Mold. Keep them separate; they decay differently and serve different audiences.
+
+- **`eval.md`** — assertions. A case is runnable: a fixture plus something that could fail. **If you can't sketch what failure looks like, it isn't eval.** Belongs in `usage.md` or `refinement.md` instead.
+- **`usage.md`** — illustration. Representative invocations and example inputs/outputs, with no assertion attached. The "here's what running this Mold tends to look like" file. Optional; create only when narrative examples accumulate.
+- **`refinement.md`** — open design questions about the Mold. "Is field X pulling weight?" "Does reference Y change the cast output?" "Should this Mold split?" Free-form notes; the `/refine-mold` skill writes journal entries under `refinements/` that may resolve or accumulate against this file.
+
+The three are not interchangeable. Misfiling is the main failure mode: agents tend to write usage-shaped content as eval cases. When in doubt, ask whether the entry has a pass/fail edge — if not, it isn't eval.
+
 ## Eval Contract
 
 `eval.md` describes how maintainers judge a cast artifact from the Mold. It is not runtime reference content.
@@ -71,6 +87,33 @@ Each eval file should include at least one case section:
 ```
 
 Use `deterministic` for checks that can be run mechanically, and `llm-judged` for qualitative review criteria.
+
+## Usage Contract
+
+`usage.md` is freeform markdown. No required structure. Suggested rhythm: one H2 per representative scenario, a short prose description, and a code block or transcript excerpt showing the invocation and a representative excerpt of output. No `expectation:` lines — that vocabulary is reserved for `eval.md`.
+
+## Refinement Contract
+
+`refinement.md` is freeform markdown. No required structure. Use it to park design questions, hunches, ablation candidates, and unresolved scope debates about the Mold itself. The `/refine-mold` skill reads this file as part of its context-loading pass and may add or resolve entries based on a refinement run.
+
+### Refinement Journal
+
+`refinements/<YYYY-MM-DD>-<slug>.md` is the durable record of one refinement run. Append-only — supersede with new entries rather than editing old ones.
+
+Frontmatter (small, controlled vocabulary):
+
+```yaml
+---
+mold: <mold-slug>
+date: YYYY-MM-DD
+intent: <one-line summary of what was being investigated>
+decision: keep | schema-change | reference-change | eval-add | open-question | other
+---
+```
+
+Body is freeform. Suggested headers: `## What I did`, `## What I observed`, `## Recommendations`, `## Open questions`. None are required; use what the run actually produced.
+
+The `decision` field is the only controlled vocabulary; it exists so a future digest can roll up open questions across all Molds. Pick the closest match — `other` is fine when nothing fits.
 
 ## Validator Checklist
 
@@ -89,6 +132,8 @@ The validator should expose the same facts a UI Mold-health panel needs:
 - `eval.md` exists (warning-only).
 - `eval.md` declares at least one evaluation case (warning-only).
 - eval cases identify deterministic vs LLM-judged checks.
+- Mold directory contains only allowlisted files / subdirectories (warning on unknown entries; catches typos and stray notes).
+- `refinements/*.md` entries carry `mold`, `date`, `intent`, `decision` frontmatter (warning-only).
 - referenced example files exist.
 - pipelines reference real Molds.
 - Molds unused by any pipeline are warned unless intentionally exempt.

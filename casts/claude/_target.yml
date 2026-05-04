@@ -50,3 +50,5 @@ skill_constraints:
     - content/schemas/
   forbid_packaged_files:
     - eval.md
+    - usage.md
+    - refinement.md

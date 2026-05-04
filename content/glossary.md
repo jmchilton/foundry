@@ -30,7 +30,7 @@ Alphabetical.
 
 **Discover-or-author branch** — a `[branch]` routing pattern (named `discover-or-author`) used in Galaxy-targeting per-step loops: try `discover-shed-tool` first; on fallthrough, invoke `author-galaxy-tool-wrapper`. The branch itself is harness logic; the two underlying capabilities are clean Molds. (`discover-shed-tool` may have siblings later — `discover-tool-via-galaxy-api`, `discover-tool-on-github` — each named for the mechanism it uses, not the goal.)
 
-**Evaluation plan** — Mold-owned content that describes how a generated skill or other cast artifact is exercised: which IWC exemplars it should reproduce or align with, pass/fail or qualitative criteria. Lives alongside the Mold in the Foundry. **Not** packaged into cast artifacts — evals are Foundry-maintainer infrastructure, not consumer-facing.
+**Evaluation plan** — Mold-owned content (`eval.md`) that describes how a generated skill or other cast artifact is exercised: which IWC exemplars it should reproduce or align with, pass/fail or qualitative criteria. Strictly assertion-shaped: every case has a fixture and something that could fail. Lives alongside the Mold in the Foundry. **Not** packaged into cast artifacts — evals are Foundry-maintainer infrastructure, not consumer-facing. Distinct from **Usage note** (illustration) and **Refinement note** (design questions).
 
 **Foundry** *(short for Galaxy Workflow Foundry)* — the standalone knowledge base where Pipelines, Molds, pattern pages, CLI manual pages, IO schemas, and IWC-citing content live. Renders as a navigable site; serves as the source of truth that casting reads.
 
@@ -68,6 +68,10 @@ Alphabetical.
 
 **Planemo** — the runtime CLI tool. Executes Galaxy *and* CWL workflows. Used by `run-workflow-test`, `debug-galaxy-workflow-output`, `debug-cwl-workflow-output`. Inside the Foundry, Planemo's CLI surface is captured as **CLI manual pages** (`content/cli/planemo/*`) referenced by action Molds. Contrasts with **gxwf**.
 
+**Refinement journal** — append-only sequence of entries under `content/molds/<slug>/refinements/<date>-<slug>.md`, one per `/refine-mold` run. Each entry carries small structured frontmatter (`mold`, `date`, `intent`, `decision`) and free-form body. Entries are superseded rather than edited; the `decision` field (`keep | schema-change | reference-change | eval-add | open-question | other`) supports cross-Mold rollups.
+
+**Refinement note** — Mold-owned content (`refinement.md`) that parks open design questions about the Mold itself: schema fields under suspicion, references whose value isn't clear, scope edges. Free-form; not assertion-shaped. Read by the `/refine-mold` skill as part of context-loading. Never packaged into cast artifacts. Distinct from **Evaluation plan** (assertions) and **Usage note** (illustration).
+
 **Reference kind** — the type discriminator on a Mold's typed references; controls casting behavior. Provisional kinds: `pattern` (markdown reference, LLM-condensed), `cli-command` (manual page, cast to JSON sidecar), `schema` (JSON Schema file, copied verbatim), `example` (fixture, copied verbatim), `prompt` (markdown fragment, inlined verbatim), `eval` (Foundry-only, never in cast). Per-kind dispatch is what makes casting more than "resolve all wiki links the same way."
 
 **Routing pattern** — the named-pattern value inside a `[branch]` phase that determines its inner shape and rendering. Initial vocabulary: `discover-or-author` (binary with `branches:` and a `fallthrough:` step) and `test-data-resolution` (sequential `chain:` of Mold wiki-links ending in a terminal sentinel like `user-supplied`). Open question whether the set graduates into a closed schema enum or stays open with validator coverage of embedded wiki-links only.
@@ -83,5 +87,7 @@ Alphabetical.
 **Tool-specific** *(Mold axis)* — a provisional Mold axis for actions whose behavior depends on one external tool. Whole-CLI reference surfaces are reference content, not Molds.
 
 **Generic** *(Mold axis)* — a Mold whose content depends on neither source nor target nor a single tool. Rare in the current inventory.
+
+**Usage note** — Mold-owned content (`usage.md`) illustrating representative invocations of a Mold. Author-facing narrative; no assertions, no `expectation:` lines. Lives alongside `eval.md` and `refinement.md` to keep illustrative content out of evaluation. Never packaged into cast artifacts in v1; may later be cast as `examples/`-shaped content.
 
 **Validation posture (schema, not caveats)** — the Foundry's stance on failure modes: gxwf static schema validation catches the failure modes prior-art skills had to enumerate as prose caveats (UUID validity, tool-ID/owner/+galaxyN, parameter-name mismatches, etc.). The Foundry does **not** maintain a parallel caveat catalog; the validation loop (`author → validate → fix`) is the enforcement mechanism, run inline per step.
