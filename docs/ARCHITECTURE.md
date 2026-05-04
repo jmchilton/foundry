@@ -406,6 +406,7 @@ foundry/
 │   ├── glossary.md                       # hand-curated terminology; skipped by validator
 │   ├── schemas/                          # Mold IO schemas (the schema library)
 │   │   ├── tests-format.md               # vendored from @galaxy-tool-util/schema
+│   │   ├── tests.schema.json             # synced vendored test-format JSON Schema artifact
 │   │   ├── summary-nextflow.md           # Foundry-authored schema note
 │   │   ├── summary-nextflow.schema.json  # Foundry-authored JSON Schema (rides alongside)
 │   │   ├── summary-paper.md
