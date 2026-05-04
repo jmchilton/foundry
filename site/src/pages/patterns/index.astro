@@ -9,12 +9,12 @@ const patterns = all
   .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
 
 const maps = patterns.filter(p => (p.data as any).pattern_kind === 'moc');
-const leafPatterns = patterns.filter(p => (p.data as any).pattern_kind === 'leaf');
+const implementationPatterns = patterns.filter(p => ['operation', 'recipe'].includes((p.data as any).pattern_kind));
 const topicTags = [...new Set(patterns.flatMap(p => (p.data.tags as string[]).filter(t => t.startsWith('topic/'))))]
   .sort((a, b) => a.localeCompare(b));
 
-const groups = new Map<string, typeof leafPatterns>();
-for (const pattern of leafPatterns) {
+const groups = new Map<string, typeof implementationPatterns>();
+for (const pattern of implementationPatterns) {
   const title = (pattern.data as any).title as string;
   const group = title.includes(':') ? title.split(':')[0] : 'General';
   const list = groups.get(group) ?? [];
@@ -37,7 +37,7 @@ function formatDate(d: Date): string {
           IWC-grounded workflow construction recipes.
         </h1>
         <p class="patterns-lede text-pretty">
-          Pattern maps are the entry points; leaf pages are the concrete Galaxy authoring moves that Molds can reference and casts can condense.
+          Pattern maps are the entry points; operation and recipe pages are the concrete Galaxy authoring moves that Molds can reference and casts can condense.
         </p>
       </div>
       <dl class="patterns-stats" aria-label="Pattern library stats">
@@ -98,7 +98,7 @@ function formatDate(d: Date): string {
     <section class="pattern-group" aria-labelledby={`patterns-${group.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
       <div class="section-rule">
         <h2 id={`patterns-${group.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>{group}</h2>
-        <span class="section-tail">/ {list.length} leaf {list.length === 1 ? 'pattern' : 'patterns'}</span>
+        <span class="section-tail">/ {list.length} implementation {list.length === 1 ? 'pattern' : 'patterns'}</span>
       </div>
       <div class="pattern-grid">
         {list.map(pattern => {
@@ -108,7 +108,7 @@ function formatDate(d: Date): string {
             <article class="pattern-card tinted-shadow tinted-shadow-hover">
               <div class="pattern-card-top">
                 <span class={`badge badge-${data.status}`}>{data.status}</span>
-                <span class="pattern-date font-mono">leaf · rev {data.revision} · {formatDate(data.revised)}</span>
+                <span class="pattern-date font-mono">{data.pattern_kind} · rev {data.revision} · {formatDate(data.revised)}</span>
               </div>
               <h3 class="pattern-card-title">
                 <a href={`${base}/${pattern.id}/`}>{data.title}</a>

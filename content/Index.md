@@ -84,6 +84,12 @@ Generated from content frontmatter. Do not edit by hand.
 
 ## Source Patterns
 
+- [[branch-filter-ifempty-to-galaxy-filters-gates]] — Route Nextflow branch, filter, and ifEmpty channel idioms to Galaxy collection cleanup, identifier filters, when gates, or review.
+- [[grouped-channel-to-regrouped-collection]] — Route Nextflow groupTuple, transpose, and grouped tuple payloads to Galaxy collection reshape patterns when the key is a real axis.
+- [[keyed-join-to-identifier-synchronized-mapover]] — Route Nextflow keyed joins and combine(by:) pairings to Galaxy collection identifier sync, ordering, relabeling, or table joins.
+- [[mapped-output-cleanup-and-publishing]] — Route Nextflow mapped-output cleanup and publishDir-style intent to Galaxy filtering, relabeling, gating, bundling, and reports.
+- [[mix-collect-to-report-aggregation]] — Route Nextflow mix, collect, toList, and collectFile report fan-in idioms to Galaxy aggregation and bundle patterns.
+- [[samplesheet-rows-to-galaxy-collections]] — Route Nextflow samplesheet row streams and repeated tuple inputs to Galaxy list, paired, or list:paired collections.
 - [[nextflow-patterns]] — Use this source-pattern map to route recurring Nextflow channel and operator idioms to Galaxy implementation patterns.
 
 ## CLI Commands

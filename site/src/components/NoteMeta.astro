@@ -27,6 +27,7 @@ const relatedNotes = resolveAll(data.related_notes);
 const relatedPatterns = resolveAll(data.related_patterns);
 const implementedByPatterns = resolveAll(data.implemented_by_patterns);
 const relatedMolds = resolveAll(data.related_molds);
+const reviewTriggers = Array.isArray(data.review_triggers) ? data.review_triggers : [];
 const hasSources = data.sources && data.sources.length > 0;
 const hasAnything =
   showRevision ||
@@ -34,6 +35,7 @@ const hasAnything =
   (showRevision && hasSources) ||
   relatedPatterns.length > 0 ||
   implementedByPatterns.length > 0 ||
+  reviewTriggers.length > 0 ||
   relatedMolds.length > 0 ||
   relatedNotes.length > 0;
 ---
@@ -111,6 +113,17 @@ const hasAnything =
     </div>
   )}
 
+  {reviewTriggers.length > 0 && (
+    <div class="meta-pair meta-pair-block">
+      <dt>Review Triggers</dt>
+      <dd>
+        <ul class="review-trigger-list">
+          {reviewTriggers.map((trigger: string) => <li>{trigger}</li>)}
+        </ul>
+      </dd>
+    </div>
+  )}
+
   {relatedMolds.length > 0 && (
     <div class="meta-pair">
       <dt>Molds</dt>
@@ -177,6 +190,21 @@ const hasAnything =
   }
   .meta-pair dd {
     margin: 0;
+  }
+  .review-trigger-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .review-trigger-list li {
+    padding: 0.16rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-accent) 9%, transparent);
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
   }
   .meta-pair a {
     color: var(--color-link);

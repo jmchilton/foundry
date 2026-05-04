@@ -77,7 +77,7 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
     {showMeta && <NoteMeta entry={entry} linkMap={linkMap} mode={metaMode} />}
 
     {data.type === 'mold' && <MoldHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
-    {data.type === 'pattern' && data.pattern_kind === 'leaf' && <PatternHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
+    {data.type === 'pattern' && data.pattern_kind !== 'moc' && <PatternHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
     {data.type === 'mold' && <MoldBody entry={entry} linkMap={linkMap} />}
     {data.type === 'pipeline' && <PipelineBody entry={entry} linkMap={linkMap} />}
     {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} placement="before" />}
