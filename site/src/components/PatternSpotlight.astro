@@ -14,8 +14,8 @@ const patterns = all
 const maps = patterns
   .filter(p => (p.data as any).pattern_kind === 'moc')
   .sort((a, b) => (a.data as any).title.localeCompare((b.data as any).title));
-const recentLeaves = patterns
-  .filter(p => (p.data as any).pattern_kind === 'leaf')
+const recentImplementationPatterns = patterns
+  .filter(p => ['operation', 'recipe'].includes((p.data as any).pattern_kind))
   .slice(0, 4);
 
 function shortTitle(title: string): string {
@@ -50,7 +50,7 @@ function shortTitle(title: string): string {
     )}
 
     <div class="spotlight-grid">
-      {recentLeaves.map((pattern, index) => {
+      {recentImplementationPatterns.map((pattern, index) => {
         const data = pattern.data as any;
         return (
           <a href={`${base}/${pattern.id}/`} class="spotlight-card no-underline tinted-shadow tinted-shadow-hover">
@@ -59,7 +59,7 @@ function shortTitle(title: string): string {
             <span class="spotlight-summary">{data.summary}</span>
             <span class="spotlight-foot">
               <span class={`badge badge-${data.status}`}>{data.status}</span>
-              <span class="font-mono">leaf</span>
+              <span class="font-mono">{data.pattern_kind}</span>
             </span>
           </a>
         );

@@ -33,6 +33,17 @@ const patternRequired = (overrides: Record<string, unknown> = {}) => baseRequire
   ...overrides,
 });
 
+const sourcePatternRequired = (overrides: Record<string, unknown> = {}) => baseRequired({
+  type: "source-pattern",
+  tags: ["source-pattern", "source/nextflow", "target/galaxy"],
+  source: "nextflow",
+  target: "galaxy",
+  source_pattern_kind: "operator",
+  implemented_by_patterns: ["[[pattern-x]]"],
+  title: "Nextflow Source Pattern",
+  ...overrides,
+});
+
 describe("validateData (per-file)", () => {
   const schema = loadRealSchema();
 
@@ -173,6 +184,18 @@ describe("validateData (per-file)", () => {
   it("warns on tag coherence drift", () => {
     const r = validateData(patternRequired({ tags: ["mold"] }), schema);
     expect(r.warnings.some((w) => /expected 'pattern'/.test(w))).toBe(true);
+  });
+
+  it("accepts source-pattern metadata", () => {
+    const r = validateData(sourcePatternRequired({
+      review_triggers: ["unmatched keys need review"],
+    }), schema);
+    expect(r.errors).toEqual([]);
+  });
+
+  it("requires source-pattern implementation links", () => {
+    const r = validateData(sourcePatternRequired({ implemented_by_patterns: undefined }), schema);
+    expect(r.errors.some((e) => /implemented_by_patterns/.test(e))).toBe(true);
   });
 
   it("accepts iwc_exemplars metadata", () => {
@@ -485,6 +508,49 @@ describe("validateDirectory (cross-file)", () => {
     });
     writeFm(path.join(dir, "patterns/not-research.md"), {
       ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Not Research" }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("validates source-pattern implementation links", () => {
+    writeFm(path.join(dir, "source-patterns/nextflow/source-x.md"), sourcePatternRequired({
+      implemented_by_patterns: ["[[pattern-x]]"],
+    }));
+    writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({ title: "Pattern X" }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+  });
+
+  it("rejects source-pattern links that do not resolve", () => {
+    writeFm(path.join(dir, "source-patterns/nextflow/source-x.md"), sourcePatternRequired({
+      implemented_by_patterns: ["[[missing-pattern]]"],
+    }));
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("rejects source-pattern links that resolve to non-patterns", () => {
+    writeFm(path.join(dir, "source-patterns/nextflow/source-x.md"), sourcePatternRequired({
+      implemented_by_patterns: ["[[not-a-pattern]]"],
+    }));
+    writeFm(path.join(dir, "research/not-a-pattern.md"), {
+      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
     });
 
     const r = validateDirectory({

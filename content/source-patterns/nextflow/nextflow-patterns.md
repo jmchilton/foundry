@@ -18,6 +18,12 @@ revised: 2026-05-03
 revision: 1
 ai_generated: true
 related_notes:
+  - "[[samplesheet-rows-to-galaxy-collections]]"
+  - "[[keyed-join-to-identifier-synchronized-mapover]]"
+  - "[[grouped-channel-to-regrouped-collection]]"
+  - "[[branch-filter-ifempty-to-galaxy-filters-gates]]"
+  - "[[mix-collect-to-report-aggregation]]"
+  - "[[mapped-output-cleanup-and-publishing]]"
   - "[[iwc-map-over-lifecycle-survey]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
@@ -32,11 +38,12 @@ The Galaxy pattern library remains the implementation layer. Source-pattern page
 
 ## Intended operation or recipe pages
 
-- **Samplesheet rows to Galaxy collections** — route `fromSamplesheet`, `splitCsv`, and repeated `tuple(meta, path)` inputs toward Galaxy `list`, `paired`, and `list:paired` collection construction.
-- **Keyed joins to identifier synchronization** — route `join` and `combine(by:)` toward identifier extraction, filtering, sorting, and relabeling patterns.
-- **Grouped channels to collection reshaping** — route `groupTuple`, `transpose`, and grouped tuple payloads toward nested collections, Apply Rules reshaping, flattening, or domain reduction.
-- **Branches to filters or gates** — route `branch`, `.filter`, and `.ifEmpty` toward Galaxy filters, conditional gates, or review triggers.
-- **Mix and collect to report aggregation** — route `mix`, `collect`, `toList`, and `collectFile` toward report aggregation, tabular collapse/pivot, and output bundles.
+- [[samplesheet-rows-to-galaxy-collections]] — route `fromSamplesheet`, `splitCsv`, and repeated `tuple(meta, path)` inputs toward Galaxy `list`, `paired`, and `list:paired` collection construction.
+- [[keyed-join-to-identifier-synchronized-mapover]] — route `join` and `combine(by:)` toward identifier extraction, filtering, sorting, and relabeling patterns.
+- [[grouped-channel-to-regrouped-collection]] — route `groupTuple`, `transpose`, and grouped tuple payloads toward nested collections, Apply Rules reshaping, flattening, or domain reduction.
+- [[branch-filter-ifempty-to-galaxy-filters-gates]] — route `branch`, `.filter`, and `.ifEmpty` toward Galaxy filters, conditional gates, or review triggers.
+- [[mix-collect-to-report-aggregation]] — route `mix`, `collect`, `toList`, and `collectFile` toward report aggregation, tabular collapse/pivot, and output bundles.
+- [[mapped-output-cleanup-and-publishing]] — route mapped output cleanup and `publishDir` intent toward filtering, relabeling, gating, bundles, and report outputs.
 
 ## Metadata contract
 

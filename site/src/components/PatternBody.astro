@@ -12,7 +12,7 @@ const { entry, linkMap, placement = 'before' } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const data = entry.data as any;
 const isMap = data.pattern_kind === 'moc';
-const isLeaf = data.pattern_kind === 'leaf';
+const isImplementationPattern = ['operation', 'recipe'].includes(data.pattern_kind);
 const exemplars = Array.isArray(data.iwc_exemplars) ? data.iwc_exemplars : [];
 const relatedPatterns = (data.related_patterns ?? [])
   .map((link: string) => resolveWikiLink(link, linkMap, base))
@@ -28,7 +28,7 @@ const relatedPatterns = (data.related_patterns ?? [])
     <h2 id="pattern-map-heading">Start Here</h2>
     <p>
       This page is a map of content, not a leaf recipe. Use it to choose the right operation page,
-      then follow the linked leaf pattern for concrete Galaxy authoring guidance.
+      then follow the linked implementation pattern for concrete Galaxy authoring guidance.
     </p>
     {relatedPatterns.length > 0 && (
       <div class="pattern-map-links">
@@ -43,7 +43,7 @@ const relatedPatterns = (data.related_patterns ?? [])
   </aside>
 )}
 
-{placement === 'after' && isLeaf && exemplars.length > 0 && (
+{placement === 'after' && isImplementationPattern && exemplars.length > 0 && (
   <section class="iwc-exemplars" aria-labelledby="iwc-exemplars-heading">
     <div class="iwc-exemplars-top">
       <span class="badge badge-draft">IWC exemplars</span>
