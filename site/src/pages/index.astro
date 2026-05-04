@@ -3,7 +3,6 @@ import Base from '../layouts/Base.astro';
 import PipelineMatrix from '../components/PipelineMatrix.astro';
 import FoundryStory from '../components/FoundryStory.astro';
 import PatternSpotlight from '../components/PatternSpotlight.astro';
-import GlossaryPrimer from '../components/GlossaryPrimer.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -40,8 +39,8 @@ const navCards = [
         <span aria-hidden="true">→</span>
       </a>
       <span class="hero-meta-sep" aria-hidden="true">·</span>
-      <a href={`${base}/glossary/`} class="hero-cta-secondary">
-        Read the glossary
+      <a href={`${base}/story/`} class="hero-cta-secondary">
+        Read the story
       </a>
     </div>
   </section>
@@ -49,7 +48,6 @@ const navCards = [
   <PipelineMatrix />
   <FoundryStory />
   <PatternSpotlight />
-  <GlossaryPrimer />
 
   <section aria-labelledby="nav-cards-heading">
     <div class="section-rule">
