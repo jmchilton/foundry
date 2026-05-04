@@ -679,11 +679,11 @@ const LINE_REF_RE = /:\d+(?:-\d+)?$/;
 
 function validatePatternIwcExemplars(file: FileMeta, findings: CrossFileFinding[]): void {
   const exemplars = Array.isArray(file.meta.iwc_exemplars) ? file.meta.iwc_exemplars : [];
-  if (file.meta.pattern_kind === "leaf" && exemplars.length === 0) {
+  if (["operation", "recipe"].includes(String(file.meta.pattern_kind)) && exemplars.length === 0) {
     findings.push({
       path: file.path,
       severity: "warning",
-      message: "leaf pattern should declare iwc_exemplars metadata",
+      message: "operation or recipe pattern should declare iwc_exemplars metadata",
     });
   }
 

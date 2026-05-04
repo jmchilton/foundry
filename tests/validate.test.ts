@@ -28,7 +28,7 @@ const baseRequired = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const patternRequired = (overrides: Record<string, unknown> = {}) => baseRequired({
-  pattern_kind: "leaf",
+  pattern_kind: "operation",
   evidence: "corpus-observed",
   ...overrides,
 });
@@ -341,7 +341,7 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.errors).toBeGreaterThanOrEqual(1);
   });
 
-  it("warns when leaf patterns omit iwc_exemplars during migration", () => {
+  it("warns when operation patterns omit iwc_exemplars during migration", () => {
     writeFm(path.join(dir, "patterns/pattern-x.md"), patternRequired({ title: "Pattern X" }));
 
     const r = validateDirectory({

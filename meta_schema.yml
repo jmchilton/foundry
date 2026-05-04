@@ -45,7 +45,7 @@ properties:
       type: string
   pattern_kind:
     type: string
-    enum: [leaf, moc]
+    enum: [operation, recipe, moc]
   evidence:
     type: string
     enum: [corpus-observed, structurally-verified, corpus-and-verified, hypothesis]

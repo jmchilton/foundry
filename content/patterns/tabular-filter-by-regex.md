@@ -1,6 +1,6 @@
 ---
 type: pattern
-pattern_kind: leaf
+pattern_kind: operation
 evidence: corpus-observed
 title: "Tabular: filter rows by regex"
 tags:

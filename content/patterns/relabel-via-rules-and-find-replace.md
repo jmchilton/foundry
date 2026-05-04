@@ -1,6 +1,6 @@
 ---
 type: pattern
-pattern_kind: leaf
+pattern_kind: recipe
 evidence: corpus-observed
 title: "Collection: relabel via rules and find/replace"
 aliases:

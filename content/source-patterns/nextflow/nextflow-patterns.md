@@ -30,7 +30,7 @@ This is the source-facing map for Nextflow-to-Galaxy conversion patterns. Use it
 
 The Galaxy pattern library remains the implementation layer. Source-pattern pages should explain what the converter saw in Nextflow, then link to the Galaxy patterns that implement or approximate that source idiom.
 
-## Intended leaf pages
+## Intended operation or recipe pages
 
 - **Samplesheet rows to Galaxy collections** — route `fromSamplesheet`, `splitCsv`, and repeated `tuple(meta, path)` inputs toward Galaxy `list`, `paired`, and `list:paired` collection construction.
 - **Keyed joins to identifier synchronization** — route `join` and `combine(by:)` toward identifier extraction, filtering, sorting, and relabeling patterns.
@@ -40,7 +40,7 @@ The Galaxy pattern library remains the implementation layer. Source-pattern page
 
 ## Metadata contract
 
-Each leaf page should list the Galaxy implementation pages in `implemented_by_patterns`. That field is machine-validated to resolve only to `type: pattern` notes.
+Each source-pattern page should list the Galaxy implementation pages in `implemented_by_patterns`. That field is machine-validated to resolve only to `type: pattern` notes.
 
 Use `review_triggers` when the Nextflow idiom has semantics Galaxy cannot preserve automatically: unmatched join keys, duplicate keys, `remainder`, arbitrary tuple records, per-element dynamic branching, or filesystem-specific `publishDir` layout.
 

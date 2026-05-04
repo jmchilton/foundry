@@ -1,6 +1,6 @@
 ---
 type: pattern
-pattern_kind: leaf
+pattern_kind: operation
 evidence: corpus-and-verified
 title: "Parameter: map workflow enum to tool parameter"
 aliases:

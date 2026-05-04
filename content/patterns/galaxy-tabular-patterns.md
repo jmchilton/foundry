@@ -44,7 +44,7 @@ related_molds:
 
 # Galaxy: tabular patterns
 
-This is the runtime-facing map for Galaxy tabular transformation choices. Use it before loading raw survey notes. The survey remains evidence backing; the leaf pages are the actionable references.
+This is the runtime-facing map for Galaxy tabular transformation choices. Use it before loading raw survey notes. The survey remains evidence backing; the operation pages are the actionable references.
 
 ## Row And Column Operations
 
