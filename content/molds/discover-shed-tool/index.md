@@ -8,10 +8,12 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-04-30
-revision: 2
+revised: 2026-05-04
+revision: 3
 ai_generated: true
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
+output_schemas:
+  - "content/schemas/galaxy-tool-discovery.schema.json"
 cli_commands:
   - "[[tool-search]]"
   - "[[tool-versions]]"
@@ -43,6 +45,14 @@ references:
     evidence: corpus-observed
     purpose: "Resolve a Tool Shed tool version to an installable changeset revision."
     trigger: "After selecting a candidate version that needs a reproducible changeset pin."
+  - kind: schema
+    ref: "content/schemas/galaxy-tool-discovery.schema.json"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: hypothesis
+    purpose: "Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery."
+    verification: "Run discover-shed-tool against known FastQC, ambiguous BWA-style, and no-hit queries and validate each emitted recommendation."
   - kind: research
     ref: "[[component-tool-shed-search]]"
     used_at: runtime
@@ -73,19 +83,23 @@ A structured recommendation object, JSON-shaped:
 
 ```json
 {
-  "status": "hit" | "weak" | "miss",
+  "status": "hit",
   "candidate": {
+    "tool_shed_url": "https://toolshed.g2.bx.psu.edu",
     "owner": "devteam",
-    "repoName": "fastqc",
-    "toolId": "fastqc",
-    "trsToolId": "devteam~fastqc~fastqc",
+    "repo": "fastqc",
+    "tool_id": "fastqc",
+    "trs_tool_id": "devteam~fastqc~fastqc",
     "version": "0.74+galaxy0",
-    "changesetRevision": "5ec9f6bceaee",
+    "changeset_revision": "5ec9f6bceaee",
     "score": 12.3,
-    "matchedTerms": ["name", "description"]
+    "matched_terms": ["fastqc"],
+    "match_fields": ["name", "description"],
+    "rationale": "single dominant hit on tool name"
   },
-  "alternates": [ /* up to N runners-up with the same shape */ ],
-  "rationale": "single dominant hit on tool name; latest version pinned to newest changeset"
+  "alternates": [],
+  "rationale": "single dominant hit on tool name; latest version pinned to newest changeset",
+  "warnings": []
 }
 ```
 
@@ -144,6 +158,8 @@ Combine the scored hit and the resolved pin into the recommendation object above
 - One dominant hit + clean version+changeset resolution → `hit`.
 - Multiple plausible hits, ambiguous owner, deprecated suspicion, or only-help-text match → `weak` with the leading candidate plus alternates.
 - No usable hit → `miss`.
+
+Validate the recommendation with `validate-galaxy-tool-discovery` before returning it. Do not rely on prose-only shape checks; downstream phases branch on this contract.
 
 ## Caveats baked into the procedure
 

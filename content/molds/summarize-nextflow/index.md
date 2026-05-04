@@ -8,8 +8,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-02
-revision: 7
+revised: 2026-05-04
+revision: 8
 ai_generated: true
 output_schemas:
   - "content/schemas/summary-nextflow.schema.json"
@@ -261,7 +261,7 @@ Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field 
 
 ### 8. Validate and emit
 
-Validate the assembled object against `schemas/summary-nextflow.schema.json` before emitting. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early.
+Validate the assembled object with `validate-summary-nextflow` before emitting. On schema failure, the cast skill should fail loud — the downstream Molds bind to the schema and will produce worse errors later. `additionalProperties: false` at every level catches drift early.
 
 ## Caveats baked into the procedure
 
@@ -284,7 +284,7 @@ The procedure assumes — and the cast skill must surface in `warnings[]` when r
 
 ## Reference dispatch (for casting)
 
-- `output_schemas` → [[summary-nextflow]] (`content/schemas/summary-nextflow.schema.json`) — copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON against this schema before returning.
+- `output_schemas` → [[summary-nextflow]] (`content/schemas/summary-nextflow.schema.json`) — copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning.
 - `cli_commands` — none today. Open question whether the Foundry seeds a `content/cli/nextflow/` family for `nextflow config`, `nf-core list`, `nf-test`. The cast skill calls these CLIs at runtime regardless; the question is whether the Foundry carries manpages for them.
 - `patterns` — none. Per-source summarization is correctly empty here; this is the first inventory case where a Mold legitimately declares no patterns. Relevant for MOLD_SPEC.
 - Research notes — pending: `[[component-nextflow-pipeline-anatomy]]` (DSL2 layout, channel idioms), `[[component-nextflow-containers-and-envs]]` (biocontainers / bioconda equivalence rules), `[[component-nextflow-testing]]` (`conf/test.config`, `nf-core/test-datasets`, nf-test). Body links above render dangling until these are seeded; they are the operational grounding for §4-7. Not packaged into the cast — the casting LLM selects only operationally relevant slices when condensing the procedural body.
