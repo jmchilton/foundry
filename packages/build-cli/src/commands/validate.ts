@@ -729,9 +729,7 @@ function validateBodyWikiLinks(
 ): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   for (const f of files) {
-    const body = readMarkdown(f.path)
-      .body.replace(FENCED_CODE_RE, "")
-      .replace(INLINE_CODE_RE, "");
+    const body = readMarkdown(f.path).body.replace(FENCED_CODE_RE, "").replace(INLINE_CODE_RE, "");
     const seen = new Set<string>();
     BODY_WIKI_LINK_RE.lastIndex = 0;
     let m: RegExpExecArray | null;
