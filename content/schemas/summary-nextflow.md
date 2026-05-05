@@ -50,7 +50,7 @@ Paper, Nextflow, and CWL are different enough that forcing a shared cross-source
 
 ## Field-name parity with gxy-sketches
 
-Three sub-shapes mirror gxy-sketches verbatim — see `docs/GXY_SKETCHES_ALIGNMENT.md` for the rationale:
+Three sub-shapes mirror gxy-sketches verbatim — see [[gxy-sketches-alignment]] for the rationale:
 
 - `SourceRecord` — mirrors `SketchSource` (`ecosystem`, `workflow`, `url`, `version`, `license`, `slug`).
 - `Tool` — extends `ToolSpec` (`name`, `version`) with the resolved container/conda strings the bridge to [[author-galaxy-tool-wrapper]] needs.

@@ -1,7 +1,27 @@
+---
+type: research
+subtype: design-spec
+title: "Alignment: gxy-sketches ↔ Galaxy Workflow Foundry"
+tags:
+  - research/design-spec
+status: draft
+created: 2026-04-30
+revised: 2026-05-05
+revision: 1
+ai_generated: true
+related_molds:
+  - "[[summarize-nextflow]]"
+  - "[[summarize-cwl]]"
+  - "[[summarize-paper]]"
+related_notes:
+  - "[[summary-nextflow]]"
+summary: "Where the Foundry's per-source summary Molds align with gxy-sketches on field names and source/test-fixture vocabulary, and where they intentionally do not."
+---
+
 # Alignment: gxy-sketches ↔ Galaxy Workflow Foundry
 
 Project-infrastructure research for an adjacent workflow-sketch project. This note records where
-the Foundry's per-source summary Molds (`summarize-paper`, `summarize-nextflow`, `summarize-cwl`) and
+the Foundry's per-source summary Molds ([[summarize-paper]], [[summarize-nextflow]], [[summarize-cwl]]) and
 a possible future `summarize-galaxy-workflow` should align with `gxy-sketches`, so the two projects
 stay legible to each other without becoming dependent.
 

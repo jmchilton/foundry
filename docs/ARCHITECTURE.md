@@ -397,7 +397,6 @@ foundry/
 │   ├── MOLDS.md
 │   ├── COMPILATION_PIPELINE.md
 │   ├── CORPUS_INGESTION.md
-│   ├── GXY_SKETCHES_ALIGNMENT.md
 │   └── COMPONENT_ARCHON.md
 ├── content/
 │   ├── Dashboard.md                      # generated; --check
