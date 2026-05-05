@@ -162,10 +162,12 @@ properties:
     type: array
     items:
       type: string
+      pattern: "^\\[\\[.+\\]\\]$"
   output_schemas:
     type: array
     items:
       type: string
+      pattern: "^\\[\\[.+\\]\\]$"
   examples:
     type: array
     items:

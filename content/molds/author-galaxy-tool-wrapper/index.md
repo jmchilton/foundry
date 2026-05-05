@@ -17,7 +17,7 @@ related_notes:
 summary: "Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable."
 references:
   - kind: schema
-    ref: "content/schemas/summary-nextflow.schema.json"
+    ref: "[[summary-nextflow]]"
     used_at: runtime
     load: upfront
     mode: verbatim

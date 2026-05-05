@@ -14,14 +14,14 @@ ai_generated: true
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 references:
   - kind: schema
-    ref: "content/schemas/summary-nextflow.schema.json"
+    ref: "[[summary-nextflow]]"
     used_at: runtime
     load: upfront
     mode: verbatim
     evidence: corpus-observed
     purpose: "Read summarized nf-test profiles, snapshot fixtures, selected test data, params, and expected outputs."
   - kind: schema
-    ref: "content/schemas/tests.schema.json"
+    ref: "[[tests-format]]"
     used_at: runtime
     load: on-demand
     mode: verbatim

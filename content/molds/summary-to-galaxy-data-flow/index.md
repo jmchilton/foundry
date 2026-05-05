@@ -16,7 +16,7 @@ related_notes:
 summary: "Abstract DAG with Galaxy collection / scatter / branching idioms surfaced."
 references:
   - kind: schema
-    ref: "content/schemas/summary-nextflow.schema.json"
+    ref: "[[summary-nextflow]]"
     used_at: runtime
     load: upfront
     mode: verbatim
