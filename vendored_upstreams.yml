@@ -1,5 +1,10 @@
 # Vendored files copied from repositories declared in common_paths.yml.
 # `source` uses the same $NAME/path citation grammar as content notes.
+#
+# Optional `build:` produces a generated artifact in the upstream repo before
+# copy. `build.command` runs in the upstream's working tree (cwd = the path
+# resolved from the `source` citation's $NAME). Identical commands across
+# entries are deduped per-invocation, so two entries can share one build.
 
 - local: content/research/galaxy-collection-semantics.yml
   source: $GALAXY/lib/galaxy/model/dataset_collections/types/collection_semantics.yml
@@ -20,3 +25,27 @@
   source: $GALAXY/config/datatypes_conf.xml.sample
   pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
   framing: content/research/galaxy-datatypes-conf.md
+
+- local: content/research/gxformat2.schema.json
+  source: $GALAXY_TOOL_UTIL_TS/dist/structural-schemas/gxformat2.schema.json
+  pinned_ref: 7ae4ecd0ba8d492225f58a6d455c4cc5317298f0
+  build:
+    command: |
+      pnpm install --silent && pnpm -r build >/dev/null && mkdir -p dist/structural-schemas \
+        && node packages/cli/dist/bin/gxwf.js structural-schema --format format2 \
+             --output dist/structural-schemas/gxformat2.schema.json \
+        && node packages/cli/dist/bin/gxwf.js structural-schema --format native \
+             --output dist/structural-schemas/native-galaxy-workflow.schema.json
+  framing: content/research/gxformat2-schema.md
+
+- local: content/research/native-galaxy-workflow.schema.json
+  source: $GALAXY_TOOL_UTIL_TS/dist/structural-schemas/native-galaxy-workflow.schema.json
+  pinned_ref: 7ae4ecd0ba8d492225f58a6d455c4cc5317298f0
+  build:
+    command: |
+      pnpm install --silent && pnpm -r build >/dev/null && mkdir -p dist/structural-schemas \
+        && node packages/cli/dist/bin/gxwf.js structural-schema --format format2 \
+             --output dist/structural-schemas/gxformat2.schema.json \
+        && node packages/cli/dist/bin/gxwf.js structural-schema --format native \
+             --output dist/structural-schemas/native-galaxy-workflow.schema.json
+  framing: content/research/galaxy-native-workflow-schema.md

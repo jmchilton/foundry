@@ -55,3 +55,8 @@ gxformat2:
   path: ~/projects/repositories/gxformat2
   repo: galaxyproject/gxformat2
   ref: main
+
+galaxy_tool_util_ts:
+  path: ~/projects/repositories/galaxy-tool-util-ts
+  repo: jmchilton/galaxy-tool-util-ts
+  ref: main
