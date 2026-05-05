@@ -14,6 +14,16 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "Translate a Nextflow summary into a Galaxy data-flow design brief."
+input_artifacts:
+  - id: summary-nextflow
+    description: "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; the JSON the data-flow translation reads."
+  - id: nextflow-galaxy-interface
+    description: "Preceding Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] that pins inputs, outputs, and labels."
+output_artifacts:
+  - id: nextflow-galaxy-data-flow
+    kind: markdown
+    default_filename: nextflow-galaxy-data-flow.md
+    description: "Reviewable Markdown brief: abstract operations, collection map/reduce choices, shape-changing placeholder steps, unresolved Galaxy tool needs, confidence, open questions."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"

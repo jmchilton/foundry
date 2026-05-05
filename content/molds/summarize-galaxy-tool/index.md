@@ -12,6 +12,14 @@ revised: 2026-05-04
 revision: 4
 ai_generated: true
 summary: "Pull JSON schema, container, source, inputs/outputs for a Galaxy tool."
+input_artifacts:
+  - id: galaxy-tool-pin
+    description: "Pin from [[discover-shed-tool]] or [[author-galaxy-tool-wrapper]]; identifies which cached ParsedTool to summarize."
+output_artifacts:
+  - id: galaxy-tool-summary
+    kind: json
+    default_filename: galaxy-tool-summary.json
+    description: "Compact tool summary derived from a cached ParsedTool: input/output ports, schema, container, source, version metadata."
 references:
   - kind: research
     ref: "[[galaxy-tool-summary-input-source]]"

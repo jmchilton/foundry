@@ -14,6 +14,12 @@ ai_generated: true
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
 output_schemas:
   - "[[galaxy-tool-discovery]]"
+output_artifacts:
+  - id: galaxy-tool-pin
+    kind: json
+    default_filename: galaxy-tool-pin.json
+    schema: "[[galaxy-tool-discovery]]"
+    description: "(owner, repo, tool_id, version, changeset_revision) pin for a Tool Shed wrapper plus discovery classification."
 cli_commands:
   - "[[tool-search]]"
   - "[[tool-versions]]"

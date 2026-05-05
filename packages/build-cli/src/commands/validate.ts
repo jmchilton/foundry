@@ -538,6 +538,77 @@ function collectPhaseMoldRefs(
   return { findings, refs };
 }
 
+/**
+ * Mold artifact handoff validation.
+ *   - Every `input_artifacts[].id` must resolve to some `output_artifacts[].id`
+ *     declared by another Mold (multi-producer is allowed; same id can come
+ *     from a discover-or-author branch).
+ *   - When `output_artifacts[].schema` is set, the wiki-link must resolve to a
+ *     `type: schema` note.
+ */
+function validateArtifactGraph(
+  files: FileMeta[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const producerIds = new Set<string>();
+  for (const f of files) {
+    if (f.meta.type !== "mold") continue;
+    const out = f.meta.output_artifacts;
+    if (!Array.isArray(out)) continue;
+    for (const a of out) {
+      if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
+        producerIds.add((a as { id: string }).id);
+      }
+    }
+  }
+  for (const f of files) {
+    if (f.meta.type !== "mold") continue;
+    const out = f.meta.output_artifacts;
+    if (Array.isArray(out)) {
+      out.forEach((a, i) => {
+        if (!a || typeof a !== "object") return;
+        const schema = (a as { schema?: unknown }).schema;
+        if (typeof schema !== "string") return;
+        const tp = resolveWikiLink(schema, slugMap);
+        if (!tp) {
+          findings.push({
+            path: f.path,
+            severity: "error",
+            message: `output_artifacts[${i}].schema: wiki link ${schema} did not resolve`,
+          });
+          return;
+        }
+        const targetType = metaByPath.get(tp)?.type;
+        if (targetType !== "schema") {
+          findings.push({
+            path: f.path,
+            severity: "error",
+            message: `output_artifacts[${i}].schema: wiki link ${schema} resolves to type=${targetType ?? "(none)"}, expected schema`,
+          });
+        }
+      });
+    }
+    const inp = f.meta.input_artifacts;
+    if (Array.isArray(inp)) {
+      inp.forEach((a, i) => {
+        if (!a || typeof a !== "object") return;
+        const id = (a as { id?: unknown }).id;
+        if (typeof id !== "string") return;
+        if (!producerIds.has(id)) {
+          findings.push({
+            path: f.path,
+            severity: "error",
+            message: `input_artifacts[${i}].id '${id}' has no producer (no Mold declares it in output_artifacts)`,
+          });
+        }
+      });
+    }
+  }
+  return findings;
+}
+
 function validatePipelinePhases(
   files: FileMeta[],
   slugMap: Map<string, string>,
@@ -970,6 +1041,7 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validateSourcePatternRefs(validFiles, slugMap, metaByPath));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
+  crossFindings.push(...validateArtifactGraph(validFiles, slugMap, metaByPath));
   crossFindings.push(
     ...validateMoldSourceLayout(
       opts.directory,

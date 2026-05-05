@@ -12,6 +12,11 @@ revised: 2026-04-30
 revision: 1
 ai_generated: true
 summary: "Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target."
+output_artifacts:
+  - id: cwl-tool-summary
+    kind: json
+    default_filename: cwl-tool-summary.json
+    description: "Compact CWL CommandLineTool summary: container, baseCommand, inputs, outputs, requirements, version metadata."
 ---
 # summarize-cwl-tool
 

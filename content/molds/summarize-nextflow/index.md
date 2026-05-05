@@ -13,6 +13,12 @@ revision: 9
 ai_generated: true
 output_schemas:
   - "[[summary-nextflow]]"
+output_artifacts:
+  - id: summary-nextflow
+    kind: json
+    default_filename: summary-nextflow.json
+    schema: "[[summary-nextflow]]"
+    description: "Structured summary of a Nextflow pipeline: processes, channels, params, containers, tools, test fixtures, nf-tests."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"

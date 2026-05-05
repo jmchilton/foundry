@@ -168,6 +168,47 @@ properties:
     items:
       type: string
       pattern: "^\\[\\[.+\\]\\]$"
+  # Typed artifact handoffs between Molds. Producer side: this Mold emits
+  # `id` as one of its outputs. Consumer side (input_artifacts): this Mold
+  # requires `id` to be supplied by a prior Mold in a Pipeline run. ids are
+  # bare slugs (kebab); the cross-file validator checks every consumer id
+  # resolves to some producer id in the corpus. Multiple Molds may produce
+  # the same id (e.g. branch outputs that satisfy a single downstream input).
+  output_artifacts:
+    type: array
+    items:
+      type: object
+      required: [id, kind, default_filename, description]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          pattern: "^[a-z][a-z0-9-]*$"
+        kind:
+          type: string
+          enum: [json, markdown, yaml, text, other]
+        default_filename:
+          type: string
+          minLength: 1
+        schema:
+          type: string
+          pattern: "^\\[\\[.+\\]\\]$"
+        description:
+          type: string
+          minLength: 20
+  input_artifacts:
+    type: array
+    items:
+      type: object
+      required: [id, description]
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          pattern: "^[a-z][a-z0-9-]*$"
+        description:
+          type: string
+          minLength: 20
   examples:
     type: array
     items:

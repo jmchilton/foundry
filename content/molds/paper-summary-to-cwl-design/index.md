@@ -14,6 +14,14 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "Translate a paper summary into a CWL workflow design brief."
+input_artifacts:
+  - id: summary-paper
+    description: "Paper extraction emitted by [[summarize-paper]]; methods, tools, sample data, references."
+output_artifacts:
+  - id: paper-cwl-design
+    kind: markdown
+    default_filename: paper-cwl-design.md
+    description: "Combined CWL interface + data-flow design brief; a single reviewable handoff until paper examples justify a split."
 ---
 # paper-summary-to-cwl-design
 

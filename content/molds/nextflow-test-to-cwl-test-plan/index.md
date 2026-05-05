@@ -13,6 +13,14 @@ revised: 2026-05-03
 revision: 1
 ai_generated: true
 summary: "Translate Nextflow test evidence into a CWL workflow test plan."
+input_artifacts:
+  - id: summary-nextflow
+    description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence."
+output_artifacts:
+  - id: cwl-test-plan
+    kind: markdown
+    default_filename: cwl-test-plan.md
+    description: "Reviewable CWL workflow test plan: job inputs, expected outputs, assertions, fixtures, rationale provenance."
 related_notes:
   - "[[summary-nextflow]]"
 references:

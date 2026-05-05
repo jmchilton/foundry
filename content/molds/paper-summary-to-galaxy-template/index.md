@@ -14,6 +14,16 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a paper summary and the paper-to-Galaxy design brief."
+input_artifacts:
+  - id: summary-paper
+    description: "Paper summary emitted by [[summarize-paper]]; consulted while emitting placeholder steps."
+  - id: paper-galaxy-design
+    description: "Combined Galaxy design brief from [[paper-summary-to-galaxy-design]] that pins interface and data-flow choices."
+output_artifacts:
+  - id: galaxy-workflow-draft
+    kind: yaml
+    default_filename: galaxy-workflow-draft.gxwf.yml
+    description: "gxformat2 skeleton: workflow inputs, outputs, placeholder steps, rough connections, TODO slots for later implementation Molds."
 references:
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"

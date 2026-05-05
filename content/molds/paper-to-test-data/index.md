@@ -12,6 +12,14 @@ revised: 2026-04-30
 revision: 1
 ai_generated: true
 summary: "Derive workflow test inputs and expected outputs from a paper."
+input_artifacts:
+  - id: summary-paper
+    description: "Paper summary from [[summarize-paper]]; sample data and reference evidence the test fixtures derive from."
+output_artifacts:
+  - id: test-data-refs
+    kind: json
+    default_filename: test-data-refs.json
+    description: "Resolved workflow test inputs and expected outputs derived from paper evidence (URLs, file shapes, expected hashes)."
 ---
 # paper-to-test-data
 

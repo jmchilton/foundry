@@ -14,6 +14,14 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "Map a CWL summary into a Galaxy workflow interface design brief."
+input_artifacts:
+  - id: summary-cwl
+    description: "Structured CWL summary emitted by [[summarize-cwl]]; the source-of-truth JSON for Galaxy interface choices."
+output_artifacts:
+  - id: cwl-galaxy-interface
+    kind: markdown
+    default_filename: cwl-galaxy-interface.md
+    description: "Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, exposed and checkpoint outputs, source provenance, confidence."
 references:
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"

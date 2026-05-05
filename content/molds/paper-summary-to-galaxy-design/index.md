@@ -14,6 +14,14 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "Translate a paper summary into a Galaxy workflow design brief."
+input_artifacts:
+  - id: summary-paper
+    description: "Paper extraction emitted by [[summarize-paper]]; methods, tools, sample data, references."
+output_artifacts:
+  - id: paper-galaxy-design
+    kind: markdown
+    default_filename: paper-galaxy-design.md
+    description: "Combined Galaxy interface + data-flow design brief; a single reviewable handoff until paper examples justify a split."
 references:
   - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"

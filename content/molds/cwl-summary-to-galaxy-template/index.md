@@ -14,6 +14,18 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs."
+input_artifacts:
+  - id: summary-cwl
+    description: "Structured CWL summary emitted by [[summarize-cwl]]; consulted while emitting placeholder steps."
+  - id: cwl-galaxy-interface
+    description: "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] that pins workflow inputs, outputs, labels."
+  - id: cwl-galaxy-data-flow
+    description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] that pins abstract operations and collection choices."
+output_artifacts:
+  - id: galaxy-workflow-draft
+    kind: yaml
+    default_filename: galaxy-workflow-draft.gxwf.yml
+    description: "gxformat2 skeleton: workflow inputs, outputs, placeholder steps, rough connections, TODO slots for later implementation Molds."
 references:
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"

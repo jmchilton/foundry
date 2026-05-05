@@ -14,6 +14,16 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "Translate a CWL summary into a Galaxy data-flow design brief."
+input_artifacts:
+  - id: summary-cwl
+    description: "Structured CWL summary emitted by [[summarize-cwl]]; consumed alongside the Galaxy interface brief."
+  - id: cwl-galaxy-interface
+    description: "Preceding Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] that pins inputs, outputs, and labels."
+output_artifacts:
+  - id: cwl-galaxy-data-flow
+    kind: markdown
+    default_filename: cwl-galaxy-data-flow.md
+    description: "Reviewable Markdown brief: abstract topology, Galaxy collection semantics, placeholder transformations, unresolved Galaxy tool needs."
 references:
   - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"

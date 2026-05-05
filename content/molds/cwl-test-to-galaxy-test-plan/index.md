@@ -12,6 +12,14 @@ revised: 2026-05-03
 revision: 2
 ai_generated: true
 summary: "Translate CWL test fixtures into a Galaxy workflow test plan."
+input_artifacts:
+  - id: summary-cwl
+    description: "Structured CWL summary from [[summarize-cwl]]; carries test fixtures, job inputs, expected outputs."
+output_artifacts:
+  - id: galaxy-test-plan
+    kind: markdown
+    default_filename: galaxy-test-plan.md
+    description: "Reviewable Galaxy workflow test plan derived from CWL test fixtures, job inputs, expected outputs, assertion evidence."
 ---
 # cwl-test-to-galaxy-test-plan
 
