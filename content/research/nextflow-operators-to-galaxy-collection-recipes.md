@@ -19,6 +19,8 @@ related_notes:
   - "[[iwc-transformations-survey]]"
   - "[[iwc-tabular-operations-survey]]"
   - "[[galaxy-data-flow-draft-contract]]"
+  - "[[iwc-map-over-lifecycle-survey]]"
+  - "[[nextflow-patterns]]"
 related_molds:
   - "[[summary-to-galaxy-data-flow]]"
   - "[[implement-galaxy-tool-step]]"

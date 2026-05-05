@@ -14,6 +14,7 @@ ai_generated: true
 summary: "Use tp_easyjoin_tool for two-tabular key joins; use tp_multijoin_tool for many files and query_tabular for SQL joins."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-group-and-aggregate-with-datamash]]"
   - "[[tabular-sql-query]]"

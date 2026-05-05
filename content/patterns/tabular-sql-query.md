@@ -14,6 +14,7 @@ ai_generated: true
 summary: "Use query_tabular when SQL semantics justify it: windows, joins, anti-joins, or fused project+compute over tabulars."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-filter-by-column-value]]"
   - "[[tabular-filter-by-regex]]"

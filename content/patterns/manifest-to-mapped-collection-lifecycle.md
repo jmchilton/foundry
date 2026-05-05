@@ -21,6 +21,7 @@ summary: "Use a manifest or table to build a collection, map a tool per row, the
 related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
+  - "[[iwc-tabular-operations-survey]]"
 related_patterns:
   - "[[tabular-to-collection-by-row]]"
   - "[[collection-build-list-paired-with-apply-rules]]"

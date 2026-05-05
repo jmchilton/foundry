@@ -27,6 +27,7 @@ related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
+  - "[[author-galaxy-tool-wrapper]]"
 summary: "Use this source-pattern map to route recurring Nextflow channel and operator idioms to Galaxy implementation patterns."
 ---
 

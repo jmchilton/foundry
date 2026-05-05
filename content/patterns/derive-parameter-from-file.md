@@ -19,6 +19,7 @@ ai_generated: true
 summary: "Read a one-value dataset with param_value_from_file, including count recipes that feed typed parameters."
 related_notes:
   - "[[iwc-parameter-derivation-survey]]"
+  - "[[iwc-conditionals-survey]]"
 related_patterns:
   - "[[conditional-gate-on-nonempty-result]]"
   - "[[tabular-compute-new-column]]"

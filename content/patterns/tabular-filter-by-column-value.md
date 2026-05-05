@@ -14,6 +14,7 @@ ai_generated: true
 summary: "Use Filter1 with a Python expression over cN columns to drop rows. Highest-frequency tabular row filter in IWC."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-filter-by-regex]]"
   - "[[tabular-sql-query]]"

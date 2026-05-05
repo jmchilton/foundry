@@ -14,6 +14,7 @@ ai_generated: true
 summary: "Use tp_awk_tool to convert chrom/start/end rows into 6-column BED, subtracting 1 from start and setting constants."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-prepend-header]]"
   - "[[tabular-compute-new-column]]"

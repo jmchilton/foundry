@@ -14,6 +14,7 @@ ai_generated: true
 summary: "Use tp_grep_tool for whole-line regex row filters on tabular input. Grep1 is the legacy alternative."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-filter-by-column-value]]"
   - "[[tabular-sql-query]]"

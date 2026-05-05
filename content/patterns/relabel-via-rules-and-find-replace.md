@@ -18,6 +18,7 @@ summary: "Use Apply Rules, identifier extraction, find/replace, and relabeling f
 related_notes:
   - "[[iwc-transformations-survey]]"
   - "[[galaxy-apply-rules-dsl]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[regex-relabel-via-tabular]]"
   - "[[collection-swap-nesting-with-apply-rules]]"

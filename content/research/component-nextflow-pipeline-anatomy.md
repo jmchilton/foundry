@@ -9,6 +9,9 @@ created: 2026-05-01
 revised: 2026-05-01
 revision: 1
 ai_generated: true
+related_notes:
+  - "[[iwc-map-over-lifecycle-survey]]"
+  - "[[iwc-parameter-derivation-survey]]"
 summary: "Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17."
 related_molds:
   - "[[summarize-nextflow]]"

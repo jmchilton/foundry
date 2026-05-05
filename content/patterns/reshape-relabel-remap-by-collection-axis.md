@@ -20,6 +20,7 @@ ai_generated: true
 summary: "Use Apply Rules and deterministic relabeling when domain fan-out creates the wrong map-over axis."
 related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[collection-swap-nesting-with-apply-rules]]"
   - "[[collection-split-identifier-via-rules]]"

@@ -17,6 +17,7 @@ ai_generated: true
 summary: "Use split_file_to_collection split_by:col to fan a tabular into collection elements by row/key."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-concatenate-collection-to-table]]"
   - "[[sync-collections-by-identifier]]"

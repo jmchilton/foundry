@@ -17,6 +17,7 @@ ai_generated: true
 summary: "Use tp_awk_tool to replace each row or label with deterministic sample_N values from awk NR."
 related_notes:
   - "[[iwc-tabular-operations-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[tabular-prepend-header]]"
   - "[[tabular-compute-new-column]]"

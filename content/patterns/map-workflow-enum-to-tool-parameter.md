@@ -18,6 +18,7 @@ ai_generated: true
 summary: "Use map_param_value to translate workflow enum values into downstream tool codes, flags, or snippets."
 related_notes:
   - "[[iwc-parameter-derivation-survey]]"
+  - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_patterns:
   - "[[conditional-route-between-alternative-outputs]]"
   - "[[conditional-run-optional-step]]"

@@ -17,6 +17,7 @@ ai_generated: true
 summary: "Use FILTER_EMPTY or FILTER_FAILED after map-over when bad elements would break downstream collection steps."
 related_notes:
   - "[[iwc-transformations-survey]]"
+  - "[[galaxy-apply-rules-dsl]]"
 related_patterns:
   - "[[sync-collections-by-identifier]]"
 related_molds:

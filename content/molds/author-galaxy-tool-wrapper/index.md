@@ -11,6 +11,9 @@ created: 2026-04-30
 revised: 2026-05-03
 revision: 2
 ai_generated: true
+related_notes:
+  - "[[nextflow-patterns]]"
+  - "[[summary-nextflow]]"
 summary: "Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable."
 references:
   - kind: schema

@@ -11,6 +11,8 @@ created: 2026-04-30
 revised: 2026-04-30
 revision: 1
 ai_generated: true
+related_notes:
+  - "[[summary-nextflow]]"
 summary: "Abstract DAG with CWL scatter / valueFrom / step idioms surfaced."
 ---
 # summary-to-cwl-data-flow
