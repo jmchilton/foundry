@@ -4,9 +4,9 @@
 // Each entry: { schema: <JSON Schema object>, version: <package version string> }.
 
 import { testsSchema } from '@galaxy-tool-util/schema';
-import galaxyToolDiscoverySchema from '../../../content/schemas/galaxy-tool-discovery.schema.json';
+import galaxyToolDiscoverySchema from '../../../packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json';
 import galaxyToolDiscoverySchemaPkg from '../../../packages/galaxy-tool-discovery-schema/package.json';
-import summaryNextflowSchema from '../../../content/schemas/summary-nextflow.schema.json';
+import summaryNextflowSchema from '../../../packages/summary-nextflow-schema/src/summary-nextflow.schema.json';
 import summaryNextflowSchemaPkg from '../../../packages/summary-nextflow-schema/package.json';
 import { readInstalledPackageVersion } from './package-version';
 

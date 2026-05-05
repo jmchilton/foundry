@@ -24,9 +24,9 @@ This page is auto-rendered from the JSON Schema authored in this repo. Each `$de
 
 **Source-of-truth chain:**
 
-1. `content/schemas/galaxy-tool-discovery.schema.json` in this repo — the canonical JSON. Edited as part of the Mold/cast loop around [[discover-shed-tool]].
-2. `packages/galaxy-tool-discovery-schema/scripts/sync-schema.mjs` runs at `prebuild`, copying the JSON into `src/` and emitting a typed `galaxy-tool-discovery.schema.generated.ts` const wrapper.
-3. Published as `@galaxy-foundry/galaxy-tool-discovery-schema` on npm. Site rendering currently reads directly from `content/schemas/`; the published artifact also exports `validateGalaxyToolDiscovery()` and ships a `validate-galaxy-tool-discovery` CLI bin for cast skills and downstream consumers.
+1. `packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop around [[discover-shed-tool]]. Mold frontmatter still cites it as `content/schemas/galaxy-tool-discovery.schema.json`; cast and Astro resolve that back to the package source.
+2. `packages/galaxy-tool-discovery-schema/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `galaxy-tool-discovery.schema.generated.ts` const wrapper from the canonical JSON.
+3. Published as `@galaxy-foundry/galaxy-tool-discovery-schema` on npm. Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published artifact also exports `validateGalaxyToolDiscovery()` and ships a `validate-galaxy-tool-discovery` CLI bin for cast skills and downstream consumers.
 
 **At runtime in cast skills:** validation should happen through the CLI command:
 

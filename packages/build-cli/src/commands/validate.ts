@@ -9,6 +9,7 @@ import type { ErrorObject } from "ajv";
 import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
 import { readMarkdown } from "../lib/frontmatter.js";
+import { resolveContentSchemaRef } from "../lib/schema-paths.js";
 import { loadSchema, loadTags } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
@@ -420,7 +421,10 @@ function validatePathReference(
     });
     return;
   }
-  const repoRelativeAbs = path.resolve(process.cwd(), ref);
+  // Schema refs cite `content/schemas/<base>.schema.json` for stability, but the
+  // JSON now lives in `packages/<pkg>-schema/src/`. Resolve to the package path.
+  const lookupRef = resolveContentSchemaRef(ref) ?? ref;
+  const repoRelativeAbs = path.resolve(process.cwd(), lookupRef);
   const contentRelativeAbs = path.resolve(contentRoot, ref.replace(/^content\//, ""));
   const abs = existsSync(repoRelativeAbs) ? repoRelativeAbs : contentRelativeAbs;
   if (!existsSync(abs)) {

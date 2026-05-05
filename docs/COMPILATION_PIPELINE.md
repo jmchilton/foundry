@@ -12,7 +12,7 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 |---|---|---|---|---|
 | `pattern` | `content/patterns/*.md` | Verbatim copy or LLM-condense per `mode` | `references/patterns/<slug>.md` | v1 |
 | `cli-command` | `content/cli/<tool>/<cmd>.md` | Deterministic JSON sidecar | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
-| `schema` | `content/schemas/<name>.schema.json` (Foundry-authored, paired with a `<name>.md` schema note) **or** vendored from an upstream npm/PyPI package and registered in `site/src/lib/schema-registry.ts` (canonical case: `@galaxy-tool-util/schema` for the workflow test-format) | Verbatim copy | `references/schemas/<name>.schema.json` | v1 |
+| `schema` | `content/schemas/<name>.schema.json` ref string, resolved at cast time to `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored, paired with a `<name>.md` schema note in `content/schemas/`) **or** vendored from an upstream npm/PyPI package and registered in `site/src/lib/schema-registry.ts` (canonical case: `@galaxy-tool-util/schema` for the workflow test-format, mirrored into `packages/tests-format-schema/src/`) | Verbatim copy | `references/schemas/<name>.schema.json` | v1 |
 | `research` | `content/research/*.md` or paired structured sources under `content/research/` | Verbatim copy or LLM condense per `mode` | `references/notes/<source-basename>` (strict 1:1) | v1 |
 | `prompt` | `content/prompts/*.md` | Inlined verbatim, no LLM rewrite | `references/prompts/` (inlined or copied) | **deferred** — rejected by v1 caster as "not implemented" until a real Mold needs it |
 | `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` | **deferred** — same as `prompt` |
@@ -105,7 +105,7 @@ To cast a Mold, the casting process consumes:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.
   - `cli_commands` — legacy wiki links into `content/cli/<tool>/<cmd>.md`.
-  - `input_schemas` / `output_schemas` — paths into `content/schemas/`.
+  - `input_schemas` / `output_schemas` — `content/schemas/<base>.schema.json` ref strings; resolved at cast time to `packages/<base>-schema/src/`.
   - `prompts` — legacy wiki links into `content/prompts/` (when the Mold needs them).
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).
@@ -214,12 +214,12 @@ Casting policy for upstream-package schemas:
 - **Source of truth lives upstream.** The Foundry pins a version (in its toolchain `package.json` for npm, etc.) but does not edit the schema.
 - **Casting copies the schema verbatim into `references/schemas/`.** The generated skill's runtime loads it for AJV / equivalent validation; no Foundry round-trip needed.
 - **Bundle helper functions when applicable.** For test-format specifically, `@galaxy-tool-util/schema` also exports `validateTestsFile` and `checkTestsAgainstWorkflow` (label/type cross-check between a `.ga` and a tests file). When a cast's runtime is Node-capable, depending on the package directly is cleaner than vendoring just the JSON; the dependency is also recorded in `_provenance.json` so reviewers can see the version pin.
-- **Schema-page rendering in the Foundry uses the same vendored copy.** The Foundry syncs the vendored test schema to `content/schemas/tests.schema.json` and renders it as a navigable schema note, so research notes and Mold bodies can deep-link individual `$defs` (e.g. `[[tests-format#has_text]]`). The vendored JSON is the single source for both casting output and site rendering.
+- **Schema-page rendering in the Foundry uses the same vendored copy.** The Foundry syncs the vendored test schema to `packages/tests-format-schema/src/tests.schema.json` and renders it via `site/src/lib/schema-registry.ts` as a navigable schema note, so research notes and Mold bodies can deep-link individual `$defs` (e.g. `[[tests-format#has_text]]`). The vendored JSON is the single source for both casting output and site rendering.
 
 Other schemas that fall under this policy as they land:
 
 - **`gxformat2`** — workflow source format. Schema-Salad-derived; vendored similarly.
-- **Mold IO summary schemas** (`summarize-paper`, `summarize-nextflow`, `summarize-cwl` outputs) — Foundry-authored under `content/schemas/`, but cast and site-rendered through the same machinery so consumers see one consistent surface.
+- **Mold IO summary schemas** (`summarize-paper`, `summarize-nextflow`, `summarize-cwl` outputs) — Foundry-authored under `packages/<name>-schema/src/`, paired with a `<name>.md` schema note in `content/schemas/`; cast and site-rendered through the same machinery so consumers see one consistent surface.
 
 The reference-kind `schema` does not distinguish between Foundry-authored and upstream-vendored at cast time — both are verbatim copies. The distinction matters only for sync/update flow: upstream schemas update via package bumps, Foundry-authored schemas update via direct edits.
 
