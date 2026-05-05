@@ -8,8 +8,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-04
-revision: 3
+revised: 2026-05-05
+revision: 4
 ai_generated: true
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
 references:
@@ -53,6 +53,14 @@ references:
     evidence: corpus-observed
     purpose: "Describe Galaxy workflow-test assertion intent and tolerances for translated expected outputs."
     trigger: "When turning Nextflow expected outputs or snapshots into Galaxy test-plan assertions."
+  - kind: research
+    ref: "[[nextflow-snapshot-to-galaxy-assertions]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Translate nf-test snapshot captures, helper-pruned file lists, and snapshot checksums into Galaxy workflow-test assertion intent."
+    trigger: "When converting nf-test snapshot fixtures, .snap sidecars, ignore files, ignore globs, or pipeline-level stable path/name captures."
   - kind: research
     ref: "[[iwc-shortcuts-anti-patterns]]"
     used_at: runtime
