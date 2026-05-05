@@ -14,7 +14,7 @@ ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a data-flow summary."
 references:
   - kind: schema
-    ref: "content/schemas/summary-nextflow.schema.json"
+    ref: "[[summary-nextflow]]"
     used_at: runtime
     load: upfront
     mode: verbatim

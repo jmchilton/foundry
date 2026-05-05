@@ -4,15 +4,15 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 8,
-    "content_hash": "904ba406b81f331bceeacd47b03277080705d1f35bbba70ea06606a43601efa7",
-    "commit": "bb669240188882d4981eb9f7cac640dc830e11b1"
+    "revision": 9,
+    "content_hash": "337aeffd871822122e0a3d91525d9e13367506de68a3eaf7c88cf1595d5f0f78",
+    "commit": "36791ee7635fb9f7123d96f6ba7233ce2c4e328a"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-05T12:08:56.572Z",
-  "cast_date": "2026-05-01",
-  "cast_revision": 3,
+  "cast_at": "2026-05-05T14:58:58.498Z",
+  "cast_date": "2026-05-05",
+  "cast_revision": 5,
   "cast_history": [
     {
       "rev": 1,
@@ -28,6 +28,16 @@
       "rev": 3,
       "date": "2026-05-01",
       "note": "regenerated after second run on nf-core/bacass. mold rev 4 + schema rev 3 add Process.aliases for include-as multiplexing and a structured nf_tests[]/SnapshotFixture for per-.nf.test-file fixtures"
+    },
+    {
+      "rev": 4,
+      "date": "2026-05-05",
+      "note": "refresh provenance after reference dispatch cleanup"
+    },
+    {
+      "rev": 5,
+      "date": "2026-05-05",
+      "note": "refresh provenance after reference dispatch cleanup"
     }
   ],
   "refs": [
@@ -82,21 +92,19 @@
     {
       "kind": "schema",
       "mode": "verbatim",
-      "ref": "content/schemas/summary-nextflow.schema.json",
-      "src": "content/schemas/summary-nextflow.schema.json",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summary-nextflow-schema#summaryNextflowSchema",
       "dst": "references/schemas/summary-nextflow.schema.json",
       "used_at": "both",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
-      "src_hash": "80232a84697c2ea6def00549180a6efb83ee8afaab4b650a349c51a5a5824084",
-      "dst_hash": "80232a84697c2ea6def00549180a6efb83ee8afaab4b650a349c51a5a5824084",
+      "src_hash": "0b6b36c652fef371b0671c2cb7544281c53957d8f5d9e5fa9135d9319d943b2e",
+      "dst_hash": "0b6b36c652fef371b0671c2cb7544281c53957d8f5d9e5fa9135d9319d943b2e",
       "source": "deterministic"
     }
   ],
   "open_questions": [
-    "Slot annotations (cast-time / runtime) are recorded here but not yet declared in the mold frontmatter — see issue #16.",
-    "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17.",
-    "Cast bundle layout (references/{schemas,notes,examples}) is not yet documented in docs/ARCHITECTURE.md — see issue #16."
+    "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17."
   ]
 }
