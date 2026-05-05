@@ -12,7 +12,7 @@ Casting operates as **per-kind dispatch** over the manifest, not a single resolv
 |---|---|---|---|---|
 | `pattern` | `content/patterns/*.md` | Verbatim copy or LLM-condense per `mode` | `references/patterns/<slug>.md` | v1 |
 | `cli-command` | `content/cli/<tool>/<cmd>.md` | Deterministic JSON sidecar | `references/cli/<slug>.json` (flat — `<slug>` is the source basename) | v1 |
-| `schema` | `content/schemas/<name>.schema.json` ref string, resolved at cast time to `packages/<name>-schema/src/<name>.schema.json` (Foundry-authored, paired with a `<name>.md` schema note in `content/schemas/`) **or** vendored from an upstream npm/PyPI package and registered in `site/src/lib/schema-registry.ts` (canonical case: `@galaxy-tool-util/schema` for the workflow test-format, mirrored into `packages/tests-format-schema/src/`) | Verbatim copy | `references/schemas/<name>.schema.json` | v1 |
+| `schema` | `[[wiki-link]]` to a `type: schema` note in `content/schemas/`. The note declares `package` + `package_export`; cast imports the named runtime export at build time and serializes it. Foundry-authored: schemas in `packages/<name>-schema/src/<name>.schema.json` (e.g. `summary-nextflow`, `galaxy-tool-discovery`). Vendored: schemas synced from upstream packages into `packages/<name>-schema/src/` (e.g. `tests-format` from `@galaxy-tool-util/schema`). | Verbatim copy of the imported export, JSON-serialized | `references/schemas/<note-slug>.schema.json` | v1 |
 | `research` | `content/research/*.md` or paired structured sources under `content/research/` | Verbatim copy or LLM condense per `mode` | `references/notes/<source-basename>` (strict 1:1) | v1 |
 | `prompt` | `content/prompts/*.md` | Inlined verbatim, no LLM rewrite | `references/prompts/` (inlined or copied) | **deferred** — rejected by v1 caster as "not implemented" until a real Mold needs it |
 | `example` | `content/molds/<slug>/examples/`, shared `content/examples/` | Verbatim copy | `references/examples/` | **deferred** — same as `prompt` |
@@ -30,7 +30,7 @@ Molds may declare the new object-shaped `references` manifest. It is additive du
 ```yaml
 references:
   - kind: schema
-    ref: "content/schemas/summary-nextflow.schema.json"
+    ref: "[[summary-nextflow]]"
     used_at: both
     load: upfront
     mode: verbatim
@@ -105,7 +105,7 @@ To cast a Mold, the casting process consumes:
   - `references` — object-shaped typed references with `kind`, `ref`, `used_at`, `load`, and `mode`; this is the preferred manifest for new operational references.
   - `patterns` — legacy wiki links into `content/patterns/`.
   - `cli_commands` — legacy wiki links into `content/cli/<tool>/<cmd>.md`.
-  - `input_schemas` / `output_schemas` — `content/schemas/<base>.schema.json` ref strings; resolved at cast time to `packages/<base>-schema/src/`.
+  - `input_schemas` / `output_schemas` — wiki-link arrays into `content/schemas/<name>.md`; resolved at cast time via the schema note's `package` + `package_export` to a runtime import from `packages/<name>-schema/`.
   - `prompts` — legacy wiki links into `content/prompts/` (when the Mold needs them).
   - `examples` — legacy paths into `content/molds/<slug>/examples/` or shared `content/examples/`.
   - IWC exemplar URLs cited in pattern bodies are resolved by the pattern transformation, not by the casting top-level (URLs stay URLs in pattern bodies; pinning to a SHA is at the pattern author's discretion).

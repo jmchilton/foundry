@@ -16,7 +16,7 @@ cli_commands:
   - "[[validate-tests]]"
 references:
   - kind: schema
-    ref: "content/schemas/tests.schema.json"
+    ref: "[[tests-format]]"
     used_at: runtime
     load: upfront
     mode: verbatim

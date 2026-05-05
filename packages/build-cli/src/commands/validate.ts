@@ -9,7 +9,6 @@ import type { ErrorObject } from "ajv";
 import AjvImport from "ajv";
 import addFormatsImport from "ajv-formats";
 import { readMarkdown } from "../lib/frontmatter.js";
-import { resolveContentSchemaRef } from "../lib/schema-paths.js";
 import { loadSchema, loadTags } from "../lib/schema.js";
 import type { FileMeta, Frontmatter, JsonSchema, ValidationResult } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
@@ -327,51 +326,47 @@ function validateTypedReference(
   };
 
   if (ref.kind === "schema") {
-    // Wiki-link form: must resolve to a `type: schema` note that has both
+    // Schema refs are wiki-links to a `type: schema` note that declares both
     // `package` and `package_export` (cast-mold imports the named export).
-    if (WIKI_LINK_RE.test(ref.ref)) {
-      const tp = resolveWikiLink(ref.ref, slugMap);
-      if (!tp) {
-        findings.push({
-          path: filePath,
-          severity: "error",
-          message: `references[${index}]: schema ref ${ref.ref} did not resolve`,
-        });
-        return;
-      }
-      const noteMeta = metaByPath.get(tp);
-      if (noteMeta?.type !== "schema") {
-        findings.push({
-          path: filePath,
-          severity: "error",
-          message: `references[${index}]: schema ref ${ref.ref} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema`,
-        });
-        return;
-      }
-      const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
-      const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
-      if (!pkg || !exp) {
-        findings.push({
-          path: filePath,
-          severity: "error",
-          message: `references[${index}]: schema wiki-link ref requires the target note to declare both 'package' and 'package_export' (got package=${pkg ?? "(none)"}, package_export=${exp ?? "(none)"})`,
-        });
-      }
+    if (!WIKI_LINK_RE.test(ref.ref)) {
+      findings.push({
+        path: filePath,
+        severity: "error",
+        message: `references[${index}]: schema ref must be a [[wiki-link]] to a schema note (got ${ref.ref})`,
+      });
       return;
     }
-    validatePathReference(
-      ref.ref,
-      index,
-      filePath,
-      contentRoot,
-      findings,
-      "content/schemas/",
-      true,
-    );
+    const tp = resolveWikiLink(ref.ref, slugMap);
+    if (!tp) {
+      findings.push({
+        path: filePath,
+        severity: "error",
+        message: `references[${index}]: schema ref ${ref.ref} did not resolve`,
+      });
+      return;
+    }
+    const noteMeta = metaByPath.get(tp);
+    if (noteMeta?.type !== "schema") {
+      findings.push({
+        path: filePath,
+        severity: "error",
+        message: `references[${index}]: schema ref ${ref.ref} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema`,
+      });
+      return;
+    }
+    const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
+    const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
+    if (!pkg || !exp) {
+      findings.push({
+        path: filePath,
+        severity: "error",
+        message: `references[${index}]: schema wiki-link ref requires the target note to declare both 'package' and 'package_export' (got package=${pkg ?? "(none)"}, package_export=${exp ?? "(none)"})`,
+      });
+    }
     return;
   }
   if (ref.kind === "example") {
-    validatePathReference(ref.ref, index, filePath, contentRoot, findings, "content/", false);
+    validatePathReference(ref.ref, index, filePath, contentRoot, findings, "content/");
     return;
   }
 
@@ -403,7 +398,6 @@ function validatePathReference(
   contentRoot: string,
   findings: CrossFileFinding[],
   requiredPrefix: string,
-  requireJson: boolean,
 ): void {
   if (WIKI_LINK_RE.test(ref)) {
     findings.push({
@@ -421,10 +415,7 @@ function validatePathReference(
     });
     return;
   }
-  // Schema refs cite `content/schemas/<base>.schema.json` for stability, but the
-  // JSON now lives in `packages/<pkg>-schema/src/`. Resolve to the package path.
-  const lookupRef = resolveContentSchemaRef(ref) ?? ref;
-  const repoRelativeAbs = path.resolve(process.cwd(), lookupRef);
+  const repoRelativeAbs = path.resolve(process.cwd(), ref);
   const contentRelativeAbs = path.resolve(contentRoot, ref.replace(/^content\//, ""));
   const abs = existsSync(repoRelativeAbs) ? repoRelativeAbs : contentRelativeAbs;
   if (!existsSync(abs)) {
@@ -440,14 +431,6 @@ function validatePathReference(
       path: filePath,
       severity: "error",
       message: `references[${index}]: path reference is not a file: ${ref}`,
-    });
-    return;
-  }
-  if (requireJson && !ref.endsWith(".schema.json")) {
-    findings.push({
-      path: filePath,
-      severity: "error",
-      message: `references[${index}]: schema reference must end with .schema.json: ${ref}`,
     });
   }
 }

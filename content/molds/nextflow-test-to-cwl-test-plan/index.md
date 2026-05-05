@@ -17,7 +17,7 @@ related_notes:
   - "[[summary-nextflow]]"
 references:
   - kind: schema
-    ref: "content/schemas/summary-nextflow.schema.json"
+    ref: "[[summary-nextflow]]"
     used_at: runtime
     load: upfront
     mode: verbatim

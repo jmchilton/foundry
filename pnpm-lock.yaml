@@ -27,6 +27,15 @@ importers:
       '@galaxy-foundry/build-cli':
         specifier: workspace:*
         version: link:packages/build-cli
+      '@galaxy-foundry/galaxy-tool-discovery-schema':
+        specifier: workspace:*
+        version: link:packages/galaxy-tool-discovery-schema
+      '@galaxy-foundry/summary-nextflow-schema':
+        specifier: workspace:*
+        version: link:packages/summary-nextflow-schema
+      '@galaxy-foundry/tests-format-schema':
+        specifier: workspace:*
+        version: link:packages/tests-format-schema
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9

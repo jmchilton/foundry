@@ -5,17 +5,22 @@
     "name": "discover-shed-tool",
     "path": "content/molds/discover-shed-tool/index.md",
     "revision": 3,
-    "content_hash": "2c94636ded57c93f7b76a762ba845493ac406ba5c5238e47f4fc583706f1b4ab",
-    "commit": "c7418dd55aa6271f0e7c510668b00be0f34acc00"
+    "content_hash": "e657432cd3152465f769e4cadddc332cee07c665ede84fde061521c7e8e2a092",
+    "commit": "36791ee7635fb9f7123d96f6ba7233ce2c4e328a"
   },
-  "cast_at": "2026-05-05T14:39:58.600Z",
+  "cast_at": "2026-05-05T14:59:13.978Z",
   "cast_date": "2026-05-05",
-  "cast_revision": 1,
+  "cast_revision": 2,
   "cast_history": [
     {
       "rev": 1,
       "date": "2026-05-05",
       "note": "initial deterministic cast for Tool Shed discovery"
+    },
+    {
+      "rev": 2,
+      "date": "2026-05-05",
+      "note": "refresh after schema wiki-link merge"
     }
   ],
   "refs": [
@@ -82,16 +87,16 @@
     {
       "kind": "schema",
       "mode": "verbatim",
-      "ref": "content/schemas/galaxy-tool-discovery.schema.json",
-      "src": "content/schemas/galaxy-tool-discovery.schema.json",
+      "ref": "[[galaxy-tool-discovery]]",
+      "src": "package://@galaxy-foundry/galaxy-tool-discovery-schema#galaxyToolDiscoverySchema",
       "dst": "references/schemas/galaxy-tool-discovery.schema.json",
       "used_at": "runtime",
       "load": "upfront",
       "evidence": "hypothesis",
       "purpose": "Validate the hit, weak, or miss recommendation emitted by Tool Shed discovery.",
       "verification": "Run discover-shed-tool against known FastQC, ambiguous BWA-style, and no-hit queries and validate each emitted recommendation.",
-      "src_hash": "f8647a23d91af11b5ba30d0154c1901d99ab31243948421f905e25e89c2a670a",
-      "dst_hash": "f8647a23d91af11b5ba30d0154c1901d99ab31243948421f905e25e89c2a670a",
+      "src_hash": "accd5ab7700937527bfefc54ab5de58a3171874c7810bef59c93d8d5e1847152",
+      "dst_hash": "accd5ab7700937527bfefc54ab5de58a3171874c7810bef59c93d8d5e1847152",
       "source": "deterministic"
     }
   ]

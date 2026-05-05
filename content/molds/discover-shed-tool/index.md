@@ -13,7 +13,7 @@ revision: 3
 ai_generated: true
 summary: "Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through."
 output_schemas:
-  - "content/schemas/galaxy-tool-discovery.schema.json"
+  - "[[galaxy-tool-discovery]]"
 cli_commands:
   - "[[tool-search]]"
   - "[[tool-versions]]"
@@ -46,7 +46,7 @@ references:
     purpose: "Resolve a Tool Shed tool version to an installable changeset revision."
     trigger: "After selecting a candidate version that needs a reproducible changeset pin."
   - kind: schema
-    ref: "content/schemas/galaxy-tool-discovery.schema.json"
+    ref: "[[galaxy-tool-discovery]]"
     used_at: runtime
     load: upfront
     mode: verbatim

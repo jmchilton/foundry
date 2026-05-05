@@ -5,14 +5,14 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 9,
-    "content_hash": "57d13420a1019bb787d327eb3ef0c82a7ed3fd8823ce9b8520637a53a274b571",
-    "commit": "c7418dd55aa6271f0e7c510668b00be0f34acc00"
+    "content_hash": "337aeffd871822122e0a3d91525d9e13367506de68a3eaf7c88cf1595d5f0f78",
+    "commit": "36791ee7635fb9f7123d96f6ba7233ce2c4e328a"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-05T14:39:58.612Z",
+  "cast_at": "2026-05-05T14:58:58.498Z",
   "cast_date": "2026-05-05",
-  "cast_revision": 4,
+  "cast_revision": 5,
   "cast_history": [
     {
       "rev": 1,
@@ -31,6 +31,11 @@
     },
     {
       "rev": 4,
+      "date": "2026-05-05",
+      "note": "refresh provenance after reference dispatch cleanup"
+    },
+    {
+      "rev": 5,
       "date": "2026-05-05",
       "note": "refresh provenance after reference dispatch cleanup"
     }
@@ -87,15 +92,15 @@
     {
       "kind": "schema",
       "mode": "verbatim",
-      "ref": "content/schemas/summary-nextflow.schema.json",
-      "src": "content/schemas/summary-nextflow.schema.json",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summary-nextflow-schema#summaryNextflowSchema",
       "dst": "references/schemas/summary-nextflow.schema.json",
       "used_at": "both",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
-      "src_hash": "80232a84697c2ea6def00549180a6efb83ee8afaab4b650a349c51a5a5824084",
-      "dst_hash": "80232a84697c2ea6def00549180a6efb83ee8afaab4b650a349c51a5a5824084",
+      "src_hash": "0b6b36c652fef371b0671c2cb7544281c53957d8f5d9e5fa9135d9319d943b2e",
+      "dst_hash": "0b6b36c652fef371b0671c2cb7544281c53957d8f5d9e5fa9135d9319d943b2e",
       "source": "deterministic"
     }
   ],

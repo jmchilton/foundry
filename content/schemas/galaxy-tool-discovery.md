@@ -3,6 +3,7 @@ type: schema
 name: galaxy-tool-discovery
 title: Galaxy tool discovery recommendation
 package: "@galaxy-foundry/galaxy-tool-discovery-schema"
+package_export: "galaxyToolDiscoverySchema"
 upstream: "https://github.com/jmchilton/foundry/blob/main/packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json"
 tags:
   - schema
@@ -24,7 +25,7 @@ This page is auto-rendered from the JSON Schema authored in this repo. Each `$de
 
 **Source-of-truth chain:**
 
-1. `packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop around [[discover-shed-tool]]. Mold frontmatter still cites it as `content/schemas/galaxy-tool-discovery.schema.json`; cast and Astro resolve that back to the package source.
+1. `packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop around [[discover-shed-tool]]. Mold frontmatter cites it via `[[galaxy-tool-discovery]]` wiki-links; cast imports the `galaxyToolDiscoverySchema` runtime export and serializes it into cast bundles.
 2. `packages/galaxy-tool-discovery-schema/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `galaxy-tool-discovery.schema.generated.ts` const wrapper from the canonical JSON.
 3. Published as `@galaxy-foundry/galaxy-tool-discovery-schema` on npm. Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published artifact also exports `validateGalaxyToolDiscovery()` and ships a `validate-galaxy-tool-discovery` CLI bin for cast skills and downstream consumers.
 

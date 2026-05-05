@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://galaxyproject.org/foundry/schemas/galaxy-tool-discovery.schema.json",
-  "$comment": "Canonical source: packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json in jmchilton/foundry. Mold frontmatter still cites this as `content/schemas/galaxy-tool-discovery.schema.json` for stability; the cast pipeline and Astro site resolve that ref back to this file at build time.",
+  "$comment": "Canonical source: packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json in jmchilton/foundry. Mold frontmatter cites this schema via [[galaxy-tool-discovery]] wiki-links; the cast pipeline imports the `galaxyToolDiscoverySchema` runtime export and serializes it into cast bundles.",
   "title": "Galaxy Tool Discovery Recommendation",
   "description": "Structured recommendation emitted by the discover-shed-tool Mold after searching the Galaxy Tool Shed and resolving any selected candidate to a pinnable Tool Shed version and changeset revision.",
   "$ref": "#/$defs/DiscoveryRecommendation",
@@ -11,23 +11,39 @@
       "description": "Top-level output from discover-shed-tool. A hit or weak result carries a selected candidate; a miss carries null candidate plus fallthrough rationale.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "candidate", "alternates", "rationale", "warnings"],
+      "required": [
+        "status",
+        "candidate",
+        "alternates",
+        "rationale",
+        "warnings"
+      ],
       "properties": {
         "status": {
           "type": "string",
-          "enum": ["hit", "weak", "miss"],
+          "enum": [
+            "hit",
+            "weak",
+            "miss"
+          ],
           "description": "Recommendation class. hit means proceed with the selected Tool Shed pin; weak means candidate exists but needs confirmation or may fall through; miss means no usable wrapper was found."
         },
         "candidate": {
           "anyOf": [
-            { "$ref": "#/$defs/ToolCandidate" },
-            { "type": "null" }
+            {
+              "$ref": "#/$defs/ToolCandidate"
+            },
+            {
+              "type": "null"
+            }
           ],
           "description": "Selected candidate for hit/weak results. Null for miss."
         },
         "alternates": {
           "type": "array",
-          "items": { "$ref": "#/$defs/ToolCandidate" },
+          "items": {
+            "$ref": "#/$defs/ToolCandidate"
+          },
           "description": "Runner-up candidates worth surfacing to the user or harness. Empty when no plausible alternates were found."
         },
         "rationale": {
@@ -37,27 +53,52 @@
         },
         "warnings": {
           "type": "array",
-          "items": { "$ref": "#/$defs/Warning" },
+          "items": {
+            "$ref": "#/$defs/Warning"
+          },
           "description": "Advisory issues that do not invalidate the recommendation but affect confidence or downstream binding."
         }
       },
       "allOf": [
         {
           "if": {
-            "properties": { "status": { "enum": ["hit", "weak"] } },
-            "required": ["status"]
+            "properties": {
+              "status": {
+                "enum": [
+                  "hit",
+                  "weak"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
           },
           "then": {
-            "properties": { "candidate": { "$ref": "#/$defs/ToolCandidate" } }
+            "properties": {
+              "candidate": {
+                "$ref": "#/$defs/ToolCandidate"
+              }
+            }
           }
         },
         {
           "if": {
-            "properties": { "status": { "const": "miss" } },
-            "required": ["status"]
+            "properties": {
+              "status": {
+                "const": "miss"
+              }
+            },
+            "required": [
+              "status"
+            ]
           },
           "then": {
-            "properties": { "candidate": { "type": "null" } }
+            "properties": {
+              "candidate": {
+                "type": "null"
+              }
+            }
           }
         }
       ]
@@ -122,14 +163,27 @@
         },
         "matched_terms": {
           "type": "array",
-          "items": { "type": "string", "minLength": 1 },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
           "description": "Query terms or exact hints that matched this candidate. Empty only when the candidate came from a non-lexical hint."
         },
         "match_fields": {
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["tool_id", "name", "description", "help", "owner", "repo", "exact_name_hint", "owner_hint", "version_hint"]
+            "enum": [
+              "tool_id",
+              "name",
+              "description",
+              "help",
+              "owner",
+              "repo",
+              "exact_name_hint",
+              "owner_hint",
+              "version_hint"
+            ]
           },
           "uniqueItems": true,
           "description": "Candidate fields or hints that matched the query. Preserves the older sketch's name/description-style evidence separately from matched_terms."
@@ -146,7 +200,10 @@
       "description": "Advisory confidence issue surfaced by discover-shed-tool.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["code", "message"],
+      "required": [
+        "code",
+        "message"
+      ],
       "properties": {
         "code": {
           "type": "string",
