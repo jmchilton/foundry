@@ -5,6 +5,7 @@ title: Nextflow pipeline summary
 package: "@galaxy-foundry/summary-nextflow-schema"
 package_export: "summaryNextflowSchema"
 upstream: "https://github.com/jmchilton/foundry/blob/main/packages/summary-nextflow-schema/src/summary-nextflow.schema.json"
+license: MIT
 tags:
   - schema
   - source/nextflow

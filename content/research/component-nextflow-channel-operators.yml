@@ -1,0 +1,370 @@
+# Nextflow channel operators — structured digest for summarize-nextflow §6.
+# Companion to component-nextflow-channel-operators.md.
+#
+# Source: https://docs.seqera.io/nextflow/reference/operator (47 operators).
+# Categories: transform | filter | fan-in | fan-out | combine | fork | terminal.
+
+operators:
+
+  # ---- transform: 1-in 1-out, cardinality preserved ----
+
+  - name: map
+    category: transform
+    arity_in: 1
+    cardinality: preserved
+    output_shape_rule: "Same shape unless closure restructures the value."
+    key_args: ["closure"]
+    notes: "Most flexible operator; closure body determines shape effect. Surface closure literal in Edge.notes when shape is non-obvious."
+
+  - name: view
+    category: transform
+    arity_in: 1
+    cardinality: preserved
+    output_shape_rule: "Pass-through; emits unchanged."
+    key_args: ["closure?"]
+    notes: "Side-effecting print; transparent for shape reasoning."
+
+  - name: set
+    category: transform
+    arity_in: 1
+    cardinality: preserved
+    output_shape_rule: "Binds channel to a name; pass-through."
+    key_args: ["name"]
+
+  - name: tap
+    category: transform
+    arity_in: 1
+    cardinality: preserved
+    output_shape_rule: "Side-channel copy; main pass-through."
+    key_args: ["name"]
+    notes: "Creates a named channel that mirrors the source; downstream sees source unchanged."
+
+  - name: dump
+    category: transform
+    arity_in: 1
+    cardinality: preserved
+    output_shape_rule: "Pass-through; debug print under -dump-channels."
+    key_args: ["tag?"]
+
+  - name: ifEmpty
+    category: transform
+    arity_in: 1
+    cardinality: preserved
+    output_shape_rule: "If source is empty, emits the supplied default; else pass-through."
+    key_args: ["default_value"]
+    notes: "Used to short-circuit empty-channel deadlocks; default may change shape."
+
+  - name: randomSample
+    category: transform
+    arity_in: 1
+    cardinality: reduced
+    output_shape_rule: "Emits N random items (or fewer); same per-item shape."
+    key_args: ["n", "seed?"]
+
+  # ---- filter: 1-in 0..1-out per input ----
+
+  - name: filter
+    category: filter
+    arity_in: 1
+    cardinality: reduced
+    output_shape_rule: "Same per-item shape; total count reduced by predicate."
+    key_args: ["predicate"]
+
+  - name: distinct
+    category: filter
+    arity_in: 1
+    cardinality: reduced
+    output_shape_rule: "Drops consecutive duplicates."
+    key_args: []
+
+  - name: unique
+    category: filter
+    arity_in: 1
+    cardinality: reduced
+    output_shape_rule: "Drops all duplicates; emits each value once."
+    key_args: []
+    notes: "Distinct from `distinct`: drops *all* dupes, not just consecutive."
+
+  - name: first
+    category: filter
+    arity_in: 1
+    cardinality: reduced
+    output_shape_rule: "Emits exactly the first value (or first matching predicate)."
+    key_args: ["predicate?"]
+
+  - name: last
+    category: filter
+    arity_in: 1
+    cardinality: reduced
+    output_shape_rule: "Emits exactly the last value."
+    key_args: []
+
+  - name: take
+    category: filter
+    arity_in: 1
+    cardinality: reduced
+    output_shape_rule: "Emits first N values."
+    key_args: ["n"]
+
+  - name: until
+    category: filter
+    arity_in: 1
+    cardinality: reduced
+    output_shape_rule: "Emits values until predicate becomes true."
+    key_args: ["predicate"]
+
+  # ---- fan-in: N-in 1-out (or aggregated) ----
+
+  - name: collect
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single list containing all source values."
+    key_args: ["flat?"]
+    notes: "Use before processes that need all-at-once batched input. Output is one item: a list."
+
+  - name: collectFile
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits one file per group; default is one file overall."
+    key_args: ["name?", "storeDir?", "by?", "sort?"]
+
+  - name: groupTuple
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Groups tuples by key (default: first element); emits one tuple per key with grouped fields as lists."
+    key_args: ["by", "size?", "remainder?"]
+    notes: "Crucial for sample-grouped fan-in. `by: [0, 1]` groups by first two tuple elements. Without `size`, blocks until source closes — common deadlock cause."
+
+  - name: reduce
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single accumulator value."
+    key_args: ["seed?", "closure"]
+
+  - name: sum
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single numeric sum."
+    key_args: ["closure?"]
+
+  - name: count
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single integer count."
+    key_args: ["predicate?"]
+
+  - name: countFasta
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single integer (FASTA records across all source files)."
+    key_args: []
+
+  - name: countFastq
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single integer (FASTQ records across all source files)."
+    key_args: []
+
+  - name: countJson
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single integer (JSON records across all source files)."
+    key_args: []
+
+  - name: countLines
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single integer (lines across all source files)."
+    key_args: []
+
+  - name: max
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits the maximum value."
+    key_args: ["closure?"]
+
+  - name: min
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits the minimum value."
+    key_args: ["closure?"]
+
+  - name: toList
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single list of all values."
+    key_args: []
+    notes: "Like collect but always preserves nested structure (no flatten)."
+
+  - name: toSortedList
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits a single sorted list of all values."
+    key_args: ["closure?"]
+
+  - name: buffer
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits lists of N values; partial last list possible."
+    key_args: ["size", "skip?", "remainder?"]
+
+  - name: collate
+    category: fan-in
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Emits lists of N values (alias-like for buffer with stricter semantics)."
+    key_args: ["size", "step?", "remainder?"]
+
+  # ---- fan-out: 1-in N-out per input ----
+
+  - name: flatten
+    category: fan-out
+    arity_in: 1
+    cardinality: expanded
+    output_shape_rule: "Emits each element of each list-typed value separately."
+    key_args: []
+
+  - name: flatMap
+    category: fan-out
+    arity_in: 1
+    cardinality: expanded
+    output_shape_rule: "Like map then flatten; closure may emit a list per input."
+    key_args: ["closure"]
+
+  - name: transpose
+    category: fan-out
+    arity_in: 1
+    cardinality: expanded
+    output_shape_rule: "For tuples whose elements are lists, emits the cross-product; e.g. tuple(meta, [a,b,c]) → 3 tuples."
+    key_args: ["by?", "remainder?"]
+    notes: "Inverse of groupTuple in many idioms. Used to fan a sample-grouped channel back out per-replicate."
+
+  - name: splitCsv
+    category: fan-out
+    arity_in: 1
+    cardinality: expanded
+    output_shape_rule: "Emits one item per CSV row; row shape is a list (or map if header)."
+    key_args: ["header?", "sep?", "quote?", "skip?", "limit?", "decompress?"]
+    notes: "Schema-aware sample-sheet parsing today goes via nf-schema's samplesheetToList; splitCsv is the lower-level split."
+
+  - name: splitFasta
+    category: fan-out
+    arity_in: 1
+    cardinality: expanded
+    output_shape_rule: "Emits one item per FASTA record (or per chunk of size N records)."
+    key_args: ["by?", "size?", "record?"]
+
+  - name: splitFastq
+    category: fan-out
+    arity_in: 1
+    cardinality: expanded
+    output_shape_rule: "Emits one item per FASTQ record (or per chunk)."
+    key_args: ["by?", "pe?", "record?"]
+    notes: "`pe: true` splits paired-end reads with paired chunks."
+
+  - name: splitJson
+    category: fan-out
+    arity_in: 1
+    cardinality: expanded
+    output_shape_rule: "Emits one item per top-level JSON value."
+    key_args: ["path?"]
+
+  - name: splitText
+    category: fan-out
+    arity_in: 1
+    cardinality: expanded
+    output_shape_rule: "Emits one item per line (or per chunk of N lines)."
+    key_args: ["by?", "limit?", "decompress?"]
+
+  # ---- combine: 2-in (or N-in) 1-out ----
+
+  - name: combine
+    category: combine
+    arity_in: 2
+    cardinality: aggregated
+    output_shape_rule: "Cross-product of two sources, joined as concatenated tuples."
+    key_args: ["by?", "flat?"]
+    notes: "Without `by`, full cross-product. With `by: [0]`, joins on first tuple element."
+
+  - name: concat
+    category: combine
+    arity_in: 2
+    cardinality: preserved
+    output_shape_rule: "Emits all items from first source, then all items from second."
+    key_args: []
+    notes: "Order is preserved across sources."
+
+  - name: cross
+    category: combine
+    arity_in: 2
+    cardinality: aggregated
+    output_shape_rule: "Joins two sources where first tuple element matches; emits concatenated tuples."
+    key_args: []
+    notes: "Default join key is the first tuple element. Inner-join semantics."
+
+  - name: join
+    category: combine
+    arity_in: 2
+    cardinality: aggregated
+    output_shape_rule: "Inner-joins two sources by key; emits one tuple per matched key."
+    key_args: ["by?", "remainder?", "failOnDuplicate?", "failOnMismatch?"]
+    notes: "`by: 0` (default) joins on first tuple element. `remainder: true` switches to outer-join. Most common nf-core fan-in idiom for sample metadata + data join."
+
+  - name: merge
+    category: combine
+    arity_in: 2
+    cardinality: preserved
+    output_shape_rule: "Emits paired items in source order; deprecated in DSL2."
+    key_args: []
+    notes: "DEPRECATED — use join or combine instead. Surface as a warning if encountered in modern DSL2."
+
+  - name: mix
+    category: combine
+    arity_in: 2
+    cardinality: preserved
+    output_shape_rule: "Interleaves items from N sources; arrival order, no key matching."
+    key_args: []
+    notes: "Common for assembling versions/multiqc inputs from heterogeneous processes."
+
+  # ---- fork: 1-in N-out (multiple channels) ----
+
+  - name: branch
+    category: fork
+    arity_in: 1
+    cardinality: forked
+    output_shape_rule: "Returns a multi-channel object; each branch is a separate downstream channel."
+    key_args: ["closure with branch labels"]
+    notes: "Branch keys come from the closure body (`branch.foo`, `branch.bar`). Cast skill must record the keys for downstream wiring."
+
+  - name: multiMap
+    category: fork
+    arity_in: 1
+    cardinality: forked
+    output_shape_rule: "Returns a multi-channel object; closure emits per-channel values."
+    key_args: ["closure with emit list"]
+    notes: "Closure's emit names define the downstream channels."
+
+  # ---- terminal: 1-in 0-out ----
+
+  - name: subscribe
+    category: terminal
+    arity_in: 1
+    cardinality: aggregated
+    output_shape_rule: "Side-effecting; no downstream channel."
+    key_args: ["closure", "onNext?", "onComplete?", "onError?"]
+    notes: "Rarely seen in workflow definitions; mostly debug paths."

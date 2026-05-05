@@ -21,6 +21,27 @@ references:
     mode: verbatim
     evidence: cast-validated
     purpose: "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract."
+  - kind: schema
+    ref: "[[nf-core-module-meta]]"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate per-module meta.yml when walking nf-core modules; pins the channel IO `type` enum and tools/containers shape."
+  - kind: schema
+    ref: "[[nf-core-subworkflow-meta]]"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate subworkflow meta.yml; backs Subworkflow.calls extraction via the components: declaration."
+  - kind: schema
+    ref: "[[nextflow-parameters-meta]]"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate per-pipeline nextflow_schema.json (Draft 2020-12) when extracting params[]."
   - kind: research
     ref: "[[component-nextflow-pipeline-anatomy]]"
     used_at: runtime
@@ -34,11 +55,10 @@ references:
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
     load: on-demand
-    mode: verbatim
-    evidence: hypothesis
+    mode: condense
+    evidence: corpus-observed
     purpose: "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence."
     trigger: "When extracting tools, versions, containers, conda directives, or environment equivalences."
-    verification: "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves tool/container/environment extraction."
   - kind: research
     ref: "[[component-nextflow-testing]]"
     used_at: runtime
