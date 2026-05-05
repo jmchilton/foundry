@@ -12,6 +12,16 @@ revised: 2026-05-03
 revision: 4
 ai_generated: true
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
+input_artifacts:
+  - id: galaxy-tool-summary
+    description: "Compact Galaxy tool summary from [[summarize-galaxy-tool]]; binds the abstract step to a concrete tool's ports."
+  - id: galaxy-workflow-draft
+    description: "gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft."
+output_artifacts:
+  - id: galaxy-workflow-draft
+    kind: yaml
+    default_filename: galaxy-workflow-draft.gxwf.yml
+    description: "gxformat2 skeleton with one more abstract step replaced by a concrete tool step (loop iteration output)."
 references:
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"

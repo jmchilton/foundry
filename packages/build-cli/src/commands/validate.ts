@@ -538,6 +538,113 @@ function collectPhaseMoldRefs(
   return { findings, refs };
 }
 
+/**
+ * Mold artifact handoff validation.
+ *   - Every `input_artifacts[].id` must resolve to some `output_artifacts[].id`
+ *     declared by another Mold (multi-producer is allowed; same id can come
+ *     from a discover-or-author branch).
+ *   - When `output_artifacts[].schema` is set, the wiki-link must resolve to a
+ *     `type: schema` note.
+ */
+function validateArtifactGraph(
+  files: FileMeta[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const producerIds = new Set<string>();
+  for (const f of files) {
+    if (f.meta.type !== "mold") continue;
+    const out = f.meta.output_artifacts;
+    if (!Array.isArray(out)) continue;
+    for (const a of out) {
+      if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
+        producerIds.add((a as { id: string }).id);
+      }
+    }
+  }
+  for (const f of files) {
+    if (f.meta.type !== "mold") continue;
+    const out = f.meta.output_artifacts;
+    if (Array.isArray(out)) {
+      out.forEach((a, i) => {
+        if (!a || typeof a !== "object") return;
+        const schema = (a as { schema?: unknown }).schema;
+        if (typeof schema !== "string") return;
+        const tp = resolveWikiLink(schema, slugMap);
+        if (!tp) {
+          findings.push({
+            path: f.path,
+            severity: "error",
+            message: `output_artifacts[${i}].schema: wiki link ${schema} did not resolve`,
+          });
+          return;
+        }
+        const targetType = metaByPath.get(tp)?.type;
+        if (targetType !== "schema") {
+          findings.push({
+            path: f.path,
+            severity: "error",
+            message: `output_artifacts[${i}].schema: wiki link ${schema} resolves to type=${targetType ?? "(none)"}, expected schema`,
+          });
+        }
+      });
+    }
+    const inp = f.meta.input_artifacts;
+    if (Array.isArray(inp)) {
+      inp.forEach((a, i) => {
+        if (!a || typeof a !== "object") return;
+        const id = (a as { id?: unknown }).id;
+        if (typeof id !== "string") return;
+        if (!producerIds.has(id)) {
+          findings.push({
+            path: f.path,
+            severity: "error",
+            message: `input_artifacts[${i}].id '${id}' has no producer (no Mold declares it in output_artifacts)`,
+          });
+        }
+      });
+    }
+  }
+  return findings;
+}
+
+function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const repoRoot =
+    path.basename(contentRoot) === "content" ? path.dirname(contentRoot) : contentRoot;
+  for (const f of files) {
+    if (f.meta.type !== "schema") continue;
+    const upstream = typeof f.meta.upstream === "string" ? f.meta.upstream : "";
+    if (!upstream || upstream.includes("github.com/jmchilton/foundry/")) continue;
+    if (typeof f.meta.license !== "string") {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: "vendored schema with external upstream must declare license",
+      });
+    }
+    const licenseFile = typeof f.meta.license_file === "string" ? f.meta.license_file : "";
+    if (!licenseFile) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: "vendored schema with external upstream must declare license_file",
+      });
+      continue;
+    }
+    const fullPath = path.join(repoRoot, licenseFile);
+    if (!existsSync(fullPath) || !statSync(fullPath).isFile() || statSync(fullPath).size === 0) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `license_file: file does not exist or is empty: ${licenseFile}`,
+      });
+    }
+  }
+  return findings;
+}
+
 function validatePipelinePhases(
   files: FileMeta[],
   slugMap: Map<string, string>,
@@ -553,6 +660,7 @@ function validatePipelinePhases(
     findings.push(...r.findings);
     for (const p of r.refs.moldPaths) moldsReferenced.add(p);
     for (const p of r.refs.branchedMoldPaths) moldsReferenced.add(p);
+    findings.push(...validatePipelineArtifactBindings(f, phases, slugMap, metaByPath));
   }
   // Inventory coverage warning: non-draft Molds should appear in at least one pipeline.
   const orphans: string[] = [];
@@ -568,6 +676,88 @@ function validatePipelinePhases(
       message: `Molds with zero pipeline membership: ${orphans.sort().join(", ")}`,
     });
   }
+  return findings;
+}
+
+/**
+ * Pipeline artifact binding ordering: every Mold-shaped phase's input_artifacts
+ * must be produced by some prior phase in the same pipeline (Mold-shaped or via
+ * branch/chain). Branch/chain phases are treated as the union of their inner
+ * Molds' artifact contracts (any branch's output may satisfy a downstream
+ * input — discover-or-author shape).
+ */
+function validatePipelineArtifactBindings(
+  file: FileMeta,
+  phases: unknown[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const phaseDecls: { out: Set<string>; in: { id: string; idx: number }[] }[] = [];
+
+  const collectMoldPathsFromPhase = (phase: unknown): string[] => {
+    const out: string[] = [];
+    const visit = (n: unknown) => {
+      if (typeof n === "string") {
+        if (WIKI_LINK_RE.test(n)) {
+          const tp = resolveWikiLink(n, slugMap);
+          if (tp && metaByPath.get(tp)?.type === "mold") out.push(tp);
+        }
+        return;
+      }
+      if (!n || typeof n !== "object") return;
+      const obj = n as Record<string, unknown>;
+      if (typeof obj.mold === "string") visit(obj.mold);
+      if (typeof obj.fallthrough === "string") visit(obj.fallthrough);
+      if (Array.isArray(obj.branches)) obj.branches.forEach(visit);
+      if (Array.isArray(obj.chain)) obj.chain.forEach(visit);
+    };
+    visit(phase);
+    return out;
+  };
+
+  phases.forEach((phase, idx) => {
+    const out = new Set<string>();
+    const inputs: { id: string; idx: number }[] = [];
+    for (const moldPath of collectMoldPathsFromPhase(phase)) {
+      const meta = metaByPath.get(moldPath);
+      if (!meta) continue;
+      const o = meta.output_artifacts;
+      if (Array.isArray(o)) {
+        for (const a of o) {
+          if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
+            out.add((a as { id: string }).id);
+          }
+        }
+      }
+      const inp = meta.input_artifacts;
+      if (Array.isArray(inp)) {
+        for (const a of inp) {
+          if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
+            inputs.push({ id: (a as { id: string }).id, idx });
+          }
+        }
+      }
+    }
+    phaseDecls.push({ out, in: inputs });
+  });
+
+  // Build cumulative produced ids, walking phases in order.
+  const cumulative = new Set<string>();
+  phaseDecls.forEach((decl, i) => {
+    for (const inp of decl.in) {
+      // Self-loop allowance: the same phase may produce and consume (loop phases re-feeding themselves).
+      if (!cumulative.has(inp.id) && !decl.out.has(inp.id)) {
+        findings.push({
+          path: file.path,
+          severity: "warning",
+          message: `phases[${i}]: input_artifact '${inp.id}' has no prior phase producing it in this pipeline`,
+        });
+      }
+    }
+    for (const id of decl.out) cumulative.add(id);
+  });
+
   return findings;
 }
 
@@ -970,6 +1160,8 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateMoldRefs(validFiles, slugMap, metaByPath, opts.directory));
   crossFindings.push(...validateSourcePatternRefs(validFiles, slugMap, metaByPath));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
+  crossFindings.push(...validateArtifactGraph(validFiles, slugMap, metaByPath));
+  crossFindings.push(...validateSchemaVendoring(validFiles, opts.directory));
   crossFindings.push(
     ...validateMoldSourceLayout(
       opts.directory,

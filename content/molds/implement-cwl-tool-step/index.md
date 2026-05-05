@@ -12,6 +12,16 @@ revised: 2026-04-30
 revision: 1
 ai_generated: true
 summary: "Convert an abstract step into a concrete CWL CommandLineTool + step."
+input_artifacts:
+  - id: cwl-tool-summary
+    description: "Compact CWL tool summary from [[summarize-cwl-tool]]; binds the abstract step to a concrete CommandLineTool."
+  - id: cwl-workflow-draft
+    description: "CWL Workflow skeleton being filled in step by step; the step replaces a placeholder in this draft."
+output_artifacts:
+  - id: cwl-workflow-draft
+    kind: yaml
+    default_filename: cwl-workflow-draft.cwl
+    description: "CWL Workflow skeleton with one more abstract step replaced by a concrete CommandLineTool step (loop iteration output)."
 ---
 # implement-cwl-tool-step
 

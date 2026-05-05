@@ -12,6 +12,11 @@ revised: 2026-04-30
 revision: 1
 ai_generated: true
 summary: "Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals."
+output_artifacts:
+  - id: summary-cwl
+    kind: json
+    default_filename: summary-cwl.json
+    description: "Structured summary of a CWL Workflow + CommandLineTool tree: inputs, outputs, scatter, conditionals, requirements."
 ---
 # summarize-cwl
 

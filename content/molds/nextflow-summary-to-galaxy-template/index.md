@@ -14,6 +14,18 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs."
+input_artifacts:
+  - id: summary-nextflow
+    description: "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; consulted while emitting placeholder steps."
+  - id: nextflow-galaxy-interface
+    description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] that pins workflow inputs, outputs, labels."
+  - id: nextflow-galaxy-data-flow
+    description: "Galaxy data-flow brief from [[nextflow-summary-to-galaxy-data-flow]] that pins abstract operations and collection choices."
+output_artifacts:
+  - id: galaxy-workflow-draft
+    kind: yaml
+    default_filename: galaxy-workflow-draft.gxwf.yml
+    description: "gxformat2 skeleton: workflow inputs, outputs, placeholder steps, rough connections, TODO slots for later implementation Molds."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"

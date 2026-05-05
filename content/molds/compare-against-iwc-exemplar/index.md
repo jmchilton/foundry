@@ -12,6 +12,14 @@ revised: 2026-05-03
 revision: 4
 ai_generated: true
 summary: "Find nearest IWC exemplar(s) and surface a structural diff against a draft."
+input_artifacts:
+  - id: galaxy-workflow-draft
+    description: "gxformat2 skeleton from a *-summary-to-galaxy-template Mold; the draft compared against IWC exemplars."
+output_artifacts:
+  - id: iwc-comparison-notes
+    kind: markdown
+    default_filename: iwc-comparison-notes.md
+    description: "Structural diff against the nearest IWC exemplar(s); guidance for authoring before more concrete step work."
 references:
   - kind: research
     ref: "[[iwc-exemplar-runtime-discovery]]"

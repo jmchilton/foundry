@@ -377,6 +377,24 @@ interface ProvenanceRefEntry {
   model?: { name: string; version?: string };
 }
 
+interface ProvenanceArtifactOutput {
+  id: string;
+  kind: string;
+  default_filename: string;
+  schema?: string;
+  description: string;
+}
+
+interface ProvenanceArtifactInput {
+  id: string;
+  description: string;
+}
+
+interface ProvenanceArtifacts {
+  produces: ProvenanceArtifactOutput[];
+  consumes: ProvenanceArtifactInput[];
+}
+
 interface Provenance {
   provenance_schema_version: number;
   cast_target: string;
@@ -394,7 +412,42 @@ interface Provenance {
   cast_revision?: number;
   cast_history?: Array<{ rev: number; date: string; note: string }>;
   refs: ProvenanceRefEntry[];
+  artifacts?: ProvenanceArtifacts;
   open_questions?: string[];
+}
+
+function readArtifactContracts(meta: Frontmatter): ProvenanceArtifacts | undefined {
+  const out: ProvenanceArtifactOutput[] = [];
+  const inp: ProvenanceArtifactInput[] = [];
+  const rawOut = meta.output_artifacts;
+  if (Array.isArray(rawOut)) {
+    for (const a of rawOut) {
+      if (!a || typeof a !== "object") continue;
+      const o = a as Record<string, unknown>;
+      if (typeof o.id !== "string") continue;
+      out.push({
+        id: o.id,
+        kind: typeof o.kind === "string" ? o.kind : "other",
+        default_filename: typeof o.default_filename === "string" ? o.default_filename : "",
+        schema: typeof o.schema === "string" ? o.schema : undefined,
+        description: typeof o.description === "string" ? o.description : "",
+      });
+    }
+  }
+  const rawIn = meta.input_artifacts;
+  if (Array.isArray(rawIn)) {
+    for (const a of rawIn) {
+      if (!a || typeof a !== "object") continue;
+      const o = a as Record<string, unknown>;
+      if (typeof o.id !== "string") continue;
+      inp.push({
+        id: o.id,
+        description: typeof o.description === "string" ? o.description : "",
+      });
+    }
+  }
+  if (out.length === 0 && inp.length === 0) return undefined;
+  return { produces: out, consumes: inp };
 }
 
 interface LegacyProvenanceCarryOver {
@@ -726,6 +779,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     cast_revision: carry.cast_revision,
     cast_history: carry.cast_history,
     refs: refEntries,
+    artifacts: readArtifactContracts(moldParsed.meta),
     open_questions: carry.open_questions,
   };
 

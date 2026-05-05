@@ -13,6 +13,7 @@ import CliCommandBody from '../components/CliCommandBody.astro';
 import ResearchBody from '../components/ResearchBody.astro';
 import SchemaBody from '../components/SchemaBody.astro';
 import { buildWikiLinkMap, buildBacklinkMap } from '../lib/wiki-links';
+import { buildArtifactGraph } from '../lib/artifacts';
 
 export async function getStaticPaths() {
   const entries = await getCollection('content');
@@ -28,6 +29,7 @@ const { Content } = await render(entry);
 const allEntries = await getCollection('content');
 const linkMap = buildWikiLinkMap(allEntries);
 const backlinkMap = buildBacklinkMap(allEntries, linkMap);
+const artifactGraph = buildArtifactGraph(allEntries, linkMap);
 
 const entryMap = new Map(allEntries.map(e => [e.id, e]));
 const incoming = (backlinkMap.get(entry.id) ?? [])
@@ -78,8 +80,8 @@ const metaMode: 'full' | 'related-only' = data.type === 'mold' ? 'related-only' 
 
     {data.type === 'mold' && <MoldHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
     {data.type === 'pattern' && data.pattern_kind !== 'moc' && <PatternHealth entry={entry} linkMap={linkMap} entryById={entryMap} />}
-    {data.type === 'mold' && <MoldBody entry={entry} linkMap={linkMap} />}
-    {data.type === 'pipeline' && <PipelineBody entry={entry} linkMap={linkMap} />}
+    {data.type === 'mold' && <MoldBody entry={entry} linkMap={linkMap} artifactGraph={artifactGraph} entryById={entryMap} />}
+    {data.type === 'pipeline' && <PipelineBody entry={entry} linkMap={linkMap} artifactGraph={artifactGraph} entryById={entryMap} />}
     {data.type === 'pattern' && <PatternBody entry={entry} linkMap={linkMap} placement="before" />}
     {data.type === 'cli-command' && <CliCommandBody entry={entry} />}
     {data.type === 'research' && <ResearchBody entry={entry} />}

@@ -15,6 +15,15 @@ related_notes:
   - "[[nextflow-patterns]]"
   - "[[summary-nextflow]]"
 summary: "Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable."
+output_artifacts:
+  - id: galaxy-tool-pin
+    kind: json
+    default_filename: galaxy-tool-pin.json
+    description: "Pin for a freshly-authored local wrapper (owner/repo/tool_id/version), parallel to a Tool Shed pin so downstream Molds consume one shape."
+  - id: galaxy-tool-wrapper
+    kind: text
+    default_filename: tool.xml
+    description: "Galaxy tool wrapper XML for a tool not present on the Tool Shed; conforms to Galaxy's tool XSD."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"

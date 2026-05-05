@@ -14,6 +14,16 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "Translate a Nextflow summary into a CWL data-flow design brief."
+input_artifacts:
+  - id: summary-nextflow
+    description: "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; consumed alongside the CWL interface brief."
+  - id: nextflow-cwl-interface
+    description: "Preceding CWL interface brief from [[nextflow-summary-to-cwl-interface]] that pins inputs, outputs, and labels."
+output_artifacts:
+  - id: nextflow-cwl-data-flow
+    kind: markdown
+    default_filename: nextflow-cwl-data-flow.md
+    description: "Reviewable Markdown brief: abstract topology, scatter/gather choices, value transformations, unresolved CommandLineTool needs, confidence."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"

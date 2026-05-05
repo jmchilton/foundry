@@ -89,6 +89,21 @@ const branchPhase = z.object({
 
 const phase = z.union([moldPhase, branchPhase]);
 
+const artifactId = z.string().regex(/^[a-z][a-z0-9-]*$/, { message: 'must be a kebab id' });
+
+const outputArtifact = z.object({
+  id: artifactId,
+  kind: z.enum(['json', 'markdown', 'yaml', 'text', 'other']),
+  default_filename: z.string().min(1),
+  schema: wikiLink.optional(),
+  description: z.string().min(20),
+}).strict();
+
+const inputArtifact = z.object({
+  id: artifactId,
+  description: z.string().min(20),
+}).strict();
+
 const moldSchema = z.object({
   type: z.literal('mold'),
   name: z.string(),
@@ -101,6 +116,8 @@ const moldSchema = z.object({
   prompts: z.array(wikiLink).optional(),
   input_schemas: z.array(wikiLink).optional(),
   output_schemas: z.array(wikiLink).optional(),
+  output_artifacts: z.array(outputArtifact).optional(),
+  input_artifacts: z.array(inputArtifact).optional(),
   examples: z.array(z.string()).optional(),
   references: z.array(typedReference).optional(),
   ...baseFields,

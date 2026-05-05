@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 9,
-    "content_hash": "5987e7ad339a112e402aac3a711961e5479645d95f0b8a3ae581e29b20fc58cd",
-    "commit": "872ebf6fe05d4d7573ec4425ec2d13b6a827f446"
+    "content_hash": "7c64dabadfdf98c5ee3fde3c0977a2297ccc3d81bd83db5c0762556ddf88bb56",
+    "commit": "a3c1e82d0cef7f53a28d10dd790141dce3c53c48"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-05T18:02:10.857Z",
+  "cast_at": "2026-05-05T19:33:24.620Z",
   "cast_date": "2026-05-05",
   "cast_revision": 5,
   "cast_history": [
@@ -43,7 +43,7 @@
   "refs": [
     {
       "kind": "research",
-      "mode": "condense",
+      "mode": "verbatim",
       "ref": "[[component-nextflow-containers-and-envs]]",
       "src": "content/research/component-nextflow-containers-and-envs.md",
       "dst": "references/notes/component-nextflow-containers-and-envs.md",
@@ -53,8 +53,8 @@
       "purpose": "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence.",
       "trigger": "When extracting tools, versions, containers, conda directives, or environment equivalences.",
       "src_hash": "0db9a019da6ea6f05937c4bacf9da3bd43ec0bf8d909b874f3f789106098887a",
-      "dst_hash": "94cf6897cec62d2f06be19d48c42864fc1df66d4e2d29f44dbf16e573c6c5a53",
-      "source": "llm"
+      "dst_hash": "0db9a019da6ea6f05937c4bacf9da3bd43ec0bf8d909b874f3f789106098887a",
+      "source": "deterministic"
     },
     {
       "kind": "research",
@@ -145,6 +145,18 @@
       "source": "deterministic"
     }
   ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "summary-nextflow",
+        "kind": "json",
+        "default_filename": "summary-nextflow.json",
+        "schema": "[[summary-nextflow]]",
+        "description": "Structured summary of a Nextflow pipeline: processes, channels, params, containers, tools, test fixtures, nf-tests."
+      }
+    ],
+    "consumes": []
+  },
   "open_questions": [
     "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17."
   ]

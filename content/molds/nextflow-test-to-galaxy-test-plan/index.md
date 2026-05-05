@@ -12,6 +12,14 @@ revised: 2026-05-05
 revision: 4
 ai_generated: true
 summary: "Translate Nextflow test evidence into a Galaxy workflow test plan."
+input_artifacts:
+  - id: summary-nextflow
+    description: "Structured Nextflow summary from [[summarize-nextflow]]; carries test_fixtures, nf_tests, snapshot evidence."
+output_artifacts:
+  - id: galaxy-test-plan
+    kind: markdown
+    default_filename: galaxy-test-plan.md
+    description: "Reviewable Galaxy workflow test plan: profile, fixture, snapshot, ignored-file, expected-output, rationale provenance."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"

@@ -20,6 +20,18 @@ related_notes:
 cli_commands:
   - "[[validate-tests]]"
 summary: "Assemble Galaxy workflow test fixtures and assertions."
+input_artifacts:
+  - id: galaxy-test-plan
+    description: "Reviewable Galaxy test plan from a *-test-to-galaxy-test-plan Mold; profile, fixtures, snapshot/assertion provenance."
+  - id: galaxy-workflow-draft
+    description: "gxformat2 workflow being tested; provides labels, outputs, and shapes the test must assert against."
+  - id: test-data-refs
+    description: "Resolved test data references (URLs, paths, expected shapes) from paper-to-test-data or find-test-data."
+output_artifacts:
+  - id: galaxy-workflow-test
+    kind: yaml
+    default_filename: galaxy-workflow-tests.yml
+    description: "Galaxy workflow test file (tests-format) with job inputs, expected outputs, assertions; passes static schema + label cross-check."
 references:
   - kind: cli-command
     ref: "[[validate-tests]]"

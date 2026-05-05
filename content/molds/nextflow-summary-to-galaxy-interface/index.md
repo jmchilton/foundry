@@ -14,6 +14,14 @@ revised: 2026-05-05
 revision: 1
 ai_generated: true
 summary: "Map a Nextflow summary into a Galaxy workflow interface design brief."
+input_artifacts:
+  - id: summary-nextflow
+    description: "Structured Nextflow pipeline summary emitted by [[summarize-nextflow]]; the source-of-truth JSON for interface choices."
+output_artifacts:
+  - id: nextflow-galaxy-interface
+    kind: markdown
+    default_filename: nextflow-galaxy-interface.md
+    description: "Reviewable Markdown brief: Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, source provenance."
 references:
   - kind: schema
     ref: "[[summary-nextflow]]"
