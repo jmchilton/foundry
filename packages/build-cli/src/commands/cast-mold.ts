@@ -22,6 +22,7 @@ import path from "node:path";
 import process from "node:process";
 import type { ErrorObject } from "ajv";
 import AjvImport from "ajv";
+import Ajv2020Import from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
@@ -34,6 +35,10 @@ type AjvValidator = {
   compile: (schema: unknown) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
 };
 const Ajv = AjvImport as unknown as new (opts: {
+  allErrors: boolean;
+  strict: boolean;
+}) => AjvValidator;
+const Ajv2020 = Ajv2020Import as unknown as new (opts: {
   allErrors: boolean;
   strict: boolean;
 }) => AjvValidator;
@@ -322,9 +327,12 @@ function buildCliSidecar(srcAbs: string, srcRel: string, meta: Frontmatter): Cli
 // ---- runs/*/summary.json schema validation ----
 
 function loadAjvForSchema(schemaPath: string): ReturnType<AjvValidator["compile"]> {
-  const ajv = new Ajv({ allErrors: true, strict: false });
-  addFormats(ajv);
   const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
+  const schemaUri = typeof schema?.$schema === "string" ? schema.$schema : "";
+  const ajv = schemaUri.includes("2020-12")
+    ? new Ajv2020({ allErrors: true, strict: false })
+    : new Ajv({ allErrors: true, strict: false });
+  addFormats(ajv);
   return ajv.compile(schema);
 }
 
@@ -665,7 +673,9 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
 
   // runs/*/summary.json validation — find a schema ref for this mold and validate any committed runs.
-  const schemaRefEntry = refEntries.find((r) => r.kind === "schema");
+  const schemaRefEntry =
+    refEntries.find((r) => r.kind === "schema" && r.ref === "[[summary-nextflow]]") ??
+    refEntries.find((r) => r.kind === "schema");
   if (schemaRefEntry) {
     const schemaAbs = path.join(bundleRoot, schemaRefEntry.dst);
     if (existsSync(schemaAbs)) {

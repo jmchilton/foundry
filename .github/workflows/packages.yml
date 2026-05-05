@@ -44,3 +44,6 @@ jobs:
 
       - name: Lint packages
         run: npm run packages-lint
+
+      - name: Cast drift check
+        run: npm run cast -- summarize-nextflow --check

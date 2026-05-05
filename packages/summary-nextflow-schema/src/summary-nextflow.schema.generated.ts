@@ -213,6 +213,36 @@ export const summaryNextflowSchema = {
             "null"
           ],
           "description": "Seqera Wave / community-cr registry reference (e.g. `community.wave.seqera.io/library/<name>:<version>--<digest>` or `https://community-cr-prod.seqera.io/.../sha256/<digest>/data`). Wave-built containers are increasingly common in nf-core; kept distinct from `docker` because the resolution rules and provenance differ."
+        },
+        "mulled_components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolSpec"
+          },
+          "description": "Constituent Bioconda packages for an opaque `mulled-v2-*` multi-package container when resolved from a cached BioContainers multi-package-containers TSV. Omitted when no matching cached row is available."
+        }
+      }
+    },
+    "ToolSpec": {
+      "title": "ToolSpec",
+      "description": "One constituent package in a decomposed multi-package container.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "bioconda"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "bioconda": {
+          "type": "string",
+          "description": "Exact Bioconda requirement spec, e.g. `bioconda::samtools=1.20`."
         }
       }
     },

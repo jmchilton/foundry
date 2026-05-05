@@ -5,6 +5,12 @@ import { afterEach, describe, expect, test } from "vitest";
 import { buildSummary } from "../src/index.js";
 
 interface SummaryLike {
+  tools: {
+    name: string;
+    version: string;
+    bioconda: string | null;
+    mulled_components?: { name: string; version: string; bioconda: string }[];
+  }[];
   processes: {
     name: string;
     module_path: string;
@@ -34,7 +40,14 @@ interface SummaryLike {
     inputs: unknown[];
     outputs: unknown[];
   }[];
-  subworkflows: { name: string; path: string; tests: { name: string; path: string }[] }[];
+  subworkflows: {
+    name: string;
+    path: string;
+    kind: "pipeline" | "utility";
+    calls: string[];
+    tests: { name: string; path: string }[];
+  }[];
+  workflow: { name: string };
   warnings: string[];
 }
 
@@ -390,13 +403,107 @@ test("align module") {
       }),
     ]);
   });
+
+  test("captures same-file utility and wrapper subworkflow calls without choosing wrapper primary", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/wrappers' }\n");
+    write(root, "modules/local/align/main.nf", "process ALIGN {\n  script:\n  'align'\n}\n");
+    write(root, "modules/local/report/main.nf", "process REPORT {\n  script:\n  'report'\n}\n");
+    write(
+      root,
+      "workflows/analysis.nf",
+      "include { ALIGN } from '../modules/local/align'\ninclude { REPORT } from '../modules/local/report'\nworkflow ANALYSIS {\n  take:\n  reads\n  main:\n  ALIGN(reads)\n  REPORT(ALIGN.out)\n}\n",
+    );
+    write(
+      root,
+      "main.nf",
+      "include { ANALYSIS } from './workflows/analysis'\nworkflow PIPELINE_INITIALISATION {\n  main:\n  paramsSummaryMap(workflow, params)\n}\nworkflow PIPELINE_COMPLETION {\n  main:\n  completionSummary(workflow, params)\n}\nworkflow NFCORE_WRAPPERS {\n  main:\n  PIPELINE_INITIALISATION()\n  ANALYSIS(Channel.of('reads'))\n  PIPELINE_COMPLETION()\n}\nworkflow { NFCORE_WRAPPERS() }\n",
+    );
+
+    const summary = await summarize(root);
+
+    expect(summary.subworkflows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "PIPELINE_INITIALISATION",
+          kind: "utility",
+          calls: [],
+        }),
+        expect.objectContaining({
+          name: "PIPELINE_COMPLETION",
+          kind: "utility",
+          calls: [],
+        }),
+        expect.objectContaining({
+          name: "NFCORE_WRAPPERS",
+          kind: "pipeline",
+          calls: ["ANALYSIS", "PIPELINE_COMPLETION", "PIPELINE_INITIALISATION"],
+        }),
+      ]),
+    );
+    expect(summary.subworkflows.map((workflow) => workflow.name)).not.toContain("ANALYSIS");
+    expect(summary.workflow.name).toBe("ANALYSIS");
+  });
+
+  test("decomposes mulled-v2 containers from a cached multi-package TSV", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/mulled' }\n");
+    write(
+      root,
+      "modules/nf-core/minimap2/align/main.nf",
+      `process MINIMAP2_ALIGN {
+  container "\${ workflow.containerEngine == 'singularity' ? 'https://depot.galaxyproject.org/singularity/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:3161f532a5ea6f1dec9be5667c9efc2afdac6104-0' : 'biocontainers/mulled-v2-66534bcbb7031a148b13e2ad42583020b9cd25c4:3161f532a5ea6f1dec9be5667c9efc2afdac6104-0' }"
+  conda "\${moduleDir}/environment.yml"
+  script:
+  'minimap2'
+}
+`,
+    );
+    write(
+      root,
+      "modules/nf-core/minimap2/align/environment.yml",
+      `dependencies:
+  - bioconda::minimap2=2.28
+  - bioconda::samtools=1.20
+`,
+    );
+    write(
+      root,
+      "multi-package-containers.tsv",
+      "#targets\tbase_image\timage_build\nminimap2=2.28,samtools=1.20\tbgruening/busybox-bash:0.1\t0\n",
+    );
+    write(
+      root,
+      "main.nf",
+      "include { MINIMAP2_ALIGN } from './modules/nf-core/minimap2/align'\nworkflow MULLED { MINIMAP2_ALIGN() }\n",
+    );
+
+    const summary = await summarize(root, `${root}/multi-package-containers.tsv`);
+    const minimap2 = summary.tools.find((tool) => tool.name === "minimap2");
+
+    expect(minimap2?.mulled_components).toEqual([
+      { name: "minimap2", version: "2.28", bioconda: "bioconda::minimap2=2.28" },
+      { name: "samtools", version: "1.20", bioconda: "bioconda::samtools=1.20" },
+    ]);
+  });
+
+  test("warns when an explicit mulled index path is missing", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/missing-mulled-index' }\n");
+    write(root, "main.nf", "workflow MISSING_INDEX { }\n");
+
+    const summary = await summarize(root, `${root}/missing.tsv`);
+
+    expect(summary.warnings).toContain(`mulled index path not found: ${root}/missing.tsv`);
+  });
 });
 
-async function summarize(root: string): Promise<SummaryLike> {
+async function summarize(root: string, mulledIndexPath?: string): Promise<SummaryLike> {
   return (await buildSummary(root, {
     profile: "test",
     withNextflow: false,
     fetchTestData: false,
+    mulledIndexPath,
     validate: false,
   })) as SummaryLike;
 }
