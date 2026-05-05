@@ -34,7 +34,7 @@ jobs:
         run: npm run packages-build
 
       - name: Install site dependencies
-        run: npm --prefix site ci
+        run: npm --prefix site install --no-audit --no-fund
 
       - name: Run repo tests
         run: npm run test
