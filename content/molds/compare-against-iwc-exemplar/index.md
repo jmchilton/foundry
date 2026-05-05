@@ -79,7 +79,7 @@ This Mold is the corpus-first check in Galaxy-targeting pipelines. It does not r
 
 ## Inputs
 
-The Mold expects a Galaxy draft from `[[summary-to-galaxy-template]]` or a later implemented workflow. The draft should include:
+The Mold expects a Galaxy draft from one of the source-specific Galaxy template Molds (`[[nextflow-summary-to-galaxy-template]]`, `[[cwl-summary-to-galaxy-template]]`, `[[paper-summary-to-galaxy-template]]`) or a later implemented workflow. The draft should include:
 
 - Workflow/domain intent and source summary context.
 - Workflow inputs, outputs, and collection topology.

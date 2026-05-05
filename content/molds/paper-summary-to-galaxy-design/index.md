@@ -29,4 +29,4 @@ references:
 
 Read a paper summary and emit a reviewable Markdown Galaxy workflow design brief. Combine interface choices and abstract data-flow choices until paper examples justify a cleaner split.
 
-The output is not gxformat2 and not a rich workflow schema. [[summary-to-galaxy-template]] turns this brief and the paper summary into a skeleton.
+The output is not gxformat2 and not a rich workflow schema. [[paper-summary-to-galaxy-template]] turns this brief and the paper summary into a skeleton.

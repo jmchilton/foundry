@@ -44,7 +44,7 @@ related_notes:
 related_molds:
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
-  - "[[summary-to-galaxy-template]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
   - "[[implement-galaxy-tool-step]]"
 sources:
   - "https://github.com/jmchilton/foundry/issues/52"
@@ -124,5 +124,5 @@ Pinned fixture examples used by the research pass:
 
 - [[nextflow-summary-to-galaxy-interface]] should consult this note while choosing Galaxy-facing workflow input/output collection shapes.
 - [[nextflow-summary-to-galaxy-data-flow]] should consult this note while translating source channel shapes into Galaxy-facing abstract data-flow.
-- [[summary-to-galaxy-template]] should consult this note while choosing workflow input/output collection shapes.
+- [[nextflow-summary-to-galaxy-template]] should consult this note while choosing workflow input/output collection shapes.
 - [[implement-galaxy-tool-step]] should consult this note when deciding whether a concrete tool connection can be direct mapped wiring or needs an explicit collection operation.

@@ -41,7 +41,9 @@ related_molds:
   - "[[implement-galaxy-tool-step]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
-  - "[[summary-to-galaxy-template]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
+  - "[[cwl-summary-to-galaxy-template]]"
+  - "[[paper-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 ---
 

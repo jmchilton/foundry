@@ -16,6 +16,7 @@ Generated from content frontmatter. Do not edit by hand.
 - [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against a draft.
 - [[cwl-summary-to-galaxy-data-flow]] — Translate a CWL summary into a Galaxy data-flow design brief.
 - [[cwl-summary-to-galaxy-interface]] — Map a CWL summary into a Galaxy workflow interface design brief.
+- [[cwl-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs.
 - [[cwl-test-to-galaxy-test-plan]] — Translate CWL test fixtures into a Galaxy workflow test plan.
 - [[debug-cwl-workflow-output]] — Triage failing CWL run outputs; classify failure modes; propose fixes.
 - [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify failure modes; propose fixes.
@@ -29,10 +30,12 @@ Generated from content frontmatter. Do not edit by hand.
 - [[nextflow-summary-to-cwl-interface]] — Map a Nextflow summary into a CWL Workflow interface design brief.
 - [[nextflow-summary-to-galaxy-data-flow]] — Translate a Nextflow summary into a Galaxy data-flow design brief.
 - [[nextflow-summary-to-galaxy-interface]] — Map a Nextflow summary into a Galaxy workflow interface design brief.
+- [[nextflow-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs.
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan.
 - [[paper-summary-to-cwl-design]] — Translate a paper summary into a CWL workflow design brief.
 - [[paper-summary-to-galaxy-design]] — Translate a paper summary into a Galaxy workflow design brief.
+- [[paper-summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a paper summary and the paper-to-Galaxy design brief.
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
 - [[summarize-cwl]] — Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals.
@@ -41,7 +44,6 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summarize-nextflow]] — Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to.
 - [[summarize-paper]] — Extract methods, tools, sample data, and references from a paper.
 - [[summary-to-cwl-template]] — CWL Workflow skeleton with per-step TODOs from source and design handoffs.
-- [[summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from source and design handoffs.
 - [[validate-cwl]] — Run cwltool --validate / schema lint, classify failures, recommend fixes.
 - [[validate-galaxy-step]] — Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation.
 - [[validate-galaxy-workflow]] — Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.
@@ -110,14 +112,19 @@ Generated from content frontmatter. Do not edit by hand.
 
 - [[galaxy-tool-discovery]] — JSON Schema for Tool Shed discovery hit, weak, and miss recommendations.
 - [[tests-format]] — JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`.
+- [[nextflow-parameters-meta]] — JSON Schema (Draft 2020-12) meta-schema validating per-pipeline nextflow_schema.json files. Upstream from nextflow-io/nf-schema.
 - [[summary-nextflow]] — JSON Schema for the structured summary emitted by the summarize-nextflow Mold.
+- [[nf-core-module-meta]] — JSON Schema (Draft-07) validating nf-core module meta.yml — channel IO, tools, containers, conda lockfiles. Upstream from nf-core/modules.
+- [[nf-core-subworkflow-meta]] — JSON Schema (Draft-07) validating nf-core subworkflow meta.yml — channel IO, components dependencies, authors. Upstream from nf-core/modules.
 
 ## Component Research
 
-- [[component-nextflow-containers-and-envs]] — Maps Nextflow container and conda evidence to Galaxy package and container requirements.
+- [[component-nextflow-channel-operators]] — Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation.
+- [[component-nextflow-containers-and-envs]] — Container URL grammar (depot, BioContainers, mulled-v2, Wave, ORAS) and conda directive resolution rules backing summarize-nextflow §5.
 - [[component-nextflow-inspect]] — White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision.
 - [[component-nextflow-pipeline-anatomy]] — Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17.
-- [[component-nextflow-testing]] — Stub. conf/test.config, nf-core/test-datasets, nf-test idioms, samplesheet conventions. Grows from cast contact — see issue #17.
+- [[component-nextflow-testing]] — nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs nextflow-test-to-target-tests Mold and summarize-nextflow §7.
+- [[component-nf-core-module-conventions]] — RFC 2119 conventions enforced by nf-core/tools module lint, with lint-check pointers. Backs summarize-nextflow + author-galaxy-tool-wrapper.
 - [[component-nf-core-tools]] — White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision.
 - [[component-tool-shed-search]] — Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload
 - [[galaxy-apply-rules-dsl]] — Reference for Galaxy's Apply Rules DSL: rule operations, mapping operations, composition patterns, pitfalls.

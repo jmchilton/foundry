@@ -19,7 +19,9 @@ related_molds:
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
   - "[[paper-summary-to-galaxy-design]]"
-  - "[[summary-to-galaxy-template]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
+  - "[[cwl-summary-to-galaxy-template]]"
+  - "[[paper-summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 sources:
   - "https://github.com/jmchilton/foundry/issues/54"
@@ -79,7 +81,7 @@ Do not add these as frontmatter fields yet.
 Unresolved tool need:
 
 - [[nextflow-summary-to-galaxy-data-flow]] emits an abstract node such as `trim FASTQ reads`, input `list:paired fastq`, output `list:paired fastq`, tool need `read trimming`, confidence `medium`.
-- [[summary-to-galaxy-template]] creates a placeholder step with TODOs and collection-shaped connections.
+- [[nextflow-summary-to-galaxy-template]] creates a placeholder step with TODOs and collection-shaped connections.
 - The harness routes through tool discovery or wrapper authoring.
 - [[implement-galaxy-tool-step]] fills exact Galaxy tool metadata, parameters, and connections.
 

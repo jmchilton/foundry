@@ -52,7 +52,7 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 
 1. `summarize-paper` — extract methods, named tools/algorithms, sample data, metrics, references to existing pipelines.
 2. `paper-summary-to-galaxy-design` — combined Galaxy interface and abstract data-flow design brief.
-3. `summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from source evidence and prior handoffs.
+3. `paper-summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from paper source evidence and prior handoffs.
 4. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s); flag divergences before sinking effort into per-step authoring.
 5. `[loop]` `[branch]` discover-or-author branch:
    - try `discover-shed-tool`.
@@ -99,7 +99,7 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 1. `summarize-nextflow`
 2. `nextflow-summary-to-galaxy-interface`
 3. `nextflow-summary-to-galaxy-data-flow`
-4. `summary-to-galaxy-template`
+4. `nextflow-summary-to-galaxy-template`
 5. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s).
 6. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
 7. `[loop]` `summarize-galaxy-tool`
@@ -118,7 +118,7 @@ CWL is already structured; the upstream extraction work is much lighter.
 1. `summarize-cwl` — read CWL Workflow + referenced `CommandLineTool`s, identify inputs/outputs, scatter, conditional logic.
 2. `cwl-summary-to-galaxy-interface` — choose Galaxy workflow interface from CWL inputs/outputs.
 3. `cwl-summary-to-galaxy-data-flow` — re-shape into Galaxy-shaped data-flow idioms from a CWL summary that's already nearly a DAG.
-4. `summary-to-galaxy-template`
+4. `cwl-summary-to-galaxy-template`
 5. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s).
 6. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
 7. `[loop]` `summarize-galaxy-tool`
@@ -134,8 +134,9 @@ CWL is already structured; the upstream extraction work is much lighter.
 
 - **Source-specific (one per source)**: `summarize-paper`, `summarize-nextflow`, `summarize-cwl`. Each emits its own schema by design.
 - **Source × target interface/data-flow**: `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, `nextflow-summary-to-cwl-data-flow`, plus combined paper design Molds until paper examples justify a split.
+- **Source × target template generation** (Galaxy): `nextflow-summary-to-galaxy-template`, `cwl-summary-to-galaxy-template`, `paper-summary-to-galaxy-template`. Each consumes its source-specific design briefs.
 - **Target-specific (one per target)**:
-  - Templates: `summary-to-galaxy-template`, `summary-to-cwl-template`.
+  - Templates: `summary-to-cwl-template`.
   - Per-step (Galaxy): `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`.
   - Per-step (CWL): `summarize-cwl-tool`, `implement-cwl-tool-step`.
   - Validate: `validate-galaxy-step`, `validate-galaxy-workflow`, `validate-cwl`.
@@ -146,7 +147,7 @@ CWL is already structured; the upstream extraction work is much lighter.
 
 ## Pattern pages, not Molds
 
-Per the architecture, the `design-*` knowledge skills (collection manipulation, tabular manipulation, conditional handling, …) are **Foundry pattern pages**, not Molds. They are wiki-linked from action Molds (especially `implement-galaxy-tool-step` and `summary-to-galaxy-template`) and pulled into generated skills via casting's link resolution.
+Per the architecture, the `design-*` knowledge skills (collection manipulation, tabular manipulation, conditional handling, …) are **Foundry pattern pages**, not Molds. They are wiki-linked from action Molds (especially `implement-galaxy-tool-step` and the source-specific Galaxy template Molds) and pulled into generated skills via casting's link resolution.
 
 Custom-Galaxy-tool authoring is split: a **pattern page** (reference and guidance) plus a companion **action Mold** (`author-galaxy-tool-wrapper`) that performs the authoring. The Mold links to the pattern page; the pattern page is consumed by the generated skill via link resolution.
 
