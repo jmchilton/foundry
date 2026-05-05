@@ -84,12 +84,12 @@ echo "$REV"
 
 ## Gotchas
 
-- **Tool versions are not monotonic.** Two changesets can legally publish the same XML `version` with different content. When pinning for reproducibility, prefer the **newest matching revision** (`--latest`) or be explicit about which changeset you want — the version string alone is ambiguous. See `[[component-tool-shed-search]]` §5.
+- **Tool versions are not monotonic.** Two changesets can legally publish the same XML `version` with different content. When pinning for reproducibility, prefer the **newest matching revision** (`--latest`) or be explicit about which changeset you want — the version string alone is ambiguous. See [[component-tool-shed-search]] §5.
 - **Source of truth for installability.** Only changesets with a `RepositoryMetadata` row marked `downloadable=True` are returned. A repository may have many additional changesets in its Mercurial history that are not installable; those are correctly excluded here.
 - **Pin shape is `(name, owner, changeset_revision)`**, not the TRS id. Workflows ultimately reference repos as a triple via the Tool Shed's `get_repository_revision_install_info`. The `trsToolId` exists for discovery only.
 - **No bulk endpoint upstream.** Each tool's revision list is one HTTP call; batching N tools means N round-trips. Acceptable for the discover-and-pin path of a workflow author; do not loop over thousands.
 
 ## Pairs with
 
-- `[[tool-search]]` → `[[tool-versions]]` → `[[tool-revisions]]` is the canonical discover-and-pin chain.
+- [[tool-search]] → [[tool-versions]] → [[tool-revisions]] is the canonical discover-and-pin chain.
 - `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <v>` — caches the `ParsedTool` once a version is chosen; the changeset revision pin lands in the workflow file (`tool_shed_repository.changeset_revision`), not in the cache.

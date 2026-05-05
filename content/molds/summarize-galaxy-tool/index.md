@@ -40,7 +40,7 @@ references:
 ---
 # summarize-galaxy-tool
 
-Read a cached Galaxy `ParsedTool` object for an existing wrapper and emit a compact tool summary that downstream step implementation can bind to. This Mold runs after `[[discover-shed-tool]]` has selected a Tool Shed pin and after the caller has populated `galaxy-tool-cache` for that pin.
+Read a cached Galaxy `ParsedTool` object for an existing wrapper and emit a compact tool summary that downstream step implementation can bind to. This Mold runs after [[discover-shed-tool]] has selected a Tool Shed pin and after the caller has populated `galaxy-tool-cache` for that pin.
 
 This Mold owns the **wrapper summarization** step only. It does not search the Tool Shed, choose a version, author XML, or decide how a workflow step should use the wrapper. Its job is to preserve the wrapper's executable contract: identity, command shape, inputs, outputs, requirements, tests, and any conditional or data-table behavior that could affect binding.
 
@@ -50,7 +50,7 @@ The v1 input-source decision is [[galaxy-tool-summary-input-source]]: read cache
 
 The Mold expects:
 
-- A Tool Shed pin from `[[discover-shed-tool]]`: `tool_shed_url`, `owner`, `repo`, `tool_id`, `version`, and `changeset_revision`.
+- A Tool Shed pin from [[discover-shed-tool]]: `tool_shed_url`, `owner`, `repo`, `tool_id`, `version`, and `changeset_revision`.
 - A `galaxy-tool-cache` directory containing the cached ParsedTool JSON for that pin.
 - Optional raw XML source for ambiguity checks, normally fetched through cache metadata rather than treated as the primary input.
 - Optional step intent from the caller, used only to prioritize which wrapper details to explain; it must not change the wrapper facts.
@@ -122,7 +122,7 @@ Keep both forms when they differ:
 
 Read `<requirements>` into structured package/container requirements. Preserve requirement `type`, `name`, `version`, and any container URI or resolver hints exposed by the cache.
 
-Do not invent Bioconda equivalences here. Equivalence inference belongs to `[[author-galaxy-tool-wrapper]]` when authoring a new XML wrapper. Existing wrapper summaries report what the wrapper declares.
+Do not invent Bioconda equivalences here. Equivalence inference belongs to [[author-galaxy-tool-wrapper]] when authoring a new XML wrapper. Existing wrapper summaries report what the wrapper declares.
 
 ### 4. Summarize command and failure behavior
 
@@ -172,8 +172,8 @@ Warnings should identify missing or lossy surfaces, especially:
 
 ## Non-goals
 
-- **Tool discovery.** Use `[[discover-shed-tool]]` before this Mold.
-- **Wrapper authoring.** Use `[[author-galaxy-tool-wrapper]]` when no acceptable wrapper exists.
-- **Step implementation.** `[[implement-galaxy-tool-step]]` binds abstract workflow intent to this summary.
+- **Tool discovery.** Use [[discover-shed-tool]] before this Mold.
+- **Wrapper authoring.** Use [[author-galaxy-tool-wrapper]] when no acceptable wrapper exists.
+- **Step implementation.** [[implement-galaxy-tool-step]] binds abstract workflow intent to this summary.
 - **Installed-Galaxy-only wrappers.** Deferred until a Galaxy API discovery/input path exists.
 - **Schema invention at runtime.** The generated skill should validate against `summary-galaxy-tool` once that schema is authored; until then, keep output shape close to this body and eval expectations.

@@ -69,7 +69,7 @@ Default: human-readable list.
 }
 ```
 
-A hit identifies `(owner, repoName, toolId)` plus a `trsToolId` (`owner~repo~toolId`). It does **not** include a changeset revision or specific tool version — those come from `[[tool-versions]]` and `[[tool-revisions]]`.
+A hit identifies `(owner, repoName, toolId)` plus a `trsToolId` (`owner~repo~toolId`). It does **not** include a changeset revision or specific tool version — those come from [[tool-versions]] and [[tool-revisions]].
 
 ## Exit codes
 
@@ -97,7 +97,7 @@ gxwf tool-search fastqc --json --max-results 5 \
 
 ## Gotchas
 
-- **No EDAM**, no stem analyzer, no panel context — the Tool Shed tool index is much poorer than Galaxy's installed-toolbox index. Queries match only `name`, `description`, `help`, and `repo_owner_username`. See `[[component-tool-shed-search]]` §2b.
+- **No EDAM**, no stem analyzer, no panel context — the Tool Shed tool index is much poorer than Galaxy's installed-toolbox index. Queries match only `name`, `description`, `help`, and `repo_owner_username`. See [[component-tool-shed-search]] §2b.
 - **Case-sensitivity asymmetry**. The tool search does not lowercase the query (unlike repo search). Mixed-case queries can miss; lowercase if uncertain.
 - **Stale indexes**. Tool Shed Whoosh indexes are rebuilt by cron / admin action, never automatically on upload. A freshly published tool may not show up for some time. Deprecated repos can still appear until the next rebuild.
 - **`*term*` wrapping** disables server-side stemming and structured query syntax. Prefer simple terms; combine `--match-name` and `--owner` to tighten.
@@ -107,6 +107,6 @@ gxwf tool-search fastqc --json --max-results 5 \
 
 ## Pairs with
 
-- `[[tool-versions]]` — list TRS-published versions for a hit's `trsToolId`.
-- `[[tool-revisions]]` — resolve a `(trsToolId, version)` to changeset revisions for reproducible pinning.
+- [[tool-versions]] — list TRS-published versions for a hit's `trsToolId`.
+- [[tool-revisions]] — resolve a `(trsToolId, version)` to changeset revisions for reproducible pinning.
 - `galaxy-tool-cache add` — terminal step of the discover-and-pin chain.

@@ -238,7 +238,7 @@ Walk per-process `container` and `conda` directives. **Container directives are 
 
 **Conda directives are usually file references** to `${moduleDir}/environment.yml`; read the file and extract its `dependencies:` list. Each `bioconda::<name>=<version>` entry becomes a `tools[]` entry with `tools[].bioconda` set to the original dependency string. Multi-tool environments are common (`minimap2` + `samtools` + `htslib`, `racon` + `multiqc`); keep every Bioconda dependency rather than selecting the first. Legacy literal-string directives (`conda "bioconda::<name>=<version>"`) feed the same field.
 
-Tool name and version are typically derivable from any of the resolved fields. Deduplicate by `(name, version)` across processes; one entry per tool. `processes[].tool` is a foreign key into `tools[].name`. This block is the bridge to `[[author-galaxy-tool-wrapper]]` — it consumes container/conda info to translate into Galaxy `<requirements>`.
+Tool name and version are typically derivable from any of the resolved fields. Deduplicate by `(name, version)` across processes; one entry per tool. `processes[].tool` is a foreign key into `tools[].name`. This block is the bridge to [[author-galaxy-tool-wrapper]] — it consumes container/conda info to translate into Galaxy `<requirements>`.
 
 ### 6. Reconcile the workflow DAG
 
@@ -297,9 +297,9 @@ The procedure assumes — and the cast skill must surface in `warnings[]` when r
 ## Non-goals
 
 - **Subset summarization.** Whole-pipeline only. A single-subworkflow summarizer might land later, but the schema and downstream Molds assume the whole-pipeline shape today.
-- **Translation to a target idiom.** This Mold does not produce Galaxy collections, CWL scatter, or any target-shaped data flow. Those live in `[[nextflow-summary-to-galaxy-interface]]`, `[[nextflow-summary-to-galaxy-data-flow]]`, `[[nextflow-summary-to-cwl-interface]]`, and `[[nextflow-summary-to-cwl-data-flow]]`.
-- **Tool wrapping.** Container/conda info is captured for `[[author-galaxy-tool-wrapper]]` to consume; this Mold never authors a wrapper.
-- **Test execution.** Fixtures are described, not run. `[[run-workflow-test]]` owns execution.
+- **Translation to a target idiom.** This Mold does not produce Galaxy collections, CWL scatter, or any target-shaped data flow. Those live in [[nextflow-summary-to-galaxy-interface]], [[nextflow-summary-to-galaxy-data-flow]], [[nextflow-summary-to-cwl-interface]], and [[nextflow-summary-to-cwl-data-flow]].
+- **Tool wrapping.** Container/conda info is captured for [[author-galaxy-tool-wrapper]] to consume; this Mold never authors a wrapper.
+- **Test execution.** Fixtures are described, not run. [[run-workflow-test]] owns execution.
 - **Schema evolution.** The schema at [[summary-nextflow]] is v1, draft. Adding fields requires evaluating against the §"Reference dispatch" exemplars (rnaseq, sarek, one ad-hoc) before merging.
 
 ## Reference dispatch
@@ -309,5 +309,5 @@ The `references:` manifest above is the source of truth for cast/runtime handlin
 - `output_schemas` / `kind: schema` → [[summary-nextflow]] — resolved at cast time to `@galaxy-foundry/summary-nextflow-schema`'s `summaryNextflowSchema` export and written verbatim into the cast bundle's `references/schemas/summary-nextflow.schema.json`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning. This reference is `used_at: both` because it shapes the generated skill and remains a runtime validation contract.
 - `cli_commands` — none today. Open question whether the Foundry seeds a `content/cli/nextflow/` family for `nextflow config`, `nf-core list`, `nf-test`. The cast skill calls these CLIs at runtime regardless; the question is whether the Foundry carries manpages for them.
 - `patterns` — none. Per-source summarization is correctly empty here; this is the first inventory case where a Mold legitimately declares no patterns. Relevant for MOLD_SPEC.
-- Research notes — `[[component-nextflow-pipeline-anatomy]]`, `[[component-nextflow-containers-and-envs]]`, and `[[component-nextflow-testing]]` are packaged into the cast bundle's `references/notes/` as runtime, on-demand grounding. They are not automatically dumped into the casting prompt; if one becomes necessary for cast-time synthesis, change that reference to `used_at: both` or `cast-time` and choose the appropriate `mode`.
+- Research notes — [[component-nextflow-pipeline-anatomy]], [[component-nextflow-containers-and-envs]], and [[component-nextflow-testing]] are packaged into the cast bundle's `references/notes/` as runtime, on-demand grounding. They are not automatically dumped into the casting prompt; if one becomes necessary for cast-time synthesis, change that reference to `used_at: both` or `cast-time` and choose the appropriate `mode`.
 - `examples` — pending: `nf-core/rnaseq` (canonical, stresses every section), `nf-core/sarek` (heavy conditional subworkflows; stresses §6's reconciliation), and one ad-hoc DSL2 pipeline (no `meta.yml`, no `nextflow_schema.json`; stresses fallback paths). Bundling vs URL-referencing is open — `rnaseq` is too large to mirror; the corpus-first principle says cite by URL. See [[GXY_SKETCHES_ALIGNMENT]] for the analogous bundle-vs-URL discussion in gxy-sketches.

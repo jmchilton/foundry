@@ -48,7 +48,7 @@ The most important sub-shapes for downstream Molds:
 - **`elementProperties.type`** — enum `[map, file, directory, string, integer, float, boolean, list, eval]`. This is the canonical set the cast skill must coerce into `summary-nextflow.schema.json`'s `ChannelIO.shape` strings.
 - **`channelArray`** — list of `channelElement` or list-of-list (the recent flat-vs-nested change the [2025-meta.yml blog post](https://nf-co.re/blog/2025/modules-meta-yml) introduced: tuple channels are nested arrays, single-element channels are flat).
 - **`tools[]`** — each tool block requires `description` and at least one of `homepage` / `documentation` / `tool_dev_url` / `doi`. `licence` is an array of SPDX identifiers. `identifier` is a `bio.tools` ID (pattern `^(biotools:.*)?$`).
-- **`containers.docker` / `.singularity` / `.conda`** — the schema explicitly allows `^oras://.*$` for the singularity branch (legal ORAS pull form documented in `[[component-nextflow-containers-and-envs]]`).
+- **`containers.docker` / `.singularity` / `.conda`** — the schema explicitly allows `^oras://.*$` for the singularity branch (legal ORAS pull form documented in [[component-nextflow-containers-and-envs]]).
 
 ## Upstream license
 

@@ -60,12 +60,12 @@ Use this when a Nextflow source has mapped process outputs, cleanup/filtering ar
 
 ## Pattern handoffs
 
-- Cleanup: `[[collection-cleanup-after-mapover-failure]]`.
-- Cleanup + sibling sync + publishing: `[[cleanup-sync-and-publish-nonempty-results]]`.
-- Sibling membership sync: `[[sync-collections-by-identifier]]`.
-- Label cleanup: `[[regex-relabel-via-tabular]]`, `[[relabel-via-rules-and-find-replace]]`.
-- Non-empty report gate: `[[conditional-gate-on-nonempty-result]]`.
-- Publishing bundles/reports: `[[collection-build-named-bundle]]`, `[[tabular-concatenate-collection-to-table]]`, `[[tabular-pivot-collection-to-wide]]`, `[[collection-unbox-singleton]]`.
+- Cleanup: [[collection-cleanup-after-mapover-failure]].
+- Cleanup + sibling sync + publishing: [[cleanup-sync-and-publish-nonempty-results]].
+- Sibling membership sync: [[sync-collections-by-identifier]].
+- Label cleanup: [[regex-relabel-via-tabular]], [[relabel-via-rules-and-find-replace]].
+- Non-empty report gate: [[conditional-gate-on-nonempty-result]].
+- Publishing bundles/reports: [[collection-build-named-bundle]], [[tabular-concatenate-collection-to-table]], [[tabular-pivot-collection-to-wide]], [[collection-unbox-singleton]].
 
 ## Pitfalls
 

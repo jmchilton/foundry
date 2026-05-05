@@ -36,8 +36,8 @@ related_notes:
 
 Operational grounding for two Molds:
 
-- `[[summarize-nextflow]]` §7 — extract `nf_tests[]` and `test_fixtures` from a real nf-core or DSL2 pipeline.
-- `[[nextflow-test-to-target-tests]]` — translate nf-test fixtures + assertions into Galaxy / CWL equivalents.
+- [[summarize-nextflow]] §7 — extract `nf_tests[]` and `test_fixtures` from a real nf-core or DSL2 pipeline.
+- [[nextflow-test-to-target-tests]] — translate nf-test fixtures + assertions into Galaxy / CWL equivalents.
 
 The summarize side is mostly *enumeration*: walk `tests/*.nf.test`, extract structured fields per the Mold §7 spec. The translation side is *mapping*: each nf-test assertion pattern has a (sometimes lossy) Galaxy or CWL equivalent.
 
@@ -83,9 +83,9 @@ Separate from assertions: where the input data lives.
 
 ## Cross-references
 
-- `[[planemo-asserts-idioms]]` — Galaxy-side idiom guide; the YAML's `target_link` fields deep-link into this.
-- `[[tests-format]]` — vendored JSON Schema for `<workflow>-tests.yml`; deep-link target for the Galaxy assertion column.
-- `[[component-nf-core-tools]]` — wider tool ecosystem (nf-core's `test_datasets_utils`, branch listings).
+- [[planemo-asserts-idioms]] — Galaxy-side idiom guide; the YAML's `target_link` fields deep-link into this.
+- [[tests-format]] — vendored JSON Schema for `<workflow>-tests.yml`; deep-link target for the Galaxy assertion column.
+- [[component-nf-core-tools]] — wider tool ecosystem (nf-core's `test_datasets_utils`, branch listings).
 
 ## Open gaps
 

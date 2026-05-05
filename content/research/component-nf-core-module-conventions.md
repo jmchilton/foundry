@@ -30,8 +30,8 @@ related_notes:
 
 Structured digest of the nf-core module specification — the conventions a module **MUST** or **SHOULD** follow to pass `nf-core modules lint`. Operational grounding for two Molds:
 
-- `[[summarize-nextflow]]` — when extracting tools/containers/IO from a real nf-core module, the conventions tell the cast skill what to *expect* and what to *flag as drift*.
-- `[[author-galaxy-tool-wrapper]]` — when translating an nf-core module into a Galaxy `<tool>` wrapper, the conventions are the contract the source-side has already enforced (versions are emitted, args go through `task.ext.args`, containers carry both branches, etc.).
+- [[summarize-nextflow]] — when extracting tools/containers/IO from a real nf-core module, the conventions tell the cast skill what to *expect* and what to *flag as drift*.
+- [[author-galaxy-tool-wrapper]] — when translating an nf-core module into a Galaxy `<tool>` wrapper, the conventions are the contract the source-side has already enforced (versions are emitted, args go through `task.ext.args`, containers carry both branches, etc.).
 
 Companion structured form: `component-nf-core-module-conventions.yml`. Per-rule entries with `id`, `level`, `description`, `lint_check`, `evidence`, `affects`. Cast skill consumes the YAML for confidence-checking and warning suppression.
 
@@ -45,7 +45,7 @@ Companion structured form: `component-nf-core-module-conventions.yml`. Per-rule 
 The YAML groups rules into:
 
 1. **Layout** — directory structure, file inventory.
-2. **Containers and conda** — directive form, environment.yml shape (also covered structurally in `[[component-nextflow-containers-and-envs]]`).
+2. **Containers and conda** — directive form, environment.yml shape (also covered structurally in [[component-nextflow-containers-and-envs]]).
 3. **Process and IO** — input/output channel declarations, meta map keys, args via `task.ext.args`.
 4. **Versions** — how each tool emits its version, the `topic: versions` convention.
 5. **Stubs and tests** — mandatory stub block, nf-test presence.
@@ -60,9 +60,9 @@ The `evidence` field cites either a specific lint-test source path or the docume
 
 ## Cross-references
 
-- `[[component-nf-core-tools]]` — wider tool ecosystem (modules.json, the install/update flow).
-- `[[component-nextflow-containers-and-envs]]` — container and conda directive deep-dive (the "containers and conda" category here is the policy layer; the other note is the URL grammar).
-- `[[nf-core-module-meta]]` — the JSON Schema this convention list operationalizes.
+- [[component-nf-core-tools]] — wider tool ecosystem (modules.json, the install/update flow).
+- [[component-nextflow-containers-and-envs]] — container and conda directive deep-dive (the "containers and conda" category here is the policy layer; the other note is the URL grammar).
+- [[nf-core-module-meta]] — the JSON Schema this convention list operationalizes.
 
 ## Open gaps
 

@@ -67,7 +67,7 @@ references:
 
 Discover whether the Galaxy Tool Shed already publishes a wrapper for the tool a workflow step needs, and resolve the discovery to a `(owner, repo, tool_id, version, changeset_revision)` quintuple that downstream steps can pin and cache.
 
-This Mold is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the cast skill recommends a pin and exits successfully. On a miss (or a low-quality hit), it falls through to `[[author-galaxy-tool-wrapper]]`. The branch itself is harness logic; this Mold owns only the discovery half.
+This Mold is the **Tool Shed leg** of the `discover-or-author` branch in Galaxy-targeting per-step pipelines. On a hit, the cast skill recommends a pin and exits successfully. On a miss (or a low-quality hit), it falls through to [[author-galaxy-tool-wrapper]]. The branch itself is harness logic; this Mold owns only the discovery half.
 
 ## Inputs
 
@@ -106,21 +106,21 @@ A structured recommendation object, JSON-shaped:
 `status` semantics:
 - `hit` — recommend pinning. Caller should cache and proceed.
 - `weak` — candidate exists but the cast skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller should confirm or fall through.
-- `miss` — no usable hit. Caller falls through to `[[author-galaxy-tool-wrapper]]`.
+- `miss` — no usable hit. Caller falls through to [[author-galaxy-tool-wrapper]].
 
 ## Procedure
 
-The cast skill follows the gxwf-shaped discover-and-pin chain. **It does not call the Tool Shed HTTP API directly** — the TS CLI wraps the call sequence and gotchas covered in `[[component-tool-shed-search]]`.
+The cast skill follows the gxwf-shaped discover-and-pin chain. **It does not call the Tool Shed HTTP API directly** — the TS CLI wraps the call sequence and gotchas covered in [[component-tool-shed-search]].
 
 ### 1. Search
 
-Issue `[[tool-search]]` with the need's keywords. Start narrow:
+Issue [[tool-search]] with the need's keywords. Start narrow:
 
 ```
 gxwf tool-search "<keywords>" --json --max-results 10
 ```
 
-If an owner hint is present, add `--owner <owner>`. If an exact-name hint is present, add `--match-name`. Lowercase the query (the tool index does not lowercase, see `[[component-tool-shed-search]]` §6).
+If an owner hint is present, add `--owner <owner>`. If an exact-name hint is present, add `--match-name`. Lowercase the query (the tool index does not lowercase, see [[component-tool-shed-search]] §6).
 
 ### 2. Triage hits
 
@@ -130,7 +130,7 @@ For each hit, score on:
 - **Recency.** Recent `last_updated` strengthens a hit; very old wrappers can still be valid but warrant the `weak` classification.
 - **Duplicates across repos.** Two owners can publish wrappers with the same XML id. Either pick the maintained one or downgrade to `weak` and surface the choice.
 
-Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see `[[component-tool-shed-search]]` §6.
+Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see [[component-tool-shed-search]] §6.
 
 ### 3. Resolve to a pinnable version
 
@@ -163,7 +163,7 @@ Validate the recommendation with `validate-galaxy-tool-discovery` before returni
 
 ## Caveats baked into the procedure
 
-The procedure assumes — and the cast skill must surface in its rationale when relevant — the following Tool Shed realities (full detail in `[[component-tool-shed-search]]` §6):
+The procedure assumes — and the cast skill must surface in its rationale when relevant — the following Tool Shed realities (full detail in [[component-tool-shed-search]] §6):
 
 - **Indexes are stale by design.** A freshly published tool may not appear; a deprecated tool may still appear. Treat absence as soft evidence, not proof.
 - **Wildcard `*term*` wrapping** disables stemming; spelling matters. Try alternate phrasings before declaring `miss`.
@@ -173,7 +173,7 @@ The procedure assumes — and the cast skill must surface in its rationale when 
 
 ## Non-goals
 
-- **Authoring.** This Mold never produces a tool wrapper. On `miss`, the harness's `discover-or-author` branch fall-through invokes `[[author-galaxy-tool-wrapper]]`.
+- **Authoring.** This Mold never produces a tool wrapper. On `miss`, the harness's `discover-or-author` branch fall-through invokes [[author-galaxy-tool-wrapper]].
 - **Caching.** This Mold emits a pin recommendation. The caller (or the next phase) runs `galaxy-tool-cache add toolshed.g2.bx.psu.edu/repos/<owner>/<repo>/<tool_id> --version <v>` to populate the cache.
-- **Galaxy-instance discovery.** Hitting a running Galaxy server's installed-tool index (EDAM-aware, panel-aware) is a different mechanism — the future `discover-tool-via-galaxy-api` Mold. The contrast is sketched in `[[component-tool-shed-search]]` §4.
+- **Galaxy-instance discovery.** Hitting a running Galaxy server's installed-tool index (EDAM-aware, panel-aware) is a different mechanism — the future `discover-tool-via-galaxy-api` Mold. The contrast is sketched in [[component-tool-shed-search]] §4.
 - **Test-data resolution.** Out of scope; handled by the `test-data-resolution` branch elsewhere in the pipeline.

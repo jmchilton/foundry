@@ -4,7 +4,7 @@
 
 - check: deterministic
 - fixture: complete gxformat2 workflow expected to pass gxwf validation.
-- expectation: reports a clean validation result and allows the harness to proceed to `[[run-workflow-test]]`.
+- expectation: reports a clean validation result and allows the harness to proceed to [[run-workflow-test]].
 
 ## Case: cross-step workflow error
 

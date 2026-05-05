@@ -26,11 +26,11 @@ related_notes:
 summary: "JSON Schema for the structured summary emitted by the summarize-nextflow Mold."
 ---
 
-This page is auto-rendered from the JSON Schema authored in this repo and shipped on npm as `@galaxy-foundry/summary-nextflow-schema`. Each `$def` becomes a section below with a stable anchor ID — research notes and Mold bodies can deep-link individual shapes via `[[summary-nextflow#Tool]]`.
+This page is auto-rendered from the JSON Schema authored in this repo and shipped on npm as `@galaxy-foundry/summary-nextflow-schema`. Each `$def` becomes a section below with a stable anchor ID — research notes and Mold bodies can deep-link individual shapes via [[summary-nextflow#Tool]].
 
 **Source-of-truth chain:**
 
-1. `packages/summary-nextflow-schema/src/summary-nextflow.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop ([[summarize-nextflow]]). Mold frontmatter cites it via `[[summary-nextflow]]` wiki-links; cast imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.
+1. `packages/summary-nextflow-schema/src/summary-nextflow.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop ([[summarize-nextflow]]). Mold frontmatter cites it via [[summary-nextflow]] wiki-links; cast imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.
 2. `packages/summary-nextflow-schema/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `summary-nextflow.schema.generated.ts` const wrapper from the canonical JSON.
 3. Published as `@galaxy-foundry/summary-nextflow-schema` on npm. Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published artifact also exports `validateSummary()` and ships a `validate-summary-nextflow` CLI bin for cast skills and downstream consumers.
 
@@ -58,7 +58,7 @@ Three sub-shapes mirror gxy-sketches verbatim — see `docs/GXY_SKETCHES_ALIGNME
 
 ## Cast-time role
 
-Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by `[[summarize-nextflow]]` via `output_schemas` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning; failure is loud — downstream Molds bind to this shape and would produce worse errors later.
+Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by [[summarize-nextflow]] via `output_schemas` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning; failure is loud — downstream Molds bind to this shape and would produce worse errors later.
 
 ## What is intentionally not modeled
 

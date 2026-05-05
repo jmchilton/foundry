@@ -45,8 +45,8 @@ Use this when the source evidence is a samplesheet or manifest reader that emits
 
 | Source row payload | Galaxy shape | Implementation route |
 | --- | --- | --- |
-| One file per row | `list` | `[[tabular-to-collection-by-row]]` or direct collection input |
-| Forward/reverse reads per row | `list:paired` | `[[collection-build-list-paired-with-apply-rules]]` |
+| One file per row | `list` | [[tabular-to-collection-by-row]] or direct collection input |
+| Forward/reverse reads per row | `list:paired` | [[collection-build-list-paired-with-apply-rules]] |
 | One pair total | `paired` | Direct paired input or paired collection construction |
 | Mixed single/paired rows | split collections or review | source review trigger |
 | Extra non-read files | parallel collections or review | source review trigger |
@@ -55,11 +55,11 @@ Use this when the source evidence is a samplesheet or manifest reader that emits
 
 1. Preserve stable sample identity from the row metadata.
 2. Decide collection type from file payload shape, not from metadata object shape alone.
-3. If the source starts as a tabular manifest, use `[[tabular-to-collection-by-row]]`.
-4. If pairedness is encoded in columns or identifiers, use `[[collection-build-list-paired-with-apply-rules]]`.
-5. If the workflow maps domain tools per row, use `[[manifest-to-mapped-collection-lifecycle]]`.
-6. After mapped steps, relabel, reshape, or sync only as needed through `[[galaxy-collection-patterns]]`.
+3. If the source starts as a tabular manifest, use [[tabular-to-collection-by-row]].
+4. If pairedness is encoded in columns or identifiers, use [[collection-build-list-paired-with-apply-rules]].
+5. If the workflow maps domain tools per row, use [[manifest-to-mapped-collection-lifecycle]].
+6. After mapped steps, relabel, reshape, or sync only as needed through [[galaxy-collection-patterns]].
 
 ## Evidence posture
 
-This page is grounded in existing Foundry research notes, especially `[[nextflow-to-galaxy-channel-shape-mapping]]` and `[[iwc-map-over-lifecycle-survey]]`. Generated Nextflow fixtures were not present during authoring, so do not treat this page as direct fixture evidence.
+This page is grounded in existing Foundry research notes, especially [[nextflow-to-galaxy-channel-shape-mapping]] and [[iwc-map-over-lifecycle-survey]]. Generated Nextflow fixtures were not present during authoring, so do not treat this page as direct fixture evidence.
