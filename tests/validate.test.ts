@@ -879,6 +879,101 @@ describe("validateDirectory (cross-file)", () => {
     expect(r.warnings).toBeGreaterThanOrEqual(1);
   });
 
+  it("warns on body wiki-links that do not resolve", () => {
+    mkdirSync(path.dirname(path.join(dir, "patterns/pattern-x.md")), { recursive: true });
+    writeFileSync(
+      path.join(dir, "patterns/pattern-x.md"),
+      `---\n${Object.entries(patternRequired({ title: "Pattern X" }))
+        .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+        .join("\n")}\n---\n\nBody cites [[ghost-target]] in prose.\n`,
+    );
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
+
+  it("ignores body wiki-links inside fenced or inline code", () => {
+    const fm = baseRequired({ type: "research", tags: ["research/component"], subtype: "component" });
+    mkdirSync(path.dirname(path.join(dir, "research/component-x.md")), { recursive: true });
+    writeFileSync(
+      path.join(dir, "research/component-x.md"),
+      `---\n${Object.entries(fm).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join("\n")}\n---\n\nInline \`[[ghost-inline]]\` and fenced:\n\n\`\`\`\n[[ghost-fenced]]\n\`\`\`\n`,
+    );
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBe(0);
+  });
+
+  it("warns on schema reference with evidence=hypothesis", () => {
+    writeFm(path.join(dir, "molds/m/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "m",
+        axis: "generic",
+        references: [
+          { kind: "schema", ref: "[[schema-x]]", used_at: "both", load: "upfront", mode: "verbatim", evidence: "hypothesis", verification: "Run cast and confirm output validates." },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "schemas/schema-x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "schema-x",
+        title: "Schema X",
+        package: "@example/schema-x",
+        package_export: "schemaX",
+      }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
+
+  it("warns when a stub mold body declares references", () => {
+    mkdirSync(path.join(dir, "molds/m"), { recursive: true });
+    const fm = baseRequired({
+      type: "mold",
+      tags: ["mold"],
+      name: "m",
+      axis: "generic",
+      references: [
+        { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed", trigger: "x" },
+      ],
+    });
+    writeFileSync(
+      path.join(dir, "molds/m/index.md"),
+      `---\n${Object.entries(fm).map(([k, v]) => `${k}: ${JSON.stringify(v)}`).join("\n")}\n---\n\n# m\n\nStub. Replace with real content later.\n`,
+    );
+    writeFm(path.join(dir, "research/component-x.md"), {
+      ...baseRequired({ type: "research", tags: ["research/component"], subtype: "component" }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+    expect(r.warnings).toBeGreaterThanOrEqual(1);
+  });
+
   it("warns on refinement journal entries with bad decision vocab", () => {
     writeFm(path.join(dir, "molds/m/index.md"), {
       ...baseRequired({

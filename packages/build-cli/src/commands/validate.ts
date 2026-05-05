@@ -326,6 +326,13 @@ function validateTypedReference(
   };
 
   if (ref.kind === "schema") {
+    if (ref.evidence === "hypothesis") {
+      findings.push({
+        path: filePath,
+        severity: "warning",
+        message: `references[${index}]: schema ref with evidence=hypothesis is suspicious — schema is the cast contract, expect cast-validated`,
+      });
+    }
     // Schema refs are wiki-links to a `type: schema` note that declares both
     // `package` and `package_export` (cast-mold imports the named export).
     if (!WIKI_LINK_RE.test(ref.ref)) {
@@ -712,6 +719,60 @@ function validateRefinementEntry(
   }
 }
 
+const BODY_WIKI_LINK_RE = /\[\[([^\]\n]+)\]\]/g;
+const FENCED_CODE_RE = /```[\s\S]*?```/g;
+const INLINE_CODE_RE = /(`+)[\s\S]+?\1/g;
+
+function validateBodyWikiLinks(
+  files: FileMeta[],
+  slugMap: Map<string, string>,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    const body = readMarkdown(f.path).body.replace(FENCED_CODE_RE, "").replace(INLINE_CODE_RE, "");
+    const seen = new Set<string>();
+    BODY_WIKI_LINK_RE.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = BODY_WIKI_LINK_RE.exec(body)) !== null) {
+      const raw = m[1];
+      if (raw === undefined) continue;
+      const inner = raw.trim();
+      if (!inner) continue;
+      const wl = `[[${inner}]]`;
+      if (seen.has(wl)) continue;
+      seen.add(wl);
+      if (!resolveWikiLink(wl, slugMap)) {
+        findings.push({
+          path: f.path,
+          severity: "warning",
+          message: `body wiki-link ${wl} did not resolve`,
+        });
+      }
+    }
+  }
+  return findings;
+}
+
+const STUB_BODY_RE = /^Stub\.\s+Replace with real/m;
+
+function validateMoldStubBody(files: FileMeta[]): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  for (const f of files) {
+    if (f.meta.type !== "mold") continue;
+    const refs = f.meta.references;
+    if (!Array.isArray(refs) || refs.length === 0) continue;
+    const body = readMarkdown(f.path).body;
+    if (STUB_BODY_RE.test(body)) {
+      findings.push({
+        path: f.path,
+        severity: "warning",
+        message: `mold body is a stub but declares ${refs.length} reference(s) — cast bundles them with no procedure to apply`,
+      });
+    }
+  }
+  return findings;
+}
+
 function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const requiredSections = ["Install", "Synopsis", "Output", "Exit codes", "Examples", "Gotchas"];
@@ -917,6 +978,8 @@ export function validateDirectory(opts: ValidateOptions): {
   );
   crossFindings.push(...validateCliCommandDocs(validFiles));
   crossFindings.push(...validatePatternVerificationEvidence(validFiles));
+  crossFindings.push(...validateBodyWikiLinks(validFiles, slugMap));
+  crossFindings.push(...validateMoldStubBody(validFiles));
 
   for (const f of crossFindings) {
     printHeader(f.path);
