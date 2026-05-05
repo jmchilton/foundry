@@ -108,24 +108,6 @@ Evidence:
 - 10x CellPlex job inputs include `fastq PE collection GEX`, `reference genome`, `gtf`, `cellranger_barcodes_3M-february-2018.txt`, `fastq PE collection CMO`, `sample name and CMO sequence collection`, and `Number of expected cells` (`$IWC/workflows/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex-tests.yml:2-75`). The workflow declares matching collection, data, string, boolean, and int inputs (`$IWC_FORMAT2/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex.gxwf.yml:4-72`).
 - HyPhy accepts a `list` collection of unaligned sequences and preserves accession-like fixture identifiers through to output element assertions (`$IWC/workflows/comparative_genomics/hyphy/hyphy-core-tests.yml:7-30`; `$IWC_FORMAT2/comparative_genomics/hyphy/hyphy-core.gxwf.yml:14-25`).
 
-## 6. Mold loading guidance
-
-For [[implement-galaxy-workflow-test]], load this note when workflow structure may need revision before test YAML can be authored:
-
-- Missing or unstable input/output labels.
-- Need to assert an intermediate result that is not currently a workflow output.
-- Collection output tests need stable element identifiers.
-- Final outputs are too weakly assertable and a better checkpoint may need exposing.
-- Test fixture shape suggests the workflow input interface should be adjusted.
-
-This note should usually be loaded **before** [[planemo-asserts-idioms]] when the workflow itself is still editable. Once labels and outputs are fixed, assertion selection belongs to [[planemo-asserts-idioms]].
-
-## 7. What not to do
-
-- Do not turn these rules into `content/patterns/` pages unless a concrete operation-anchored Galaxy construction recipe emerges.
-- Do not stuff this guidance into a long Mold body. Keep the Mold body thin and auto-load this research note when the trigger applies.
-- Do not expose every intermediate output as boilerplate. The evidence supports promoted checkpoints, not indiscriminate output sprawl.
-
 ## Cross-references
 
 - [[iwc-workflow-testability-survey]] — corpus survey and distribution rationale.
