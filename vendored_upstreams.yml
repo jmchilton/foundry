@@ -15,3 +15,8 @@
   source: $GALAXY/lib/galaxy/tool_util/xsd/galaxy.xsd
   pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
   framing: content/research/galaxy-xsd.md
+
+- local: content/research/datatypes_conf.xml.sample
+  source: $GALAXY/config/datatypes_conf.xml.sample
+  pinned_ref: 7765fae934fbfdee77e3be5f5b235e43735273ae
+  framing: content/research/galaxy-datatypes-conf.md
