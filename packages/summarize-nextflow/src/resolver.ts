@@ -625,12 +625,12 @@ function selectPrimaryWorkflow(
   const knownProcesses = new Set(processNames);
   return (
     [...workflows].sort((left, right) => {
-      const processCallDiff =
-        countKnownCalls(right, knownProcesses) - countKnownCalls(left, knownProcesses);
-      if (processCallDiff !== 0) return processCallDiff;
       const pathDiff =
         Number(right.path.startsWith("workflows/")) - Number(left.path.startsWith("workflows/"));
       if (pathDiff !== 0) return pathDiff;
+      const processCallDiff =
+        countKnownCalls(right, knownProcesses) - countKnownCalls(left, knownProcesses);
+      if (processCallDiff !== 0) return processCallDiff;
       const callDiff = right.calls.length - left.calls.length;
       if (callDiff !== 0) return callDiff;
       return left.name.localeCompare(right.name);
