@@ -22,11 +22,11 @@ import path from "node:path";
 import process from "node:process";
 import type { ErrorObject } from "ajv";
 import AjvImport from "ajv";
+import Ajv2020Import from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
 import { readMarkdown } from "../lib/frontmatter.js";
-import { resolveContentSchemaRef } from "../lib/schema-paths.js";
 import type { Frontmatter } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
 import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
@@ -35,6 +35,10 @@ type AjvValidator = {
   compile: (schema: unknown) => ((data: unknown) => boolean) & { errors?: ErrorObject[] | null };
 };
 const Ajv = AjvImport as unknown as new (opts: {
+  allErrors: boolean;
+  strict: boolean;
+}) => AjvValidator;
+const Ajv2020 = Ajv2020Import as unknown as new (opts: {
   allErrors: boolean;
   strict: boolean;
 }) => AjvValidator;
@@ -208,37 +212,33 @@ function resolveMoldRef(
   let dstOverride: string | undefined;
   let packageSource: { spec: string; exportName: string } | undefined;
   if (kind === "schema") {
-    if (WIKI_LINK_RE.test(refStr)) {
-      // Wiki-link form: resolves to a `type: schema` note. Supports package-vendored
-      // schemas (note has `package` + `package_export`) — caster imports the
-      // runtime export, JSON.stringifies it, and writes to the bundle.
-      const tp = resolveWikiLink(refStr, slugMap);
-      if (!tp) return { error: `references[${index}]: schema ref ${refStr} did not resolve` };
-      const noteMeta = metaByPath.get(tp);
-      if (noteMeta?.type !== "schema") {
-        return {
-          error: `references[${index}]: schema ref ${refStr} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema`,
-        };
-      }
-      const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
-      const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
-      if (!pkg || !exp) {
-        return {
-          error: `references[${index}]: schema ref ${refStr} resolves to a foundry-authored schema note; use the path form (content/schemas/${path.basename(path.dirname(tp))}.schema.json or similar)`,
-        };
-      }
-      const noteSlug = path.basename(tp, ".md");
-      src = `package://${pkg}#${exp}`;
-      dstOverride = path.posix.join(kindCfg.dst_dir, `${noteSlug}.schema.json`);
-      packageSource = { spec: pkg, exportName: exp };
-    } else {
-      if (!refStr.startsWith("content/schemas/") || !refStr.endsWith(".schema.json")) {
-        return {
-          error: `references[${index}]: schema ref must be content/schemas/*.schema.json or a [[wiki-link]] to a schema note (got ${refStr})`,
-        };
-      }
-      src = refStr;
+    // Schema refs are wiki-links to a `type: schema` note. The note declares
+    // `package` + `package_export`; cast imports the runtime export,
+    // JSON.stringifies it, and writes to the bundle.
+    if (!WIKI_LINK_RE.test(refStr)) {
+      return {
+        error: `references[${index}]: schema ref must be a [[wiki-link]] to a schema note (got ${refStr})`,
+      };
     }
+    const tp = resolveWikiLink(refStr, slugMap);
+    if (!tp) return { error: `references[${index}]: schema ref ${refStr} did not resolve` };
+    const noteMeta = metaByPath.get(tp);
+    if (noteMeta?.type !== "schema") {
+      return {
+        error: `references[${index}]: schema ref ${refStr} resolves to type=${noteMeta?.type ?? "(none)"}, expected schema`,
+      };
+    }
+    const pkg = typeof noteMeta.package === "string" ? noteMeta.package : null;
+    const exp = typeof noteMeta.package_export === "string" ? noteMeta.package_export : null;
+    if (!pkg || !exp) {
+      return {
+        error: `references[${index}]: schema ref ${refStr} resolves to a schema note missing 'package' and/or 'package_export' frontmatter`,
+      };
+    }
+    const noteSlug = path.basename(tp, ".md");
+    src = `package://${pkg}#${exp}`;
+    dstOverride = path.posix.join(kindCfg.dst_dir, `${noteSlug}.schema.json`);
+    packageSource = { spec: pkg, exportName: exp };
   } else {
     const tp = resolveWikiLink(refStr, slugMap);
     if (!tp) return { error: `references[${index}]: ${kind} ref ${refStr} did not resolve` };
@@ -327,9 +327,12 @@ function buildCliSidecar(srcAbs: string, srcRel: string, meta: Frontmatter): Cli
 // ---- runs/*/summary.json schema validation ----
 
 function loadAjvForSchema(schemaPath: string): ReturnType<AjvValidator["compile"]> {
-  const ajv = new Ajv({ allErrors: true, strict: false });
-  addFormats(ajv);
   const schema = JSON.parse(readFileSync(schemaPath, "utf8"));
+  const schemaUri = typeof schema?.$schema === "string" ? schema.$schema : "";
+  const ajv = schemaUri.includes("2020-12")
+    ? new Ajv2020({ allErrors: true, strict: false })
+    : new Ajv({ allErrors: true, strict: false });
+  addFormats(ajv);
   return ajv.compile(schema);
 }
 
@@ -489,10 +492,7 @@ async function castOneRef(
     };
   }
 
-  // Schema refs cite `content/schemas/<base>.schema.json` for stability, but the
-  // JSON now lives in `packages/<pkg>-schema/src/`. Resolve to the package path.
-  const lookupSrc = resolveContentSchemaRef(resolved.src) ?? resolved.src;
-  const srcAbs = path.join(repoRoot, lookupSrc);
+  const srcAbs = path.join(repoRoot, resolved.src);
   if (!existsSync(srcAbs)) {
     return {
       entry: { ...skeleton(resolved), src_hash: null, dst_hash: null, source: "deterministic" },
@@ -673,7 +673,9 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
   }
 
   // runs/*/summary.json validation — find a schema ref for this mold and validate any committed runs.
-  const schemaRefEntry = refEntries.find((r) => r.kind === "schema");
+  const schemaRefEntry =
+    refEntries.find((r) => r.kind === "schema" && r.ref === "[[summary-nextflow]]") ??
+    refEntries.find((r) => r.kind === "schema");
   if (schemaRefEntry) {
     const schemaAbs = path.join(bundleRoot, schemaRefEntry.dst);
     if (existsSync(schemaAbs)) {

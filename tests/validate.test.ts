@@ -449,7 +449,7 @@ describe("validateDirectory (cross-file)", () => {
         references: [
           { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed" },
           { kind: "pattern", ref: "[[pattern-x]]", used_at: "cast-time", load: "upfront", mode: "condense", evidence: "corpus-observed" },
-          { kind: "schema", ref: "content/schemas/x.schema.json", used_at: "both", load: "upfront", mode: "verbatim", evidence: "cast-validated" },
+          { kind: "schema", ref: "[[schema-x]]", used_at: "both", load: "upfront", mode: "verbatim", evidence: "cast-validated" },
         ],
       }),
     });
@@ -459,8 +459,16 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "patterns/pattern-x.md"), {
       ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Pattern X" }),
     });
-    mkdirSync(path.join(dir, "schemas"), { recursive: true });
-    writeFileSync(path.join(dir, "schemas/x.schema.json"), "{}");
+    writeFm(path.join(dir, "schemas/schema-x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "schema-x",
+        title: "Schema X",
+        package: "@example/schema-x",
+        package_export: "schemaX",
+      }),
+    });
 
     const r = validateDirectory({
       directory: dir,
@@ -559,6 +567,101 @@ describe("validateDirectory (cross-file)", () => {
       tagsPath: TAGS_PATH,
     });
     expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("rejects a vendored schema missing license_file", () => {
+    mkdirSync(path.join(dir, "schemas"), { recursive: true });
+    writeFileSync(path.join(dir, "schemas/x.schema.json"), "{}");
+    writeFm(path.join(dir, "schemas/x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "x",
+        title: "X",
+        package: "@some-org/x",
+        upstream: "https://github.com/some-org/x/blob/main/x.schema.json",
+      }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("accepts a vendored schema with license_file resolving inside the vault", () => {
+    mkdirSync(path.join(dir, "LICENSES"), { recursive: true });
+    writeFileSync(path.join(dir, "LICENSES/some-org.LICENSE"), "MIT License\n\nCopyright …\n");
+    mkdirSync(path.join(dir, "schemas"), { recursive: true });
+    writeFileSync(path.join(dir, "schemas/x.schema.json"), "{}");
+    writeFm(path.join(dir, "schemas/x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "x",
+        title: "X",
+        package: "@some-org/x",
+        upstream: "https://github.com/some-org/x/blob/main/x.schema.json",
+        license: "MIT",
+        license_file: "LICENSES/some-org.LICENSE",
+      }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
+  });
+
+  it("rejects a license_file pointing at a missing file", () => {
+    mkdirSync(path.join(dir, "schemas"), { recursive: true });
+    writeFileSync(path.join(dir, "schemas/x.schema.json"), "{}");
+    writeFm(path.join(dir, "schemas/x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "x",
+        title: "X",
+        package: "@some-org/x",
+        upstream: "https://github.com/some-org/x/blob/main/x.schema.json",
+        license: "MIT",
+        license_file: "LICENSES/does-not-exist.LICENSE",
+      }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBeGreaterThanOrEqual(1);
+  });
+
+  it("does not require license_file for Foundry-authored schemas", () => {
+    mkdirSync(path.join(dir, "schemas"), { recursive: true });
+    writeFileSync(path.join(dir, "schemas/x.schema.json"), "{}");
+    writeFm(path.join(dir, "schemas/x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "x",
+        title: "X",
+        package: "@galaxy-foundry/x-schema",
+        upstream: "https://github.com/jmchilton/foundry/blob/main/packages/x-schema/src/x.schema.json",
+        license: "MIT",
+      }),
+    });
+
+    const r = validateDirectory({
+      directory: dir,
+      schemaPath: SCHEMA_PATH,
+      tagsPath: TAGS_PATH,
+    });
+    expect(r.errors).toBe(0);
   });
 
   it("requires verification for hypothesis references", () => {

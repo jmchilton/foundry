@@ -3,7 +3,9 @@ type: schema
 name: summary-nextflow
 title: Nextflow pipeline summary
 package: "@galaxy-foundry/summary-nextflow-schema"
+package_export: "summaryNextflowSchema"
 upstream: "https://github.com/jmchilton/foundry/blob/main/packages/summary-nextflow-schema/src/summary-nextflow.schema.json"
+license: MIT
 tags:
   - schema
   - source/nextflow
@@ -26,7 +28,7 @@ This page is auto-rendered from the JSON Schema authored in this repo and shippe
 
 **Source-of-truth chain:**
 
-1. `packages/summary-nextflow-schema/src/summary-nextflow.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop ([[summarize-nextflow]]). Mold frontmatter still cites it as `content/schemas/summary-nextflow.schema.json`; cast and Astro resolve that back to the package source.
+1. `packages/summary-nextflow-schema/src/summary-nextflow.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop ([[summarize-nextflow]]). Mold frontmatter cites it via `[[summary-nextflow]]` wiki-links; cast imports the `summaryNextflowSchema` runtime export and serializes it into cast bundles.
 2. `packages/summary-nextflow-schema/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `summary-nextflow.schema.generated.ts` const wrapper from the canonical JSON.
 3. Published as `@galaxy-foundry/summary-nextflow-schema` on npm. Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published artifact also exports `validateSummary()` and ships a `validate-summary-nextflow` CLI bin for cast skills and downstream consumers.
 

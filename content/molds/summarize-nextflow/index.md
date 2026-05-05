@@ -8,19 +8,40 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-04
-revision: 8
+revised: 2026-05-05
+revision: 9
 ai_generated: true
 output_schemas:
-  - "content/schemas/summary-nextflow.schema.json"
+  - "[[summary-nextflow]]"
 references:
   - kind: schema
-    ref: "content/schemas/summary-nextflow.schema.json"
+    ref: "[[summary-nextflow]]"
     used_at: both
     load: upfront
     mode: verbatim
     evidence: cast-validated
     purpose: "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract."
+  - kind: schema
+    ref: "[[nf-core-module-meta]]"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate per-module meta.yml when walking nf-core modules; pins the channel IO `type` enum and tools/containers shape."
+  - kind: schema
+    ref: "[[nf-core-subworkflow-meta]]"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate subworkflow meta.yml; backs Subworkflow.calls extraction via the components: declaration."
+  - kind: schema
+    ref: "[[nextflow-parameters-meta]]"
+    used_at: both
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate per-pipeline nextflow_schema.json (Draft 2020-12) when extracting params[]."
   - kind: research
     ref: "[[component-nextflow-pipeline-anatomy]]"
     used_at: runtime
@@ -34,11 +55,10 @@ references:
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
     load: on-demand
-    mode: verbatim
-    evidence: hypothesis
+    mode: condense
+    evidence: corpus-observed
     purpose: "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence."
     trigger: "When extracting tools, versions, containers, conda directives, or environment equivalences."
-    verification: "Run the generated summarize-nextflow skill against nf-core/rnaseq and confirm this reference improves tool/container/environment extraction."
   - kind: research
     ref: "[[component-nextflow-testing]]"
     used_at: runtime
@@ -74,7 +94,7 @@ The Mold does **not** accept "summarize this single subworkflow" subset hints; w
 
 ## Outputs
 
-A single JSON document conforming to [[summary-nextflow]] (`content/schemas/summary-nextflow.schema.json`). Sketch shape:
+A single JSON document conforming to [[summary-nextflow]] (`packages/summary-nextflow-schema/src/summary-nextflow.schema.json`). Sketch shape:
 
 ```jsonc
 {
@@ -282,10 +302,12 @@ The procedure assumes — and the cast skill must surface in `warnings[]` when r
 - **Test execution.** Fixtures are described, not run. `[[run-workflow-test]]` owns execution.
 - **Schema evolution.** The schema at [[summary-nextflow]] is v1, draft. Adding fields requires evaluating against the §"Reference dispatch" exemplars (rnaseq, sarek, one ad-hoc) before merging.
 
-## Reference dispatch (for casting)
+## Reference dispatch
 
-- `output_schemas` → [[summary-nextflow]] (`content/schemas/summary-nextflow.schema.json`) — copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning.
+The `references:` manifest above is the source of truth for cast/runtime handling. `used_at` says whether a reference is consumed while building the cast, loaded by the generated skill at runtime, or both; `load` says whether the generated skill treats it as upfront context or an on-demand file.
+
+- `output_schemas` / `kind: schema` → [[summary-nextflow]] — resolved at cast time to `@galaxy-foundry/summary-nextflow-schema`'s `summaryNextflowSchema` export and written verbatim into the cast bundle's `references/schemas/summary-nextflow.schema.json`. The cast skill validates its emitted JSON with `validate-summary-nextflow` before returning. This reference is `used_at: both` because it shapes the generated skill and remains a runtime validation contract.
 - `cli_commands` — none today. Open question whether the Foundry seeds a `content/cli/nextflow/` family for `nextflow config`, `nf-core list`, `nf-test`. The cast skill calls these CLIs at runtime regardless; the question is whether the Foundry carries manpages for them.
 - `patterns` — none. Per-source summarization is correctly empty here; this is the first inventory case where a Mold legitimately declares no patterns. Relevant for MOLD_SPEC.
-- Research notes — pending: `[[component-nextflow-pipeline-anatomy]]` (DSL2 layout, channel idioms), `[[component-nextflow-containers-and-envs]]` (biocontainers / bioconda equivalence rules), `[[component-nextflow-testing]]` (`conf/test.config`, `nf-core/test-datasets`, nf-test). Body links above render dangling until these are seeded; they are the operational grounding for §4-7. Not packaged into the cast — the casting LLM selects only operationally relevant slices when condensing the procedural body.
+- Research notes — `[[component-nextflow-pipeline-anatomy]]`, `[[component-nextflow-containers-and-envs]]`, and `[[component-nextflow-testing]]` are packaged into the cast bundle's `references/notes/` as runtime, on-demand grounding. They are not automatically dumped into the casting prompt; if one becomes necessary for cast-time synthesis, change that reference to `used_at: both` or `cast-time` and choose the appropriate `mode`.
 - `examples` — pending: `nf-core/rnaseq` (canonical, stresses every section), `nf-core/sarek` (heavy conditional subworkflows; stresses §6's reconciliation), and one ad-hoc DSL2 pipeline (no `meta.yml`, no `nextflow_schema.json`; stresses fallback paths). Bundling vs URL-referencing is open — `rnaseq` is too large to mirror; the corpus-first principle says cite by URL. See [[GXY_SKETCHES_ALIGNMENT]] for the analogous bundle-vs-URL discussion in gxy-sketches.

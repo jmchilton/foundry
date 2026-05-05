@@ -162,10 +162,12 @@ properties:
     type: array
     items:
       type: string
+      pattern: "^\\[\\[.+\\]\\]$"
   output_schemas:
     type: array
     items:
       type: string
+      pattern: "^\\[\\[.+\\]\\]$"
   examples:
     type: array
     items:
@@ -237,6 +239,21 @@ properties:
   package_export:
     type: string
     description: "For package-vendored schemas: the named runtime export from `package` that returns the JSON Schema object (e.g. `testsSchema`). cast-mold imports and stringifies this when resolving a typed `kind: schema` reference."
+
+  # --- Vendoring fields (any note redistributing upstream content) ---
+  # SPDX identifier of the content's license. Set on schema notes whose
+  # `upstream` lives outside this repo, and on research notes that vendor a
+  # structured upstream artifact alongside their prose.
+  license:
+    type: string
+    enum: [MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, AFL-3.0, GPL-2.0-only, GPL-3.0-only]
+    description: "SPDX license identifier for the note's vendored content. The Foundry's own content is covered by the root LICENSE; this field annotates third-party redistributions."
+  # Repo-relative path to the upstream LICENSE under LICENSES/. The validator
+  # confirms the file exists and is non-empty.
+  license_file:
+    type: string
+    pattern: "^LICENSES/[A-Za-z0-9._-]+(\\.LICENSE|\\.txt)?$"
+    description: "Repo-relative path under LICENSES/ to the verbatim upstream LICENSE this note redistributes content under."
 
 allOf:
   # mold requires name + axis

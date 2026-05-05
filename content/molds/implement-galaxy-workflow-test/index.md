@@ -30,7 +30,7 @@ references:
     purpose: "Run the cheap static workflow-test validation and workflow-label cross-check before Planemo execution."
     trigger: "After authoring or editing a Galaxy workflow test file and before Planemo invocation."
   - kind: schema
-    ref: "content/schemas/tests.schema.json"
+    ref: "[[tests-format]]"
     used_at: runtime
     load: upfront
     mode: verbatim
