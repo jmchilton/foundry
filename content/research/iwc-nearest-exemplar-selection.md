@@ -18,7 +18,9 @@ related_notes:
   - "[[iwc-test-data-conventions]]"
 related_molds:
   - "[[compare-against-iwc-exemplar]]"
-  - "[[summary-to-galaxy-template]]"
+  - "[[nextflow-summary-to-galaxy-template]]"
+  - "[[cwl-summary-to-galaxy-template]]"
+  - "[[paper-summary-to-galaxy-template]]"
 sources:
   - "https://github.com/jmchilton/foundry/issues/55"
 summary: "Defines a feature hierarchy for selecting useful IWC exemplar workflows for structural comparison."
@@ -79,7 +81,7 @@ Use `$IWC_FORMAT2/...` for parameter-level evidence and exact `tool_state`. Use 
 ## Mold Use
 
 - [[compare-against-iwc-exemplar]] should use this as the selection procedure for finding and ranking exemplar candidates.
-- [[summary-to-galaxy-template]] should use this on demand when a skeleton is mature enough to pick comparison targets.
+- The source-specific Galaxy template Molds ([[nextflow-summary-to-galaxy-template]], [[cwl-summary-to-galaxy-template]], [[paper-summary-to-galaxy-template]]) should use this on demand when a skeleton is mature enough to pick comparison targets.
 
 ## Runtime Discovery
 

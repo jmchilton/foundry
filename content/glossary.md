@@ -82,7 +82,7 @@ Alphabetical.
 
 **Source-specific** *(Mold axis)* — a Mold whose content depends on the input format. Examples: `summarize-paper`, `summarize-nextflow`, `summarize-cwl`. Each emits its own schema by design — no shared summary schema.
 
-**Target-specific** *(Mold axis)* — a Mold whose content depends on the output target. Examples: `summary-to-galaxy-template`, `summarize-galaxy-tool`, `validate-cwl`.
+**Target-specific** *(Mold axis)* — a Mold whose content depends on the output target. Examples: `summary-to-cwl-template`, `summarize-galaxy-tool`, `validate-cwl`.
 
 **Tool-specific** *(Mold axis)* — a provisional Mold axis for actions whose behavior depends on one external tool. Whole-CLI reference surfaces are reference content, not Molds.
 

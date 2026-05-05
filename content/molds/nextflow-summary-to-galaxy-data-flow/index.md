@@ -68,4 +68,4 @@ related_notes:
 
 Read a Nextflow summary plus the preceding Galaxy interface brief and emit a reviewable Markdown data-flow brief. Capture abstract operations, collection map/reduce choices, shape-changing placeholder transformations, unresolved Galaxy tool needs, confidence, and open questions.
 
-The output is not gxformat2 and should not resolve exact Tool Shed tools. [[summary-to-galaxy-template]] turns this handoff and the interface brief into a skeleton.
+The output is not gxformat2 and should not resolve exact Tool Shed tools. [[nextflow-summary-to-galaxy-template]] turns this handoff and the interface brief into a skeleton.

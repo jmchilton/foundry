@@ -18,20 +18,22 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | --- | --- | --- | --- | --- |
 | [[cwl-summary-to-galaxy-data-flow]] | Translate a CWL summary into a Galaxy data-flow design brief. | draft | 2026-05-05 | 1 |
 | [[cwl-summary-to-galaxy-interface]] | Map a CWL summary into a Galaxy workflow interface design brief. | draft | 2026-05-05 | 1 |
+| [[cwl-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs. | draft | 2026-05-05 | 1 |
 | [[nextflow-summary-to-cwl-data-flow]] | Translate a Nextflow summary into a CWL data-flow design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-summary-to-cwl-interface]] | Map a Nextflow summary into a CWL Workflow interface design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-summary-to-galaxy-interface]] | Map a Nextflow summary into a Galaxy workflow interface design brief. | draft | 2026-05-05 | 1 |
+| [[nextflow-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs. | draft | 2026-05-05 | 1 |
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | draft | 2026-05-05 | 4 |
 | [[paper-summary-to-cwl-design]] | Translate a paper summary into a CWL workflow design brief. | draft | 2026-05-05 | 1 |
 | [[paper-summary-to-galaxy-design]] | Translate a paper summary into a Galaxy workflow design brief. | draft | 2026-05-05 | 1 |
+| [[paper-summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a paper summary and the paper-to-Galaxy design brief. | draft | 2026-05-05 | 1 |
+| [[summarize-nextflow]] | Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to. | draft | 2026-05-05 | 9 |
 | [[summary-to-cwl-template]] | CWL Workflow skeleton with per-step TODOs from source and design handoffs. | draft | 2026-05-05 | 2 |
-| [[summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from source and design handoffs. | draft | 2026-05-05 | 4 |
 | [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | draft | 2026-05-04 | 3 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | draft | 2026-05-04 | 5 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | draft | 2026-05-04 | 3 |
 | [[summarize-galaxy-tool]] | Pull JSON schema, container, source, inputs/outputs for a Galaxy tool. | draft | 2026-05-04 | 4 |
-| [[summarize-nextflow]] | Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to. | draft | 2026-05-04 | 8 |
 | [[author-galaxy-tool-wrapper]] | Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable. | draft | 2026-05-03 | 2 |
 | [[compare-against-iwc-exemplar]] | Find nearest IWC exemplar(s) and surface a structural diff against a draft. | draft | 2026-05-03 | 4 |
 | [[cwl-test-to-galaxy-test-plan]] | Translate CWL test fixtures into a Galaxy workflow test plan. | draft | 2026-05-03 | 2 |
@@ -120,16 +122,22 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[nextflow-parameters-meta]] | JSON Schema (Draft 2020-12) meta-schema validating per-pipeline nextflow_schema.json files. Upstream from nextflow-io/nf-schema. | draft | 2026-05-05 | 1 |
+| [[nf-core-module-meta]] | JSON Schema (Draft-07) validating nf-core module meta.yml — channel IO, tools, containers, conda lockfiles. Upstream from nf-core/modules. | draft | 2026-05-05 | 1 |
+| [[nf-core-subworkflow-meta]] | JSON Schema (Draft-07) validating nf-core subworkflow meta.yml — channel IO, components dependencies, authors. Upstream from nf-core/modules. | draft | 2026-05-05 | 1 |
+| [[tests-format]] | JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`. | draft | 2026-05-05 | 4 |
 | [[galaxy-tool-discovery]] | JSON Schema for Tool Shed discovery hit, weak, and miss recommendations. | draft | 2026-05-04 | 1 |
 | [[summary-nextflow]] | JSON Schema for the structured summary emitted by the summarize-nextflow Mold. | draft | 2026-05-04 | 4 |
-| [[tests-format]] | JSON Schema for the planemo workflow test format (`<workflow>-tests.yml`), vendored from `@galaxy-tool-util/schema`. | draft | 2026-05-04 | 3 |
 
 ## Component Research
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[component-nextflow-channel-operators]] | Structured digest of Nextflow channel operators (47 entries) with cardinality and shape semantics; backs summarize-nextflow §6 edge reconciliation. | draft | 2026-05-05 | 1 |
+| [[component-nextflow-containers-and-envs]] | Container URL grammar (depot, BioContainers, mulled-v2, Wave, ORAS) and conda directive resolution rules backing summarize-nextflow §5. | draft | 2026-05-05 | 3 |
+| [[component-nextflow-testing]] | nf-test patterns mapped to Galaxy planemo asserts and CWL test equivalents — backs nextflow-test-to-target-tests Mold and summarize-nextflow §7. | draft | 2026-05-05 | 2 |
+| [[component-nf-core-module-conventions]] | RFC 2119 conventions enforced by nf-core/tools module lint, with lint-check pointers. Backs summarize-nextflow + author-galaxy-tool-wrapper. | draft | 2026-05-05 | 1 |
 | [[nextflow-snapshot-to-galaxy-assertions]] | Translates nf-test snapshot assertions into Galaxy workflow test-format assertions, broken out by module-level vs pipeline-level test shape. | draft | 2026-05-05 | 2 |
-| [[component-nextflow-containers-and-envs]] | Maps Nextflow container and conda evidence to Galaxy package and container requirements. | draft | 2026-05-04 | 2 |
 | [[iwc-runtime-parameter-shims-survey]] | Focused survey of tiny IWC runtime parameter shims for flags, enums, counts, booleans, and composed text. | draft | 2026-05-04 | 1 |
 | [[component-tool-shed-search]] | Tool Shed's Whoosh repo/tool search and partial GA4GH TRS v2, indexed from hg-walked metadata with no auto-refresh on upload | draft | 2026-05-03 | 2 |
 | [[galaxy-collection-semantics]] | Vendored formal spec of Galaxy dataset-collection mapping/reduction semantics, with labeled examples and pinned test references. | draft | 2026-05-03 | 3 |
@@ -154,5 +162,4 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[nextflow-to-galaxy-channel-shape-mapping]] | Maps common Nextflow channel, tuple, and path shapes to Galaxy dataset and collection shapes. | draft | 2026-05-02 | 1 |
 | [[component-nextflow-inspect]] | White paper on Nextflow's native introspection subcommands — `nextflow inspect`, `nextflow config`, and adjacent tooling. Survey, not decision. | draft | 2026-05-01 | 1 |
 | [[component-nextflow-pipeline-anatomy]] | Stub. DSL2 layout, channel idioms, operator-chain reading rules. Grows from cast contact with rnaseq/sarek/ad-hoc — see issue #17. | draft | 2026-05-01 | 1 |
-| [[component-nextflow-testing]] | Stub. conf/test.config, nf-core/test-datasets, nf-test idioms, samplesheet conventions. Grows from cast contact — see issue #17. | draft | 2026-05-01 | 1 |
 | [[component-nf-core-tools]] | White paper on nf-core/tools — conventions, CLI surface, schema universe, container resolution. Survey, not decision. | draft | 2026-05-01 | 1 |

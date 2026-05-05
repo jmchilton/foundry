@@ -1,17 +1,19 @@
 ---
 type: mold
-name: summary-to-galaxy-template
-axis: target-specific
+name: cwl-summary-to-galaxy-template
+axis: source-specific
+source: cwl
 target: galaxy
 tags:
   - mold
+  - source/cwl
   - target/galaxy
 status: draft
-created: 2026-04-30
+created: 2026-05-05
 revised: 2026-05-05
-revision: 4
+revision: 1
 ai_generated: true
-summary: "gxformat2 skeleton with per-step TODOs from source and design handoffs."
+summary: "gxformat2 skeleton with per-step TODOs from a CWL summary and prior Galaxy design briefs."
 references:
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"
@@ -27,7 +29,7 @@ references:
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton."
+    purpose: "Translate CWL arrays, records, scatter, and secondary-file shapes into Galaxy collection typing and map-over/reduction semantics."
     trigger: "When creating workflow inputs, outputs, and placeholder connections involving collections."
   - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"
@@ -37,7 +39,7 @@ references:
     evidence: hypothesis
     purpose: "Respect the handoff from abstract data-flow draft to gxformat2 skeleton."
     trigger: "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs."
-    verification: "Promote after two worked Galaxy templates preserve the data-flow/template split without schema changes."
+    verification: "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes."
   - kind: research
     ref: "[[iwc-nearest-exemplar-selection]]"
     used_at: runtime
@@ -63,14 +65,11 @@ references:
     purpose: "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps."
     trigger: "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges."
 related_notes:
-  - "[[nextflow-summary-to-galaxy-interface]]"
-  - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[cwl-summary-to-galaxy-interface]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
-  - "[[paper-summary-to-galaxy-design]]"
 ---
-# summary-to-galaxy-template
+# cwl-summary-to-galaxy-template
 
-Read the original source artifact, the source summary, and all prior source-target design handoffs from the pipeline run. Emit a gxformat2 skeleton with workflow inputs, workflow outputs, placeholder steps, rough connections, and TODO slots for later implementation Molds.
+Read the original CWL source artifact, the CWL summary, the CWL-to-Galaxy interface brief, and the CWL-to-Galaxy data-flow brief. Emit a gxformat2 skeleton with workflow inputs, workflow outputs, placeholder steps, rough connections, and TODO slots for later implementation Molds.
 
-The interface and data-flow briefs guide the skeleton, but they do not replace source evidence. Treat the prior-step index as the working context: source summary, interface brief, data-flow brief or paper design brief, and any open questions carried forward.
+CWL already carries structured workflow shape, so this Mold should be lighter than [[nextflow-summary-to-galaxy-template]]. Treat the prior-step index as the working context: CWL source, CWL summary, interface brief, data-flow brief, and any open questions carried forward.
