@@ -51,12 +51,12 @@ Use this when a Nextflow summary reports `.branch`, `.filter`, or `.ifEmpty`. Do
 
 | Nextflow source shape | Galaxy target pattern | Notes |
 | --- | --- | --- |
-| `branch` separates workflow modes from a user parameter | `[[conditional-run-optional-step]]` or `[[conditional-route-between-alternative-outputs]]` | Gate whole steps; merge if downstream needs one value. |
-| `branch` selects among peer outputs | `[[conditional-route-between-alternative-outputs]]` | Require compatible branch outputs. |
-| `filter` removes empty or failed mapped outputs | `[[collection-cleanup-after-mapover-failure]]` | Prefer empty/failed filters, not `when`. |
-| Cleaned result membership subsets a sibling collection | `[[sync-collections-by-identifier]]` | Extract identifiers from the truth collection. |
-| `ifEmpty` controls final report/export | `[[conditional-gate-on-nonempty-result]]` | Derive a boolean, then gate report/export. |
-| cleanup + sibling sync + publish gate | `[[cleanup-sync-and-publish-nonempty-results]]` | Use the lifecycle recipe. |
+| `branch` separates workflow modes from a user parameter | [[conditional-run-optional-step]] or [[conditional-route-between-alternative-outputs]] | Gate whole steps; merge if downstream needs one value. |
+| `branch` selects among peer outputs | [[conditional-route-between-alternative-outputs]] | Require compatible branch outputs. |
+| `filter` removes empty or failed mapped outputs | [[collection-cleanup-after-mapover-failure]] | Prefer empty/failed filters, not `when`. |
+| Cleaned result membership subsets a sibling collection | [[sync-collections-by-identifier]] | Extract identifiers from the truth collection. |
+| `ifEmpty` controls final report/export | [[conditional-gate-on-nonempty-result]] | Derive a boolean, then gate report/export. |
+| cleanup + sibling sync + publish gate | [[cleanup-sync-and-publish-nonempty-results]] | Use the lifecycle recipe. |
 
 ## Pitfalls
 

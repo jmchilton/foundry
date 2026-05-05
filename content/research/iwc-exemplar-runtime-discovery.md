@@ -31,7 +31,7 @@ The v1 procedure is:
 3. Narrow candidates by path/domain keywords first, then by fetched workflow labels, input types, output labels, and tool ids.
 4. Fetch only the ranked candidate workflows as URLs.
 5. Normalize each fetched workflow with `gxwf` into the comparison representation needed by the Mold.
-6. Rank with `[[iwc-nearest-exemplar-selection]]` and emit one nearest exemplar plus weak alternates when useful.
+6. Rank with [[iwc-nearest-exemplar-selection]] and emit one nearest exemplar plus weak alternates when useful.
 
 The caller may provide a local IWC path as an override for offline development, but cast artifacts must not depend on Foundry `workflow-fixtures/` or a bundled exemplar index.
 

@@ -79,7 +79,7 @@ This Mold is the corpus-first check in Galaxy-targeting pipelines. It does not r
 
 ## Inputs
 
-The Mold expects a Galaxy draft from one of the source-specific Galaxy template Molds (`[[nextflow-summary-to-galaxy-template]]`, `[[cwl-summary-to-galaxy-template]]`, `[[paper-summary-to-galaxy-template]]`) or a later implemented workflow. The draft should include:
+The Mold expects a Galaxy draft from one of the source-specific Galaxy template Molds ([[nextflow-summary-to-galaxy-template]], [[cwl-summary-to-galaxy-template]], [[paper-summary-to-galaxy-template]]) or a later implemented workflow. The draft should include:
 
 - Workflow/domain intent and source summary context.
 - Workflow inputs, outputs, and collection topology.
@@ -198,6 +198,6 @@ Do not block downstream authoring on low-confidence exemplar mismatches. Report 
 ## Non-goals
 
 - **No corpus mirroring.** Runtime output cites IWC URLs; Foundry fixtures are research aids only.
-- **No tool discovery.** Do not replace `[[discover-shed-tool]]`.
+- **No tool discovery.** Do not replace [[discover-shed-tool]].
 - **No automatic rewrite.** This Mold emits structural diff guidance; the harness or user decides which changes to apply.
 - **No forced nearest.** A no-match result is valid when IWC lacks a close exemplar.

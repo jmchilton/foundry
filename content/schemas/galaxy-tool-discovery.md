@@ -21,11 +21,11 @@ related_molds:
 summary: "JSON Schema for Tool Shed discovery hit, weak, and miss recommendations."
 ---
 
-This page is auto-rendered from the JSON Schema authored in this repo. Each `$def` becomes a section below with a stable anchor ID — research notes and Mold bodies can deep-link individual shapes via `[[galaxy-tool-discovery#ToolCandidate]]`.
+This page is auto-rendered from the JSON Schema authored in this repo. Each `$def` becomes a section below with a stable anchor ID — research notes and Mold bodies can deep-link individual shapes via [[galaxy-tool-discovery#ToolCandidate]].
 
 **Source-of-truth chain:**
 
-1. `packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop around [[discover-shed-tool]]. Mold frontmatter cites it via `[[galaxy-tool-discovery]]` wiki-links; cast imports the `galaxyToolDiscoverySchema` runtime export and serializes it into cast bundles.
+1. `packages/galaxy-tool-discovery-schema/src/galaxy-tool-discovery.schema.json` — the canonical JSON, hand-edited as part of the Mold/cast loop around [[discover-shed-tool]]. Mold frontmatter cites it via [[galaxy-tool-discovery]] wiki-links; cast imports the `galaxyToolDiscoverySchema` runtime export and serializes it into cast bundles.
 2. `packages/galaxy-tool-discovery-schema/scripts/sync-schema.mjs` runs at `prebuild`, regenerating the typed `galaxy-tool-discovery.schema.generated.ts` const wrapper from the canonical JSON.
 3. Published as `@galaxy-foundry/galaxy-tool-discovery-schema` on npm. Site rendering imports the schema directly from this package via `site/src/lib/schema-registry.ts`; the published artifact also exports `validateGalaxyToolDiscovery()` and ships a `validate-galaxy-tool-discovery` CLI bin for cast skills and downstream consumers.
 
@@ -39,7 +39,7 @@ Library validation exists for TypeScript consumers, but generated skills should 
 
 ## Why recommendation-shaped
 
-`[[discover-shed-tool]]` is not just a thin `gxwf tool-search` wrapper. It searches, resolves candidate versions, resolves changeset revisions, ranks alternates, and decides whether the harness should proceed, ask for confirmation, or fall through to [[author-galaxy-tool-wrapper]]. The schema therefore models the recommendation boundary rather than any one upstream CLI response.
+[[discover-shed-tool]] is not just a thin `gxwf tool-search` wrapper. It searches, resolves candidate versions, resolves changeset revisions, ranks alternates, and decides whether the harness should proceed, ask for confirmation, or fall through to [[author-galaxy-tool-wrapper]]. The schema therefore models the recommendation boundary rather than any one upstream CLI response.
 
 The deterministic primitive outputs stay upstream in `@galaxy-tool-util/*`:
 
@@ -58,13 +58,13 @@ The schema uses Foundry's JSON contract style: `snake_case` fields such as `tool
 
 ## Cast-time role
 
-Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by `[[discover-shed-tool]]` via `output_schemas` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted recommendation with `validate-galaxy-tool-discovery` before returning; downstream phases bind to this object and would produce worse errors later.
+Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is referenced by [[discover-shed-tool]] via `output_schemas` and copied verbatim into the cast bundle's `references/schemas/`. The cast skill validates its emitted recommendation with `validate-galaxy-tool-discovery` before returning; downstream phases bind to this object and would produce worse errors later.
 
 The same object feeds several consumers:
 
-- `[[summarize-galaxy-tool]]` consumes the selected Tool Shed pin after the harness has populated `galaxy-tool-cache`.
-- `[[author-galaxy-tool-wrapper]]` receives `weak` or `miss` context when the branch falls through.
-- `[[implement-galaxy-tool-step]]` uses the selected wrapper path indirectly, after [[summarize-galaxy-tool]] has produced a wrapper summary.
+- [[summarize-galaxy-tool]] consumes the selected Tool Shed pin after the harness has populated `galaxy-tool-cache`.
+- [[author-galaxy-tool-wrapper]] receives `weak` or `miss` context when the branch falls through.
+- [[implement-galaxy-tool-step]] uses the selected wrapper path indirectly, after [[summarize-galaxy-tool]] has produced a wrapper summary.
 
 ## What is intentionally not modeled
 

@@ -34,6 +34,6 @@ references:
 
 # validate-galaxy-step
 
-Validate the Galaxy workflow fragment after one step has been implemented. The Mold owns the inline validation loop: run `[[gxwf validate]]`, classify diagnostics that are local to the new step, and route failures back to `[[implement-galaxy-tool-step]]` or `[[author-galaxy-tool-wrapper]]` as appropriate.
+Validate the Galaxy workflow fragment after one step has been implemented. The Mold owns the inline validation loop: run [[gxwf validate]], classify diagnostics that are local to the new step, and route failures back to [[implement-galaxy-tool-step]] or [[author-galaxy-tool-wrapper]] as appropriate.
 
-This is separate from `[[validate-galaxy-workflow]]` because the harness behavior differs: step validation runs inside the per-step loop and should preserve local context about the step that just changed.
+This is separate from [[validate-galaxy-workflow]] because the harness behavior differs: step validation runs inside the per-step loop and should preserve local context about the step that just changed.

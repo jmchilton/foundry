@@ -50,10 +50,10 @@ If membership, order, or labels may drift, add explicit identifier synchronizati
 
 ## Choose implementation pattern
 
-- `[[sync-collections-by-identifier]]` for membership intersection by identifier.
-- `[[harmonize-by-sortlist-from-identifiers]]` for order sync before zip-like mapped consumption.
-- `[[regex-relabel-via-tabular]]` to restore or clean labels before keyed pairing.
-- `[[tabular-join-on-key]]` when the source join is row/table data joining rather than file collection alignment.
+- [[sync-collections-by-identifier]] for membership intersection by identifier.
+- [[harmonize-by-sortlist-from-identifiers]] for order sync before zip-like mapped consumption.
+- [[regex-relabel-via-tabular]] to restore or clean labels before keyed pairing.
+- [[tabular-join-on-key]] when the source join is row/table data joining rather than file collection alignment.
 
 ## Decision checklist
 

@@ -212,7 +212,7 @@ For a Nextflow → Galaxy translation: run the translated Galaxy workflow once, 
 
 ## 8. Cross-references
 
-- [[tests-format]] — Galaxy assertion vocabulary, deep-link via `[[tests-format#<def>]]`.
+- [[tests-format]] — Galaxy assertion vocabulary, deep-link via [[tests-format#<def>]].
 - [[planemo-asserts-idioms]] — output-type → assertion-family decision table; tolerance magnitudes; static-gate inner loop.
 - [[summary-nextflow]] — source-side schema, including `NfTest` and `SnapshotFixture` shape.
 - [[iwc-test-data-conventions]] — Galaxy job-input shape (the *other* half of test translation).

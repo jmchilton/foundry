@@ -44,12 +44,12 @@ Use this when Nextflow report, version, or QC channels converge before final rep
 
 ## Galaxy translation
 
-- If source emits nested outputs for a report consumer, flatten first with `[[collection-flatten-after-fanout]]`.
-- If final artifacts should remain separate but published together, use `[[collection-build-named-bundle]]`.
-- If per-element tabular outputs should become one long table, use `[[tabular-concatenate-collection-to-table]]`.
-- If per-element id/value tables should become one wide matrix, use `[[tabular-pivot-collection-to-wide]]`.
-- If several parallel outputs feed a collection-aware consumer before flattening, use `[[fan-in-bundle-consume-and-flatten]]`.
-- If aggregation/reporting should only run when cleaned results remain, use `[[conditional-gate-on-nonempty-result]]`.
+- If source emits nested outputs for a report consumer, flatten first with [[collection-flatten-after-fanout]].
+- If final artifacts should remain separate but published together, use [[collection-build-named-bundle]].
+- If per-element tabular outputs should become one long table, use [[tabular-concatenate-collection-to-table]].
+- If per-element id/value tables should become one wide matrix, use [[tabular-pivot-collection-to-wide]].
+- If several parallel outputs feed a collection-aware consumer before flattening, use [[fan-in-bundle-consume-and-flatten]].
+- If aggregation/reporting should only run when cleaned results remain, use [[conditional-gate-on-nonempty-result]].
 
 ## Operator-specific decisions
 

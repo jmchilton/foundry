@@ -25,7 +25,7 @@ summary: "Decision and idiom guide for picking planemo workflow-test assertions:
 
 Companion to [[iwc-test-data-conventions]] (input shapes), [[galaxy-workflow-testability-design]] (workflow structure before test YAML exists), and [[iwc-shortcuts-anti-patterns]] (what's accepted vs smell). This note is forward-looking: when authoring a new `<workflow>-tests.yml`, which assertion family fits which output, and what the recommended tolerances and operators are.
 
-The **vocabulary itself is not restated here** — every assertion's parameter list, types, defaults, required fields, and Python docstring is rendered from the test-format JSON Schema at [[tests-format]]. Assertion names below deep-link into that page (e.g. `[[tests-format#has_text_model|has_text]]` jumps straight to that `$def`).
+The **vocabulary itself is not restated here** — every assertion's parameter list, types, defaults, required fields, and Python docstring is rendered from the test-format JSON Schema at [[tests-format]]. Assertion names below deep-link into that page (e.g. [[tests-format#has_text_model|has_text]] jumps straight to that `$def`).
 
 ## 1. Choose by output type
 

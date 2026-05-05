@@ -27,7 +27,7 @@ summary: "JSON Schema (Draft-07) validating nf-core subworkflow meta.yml — cha
 
 JSON Schema vendored verbatim from `nf-core/modules` at SHA `d852990`. Validates every subworkflow `meta.yml` under `subworkflows/nf-core/<name>/`.
 
-**Operational role.** Companion to `[[nf-core-module-meta]]` for the subworkflow tier. `summarize-nextflow` §6 distinguishes `kind: pipeline` vs `kind: utility` subworkflows; this schema's `components` field — the declared transitive module/subworkflow dependencies — is the structured signal that backs the call-graph extraction.
+**Operational role.** Companion to [[nf-core-module-meta]] for the subworkflow tier. `summarize-nextflow` §6 distinguishes `kind: pipeline` vs `kind: utility` subworkflows; this schema's `components` field — the declared transitive module/subworkflow dependencies — is the structured signal that backs the call-graph extraction.
 
 **Source-of-truth chain:**
 

@@ -23,7 +23,7 @@ related_notes:
 
 # Nextflow Channel Operators
 
-Operational grounding for `[[summarize-nextflow]]` §6 ("Reconcile the workflow DAG"). The Mold's deterministic parser records the *literal* operator chain a workflow uses (`["map", "join", "groupTuple"]` in `Edge.via`); a second LLM pass reconciles the chain into a coherent `from → to` edge with resolved shape.
+Operational grounding for [[summarize-nextflow]] §6 ("Reconcile the workflow DAG"). The Mold's deterministic parser records the *literal* operator chain a workflow uses (`["map", "join", "groupTuple"]` in `Edge.via`); a second LLM pass reconciles the chain into a coherent `from → to` edge with resolved shape.
 
 That reconciliation badly needs operator-level cardinality semantics: which operators preserve cardinality, which fan out, which fan in, which fork. Without a structured operator catalog, the LLM is guessing.
 
@@ -69,8 +69,8 @@ The Mold §6 says operator chains with deeply nested closures may produce edges 
 ## Cross-references
 
 - `summarize-nextflow.md` §6 — the consumer of this digest.
-- `[[component-nextflow-pipeline-anatomy]]` — DSL2 layout context.
-- The `Edge.via` field in `[[summary-nextflow]]` — where the operator chain is recorded.
+- [[component-nextflow-pipeline-anatomy]] — DSL2 layout context.
+- The `Edge.via` field in [[summary-nextflow]] — where the operator chain is recorded.
 
 ## Open gaps
 

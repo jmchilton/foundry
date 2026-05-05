@@ -46,10 +46,10 @@ Use this when Nextflow groups records with `groupTuple()`, reshapes grouped reco
 First decide whether the grouping key is a real Galaxy axis such as sample, region, segment, replicate, or method.
 
 - If yes, model it as `list`, `list:list`, `list:paired`, or another concrete collection shape.
-- If the axis order is wrong, use `[[collection-swap-nesting-with-apply-rules]]` or `[[reshape-relabel-remap-by-collection-axis]]`.
-- If one identifier encodes multiple axes, use `[[collection-split-identifier-via-rules]]`.
-- If the outer axis no longer matters, use `[[collection-flatten-after-fanout]]`.
-- If the grouped result is a known singleton, use `[[collection-unbox-singleton]]`.
+- If the axis order is wrong, use [[collection-swap-nesting-with-apply-rules]] or [[reshape-relabel-remap-by-collection-axis]].
+- If one identifier encodes multiple axes, use [[collection-split-identifier-via-rules]].
+- If the outer axis no longer matters, use [[collection-flatten-after-fanout]].
+- If the grouped result is a known singleton, use [[collection-unbox-singleton]].
 - If grouping only feeds a domain merge/reduce tool, implement the reducer rather than a synthetic reshape.
 
 ## Decision checklist
