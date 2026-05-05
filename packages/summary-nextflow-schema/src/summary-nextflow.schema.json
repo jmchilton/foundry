@@ -306,7 +306,47 @@
         "helpers":       { "type": "array", "items": { "type": "string" }, "description": "nf-test helper functions invoked in the snapshot expression (e.g. `getAllFilesFromDir`, `removeNextflowVersion`). Used to detect whether a target framework can replicate the comparison." },
         "ignore_files":  { "type": "array", "items": { "type": "string" }, "description": "Repo-relative paths passed as `ignoreFile:` to helpers (e.g. `tests/.nftignore`, `tests/.nftignore_files_entirely`). The files themselves are line-delimited globs." },
         "ignore_globs":  { "type": "array", "items": { "type": "string" }, "description": "Inline `ignore: [...]` glob list passed to helpers (e.g. `['Prokka/**', '**/multiqc_busco.yaml']`). Distinct from ignore_files which references on-disk lists." },
-        "snap_path":     { "type": ["string", "null"], "description": "Repo-relative path of the corresponding `.nf.test.snap` file when present." }
+        "snap_path":     { "type": ["string", "null"], "description": "Repo-relative path of the corresponding `.nf.test.snap` file when present." },
+        "parsed_content": { "type": "array", "items": { "$ref": "#/$defs/SnapshotContent" }, "description": "Parsed entries from the `.nf.test.snap` JSON sidecar. Empty when the sidecar is absent, too large for compact summary output, or not valid JSON. Each entry preserves the snapshot name plus channel-keyed file md5 assertions and non-file scalar values." }
+      }
+    },
+
+    "SnapshotContent": {
+      "title": "SnapshotContent",
+      "description": "One top-level snapshot entry from an nf-test `.snap` JSON sidecar.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "channels"],
+      "properties": {
+        "name":     { "type": "string", "description": "Top-level key in the `.snap` file, usually the `test(\"...\")` name." },
+        "channels": { "type": "array", "items": { "$ref": "#/$defs/SnapshotChannel" }, "description": "Channel-keyed snapshot values. Pipeline-template flat file lists use `key: null`." }
+      }
+    },
+
+    "SnapshotChannel": {
+      "title": "SnapshotChannel",
+      "description": "One output channel or flat snapshot list inside a `.snap` entry.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "files", "values"],
+      "properties": {
+        "key":    { "type": ["string", "null"], "description": "Channel key from the snapshot object, e.g. `0`, `1`, or `genome_gtf`; null for flat file-list snapshots." },
+        "files":  { "type": "array", "items": { "$ref": "#/$defs/SnapshotFile" }, "description": "File md5 assertions parsed from `<path>:md5,<hex>` strings." },
+        "values": { "type": "array", "items": {}, "description": "Non-file snapshot values preserved verbatim for consumers that need versions, counts, or scalar tuple emissions." }
+      }
+    },
+
+    "SnapshotFile": {
+      "title": "SnapshotFile",
+      "description": "One file digest assertion from a `.snap` sidecar.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "basename", "md5", "stub"],
+      "properties": {
+        "path":     { "type": "string", "description": "Path portion before `:md5,` exactly as stored in the sidecar." },
+        "basename": { "type": "string", "description": "Final path segment, suitable for Galaxy test `file:` assertions when the snapshot stores only basenames." },
+        "md5":      { "type": "string", "pattern": "^[a-fA-F0-9]{32}$", "description": "MD5 digest from the sidecar." },
+        "stub":     { "type": "boolean", "description": "True when the digest is the empty-file md5 emitted by many `-stub` tests." }
       }
     }
   }

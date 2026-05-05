@@ -16,7 +16,21 @@ interface SummaryLike {
       input: { name: string; type?: string; description?: string; pattern?: string }[];
       output: { name: string; type?: string; description?: string; pattern?: string }[];
     } | null;
-    module_tests: { name: string; path: string; snapshot: { snap_path: string | null } | null }[];
+    module_tests: {
+      name: string;
+      path: string;
+      snapshot: {
+        snap_path: string | null;
+        parsed_content?: {
+          name: string;
+          channels: {
+            key: string | null;
+            files: { path: string; basename: string; md5: string; stub: boolean }[];
+            values: unknown[];
+          }[];
+        }[];
+      } | null;
+    }[];
     inputs: unknown[];
     outputs: unknown[];
   }[];
@@ -245,7 +259,25 @@ test("align module") {
 }
 `,
     );
-    write(root, "modules/nf-core/minimap2/align/tests/main.nf.test.snap", "snapshot\n");
+    write(
+      root,
+      "modules/nf-core/minimap2/align/tests/main.nf.test.snap",
+      JSON.stringify({
+        "align module": {
+          content: [
+            {
+              "0": ["aligned.bam:md5,aa8b2aa1e0b5fbbba3b04d471e1b0535"],
+              versions: [["MINIMAP2", "minimap2", "2.28"]],
+              bam: [["sample1", "results/aligned.bam:md5,d41d8cd98f00b204e9800998ecf8427e"]],
+            },
+          ],
+          meta: { "nf-test": "0.9.3" },
+        },
+        "sibling module": {
+          content: [{ bam: ["sibling.bam:md5,ffffffffffffffffffffffffffffffff"] }],
+        },
+      }),
+    );
 
     const summary = await summarize(root);
     const process = summary.processes[0]!;
@@ -271,6 +303,42 @@ test("align module") {
         path: "modules/nf-core/minimap2/align/tests/main.nf.test",
         snapshot: expect.objectContaining({
           snap_path: "modules/nf-core/minimap2/align/tests/main.nf.test.snap",
+          parsed_content: [
+            {
+              name: "align module",
+              channels: [
+                {
+                  key: "0",
+                  files: [
+                    {
+                      path: "aligned.bam",
+                      basename: "aligned.bam",
+                      md5: "aa8b2aa1e0b5fbbba3b04d471e1b0535",
+                      stub: false,
+                    },
+                  ],
+                  values: [],
+                },
+                {
+                  key: "versions",
+                  files: [],
+                  values: [["MINIMAP2", "minimap2", "2.28"]],
+                },
+                {
+                  key: "bam",
+                  files: [
+                    {
+                      path: "results/aligned.bam",
+                      basename: "aligned.bam",
+                      md5: "d41d8cd98f00b204e9800998ecf8427e",
+                      stub: true,
+                    },
+                  ],
+                  values: ["sample1"],
+                },
+              ],
+            },
+          ],
         }),
       }),
     );
