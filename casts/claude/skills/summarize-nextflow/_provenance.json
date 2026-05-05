@@ -4,15 +4,15 @@
   "mold": {
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
-    "revision": 8,
-    "content_hash": "904ba406b81f331bceeacd47b03277080705d1f35bbba70ea06606a43601efa7",
-    "commit": "bb669240188882d4981eb9f7cac640dc830e11b1"
+    "revision": 9,
+    "content_hash": "57d13420a1019bb787d327eb3ef0c82a7ed3fd8823ce9b8520637a53a274b571",
+    "commit": "c7418dd55aa6271f0e7c510668b00be0f34acc00"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-05T12:08:56.572Z",
-  "cast_date": "2026-05-01",
-  "cast_revision": 3,
+  "cast_at": "2026-05-05T14:39:58.612Z",
+  "cast_date": "2026-05-05",
+  "cast_revision": 4,
   "cast_history": [
     {
       "rev": 1,
@@ -28,6 +28,11 @@
       "rev": 3,
       "date": "2026-05-01",
       "note": "regenerated after second run on nf-core/bacass. mold rev 4 + schema rev 3 add Process.aliases for include-as multiplexing and a structured nf_tests[]/SnapshotFixture for per-.nf.test-file fixtures"
+    },
+    {
+      "rev": 4,
+      "date": "2026-05-05",
+      "note": "refresh provenance after reference dispatch cleanup"
     }
   ],
   "refs": [
@@ -95,8 +100,6 @@
     }
   ],
   "open_questions": [
-    "Slot annotations (cast-time / runtime) are recorded here but not yet declared in the mold frontmatter — see issue #16.",
-    "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17.",
-    "Cast bundle layout (references/{schemas,notes,examples}) is not yet documented in docs/ARCHITECTURE.md — see issue #16."
+    "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17."
   ]
 }
