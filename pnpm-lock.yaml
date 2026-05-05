@@ -117,6 +117,28 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.19.17)
 
+  packages/galaxy-tool-summary-schema:
+    dependencies:
+      '@galaxy-tool-util/schema':
+        specifier: ^1.2.0
+        version: 1.2.0
+      ajv:
+        specifier: ^8.17.1
+        version: 8.20.0
+      ajv-formats:
+        specifier: ^3.0.1
+        version: 3.0.1(ajv@8.20.0)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.0
+        version: 22.19.17
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@22.19.17)
+
   packages/summarize-nextflow:
     dependencies:
       '@galaxy-foundry/summary-nextflow-schema':
@@ -586,6 +608,9 @@ packages:
 
   '@galaxy-tool-util/schema@1.1.0':
     resolution: {integrity: sha512-D0dMtBaTyRJhoAxH1Djx/42WnxQDAk3yuMhTd3k+MCez1jiGL1kFeYDQEk8yWSgY5Z4d+u24wbhaWG4Q2GTG1w==}
+
+  '@galaxy-tool-util/schema@1.2.0':
+    resolution: {integrity: sha512-0OOemrWHa/wGtxJZehCa4Y6D2thLxub1iAJ+Fmifj9TeRkTE0f1taZHAutwV4mJeBZ/xzgBgFUZu8ZWWzeKpPg==}
 
   '@galaxy-tool-util/search@1.1.0':
     resolution: {integrity: sha512-VSLDCUE68u/2+zKWH8J+wf0N080vOUDJd/nVFr5v7F81TJURjdC4oHRsl2YYs2Uwb8JkpWIvs9EAbtSB2rzF2g==}
@@ -2048,6 +2073,13 @@ snapshots:
       yaml: 2.8.3
 
   '@galaxy-tool-util/schema@1.1.0':
+    dependencies:
+      ajv: 8.20.0
+      ajv-formats: 3.0.1(ajv@8.20.0)
+      effect: 3.21.2
+      yaml: 2.8.3
+
+  '@galaxy-tool-util/schema@1.2.0':
     dependencies:
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)

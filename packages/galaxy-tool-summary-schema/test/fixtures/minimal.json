@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "tool_id": "fastqc",
+  "tool_version": "0.74+galaxy0",
+  "cache_key": "abc123def456",
+  "source": {
+    "kind": "toolshed",
+    "label": "api",
+    "url": "https://toolshed.g2.bx.psu.edu/api/tools/devteam~fastqc~fastqc/versions/0.74+galaxy0",
+    "cached_at": "2026-05-04T12:00:00Z"
+  },
+  "artifacts": {
+    "parsed_tool_path": "/tmp/galaxy-tool-cache/abc123def456.json",
+    "raw_tool_source_path": null
+  },
+  "parsed_tool": {
+    "id": "fastqc",
+    "version": "0.74+galaxy0",
+    "name": "FastQC",
+    "description": "Read quality reports",
+    "inputs": [],
+    "outputs": [],
+    "citations": [],
+    "license": null,
+    "profile": null,
+    "edam_operations": [],
+    "edam_topics": [],
+    "xrefs": []
+  },
+  "input_schemas": {
+    "workflow_step": {
+      "type": "object",
+      "properties": {}
+    },
+    "workflow_step_linked": null
+  },
+  "warnings": []
+}
