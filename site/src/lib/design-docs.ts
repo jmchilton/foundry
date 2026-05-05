@@ -63,13 +63,6 @@ export const DESIGN_DOCS: DesignDoc[] = [
     category: 'infrastructure',
   },
   {
-    slug: 'gxy-sketches',
-    title: 'gxy-sketches Alignment',
-    source: 'GXY_SKETCHES_ALIGNMENT.md',
-    summary: 'Adjacent-project alignment notes for shared workflow summaries, test manifests, and future sketch targets.',
-    category: 'infrastructure',
-  },
-  {
     slug: 'cli-metadata',
     title: 'CLI Metadata Integration',
     source: 'CLI_META_INTEGRATION.md',

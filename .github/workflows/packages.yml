@@ -27,6 +27,9 @@ jobs:
       - name: Validate content
         run: npm run validate
 
+      - name: Run repo tests
+        run: npm run test
+
       - name: Typecheck packages
         run: npm run packages-typecheck
 
@@ -47,3 +50,9 @@ jobs:
 
       - name: Cast drift check
         run: npm run cast -- summarize-nextflow --check
+
+      - name: Install site dependencies
+        run: npm --prefix site ci
+
+      - name: Build site
+        run: npm run site:build
