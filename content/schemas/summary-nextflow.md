@@ -9,8 +9,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-04
-revision: 4
+revised: 2026-05-05
+revision: 5
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
@@ -60,7 +60,7 @@ Per `docs/COMPILATION_PIPELINE.md`'s per-kind dispatch, this schema is reference
 
 - **Structured channel typing.** `processes[].inputs[].shape` is a string (`"tuple(meta, [path,path])"`), not a structured type. NF channel typing is a research project; a string is enough for downstream Molds to reason about and an LLM to emit.
 - **Operator-chain semantics.** `Edge.via` records the literal operator chain (`["map", "join", "groupTuple"]`). Reconciling what the chain *does* to channel shapes is left to the LLM step that fills `Edge.notes` when confidence is low.
-- **Multi-tool processes.** A process can run multiple tools (a shell pipeline of two binaries). `Process.tool` is nullable; multi-tool processes set it null and surface tool details in `script_summary` and `container`. A `tools[]` foreign-key array on `Process` would be cleaner; deferred until the second NF pipeline forces it.
+- **Multi-tool processes outside decomposed mulled-v2 containers.** A process can run multiple tools (a shell pipeline of two binaries). `Process.tool` is nullable; multi-tool processes set it null and surface tool details in `script_summary` and `container`. A `tools[]` foreign-key array on `Process` would be cleaner; deferred until downstream use forces it.
 
 ## Revision 2 — 2026-05-01
 
@@ -87,4 +87,19 @@ Second cast against `nf-core/bacass @ 2.5.0` (33 processes, 9 nf-test files, 11 
 
 What was not changed despite biting:
 - TestFixtures stayed singular. Multiple test profiles surfaced via `nf_tests[]` rather than promoting `test_fixtures` to an array — this preserves backward compatibility and keeps the "data shape of the selected profile" abstraction.
-- Mulled-v2 multi-package containers, multi-dependency `environment.yml`, multiMap/.branch/.cross fan-out, conditional channel construction, .mix-then-reassign — all still have only one bite each (bacass), so deferred per the "grow from contact" rule. They're recorded in `content/log.md` and the relevant notes' Open gaps sections; if rnaseq/sarek shows the same patterns, the schema gets bumped again.
+- Mulled-v2 multi-package containers, multiMap/.branch/.cross fan-out, conditional channel construction, .mix-then-reassign — all still had only one bite each (bacass), so deferred per the "grow from contact" rule.
+
+## Revision 4 — 2026-05-05
+
+Snapshot-sidecar parsing landed for module and subworkflow tests whose interesting assertions live in sibling `.nf.test.snap` JSON files. Changes:
+
+- **`SnapshotFixture.parsed_content: SnapshotContent[]` added.** Each parsed sidecar entry preserves the snapshot name plus channel-keyed `SnapshotChannel` values.
+- **`SnapshotFile` added.** `<path>:md5,<hex>` strings become file digest assertions with `path`, `basename`, `md5`, and a `stub` flag for empty-file md5s.
+- **Non-file values preserved.** Version tuples, counts, and other scalar snapshot values remain in `SnapshotChannel.values` so downstream test-plan Molds do not re-read `.snap` files.
+
+## Revision 5 — 2026-05-05
+
+Mulled-v2 multi-package container decomposition now has a narrow optional shape. Changes:
+
+- **`Tool.mulled_components: ToolSpec[]` added.** When `summarize-nextflow` is given a cached BioContainers `multi-package-containers` TSV, opaque `mulled-v2-*` container IDs can be decomposed into constituent Bioconda package specs.
+- **`ToolSpec` added.** Constituent packages record `name`, `version`, and exact `bioconda` requirement text.

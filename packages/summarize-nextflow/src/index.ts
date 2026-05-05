@@ -9,6 +9,7 @@ export interface SummarizeNextflowOptions {
   withNextflow: boolean;
   fetchTestData: boolean;
   testDataDir?: string;
+  mulledIndexPath?: string;
   validate: boolean;
 }
 
@@ -33,5 +34,6 @@ export async function buildSummary(
     withNextflow: options.withNextflow,
     fetchTestData: options.fetchTestData,
     testDataDir: options.testDataDir,
+    mulledIndexPath: options.mulledIndexPath,
   });
 }

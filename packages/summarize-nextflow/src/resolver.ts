@@ -66,6 +66,13 @@ interface Tool {
   docker: string | null;
   singularity: string | null;
   wave: string | null;
+  mulled_components?: ToolSpec[];
+}
+
+interface ToolSpec {
+  name: string;
+  version: string;
+  bioconda: string;
 }
 
 interface ChannelIO {
@@ -170,6 +177,7 @@ export interface ResolveOptions {
   withNextflow: boolean;
   fetchTestData: boolean;
   testDataDir?: string;
+  mulledIndexPath?: string;
 }
 
 export async function resolveNextflowSummary(
@@ -185,13 +193,20 @@ export async function resolveNextflowSummary(
   const processFiles = discoverProcessFiles(pipelineRoot);
   const processes = processFiles.flatMap((path) => parseProcessFile(pipelineRoot, path));
   const aliases = discoverProcessAliases(pipelineRoot);
-  const tools = buildTools(pipelineRoot, processes);
+  const warnings =
+    options.mulledIndexPath && !existsSync(options.mulledIndexPath)
+      ? [`mulled index path not found: ${options.mulledIndexPath}`]
+      : [];
+  const tools = buildTools(pipelineRoot, processes, options.mulledIndexPath);
   const workflows = parseWorkflows(
     pipelineRoot,
     processes.map((process) => process.name),
   );
-  const primaryWorkflow = selectPrimaryWorkflow(workflows);
-  const warnings = buildWarnings(processes, workflows);
+  const primaryWorkflow = selectPrimaryWorkflow(
+    workflows,
+    processes.map((process) => process.name),
+  );
+  warnings.push(...buildWarnings(processes, workflows));
 
   const summary: Summary = {
     source: {
@@ -577,12 +592,17 @@ function parseWorkflows(pipelineRoot: string, processNames: string[]): ParsedWor
   const knownProcesses = new Set(processNames);
   for (const path of walk(pipelineRoot).filter((candidate) => candidate.endsWith(".nf"))) {
     const text = readText(path);
+    const blocks = extractWorkflowBlocks(text);
+    const localWorkflowNames = blocks.flatMap((block) => (block.name ? [block.name] : []));
     const importedNames = new Set(
       parseIncludeItems(text).map((include) => include.alias ?? include.name),
     );
-    for (const block of extractWorkflowBlocks(text)) {
+    for (const block of blocks) {
       if (!block.name) continue;
-      const calls = parseWorkflowCalls(block.body, new Set([...knownProcesses, ...importedNames]));
+      const calls = parseWorkflowCalls(
+        block.body,
+        new Set([...knownProcesses, ...importedNames, ...localWorkflowNames]),
+      );
       workflows.set(block.name, {
         name: block.name,
         path: relative(pipelineRoot, path),
@@ -598,17 +618,28 @@ function parseWorkflows(pipelineRoot: string, processNames: string[]): ParsedWor
   return [...workflows.values()].sort((left, right) => left.path.localeCompare(right.path));
 }
 
-function selectPrimaryWorkflow(workflows: ParsedWorkflow[]): ParsedWorkflow | null {
+function selectPrimaryWorkflow(
+  workflows: ParsedWorkflow[],
+  processNames: string[],
+): ParsedWorkflow | null {
+  const knownProcesses = new Set(processNames);
   return (
     [...workflows].sort((left, right) => {
-      const callDiff = right.calls.length - left.calls.length;
-      if (callDiff !== 0) return callDiff;
+      const processCallDiff =
+        countKnownCalls(right, knownProcesses) - countKnownCalls(left, knownProcesses);
+      if (processCallDiff !== 0) return processCallDiff;
       const pathDiff =
         Number(right.path.startsWith("workflows/")) - Number(left.path.startsWith("workflows/"));
       if (pathDiff !== 0) return pathDiff;
+      const callDiff = right.calls.length - left.calls.length;
+      if (callDiff !== 0) return callDiff;
       return left.name.localeCompare(right.name);
     })[0] ?? null
   );
+}
+
+function countKnownCalls(workflow: ParsedWorkflow, knownNames: Set<string>): number {
+  return workflow.calls.filter((call) => knownNames.has(call)).length;
 }
 
 function stripWorkflowBody(workflow: ParsedWorkflow): Subworkflow {
@@ -878,13 +909,17 @@ function parseIoName(line: string, blockName: "input" | "output"): string {
   );
 }
 
-function buildTools(pipelineRoot: string, processes: Process[]): Tool[] {
+function buildTools(pipelineRoot: string, processes: Process[], mulledIndexPath?: string): Tool[] {
   const tools = new Map<string, Tool>();
+  const mulledIndex = loadMulledIndex(
+    mulledIndexPath ?? process.env.BIOCONTAINERS_MULTI_PACKAGE_TSV,
+  );
   for (const process of processes) {
     const envPath = join(pipelineRoot, dirname(process.module_path), "environment.yml");
     const containerStrings = [...(process.container ?? "").matchAll(/'([^']+)'/gu)]
       .map((match) => match[1]!)
       .filter((value) => value.includes(":") || value.includes("/"));
+    const mulledComponents = mulledComponentsForContainers(containerStrings, mulledIndex);
     for (const dependency of existsSync(envPath)
       ? parseBiocondaDependencies(readText(envPath))
       : []) {
@@ -901,10 +936,81 @@ function buildTools(pipelineRoot: string, processes: Process[]): Tool[] {
               value.includes("community-cr-prod.seqera.io"),
           ) ?? null,
         wave: containerStrings.find((value) => value.includes("community.wave.seqera.io")) ?? null,
+        mulled_components: mulledComponents.length > 0 ? mulledComponents : undefined,
       });
     }
   }
   return [...tools.values()];
+}
+
+function loadMulledIndex(path: string | undefined): Map<string, ToolSpec[]> {
+  if (!path || !existsSync(path)) return new Map();
+  return parseMulledIndex(readText(path));
+}
+
+function parseMulledIndex(text: string): Map<string, ToolSpec[]> {
+  const index = new Map<string, ToolSpec[]>();
+  for (const line of text.split("\n")) {
+    const normalized = line.trim();
+    if (!normalized || normalized.startsWith("#")) continue;
+    const id = /\b(mulled-v2-[A-Za-z0-9_.-]+(?::[A-Za-z0-9_.-]+)?)/u.exec(normalized)?.[1];
+    const columns = normalized.split("\t");
+    const targets = id ? (columns.at(-1) ?? normalized) : columns[0]!;
+    const components = parseMulledTargetSpecs(targets);
+    if (components.length === 0) continue;
+    for (const imageName of id ? [id] : mulledImageNames(components, columns[2])) {
+      index.set(imageName, components);
+    }
+  }
+  return index;
+}
+
+function parseMulledTargetSpecs(text: string): ToolSpec[] {
+  return text
+    .split(",")
+    .map((target) => target.trim())
+    .flatMap((target) => {
+      const match = /^(?:bioconda::)?([A-Za-z0-9_.-]+)(?:={1,2}([^=,\s]+))?(?:=[^=,\s]+)?$/u.exec(
+        target,
+      );
+      if (!match) return [];
+      return {
+        name: match[1]!,
+        version: match[2] ?? "unknown",
+        bioconda: `bioconda::${match[1]!}${match[2] ? `=${match[2]}` : ""}`,
+      };
+    });
+}
+
+function mulledImageNames(components: ToolSpec[], imageBuild: string | undefined): string[] {
+  if (components.length < 2) return [];
+  const sorted = [...components].sort((left, right) => left.name.localeCompare(right.name));
+  const packageHash = sha1(sorted.map((component) => component.name).join("\n"));
+  const versions = sorted.map((component) =>
+    component.version === "unknown" ? "null" : component.version,
+  );
+  if (versions.every((version) => version === "null")) {
+    const suffix = imageBuild ? `:${imageBuild}` : "";
+    return [`mulled-v2-${packageHash}${suffix}`];
+  }
+  const versionHash = sha1(versions.join("\n"));
+  const buildSuffix = imageBuild ? `-${imageBuild}` : "";
+  return [`mulled-v2-${packageHash}:${versionHash}${buildSuffix}`];
+}
+
+function mulledComponentsForContainers(
+  containerStrings: string[],
+  mulledIndex: Map<string, ToolSpec[]>,
+): ToolSpec[] {
+  for (const container of containerStrings) {
+    const id = /\b(mulled-v2-[A-Za-z0-9_.-]+(?::[A-Za-z0-9_.-]+)?)/u.exec(container)?.[1];
+    if (!id) continue;
+    const exact = mulledIndex.get(id);
+    if (exact) return exact;
+    const byName = mulledIndex.get(id.split(":")[0]!);
+    if (byName) return byName;
+  }
+  return [];
 }
 
 function parseBiocondaDependencies(
