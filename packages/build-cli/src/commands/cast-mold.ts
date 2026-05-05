@@ -388,6 +388,8 @@ interface ProvenanceArtifactOutput {
 interface ProvenanceArtifactInput {
   id: string;
   description: string;
+  inherited_schema?: string;
+  producers?: string[];
 }
 
 interface ProvenanceArtifacts {
@@ -416,7 +418,44 @@ interface Provenance {
   open_questions?: string[];
 }
 
-function readArtifactContracts(meta: Frontmatter): ProvenanceArtifacts | undefined {
+interface ProducerInfo {
+  schema?: string;
+  producers: string[];
+}
+
+export function buildProducerIndex(
+  metaByPath: Map<string, Frontmatter>,
+): Map<string, ProducerInfo> {
+  const idx = new Map<string, ProducerInfo>();
+  for (const [rel, meta] of metaByPath) {
+    if (meta.type !== "mold") continue;
+    const producerSlug = fileSlug(rel);
+    const out = meta.output_artifacts;
+    if (!Array.isArray(out)) continue;
+    for (const a of out) {
+      if (!a || typeof a !== "object") continue;
+      const o = a as Record<string, unknown>;
+      if (typeof o.id !== "string") continue;
+      const info = idx.get(o.id) ?? { producers: [] };
+      info.producers.push(producerSlug);
+      const schema = typeof o.schema === "string" ? o.schema : undefined;
+      if (schema) {
+        if (info.schema && info.schema !== schema) {
+          info.schema = undefined; // disagreement — drop the inherited hint
+        } else {
+          info.schema = schema;
+        }
+      }
+      idx.set(o.id, info);
+    }
+  }
+  return idx;
+}
+
+export function readArtifactContracts(
+  meta: Frontmatter,
+  producerIndex: Map<string, ProducerInfo>,
+): ProvenanceArtifacts | undefined {
   const out: ProvenanceArtifactOutput[] = [];
   const inp: ProvenanceArtifactInput[] = [];
   const rawOut = meta.output_artifacts;
@@ -440,9 +479,12 @@ function readArtifactContracts(meta: Frontmatter): ProvenanceArtifacts | undefin
       if (!a || typeof a !== "object") continue;
       const o = a as Record<string, unknown>;
       if (typeof o.id !== "string") continue;
+      const info = producerIndex.get(o.id);
       inp.push({
         id: o.id,
         description: typeof o.description === "string" ? o.description : "",
+        inherited_schema: info?.schema,
+        producers: info && info.producers.length > 0 ? [...info.producers].sort() : undefined,
       });
     }
   }
@@ -779,7 +821,7 @@ export async function runCastMoldCommand(argv = process.argv.slice(2)): Promise<
     cast_revision: carry.cast_revision,
     cast_history: carry.cast_history,
     refs: refEntries,
-    artifacts: readArtifactContracts(moldParsed.meta),
+    artifacts: readArtifactContracts(moldParsed.meta, buildProducerIndex(metaByPath)),
     open_questions: carry.open_questions,
   };
 

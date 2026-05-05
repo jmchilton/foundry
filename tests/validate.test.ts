@@ -62,6 +62,29 @@ describe("validateData (per-file)", () => {
     expect(r.errors.some((e) => /bogus/.test(e))).toBe(true);
   });
 
+  it("redirects when 'schema' is set on an input_artifact", () => {
+    const r = validateData(
+      baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "consumer",
+        axis: "generic",
+        input_artifacts: [
+          {
+            id: "summary-x",
+            schema: "[[schema-x]]",
+            description: "Upstream structured summary used for binding.",
+          },
+        ],
+      }),
+      schema,
+    );
+    const msg = r.errors.find((e) => /input_artifacts\.0/.test(e)) ?? "";
+    expect(msg).toMatch(/'schema' is producer-owned/);
+    expect(msg).toMatch(/output_artifacts\[\]\.schema/);
+    expect(msg).toMatch(/input_schemas/);
+  });
+
   it("rejects pipeline missing phases", () => {
     const r = validateData(
       baseRequired({ type: "pipeline", tags: ["pipeline"], title: "X" }),

@@ -91,6 +91,106 @@ describe("cast-skill-verify (summarize-nextflow integration)", () => {
   });
 });
 
+describe("artifact-contract inheritance", () => {
+  it("consumer input inherits schema and producers from the producer's output_artifact", async () => {
+    const { buildProducerIndex, readArtifactContracts } = await import(
+      "../packages/build-cli/src/commands/cast-mold.js"
+    );
+    const meta = new Map<string, any>([
+      [
+        "content/molds/producer/index.md",
+        {
+          type: "mold",
+          output_artifacts: [
+            {
+              id: "summary-x",
+              kind: "json",
+              default_filename: "summary-x.json",
+              schema: "[[schema-x]]",
+              description: "Producer output that downstream consumers bind to.",
+            },
+          ],
+        },
+      ],
+      [
+        "content/molds/consumer/index.md",
+        {
+          type: "mold",
+          input_artifacts: [
+            { id: "summary-x", description: "Upstream summary used for binding." },
+          ],
+        },
+      ],
+    ]);
+    const idx = buildProducerIndex(meta);
+    const contracts = readArtifactContracts(
+      meta.get("content/molds/consumer/index.md")!,
+      idx,
+    );
+    expect(contracts).toBeDefined();
+    expect(contracts!.consumes).toEqual([
+      {
+        id: "summary-x",
+        description: "Upstream summary used for binding.",
+        inherited_schema: "[[schema-x]]",
+        producers: ["producer"],
+      },
+    ]);
+  });
+
+  it("drops inherited_schema when producers disagree on the schema", async () => {
+    const { buildProducerIndex, readArtifactContracts } = await import(
+      "../packages/build-cli/src/commands/cast-mold.js"
+    );
+    const meta = new Map<string, any>([
+      [
+        "content/molds/producer-a/index.md",
+        {
+          type: "mold",
+          output_artifacts: [
+            {
+              id: "shared",
+              kind: "json",
+              default_filename: "shared.json",
+              schema: "[[schema-a]]",
+              description: "Producer A output.",
+            },
+          ],
+        },
+      ],
+      [
+        "content/molds/producer-b/index.md",
+        {
+          type: "mold",
+          output_artifacts: [
+            {
+              id: "shared",
+              kind: "json",
+              default_filename: "shared.json",
+              schema: "[[schema-b]]",
+              description: "Producer B output.",
+            },
+          ],
+        },
+      ],
+      [
+        "content/molds/consumer/index.md",
+        {
+          type: "mold",
+          input_artifacts: [{ id: "shared", description: "Disagreement-test input." }],
+        },
+      ],
+    ]);
+    const idx = buildProducerIndex(meta);
+    const contracts = readArtifactContracts(
+      meta.get("content/molds/consumer/index.md")!,
+      idx,
+    );
+    expect(contracts!.consumes[0]?.inherited_schema).toBeUndefined();
+    expect(contracts!.consumes[0]?.producers).toEqual(["producer-a", "producer-b"]);
+  });
+});
+
 describe("cast-mold negative cases", () => {
   it("unknown mold fails fast", () => {
     const r = runTsx(castMold, ["does-not-exist", "--target=claude", "--check"]);

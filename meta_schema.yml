@@ -196,6 +196,12 @@ properties:
         description:
           type: string
           minLength: 20
+  # Schema is producer-owned: declare `schema:` on the producer Mold's
+  # `output_artifacts[]` entry. Consumers inherit the contract by binding to
+  # the same `id`; cast-mold surfaces the inherited schema on each consumer
+  # input in the resolved provenance. To list a runtime-validation hint
+  # without a producer commitment (e.g. external/free-floating input), use
+  # the top-level `input_schemas` array instead.
   input_artifacts:
     type: array
     items:

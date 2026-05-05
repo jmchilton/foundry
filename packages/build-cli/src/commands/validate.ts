@@ -79,6 +79,13 @@ function validateSchema(data: Frontmatter, schema: JsonSchema): string[] {
     const loc = e.instancePath.replace(/^\//, "").replace(/\//g, ".") || "(root)";
     const params = e.params as Record<string, unknown> | undefined;
     const extra = params?.additionalProperty ? ` ('${String(params.additionalProperty)}')` : "";
+    if (
+      e.keyword === "additionalProperties" &&
+      params?.additionalProperty === "schema" &&
+      /^input_artifacts\.\d+$/.test(loc)
+    ) {
+      return `${loc}: 'schema' is producer-owned — declare it on the producer Mold's output_artifacts[].schema (consumers inherit via id). For a runtime-validation hint without a producer commitment, list the schema in the top-level 'input_schemas' array.`;
+    }
     return `${loc}: ${e.message ?? "validation failed"}${extra}`;
   });
 }
