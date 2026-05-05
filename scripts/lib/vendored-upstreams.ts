@@ -1,14 +1,19 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
 import { citationLocalPath, loadCommonPaths, parseCitation } from "./common-paths";
+
+export interface VendoredBuildStep {
+  command: string;
+}
 
 export interface VendoredUpstreamEntry {
   local: string;
   source: string;
   pinned_ref: string;
   framing?: string;
+  build?: VendoredBuildStep;
 }
 
 export interface VendoredDrift {
@@ -31,13 +36,28 @@ export function loadVendoredUpstreams(
     if (!value.local || !value.source || !value.pinned_ref) {
       throw new Error(`vendored entry ${i + 1} requires local, source, and pinned_ref`);
     }
+    let build: VendoredBuildStep | undefined;
+    if (value.build !== undefined) {
+      const b = value.build as Partial<VendoredBuildStep>;
+      if (!b.command) throw new Error(`vendored entry ${i + 1} build requires command`);
+      build = { command: b.command };
+    }
     return {
       local: value.local,
       source: value.source,
       pinned_ref: value.pinned_ref,
       framing: value.framing,
+      build,
     };
   });
+}
+
+function runBuild(repoPath: string, command: string, cache: Set<string>): void {
+  const key = `${repoPath}::${command}`;
+  if (cache.has(key)) return;
+  cache.add(key);
+  console.log(`Running build in ${repoPath}: ${command}`);
+  execSync(command, { cwd: repoPath, stdio: "inherit" });
 }
 
 export function currentRepoRef(repoPath: string): string {
@@ -63,9 +83,11 @@ export function findVendoredDrift(
   entries = loadVendoredUpstreams(repoRoot),
 ): VendoredDrift[] {
   const drift: VendoredDrift[] = [];
+  const buildCache = new Set<string>();
   for (const entry of entries) {
     const localPath = path.join(repoRoot, entry.local);
     const source = resolveSource(repoRoot, entry.source);
+    if (entry.build) runBuild(source.repoPath, entry.build.command, buildCache);
     if (!fs.existsSync(localPath)) throw new Error(`Missing vendored file ${entry.local}`);
     if (!fs.existsSync(source.sourcePath)) throw new Error(`Missing source file ${entry.source}`);
     if (fs.readFileSync(localPath, "utf-8") !== fs.readFileSync(source.sourcePath, "utf-8")) {
@@ -81,10 +103,13 @@ export function syncVendoredUpstreams(
 ): VendoredDrift[] {
   const updated: VendoredDrift[] = [];
   const framingRefs = new Map<string, string>();
+  const buildCache = new Set<string>();
   for (const entry of entries) {
     const localPath = path.join(repoRoot, entry.local);
     const source = resolveSource(repoRoot, entry.source);
+    if (entry.build) runBuild(source.repoPath, entry.build.command, buildCache);
     if (!fs.existsSync(source.sourcePath)) throw new Error(`Missing source file ${entry.source}`);
+    fs.mkdirSync(path.dirname(localPath), { recursive: true });
     fs.copyFileSync(source.sourcePath, localPath);
     updated.push({ entry, sourcePath: source.sourcePath, currentRef: source.currentRef });
     if (entry.framing) framingRefs.set(entry.framing, source.currentRef);
