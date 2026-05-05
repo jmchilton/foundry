@@ -33,6 +33,12 @@ jobs:
       - name: Build packages
         run: npm run packages-build
 
+      - name: Install site dependencies
+        run: npm --prefix site install --no-audit --no-fund
+
+      - name: Run repo tests
+        run: npm run test
+
       - name: Test packages
         run: npm run packages-test
 
@@ -47,3 +53,6 @@ jobs:
 
       - name: Cast drift check
         run: npm run cast -- summarize-nextflow --check
+
+      - name: Build site
+        run: npm run site:build
