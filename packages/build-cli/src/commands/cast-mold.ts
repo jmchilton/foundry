@@ -26,6 +26,7 @@ import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
 import { readMarkdown } from "../lib/frontmatter.js";
+import { resolveContentSchemaRef } from "../lib/schema-paths.js";
 import type { Frontmatter } from "../lib/types.js";
 import { fileSlug, findMdFiles } from "../lib/walk.js";
 import { resolveWikiLink, slugify, WIKI_LINK_RE } from "../lib/wiki-links.js";
@@ -488,7 +489,10 @@ async function castOneRef(
     };
   }
 
-  const srcAbs = path.join(repoRoot, resolved.src);
+  // Schema refs cite `content/schemas/<base>.schema.json` for stability, but the
+  // JSON now lives in `packages/<pkg>-schema/src/`. Resolve to the package path.
+  const lookupSrc = resolveContentSchemaRef(resolved.src) ?? resolved.src;
+  const srcAbs = path.join(repoRoot, lookupSrc);
   if (!existsSync(srcAbs)) {
     return {
       entry: { ...skeleton(resolved), src_hash: null, dst_hash: null, source: "deterministic" },

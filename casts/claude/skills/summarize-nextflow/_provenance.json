@@ -6,11 +6,11 @@
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 8,
     "content_hash": "904ba406b81f331bceeacd47b03277080705d1f35bbba70ea06606a43601efa7",
-    "commit": "d556ee18ef789cbe31fda9a1097c41abab887a14"
+    "commit": "bb669240188882d4981eb9f7cac640dc830e11b1"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-04T15:01:10.725Z",
+  "cast_at": "2026-05-05T12:08:56.572Z",
   "cast_date": "2026-05-01",
   "cast_revision": 3,
   "cast_history": [
@@ -89,8 +89,8 @@
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
-      "src_hash": "6a94a2af1e035b6c17676b27928bdb9cd55d6a56df8c1b2d68a655ef2a76cbcc",
-      "dst_hash": "6a94a2af1e035b6c17676b27928bdb9cd55d6a56df8c1b2d68a655ef2a76cbcc",
+      "src_hash": "80232a84697c2ea6def00549180a6efb83ee8afaab4b650a349c51a5a5824084",
+      "dst_hash": "80232a84697c2ea6def00549180a6efb83ee8afaab4b650a349c51a5a5824084",
       "source": "deterministic"
     }
   ],

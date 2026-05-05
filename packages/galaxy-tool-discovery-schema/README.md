@@ -4,7 +4,7 @@ JSON Schema for the [Foundry's](https://github.com/jmchilton/foundry) `discover-
 
 ## Source Of Truth
 
-The schema is authored in the Foundry monorepo at `content/schemas/galaxy-tool-discovery.schema.json`. This package mirrors it via `scripts/sync-schema.mjs`, which runs as `prebuild`. The mirror lives at `src/galaxy-tool-discovery.schema.json`; a TypeScript const wrapper is generated at `src/galaxy-tool-discovery.schema.generated.ts`. Both are committed to make publish reproducible without the monorepo present.
+The schema is authored in this package at `src/galaxy-tool-discovery.schema.json` (canonical, hand-edited). `scripts/sync-schema.mjs` regenerates the typed const wrapper at `src/galaxy-tool-discovery.schema.generated.ts` from it; this runs as `prebuild`. The Foundry's `content/schemas/` only holds the rendered `<name>.md` schema note — Mold frontmatter cites `content/schemas/galaxy-tool-discovery.schema.json` as a stable ref string and the cast pipeline resolves it back to this package at build time.
 
 ## Install
 

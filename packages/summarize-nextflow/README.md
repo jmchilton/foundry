@@ -2,7 +2,7 @@
 
 Statically introspect a Nextflow / nf-core pipeline tree and emit a JSON summary.
 
-Source-specific (Nextflow), target-agnostic. The summary is the input to downstream Galaxy / CWL translation tooling. Output validates against the schema vendored under `content/schemas/summary-nextflow.schema.json` in the parent Foundry repo.
+Source-specific (Nextflow), target-agnostic. The summary is the input to downstream Galaxy / CWL translation tooling. Output validates against the schema in `@galaxy-foundry/summary-nextflow-schema` (`packages/summary-nextflow-schema/src/summary-nextflow.schema.json`).
 
 ## Status
 

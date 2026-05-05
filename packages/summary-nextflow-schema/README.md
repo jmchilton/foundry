@@ -4,7 +4,7 @@ JSON Schema for the [Foundry's](https://github.com/jmchilton/foundry) `summarize
 
 ## Source of truth
 
-The schema is authored in the Foundry monorepo at `content/schemas/summary-nextflow.schema.json`. This package mirrors it via `scripts/sync-schema.mjs`, which runs as `prebuild`. The mirror lives at `src/summary-nextflow.schema.json`; a TypeScript const wrapper is generated at `src/summary-nextflow.schema.generated.ts`. Both are committed to make publish reproducible without the monorepo present.
+The schema is authored in this package at `src/summary-nextflow.schema.json` (canonical, hand-edited). `scripts/sync-schema.mjs` regenerates the typed const wrapper at `src/summary-nextflow.schema.generated.ts` from it; this runs as `prebuild`. The Foundry's `content/schemas/` only holds the rendered `<name>.md` schema note — Mold frontmatter cites `content/schemas/summary-nextflow.schema.json` as a stable ref string and the cast pipeline resolves it back to this package at build time.
 
 ## Install
 
