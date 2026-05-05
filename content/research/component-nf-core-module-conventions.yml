@@ -1,0 +1,206 @@
+# nf-core module conventions — structured digest.
+# Companion to component-nf-core-module-conventions.md.
+#
+# Levels: MUST (lint fails) | SHOULD (lint warns).
+# `lint_check` names the lint test in nf_core/modules/lint/.
+# `affects` lists Mold steps that consume this rule.
+
+rules:
+
+  # ---- Layout ----
+
+  - id: layout.directory_structure
+    level: MUST
+    category: layout
+    description: "Module lives at modules/nf-core/<tool>/<subtool>/ with files: main.nf, meta.yml, environment.yml, tests/main.nf.test (and tests/main.nf.test.snap when applicable)."
+    lint_check: "modules_structure"
+    evidence: "nf_core/modules/lint/modules_structure.py"
+    affects: ["summarize-nextflow §1 (detect pipeline shape)", "summarize-nextflow §4 (enumerate processes)"]
+
+  - id: layout.module_path_naming
+    level: MUST
+    category: layout
+    description: "Process name in main.nf is the upper-snake-case form of <tool>_<subtool> (e.g. modules/nf-core/samtools/index/ → SAMTOOLS_INDEX)."
+    lint_check: "main_nf"
+    evidence: "nf_core/modules/lint/main_nf.py"
+    affects: ["summarize-nextflow §4 (process aliases via include { X as Y })"]
+
+  # ---- Containers and conda ----
+
+  - id: containers.ternary_directive
+    level: MUST
+    category: containers
+    description: "Container directive uses the canonical ternary: 'workflow.containerEngine in [singularity, apptainer] && !task.ext.singularity_pull_docker_container ? <sing> : <docker>'. Older modules use '== singularity'; both accepted."
+    lint_check: "main_nf"
+    evidence: "nf_core/module-template/main.nf, lines 27-30; nf_core/modules/lint/main_nf.py"
+    affects: ["summarize-nextflow §5 (extract both ternary branches)"]
+
+  - id: containers.environment_yml_present
+    level: MUST
+    category: containers
+    description: "environment.yml is a sibling of main.nf and validates against environment-schema.json: requires channels (no `default`), dependencies (= pinned, not >=); forbids name."
+    lint_check: "environment_yml"
+    evidence: "modules/environment-schema.json"
+    affects: ["summarize-nextflow §5 (resolve conda directive); author-galaxy-tool-wrapper (Galaxy <requirement> translation)"]
+
+  - id: containers.channel_order
+    level: SHOULD
+    category: containers
+    description: "environment.yml declares channels in order: conda-forge, bioconda. Schema does not enforce; lint does."
+    lint_check: "environment_yml"
+    evidence: "nf_core/modules/lint/environment_yml.py"
+    affects: ["author-galaxy-tool-wrapper (channel-order-aware translation)"]
+
+  - id: containers.bioconda_pin
+    level: MUST
+    category: containers
+    description: "Bioconda dependencies use `=` version pin (e.g. `bioconda::fastqc=0.12.1`); `>=`, `<=`, `*` are forbidden by environment-schema.json."
+    lint_check: "environment_yml"
+    evidence: "modules/environment-schema.json"
+    affects: ["summarize-nextflow §5; author-galaxy-tool-wrapper"]
+
+  # ---- Process and IO ----
+
+  - id: process.input_channels_declared
+    level: MUST
+    category: process_io
+    description: "All mandatory and optional file inputs are declared in input channels (not embedded in script via interpolation)."
+    lint_check: "main_nf"
+    evidence: "nf-co.re/docs/guidelines/components/modules"
+    affects: ["summarize-nextflow §4 (input channel extraction)"]
+
+  - id: process.args_via_task_ext_args
+    level: MUST
+    category: process_io
+    description: "Non-mandatory CLI arguments are provided via `$task.ext.args` (and `args2`, `args3` for piped-stage args). Hardcoded options in script are forbidden."
+    lint_check: "main_nf"
+    evidence: "nf-co.re/docs/guidelines/components/modules"
+    affects: ["summarize-nextflow §4 (script_summary); author-galaxy-tool-wrapper (Galaxy <param> generation)"]
+
+  - id: process.meta_map_keys_standard_only
+    level: SHOULD
+    category: process_io
+    description: "Modules SHOULD support meta maps in any file input channel. Only `meta.id` and `meta.single_end` are accepted standard keys; custom hardcoded metadata fields are prohibited."
+    lint_check: "main_nf"
+    evidence: "nf-co.re/docs/guidelines/components/modules"
+    affects: ["summarize-nextflow §4 (channel shape extraction); author-galaxy-tool-wrapper (collection-element-identifier mapping)"]
+
+  - id: process.publishdir_in_pipeline_config
+    level: MUST
+    category: process_io
+    description: "Modules do not declare publishDir. Output publishing is configured at the pipeline level via conf/modules.config withName: blocks."
+    lint_check: "main_nf"
+    evidence: "nf_core/modules/lint/main_nf.py"
+    affects: ["summarize-nextflow §6 (workflow-level conditionals); module vs pipeline override resolution"]
+
+  # ---- Versions ----
+
+  - id: versions.topic_versions_emission
+    level: MUST
+    category: versions
+    description: "Each tool emits its version into the `versions` topic via `tuple(val(\"${task.process}\"), val('toolname'), eval(<cmd-that-prints-version>)) topic: versions`."
+    lint_check: "main_nf"
+    evidence: "nf_core/module-template/main.nf"
+    affects: ["summarize-nextflow §4 (detect topic: versions); summarize-nextflow §5 (cross-check tool name with environment.yml)"]
+
+  - id: versions.no_leading_v
+    level: SHOULD
+    category: versions
+    description: "Version strings start with numeric characters (no leading 'v'). softwareVersionsToYAML normalizes downstream."
+    lint_check: "main_nf"
+    evidence: "nf-co.re/docs/guidelines/components/modules"
+    affects: ["summarize-nextflow §5 (tool version derivation)"]
+
+  - id: versions.per_tool_emission
+    level: MUST
+    category: versions
+    description: "Each binary the process invokes gets its own version emission row. Multi-tool processes emit multiple rows under the same `task.process` value."
+    lint_check: "main_nf"
+    evidence: "nf-co.re/docs/guidelines/components/modules"
+    affects: ["summarize-nextflow §5 (multi-tool process detection)"]
+
+  # ---- Stubs and tests ----
+
+  - id: stubs.mandatory_stub_block
+    level: MUST
+    category: stubs_tests
+    description: "Every module includes a stub block that produces minimal versions of each declared output. Gzipped stub files use `echo | gzip > \"${prefix}.txt.gz\"` (not `touch` then gzip)."
+    lint_check: "main_nf"
+    evidence: "nf-co.re/docs/guidelines/components/modules"
+    affects: ["summarize-nextflow (stub vs script body distinction); nextflow-test-to-target-tests (stub-only test execution path)"]
+
+  - id: tests.nf_test_present
+    level: MUST
+    category: stubs_tests
+    description: "Module ships at least one tests/main.nf.test file with required tags. Snapshot file (tests/main.nf.test.snap) is mandatory when assertions use snapshot(...).match()."
+    lint_check: "module_tests"
+    evidence: "nf_core/modules/lint/module_tests.py"
+    affects: ["summarize-nextflow §7 (nf_tests[] enumeration); nextflow-test-to-target-tests"]
+
+  - id: tests.required_tags
+    level: MUST
+    category: stubs_tests
+    description: "nf-test files declare `tag` entries naming the module path (e.g., 'modules_nfcore', 'samtools', 'samtools/index'). The lint check enforces tag conventions."
+    lint_check: "module_tests"
+    evidence: "nf_core/modules/lint/module_tests.py"
+    affects: ["summarize-nextflow §7 (test profile attribution)"]
+
+  # ---- Documentation (meta.yml) ----
+
+  - id: docs.meta_yml_validates
+    level: MUST
+    category: documentation
+    description: "meta.yml validates against modules/meta-schema.json (Draft-07): name, description, keywords (≥3, no 'example'), authors, output, tools required."
+    lint_check: "meta_yml"
+    evidence: "modules/meta-schema.json"
+    affects: ["summarize-nextflow §4 (use meta.yml as IO ground truth)"]
+
+  - id: docs.tool_attribution
+    level: MUST
+    category: documentation
+    description: "Each tool in meta.yml's tools[] declares description plus at least one of homepage / documentation / tool_dev_url / doi. licence is an SPDX identifier list. identifier is a bio.tools ID (^biotools:.*)."
+    lint_check: "meta_yml"
+    evidence: "modules/meta-schema.json"
+    affects: ["author-galaxy-tool-wrapper (Galaxy <citations> generation)"]
+
+  - id: docs.io_descriptions
+    level: SHOULD
+    category: documentation
+    description: "Every input and output channel element has type + description. Pattern (Java glob) and ontologies (URL-keyed) are optional but recommended."
+    lint_check: "meta_yml"
+    evidence: "modules/meta-schema.json"
+    affects: ["summarize-nextflow §4 (description fields); author-galaxy-tool-wrapper (Galaxy <param help>)"]
+
+  # ---- Code hygiene ----
+
+  - id: hygiene.no_system_exit
+    level: MUST
+    category: hygiene
+    description: "Groovy `System.exit` is forbidden; modules use `error()` instead so Nextflow can capture the failure cleanly."
+    lint_check: "system_exit"
+    evidence: "nf_core/modules/lint/main_nf.py (system_exit check); also enforced at pipeline level"
+    affects: ["summarize-nextflow (script_summary unaffected; flagged as a smell if encountered)"]
+
+  - id: hygiene.no_template_strings
+    level: MUST
+    category: hygiene
+    description: "No leftover Jinja/template strings ({{ ... }}) committed."
+    lint_check: "template_strings"
+    evidence: "nf_core/pipelines/lint/template_strings.py (parallels module-side check)"
+    affects: ["summarize-nextflow (would invalidate parsing)"]
+
+  - id: hygiene.no_merge_markers
+    level: MUST
+    category: hygiene
+    description: "No git merge conflict markers (<<<<<<<, =======, >>>>>>>) in committed source."
+    lint_check: "merge_markers"
+    evidence: "nf_core/pipelines/lint/merge_markers.py"
+    affects: ["summarize-nextflow (would crash parser)"]
+
+  - id: hygiene.no_todos_in_committed
+    level: SHOULD
+    category: hygiene
+    description: "TODO comments are flagged in committed code; allowed during PR review but should be resolved or tracked elsewhere before merge."
+    lint_check: "pipeline_todos"
+    evidence: "nf_core/pipelines/lint/pipeline_todos.py"
+    affects: ["summarize-nextflow (informational only)"]

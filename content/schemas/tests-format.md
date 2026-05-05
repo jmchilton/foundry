@@ -5,13 +5,15 @@ title: Galaxy workflow test format
 package: "@galaxy-tool-util/schema"
 package_export: "testsSchema"
 upstream: "https://github.com/jmchilton/galaxy-tool-util-ts/blob/main/packages/schema/src/test-format/tests.schema.json"
+license: MIT
+license_file: LICENSES/galaxy-tool-util-ts.LICENSE
 tags:
   - schema
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-04
-revision: 3
+revised: 2026-05-05
+revision: 4
 ai_generated: true
 related_notes:
   - "[[implement-galaxy-workflow-test]]"
