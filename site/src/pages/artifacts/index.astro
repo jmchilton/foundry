@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { buildWikiLinkMap } from '../../lib/wiki-links';
+import { buildArtifactGraph, artifactHref } from '../../lib/artifacts';
+
+const entries = await getCollection('content');
+const linkMap = buildWikiLinkMap(entries);
+const graph = buildArtifactGraph(entries, linkMap);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const rows = Array.from(graph.values()).sort((a, b) => a.id.localeCompare(b.id));
+---
+<Base title="Artifacts">
+  <header class="mb-4">
+    <p class="text-xs font-mono uppercase tracking-widest text-(--color-text-muted) mb-1">index</p>
+    <h1 class="text-2xl font-semibold m-0">Artifacts</h1>
+    <p class="text-sm text-(--color-text-secondary) mt-2 m-0">
+      Pipeline handoffs declared by Molds via <code>output_artifacts</code> / <code>input_artifacts</code>.
+    </p>
+  </header>
+
+  <table class="w-full text-sm border-collapse">
+    <thead>
+      <tr class="border-b border-(--color-border)">
+        <th class="text-left py-1 pr-2 font-semibold">id</th>
+        <th class="text-left py-1 pr-2 font-semibold">producers</th>
+        <th class="text-left py-1 pr-2 font-semibold">consumers</th>
+        <th class="text-left py-1 font-semibold">pipelines</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map(node => (
+        <tr class="border-b border-(--color-border) align-top">
+          <td class="py-1 pr-2"><a href={artifactHref(base, node.id)} class="text-(--color-link) hover:underline font-mono">{node.id}</a></td>
+          <td class="py-1 pr-2">{node.producers.length}</td>
+          <td class="py-1 pr-2">{node.consumers.length}</td>
+          <td class="py-1">{node.pipelines.size}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</Base>

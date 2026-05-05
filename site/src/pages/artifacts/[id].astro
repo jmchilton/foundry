@@ -1,0 +1,115 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { buildWikiLinkMap, resolveWikiLink } from '../../lib/wiki-links';
+import { buildArtifactGraph } from '../../lib/artifacts';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('content');
+  const linkMap = buildWikiLinkMap(entries);
+  const graph = buildArtifactGraph(entries, linkMap);
+  return Array.from(graph.values()).map(node => ({
+    params: { id: node.id },
+    props: { id: node.id },
+  }));
+}
+
+const { id } = Astro.props;
+const entries = await getCollection('content');
+const linkMap = buildWikiLinkMap(entries);
+const graph = buildArtifactGraph(entries, linkMap);
+const node = graph.get(id);
+const entryById = new Map(entries.map(e => [e.id, e]));
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+function entryName(entryId: string): string {
+  const e = entryById.get(entryId);
+  if (!e) return entryId;
+  const d = e.data as any;
+  return d.name || d.title || entryId.split('/').pop() || entryId;
+}
+
+function entryHref(entryId: string): string {
+  return `${base}/${entryId}/`;
+}
+---
+<Base title={`artifact: ${id}`}>
+  <header class="mb-4">
+    <p class="text-xs font-mono uppercase tracking-widest text-(--color-text-muted) mb-1">artifact</p>
+    <h1 class="text-2xl font-mono font-semibold m-0">{id}</h1>
+    {node && node.defaultFilenames.size > 0 && (
+      <p class="text-sm text-(--color-text-secondary) mt-2">
+        default filename(s): {Array.from(node.defaultFilenames).map(f => <code class="mr-2">{f}</code>)}
+      </p>
+    )}
+  </header>
+
+  {!node && <p class="text-sm text-(--color-text-secondary)">Unknown artifact id.</p>}
+
+  {node && (
+    <div class="grid gap-4">
+      <section class="p-3 rounded-lg border border-(--color-border)">
+        <h2 class="text-base font-semibold m-0 mb-2">Producers <span class="text-sm font-normal text-(--color-text-secondary)">({node.producers.length})</span></h2>
+        {node.producers.length === 0 && <p class="text-sm text-(--color-text-secondary) m-0">No Mold declares this artifact in <code>output_artifacts</code>.</p>}
+        <ul class="list-none p-0 m-0 grid gap-2">
+          {node.producers.map(p => (
+            <li>
+              <a href={entryHref(p.moldId)} class="text-(--color-link) hover:underline font-semibold">{entryName(p.moldId)}</a>
+              <span class="ml-2 text-xs text-(--color-text-muted) font-mono">{p.decl.kind} · {p.decl.default_filename}</span>
+              <p class="m-0 text-sm text-(--color-text-secondary)">{p.decl.description}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="p-3 rounded-lg border border-(--color-border)">
+        <h2 class="text-base font-semibold m-0 mb-2">Consumers <span class="text-sm font-normal text-(--color-text-secondary)">({node.consumers.length})</span></h2>
+        {node.consumers.length === 0 && <p class="text-sm text-(--color-text-secondary) m-0">No Mold declares this artifact in <code>input_artifacts</code>.</p>}
+        <ul class="list-none p-0 m-0 grid gap-2">
+          {node.consumers.map(c => (
+            <li>
+              <a href={entryHref(c.moldId)} class="text-(--color-link) hover:underline font-semibold">{entryName(c.moldId)}</a>
+              <p class="m-0 text-sm text-(--color-text-secondary)">{c.decl.description}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {node.schemas.size > 0 && (
+        <section class="p-3 rounded-lg border border-(--color-border)">
+          <h2 class="text-base font-semibold m-0 mb-2">Schemas</h2>
+          <ul class="list-none p-0 m-0 grid gap-1">
+            {Array.from(node.schemas).map(wl => {
+              const r = resolveWikiLink(wl, linkMap, base);
+              return (
+                <li>
+                  {r.href
+                    ? <a href={r.href} class="text-(--color-link) hover:underline font-mono">{r.label}</a>
+                    : <span class="dangling font-mono">{r.label}</span>}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      {node.pipelines.size > 0 && (
+        <section class="p-3 rounded-lg border border-(--color-border)">
+          <h2 class="text-base font-semibold m-0 mb-2">Pipelines</h2>
+          <ul class="list-none p-0 m-0 grid gap-2">
+            {Array.from(node.pipelines.values()).map(use => (
+              <li>
+                <a href={entryHref(use.pipelineId)} class="text-(--color-link) hover:underline font-semibold">{entryName(use.pipelineId)}</a>
+                <span class="ml-2 text-xs text-(--color-text-muted) font-mono">
+                  {use.produceAt.length > 0 && <>produced @ phase {use.produceAt.join(', ')}</>}
+                  {use.produceAt.length > 0 && use.consumeAt.length > 0 && ' · '}
+                  {use.consumeAt.length > 0 && <>consumed @ phase {use.consumeAt.join(', ')}</>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  )}
+</Base>

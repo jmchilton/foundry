@@ -3,13 +3,16 @@ import type { CollectionEntry } from 'astro:content';
 import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 import ReferenceContract from './ReferenceContract.astro';
 import CastArtifacts from './CastArtifacts.astro';
+import { artifactHref, type ArtifactGraph } from '../lib/artifacts';
 
 interface Props {
   entry: CollectionEntry<'content'>;
   linkMap: Map<string, WikiLinkTarget>;
+  artifactGraph?: ArtifactGraph;
+  entryById?: Map<string, CollectionEntry<'content'>>;
 }
 
-const { entry, linkMap } = Astro.props;
+const { entry, linkMap, artifactGraph, entryById } = Astro.props;
 const data = entry.data as any;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -24,6 +27,36 @@ const prompts = resolveAll(data.prompts);
 
 const axisChip = data.axis;
 const specifier = data.source ?? data.target ?? data.tool ?? null;
+
+function entryName(id: string): string {
+  const e = entryById?.get(id);
+  if (!e) return id;
+  const d = e.data as any;
+  return d.name || d.title || id.split('/').pop() || id;
+}
+
+function entryHref(id: string): string {
+  return `${base}/${id}/`;
+}
+
+const outputArtifacts: any[] = Array.isArray(data.output_artifacts) ? data.output_artifacts : [];
+const inputArtifacts: any[] = Array.isArray(data.input_artifacts) ? data.input_artifacts : [];
+
+function consumersOf(id: string): { moldId: string; description: string }[] {
+  const node = artifactGraph?.get(id);
+  if (!node) return [];
+  return node.consumers
+    .filter(c => c.moldId !== entry.id)
+    .map(c => ({ moldId: c.moldId, description: c.decl.description }));
+}
+
+function producersOf(id: string): { moldId: string; description: string }[] {
+  const node = artifactGraph?.get(id);
+  if (!node) return [];
+  return node.producers
+    .filter(p => p.moldId !== entry.id)
+    .map(p => ({ moldId: p.moldId, description: p.decl.description }));
+}
 ---
 <dl class="mold-strip">
   <div class="mold-strip-cell mold-strip-cell-axis">
@@ -103,6 +136,178 @@ const specifier = data.source ?? data.target ?? data.tool ?? null;
 <ReferenceContract references={data.references} linkMap={linkMap} />
 
 <CastArtifacts moldSlug={data.name} />
+
+{(outputArtifacts.length + inputArtifacts.length) > 0 && (
+  <section class="artifacts-section">
+    <div class="section-rule">
+      <h2>Artifact handoffs</h2>
+      <span class="section-tail">/ pipeline contract</span>
+    </div>
+    {outputArtifacts.length > 0 && (
+      <div class="artifact-block">
+        <h3 class="artifact-side">Produces</h3>
+        <ul class="artifact-list">
+          {outputArtifacts.map((a: any) => {
+            const schemaLink = a.schema ? resolveWikiLink(a.schema, linkMap, base) : null;
+            const consumers = consumersOf(a.id);
+            return (
+              <li class="artifact-card">
+                <div class="artifact-head">
+                  <a href={artifactHref(base, a.id)} class="artifact-id">{a.id}</a>
+                  <span class="artifact-kind">{a.kind}</span>
+                  <code class="artifact-filename">{a.default_filename}</code>
+                </div>
+                <p class="artifact-desc">{a.description}</p>
+                <dl class="artifact-meta">
+                  {schemaLink && (
+                    <>
+                      <dt>schema</dt>
+                      <dd>
+                        {schemaLink.href
+                          ? <a href={schemaLink.href} class="text-(--color-link) hover:underline">{schemaLink.label}</a>
+                          : <span class="dangling">{schemaLink.label}</span>}
+                      </dd>
+                    </>
+                  )}
+                  {consumers.length > 0 && (
+                    <>
+                      <dt>consumed by</dt>
+                      <dd>
+                        <ul class="partner-list">
+                          {consumers.map(c => (
+                            <li><a href={entryHref(c.moldId)} class="text-(--color-link) hover:underline">{entryName(c.moldId)}</a></li>
+                          ))}
+                        </ul>
+                      </dd>
+                    </>
+                  )}
+                </dl>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )}
+    {inputArtifacts.length > 0 && (
+      <div class="artifact-block">
+        <h3 class="artifact-side">Consumes</h3>
+        <ul class="artifact-list">
+          {inputArtifacts.map((a: any) => {
+            const producers = producersOf(a.id);
+            return (
+              <li class="artifact-card">
+                <div class="artifact-head">
+                  <a href={artifactHref(base, a.id)} class="artifact-id">{a.id}</a>
+                </div>
+                <p class="artifact-desc">{a.description}</p>
+                {producers.length > 0 && (
+                  <dl class="artifact-meta">
+                    <dt>produced by</dt>
+                    <dd>
+                      <ul class="partner-list">
+                        {producers.map(p => (
+                          <li><a href={entryHref(p.moldId)} class="text-(--color-link) hover:underline">{entryName(p.moldId)}</a></li>
+                        ))}
+                      </ul>
+                    </dd>
+                  </dl>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )}
+  </section>
+)}
+
+<style>
+  .artifacts-section {
+    margin: 1.25rem 0 1.5rem;
+  }
+  .artifact-block + .artifact-block {
+    margin-top: 1rem;
+  }
+  .artifact-side {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--color-text-muted);
+    margin: 0 0 0.5rem 0;
+  }
+  .artifact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  .artifact-card {
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.85rem;
+    background: var(--color-surface-raised);
+  }
+  .artifact-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+  }
+  .artifact-id {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-link);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-link) 25%, transparent);
+  }
+  .artifact-id:hover { color: var(--color-link-hover); }
+  .artifact-kind {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.2rem;
+    background: color-mix(in srgb, var(--color-galaxy-grey) 18%, transparent);
+    color: var(--color-text-secondary);
+  }
+  .artifact-filename {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+  }
+  .artifact-desc {
+    margin: 0.35rem 0 0.4rem;
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+  }
+  .artifact-meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.2rem 0.6rem;
+    margin: 0.25rem 0 0;
+    font-size: 0.8rem;
+  }
+  .artifact-meta dt {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    align-self: center;
+  }
+  .artifact-meta dd { margin: 0; }
+  .partner-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.7rem;
+  }
+</style>
 
 {(patterns.length + cliCommands.length + prompts.length) > 0 && (
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">

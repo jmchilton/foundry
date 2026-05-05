@@ -84,7 +84,8 @@ export type BacklinkField =
   | 'patterns'
   | 'cli_commands'
   | 'prompts'
-  | 'phases';
+  | 'phases'
+  | 'output_artifact_schema';
 
 export interface Backlink {
   sourceId: string;
@@ -140,6 +141,16 @@ export function buildBacklinkMap(
       for (const wl of collectPhaseRefs(data.phases)) {
         const tid = resolveWikiLinkId(wl, linkMap);
         if (tid) add(tid, entry.id, 'phases');
+      }
+    }
+
+    // Mold output_artifacts[].schema: link the schema note back to the producing Mold.
+    if (data.type === 'mold' && Array.isArray(data.output_artifacts)) {
+      for (const a of data.output_artifacts) {
+        const schema = a && typeof a === 'object' ? (a as any).schema : undefined;
+        if (typeof schema !== 'string') continue;
+        const tid = resolveWikiLinkId(schema, linkMap);
+        if (tid) add(tid, entry.id, 'output_artifact_schema');
       }
     }
   }

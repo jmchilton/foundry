@@ -659,6 +659,7 @@ function validatePipelinePhases(
     findings.push(...r.findings);
     for (const p of r.refs.moldPaths) moldsReferenced.add(p);
     for (const p of r.refs.branchedMoldPaths) moldsReferenced.add(p);
+    findings.push(...validatePipelineArtifactBindings(f, phases, slugMap, metaByPath));
   }
   // Inventory coverage warning: non-draft Molds should appear in at least one pipeline.
   const orphans: string[] = [];
@@ -674,6 +675,88 @@ function validatePipelinePhases(
       message: `Molds with zero pipeline membership: ${orphans.sort().join(", ")}`,
     });
   }
+  return findings;
+}
+
+/**
+ * Pipeline artifact binding ordering: every Mold-shaped phase's input_artifacts
+ * must be produced by some prior phase in the same pipeline (Mold-shaped or via
+ * branch/chain). Branch/chain phases are treated as the union of their inner
+ * Molds' artifact contracts (any branch's output may satisfy a downstream
+ * input — discover-or-author shape).
+ */
+function validatePipelineArtifactBindings(
+  file: FileMeta,
+  phases: unknown[],
+  slugMap: Map<string, string>,
+  metaByPath: Map<string, Frontmatter>,
+): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const phaseDecls: { out: Set<string>; in: { id: string; idx: number }[] }[] = [];
+
+  const collectMoldPathsFromPhase = (phase: unknown): string[] => {
+    const out: string[] = [];
+    const visit = (n: unknown) => {
+      if (typeof n === "string") {
+        if (WIKI_LINK_RE.test(n)) {
+          const tp = resolveWikiLink(n, slugMap);
+          if (tp && metaByPath.get(tp)?.type === "mold") out.push(tp);
+        }
+        return;
+      }
+      if (!n || typeof n !== "object") return;
+      const obj = n as Record<string, unknown>;
+      if (typeof obj.mold === "string") visit(obj.mold);
+      if (typeof obj.fallthrough === "string") visit(obj.fallthrough);
+      if (Array.isArray(obj.branches)) obj.branches.forEach(visit);
+      if (Array.isArray(obj.chain)) obj.chain.forEach(visit);
+    };
+    visit(phase);
+    return out;
+  };
+
+  phases.forEach((phase, idx) => {
+    const out = new Set<string>();
+    const inputs: { id: string; idx: number }[] = [];
+    for (const moldPath of collectMoldPathsFromPhase(phase)) {
+      const meta = metaByPath.get(moldPath);
+      if (!meta) continue;
+      const o = meta.output_artifacts;
+      if (Array.isArray(o)) {
+        for (const a of o) {
+          if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
+            out.add((a as { id: string }).id);
+          }
+        }
+      }
+      const inp = meta.input_artifacts;
+      if (Array.isArray(inp)) {
+        for (const a of inp) {
+          if (a && typeof a === "object" && typeof (a as { id?: unknown }).id === "string") {
+            inputs.push({ id: (a as { id: string }).id, idx });
+          }
+        }
+      }
+    }
+    phaseDecls.push({ out, in: inputs });
+  });
+
+  // Build cumulative produced ids, walking phases in order.
+  const cumulative = new Set<string>();
+  phaseDecls.forEach((decl, i) => {
+    for (const inp of decl.in) {
+      // Self-loop allowance: the same phase may produce and consume (loop phases re-feeding themselves).
+      if (!cumulative.has(inp.id) && !decl.out.has(inp.id)) {
+        findings.push({
+          path: file.path,
+          severity: "warning",
+          message: `phases[${i}]: input_artifact '${inp.id}' has no prior phase producing it in this pipeline`,
+        });
+      }
+    }
+    for (const id of decl.out) cumulative.add(id);
+  });
+
   return findings;
 }
 

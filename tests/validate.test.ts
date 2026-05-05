@@ -1132,4 +1132,64 @@ describe("validateDirectory (cross-file)", () => {
     });
     expect(r.errors).toBe(0);
   });
+
+  it("warns when a pipeline phase consumes an artifact no prior phase produces", () => {
+    writeFm(path.join(dir, "molds/producer/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "producer",
+        axis: "generic",
+        output_artifacts: [
+          {
+            id: "summary-x",
+            kind: "json",
+            default_filename: "summary-x.json",
+            description: "Structured summary that downstream Molds bind to.",
+          },
+        ],
+      }),
+    });
+    writeFm(path.join(dir, "molds/consumer/index.md"), {
+      ...baseRequired({
+        type: "mold",
+        tags: ["mold"],
+        name: "consumer",
+        axis: "generic",
+        input_artifacts: [
+          { id: "summary-x", description: "Upstream structured summary." },
+        ],
+      }),
+    });
+    // Out-of-order pipeline: consumer first, producer second.
+    writeFm(path.join(dir, "pipelines/bad-order.md"), {
+      ...baseRequired({
+        type: "pipeline",
+        tags: ["pipeline"],
+        title: "Bad Order",
+        phases: [
+          { mold: "[[consumer]]" },
+          { mold: "[[producer]]" },
+        ],
+      }),
+    });
+
+    const before = process.stdout.write;
+    let captured = "";
+    process.stdout.write = (chunk: any) => {
+      captured += String(chunk);
+      return true;
+    };
+    try {
+      const r = validateDirectory({
+        directory: dir,
+        schemaPath: SCHEMA_PATH,
+        tagsPath: TAGS_PATH,
+      });
+      expect(r.errors).toBe(0);
+    } finally {
+      process.stdout.write = before;
+    }
+    expect(captured).toMatch(/input_artifact 'summary-x' has no prior phase producing it/);
+  });
 });

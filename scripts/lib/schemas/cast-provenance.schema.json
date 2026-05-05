@@ -47,6 +47,41 @@
     "open_questions": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["produces", "consumes"],
+      "description": "Pipeline artifact handoff contract copied from the Mold's frontmatter so harnesses can wire prior-step paths to a stable id.",
+      "properties": {
+        "produces": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "kind", "default_filename", "description"],
+            "properties": {
+              "id": { "type": "string" },
+              "kind": { "type": "string" },
+              "default_filename": { "type": "string" },
+              "schema": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "consumes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "description"],
+            "properties": {
+              "id": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
     }
   },
   "definitions": {

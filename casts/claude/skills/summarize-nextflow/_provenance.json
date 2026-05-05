@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 9,
-    "content_hash": "7ab309b54802acbcf4a27c7fc3f7df455613446f75f675a6f2667a2b4f124aa8",
-    "commit": "23b63d508c4f9062ad01515130997a969c710f83"
+    "content_hash": "7c64dabadfdf98c5ee3fde3c0977a2297ccc3d81bd83db5c0762556ddf88bb56",
+    "commit": "a3c1e82d0cef7f53a28d10dd790141dce3c53c48"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-05T18:57:03.949Z",
+  "cast_at": "2026-05-05T19:33:24.620Z",
   "cast_date": "2026-05-05",
   "cast_revision": 5,
   "cast_history": [
@@ -145,6 +145,18 @@
       "source": "deterministic"
     }
   ],
+  "artifacts": {
+    "produces": [
+      {
+        "id": "summary-nextflow",
+        "kind": "json",
+        "default_filename": "summary-nextflow.json",
+        "schema": "[[summary-nextflow]]",
+        "description": "Structured summary of a Nextflow pipeline: processes, channels, params, containers, tools, test fixtures, nf-tests."
+      }
+    ],
+    "consumes": []
+  },
   "open_questions": [
     "The three notes are stubs; first-paragraph contents will come from running this cast against nf-core/rnaseq — see issue #17."
   ]
