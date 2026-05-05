@@ -7,7 +7,7 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-03
-revised: 2026-05-03
+revised: 2026-05-05
 revision: 1
 ai_generated: false
 related_notes:
