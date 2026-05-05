@@ -8,10 +8,12 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-04
-revision: 4
+revised: 2026-05-05
+revision: 5
 ai_generated: true
 summary: "Pull JSON schema, container, source, inputs/outputs for a Galaxy tool."
+output_schemas:
+  - "[[galaxy-tool-summary]]"
 input_artifacts:
   - id: galaxy-tool-pin
     description: "Pin from [[discover-shed-tool]] or [[author-galaxy-tool-wrapper]]; identifies which cached ParsedTool to summarize."
@@ -19,8 +21,24 @@ output_artifacts:
   - id: galaxy-tool-summary
     kind: json
     default_filename: galaxy-tool-summary.json
-    description: "Compact tool summary derived from a cached ParsedTool: input/output ports, schema, container, source, version metadata."
+    schema: "[[galaxy-tool-summary]]"
+    description: "Deterministic Galaxy tool summary manifest emitted by `galaxy-tool-cache summarize`: cache provenance, embedded ParsedTool, generated input JSON Schemas."
 references:
+  - kind: schema
+    ref: "[[galaxy-tool-summary]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Validate the manifest emitted by `galaxy-tool-cache summarize` before handing it to downstream step Molds."
+  - kind: schema
+    ref: "[[parsed-tool]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Resolve field-level questions about the upstream `ParsedTool` payload embedded under `parsed_tool`."
+    trigger: "When a downstream Mold needs a specific input/output/help/citation field from the embedded `ParsedTool`."
   - kind: research
     ref: "[[galaxy-tool-summary-input-source]]"
     used_at: runtime
@@ -65,49 +83,9 @@ The Mold expects:
 
 ## Outputs
 
-A single JSON document conforming to the future `summary-galaxy-tool` schema. Sketch shape:
+A single JSON document conforming to [[galaxy-tool-summary]] — the deterministic manifest emitted by `galaxy-tool-cache summarize` from `@galaxy-tool-util/cli`. Top-level fields: `schema_version`, `tool_id`, `tool_version`, `cache_key`, `source`, `artifacts`, `parsed_tool`, `input_schemas`, `warnings`. The `parsed_tool` subtree is the upstream [[parsed-tool]] payload verbatim; `input_schemas.workflow_step` and `input_schemas.workflow_step_linked` carry generated JSON Schemas describing the tool's inputs at workflow-step authoring time.
 
-```jsonc
-{
-  "source": {
-    "kind": "toolshed",
-    "tool_shed_url": "https://toolshed.g2.bx.psu.edu",
-    "owner": "devteam",
-    "repo": "fastqc",
-    "tool_id": "fastqc",
-    "version": "0.74+galaxy0",
-    "changeset_revision": "5ec9f6bceaee"
-  },
-  "tool": {
-    "id": "toolshed.g2.bx.psu.edu/repos/devteam/fastqc/fastqc/0.74+galaxy0",
-    "name": "FastQC",
-    "description": "Read quality reports",
-    "profile": "22.05",
-    "version_command": "fastqc --version"
-  },
-  "requirements": [
-    { "type": "package", "name": "fastqc", "version": "0.74" }
-  ],
-  "command": {
-    "template": "fastqc ...",
-    "strict_shell": true,
-    "stdio": [],
-    "environment": []
-  },
-  "inputs": [
-    { "name": "input_file", "type": "data", "format": ["fastq", "fastqsanger"], "optional": false }
-  ],
-  "outputs": [
-    { "name": "html_file", "type": "data", "format": "html", "from_work_dir": null }
-  ],
-  "conditionals": [],
-  "data_tables": [],
-  "tests": [],
-  "warnings": []
-}
-```
-
-Field-name parity with `summary-nextflow.tools[]` should be preserved where concepts match (`name`, `version`, container/package evidence), but Galaxy wrapper-specific structure belongs here rather than being forced into the Nextflow schema.
+This Mold does not hand-author the manifest — it invokes `galaxy-tool-cache summarize` against a cache populated for the Tool Shed pin. Wrapper-derived facts that are not yet exposed by upstream `ParsedTool` (currently: requirements, containers, stdio) flow into the manifest additively as Galaxy upstream extends `ParsedTool`; no Foundry-side schema change is needed when they ship.
 
 ## Procedure
 
@@ -184,4 +162,3 @@ Warnings should identify missing or lossy surfaces, especially:
 - **Wrapper authoring.** Use [[author-galaxy-tool-wrapper]] when no acceptable wrapper exists.
 - **Step implementation.** [[implement-galaxy-tool-step]] binds abstract workflow intent to this summary.
 - **Installed-Galaxy-only wrappers.** Deferred until a Galaxy API discovery/input path exists.
-- **Schema invention at runtime.** The generated skill should validate against `summary-galaxy-tool` once that schema is authored; until then, keep output shape close to this body and eval expectations.

@@ -8,13 +8,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-03
-revision: 4
+revised: 2026-05-05
+revision: 5
 ai_generated: true
 summary: "Convert an abstract step into a concrete gxformat2 step using a tool summary."
+input_schemas:
+  - "[[galaxy-tool-summary]]"
 input_artifacts:
   - id: galaxy-tool-summary
-    description: "Compact Galaxy tool summary from [[summarize-galaxy-tool]]; binds the abstract step to a concrete tool's ports."
+    description: "Galaxy tool summary manifest from [[summarize-galaxy-tool]] conforming to [[galaxy-tool-summary]]; binds the abstract step to a concrete tool's ports via the embedded `parsed_tool` and generated `input_schemas`."
   - id: galaxy-workflow-draft
     description: "gxformat2 skeleton being filled in step by step; the step replaces a placeholder in this draft."
 output_artifacts:
@@ -23,6 +25,13 @@ output_artifacts:
     default_filename: galaxy-workflow-draft.gxwf.yml
     description: "gxformat2 skeleton with one more abstract step replaced by a concrete tool step (loop iteration output)."
 references:
+  - kind: schema
+    ref: "[[galaxy-tool-summary]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Bind the abstract step against the deterministic tool summary manifest emitted upstream — read `parsed_tool` for ports/datatypes and `input_schemas.workflow_step_linked` for valid step `tool_state` shape."
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"
     used_at: runtime
