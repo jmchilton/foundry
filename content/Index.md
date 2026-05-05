@@ -14,6 +14,8 @@ Generated from content frontmatter. Do not edit by hand.
 
 - [[author-galaxy-tool-wrapper]] — Author a new Galaxy tool wrapper (XML) when discovery yields nothing acceptable.
 - [[compare-against-iwc-exemplar]] — Find nearest IWC exemplar(s) and surface a structural diff against a draft.
+- [[cwl-summary-to-galaxy-data-flow]] — Translate a CWL summary into a Galaxy data-flow design brief.
+- [[cwl-summary-to-galaxy-interface]] — Map a CWL summary into a Galaxy workflow interface design brief.
 - [[cwl-test-to-galaxy-test-plan]] — Translate CWL test fixtures into a Galaxy workflow test plan.
 - [[debug-cwl-workflow-output]] — Triage failing CWL run outputs; classify failure modes; propose fixes.
 - [[debug-galaxy-workflow-output]] — Triage failing Galaxy run outputs; classify failure modes; propose fixes.
@@ -23,8 +25,14 @@ Generated from content frontmatter. Do not edit by hand.
 - [[implement-cwl-workflow-test]] — Assemble CWL job file(s) and expected-output assertions.
 - [[implement-galaxy-tool-step]] — Convert an abstract step into a concrete gxformat2 step using a tool summary.
 - [[implement-galaxy-workflow-test]] — Assemble Galaxy workflow test fixtures and assertions.
+- [[nextflow-summary-to-cwl-data-flow]] — Translate a Nextflow summary into a CWL data-flow design brief.
+- [[nextflow-summary-to-cwl-interface]] — Map a Nextflow summary into a CWL Workflow interface design brief.
+- [[nextflow-summary-to-galaxy-data-flow]] — Translate a Nextflow summary into a Galaxy data-flow design brief.
+- [[nextflow-summary-to-galaxy-interface]] — Map a Nextflow summary into a Galaxy workflow interface design brief.
 - [[nextflow-test-to-cwl-test-plan]] — Translate Nextflow test evidence into a CWL workflow test plan.
 - [[nextflow-test-to-galaxy-test-plan]] — Translate Nextflow test evidence into a Galaxy workflow test plan.
+- [[paper-summary-to-cwl-design]] — Translate a paper summary into a CWL workflow design brief.
+- [[paper-summary-to-galaxy-design]] — Translate a paper summary into a Galaxy workflow design brief.
 - [[paper-to-test-data]] — Derive workflow test inputs and expected outputs from a paper.
 - [[run-workflow-test]] — Execute a workflow's tests via Planemo; emit structured pass/fail and outputs.
 - [[summarize-cwl]] — Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals.
@@ -32,10 +40,8 @@ Generated from content frontmatter. Do not edit by hand.
 - [[summarize-galaxy-tool]] — Pull JSON schema, container, source, inputs/outputs for a Galaxy tool.
 - [[summarize-nextflow]] — Read a Nextflow pipeline source tree and emit a structured per-source summary downstream Molds bind to.
 - [[summarize-paper]] — Extract methods, tools, sample data, and references from a paper.
-- [[summary-to-cwl-data-flow]] — Abstract DAG with CWL scatter / valueFrom / step idioms surfaced.
-- [[summary-to-cwl-template]] — CWL Workflow skeleton with per-step TODOs from a data-flow summary.
-- [[summary-to-galaxy-data-flow]] — Abstract DAG with Galaxy collection / scatter / branching idioms surfaced.
-- [[summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from a data-flow summary.
+- [[summary-to-cwl-template]] — CWL Workflow skeleton with per-step TODOs from source and design handoffs.
+- [[summary-to-galaxy-template]] — gxformat2 skeleton with per-step TODOs from source and design handoffs.
 - [[validate-cwl]] — Run cwltool --validate / schema lint, classify failures, recommend fixes.
 - [[validate-galaxy-step]] — Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation.
 - [[validate-galaxy-workflow]] — Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures.

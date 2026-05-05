@@ -6,17 +6,27 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
-| [[cwl-to-galaxy]] | Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction. | draft | 2026-04-30 | 1 |
-| [[nextflow-to-cwl]] | Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set. | draft | 2026-04-30 | 1 |
-| [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | draft | 2026-04-30 | 1 |
-| [[paper-to-cwl]] | Direct path from a paper to a CWL Workflow + CommandLineTool set. | draft | 2026-04-30 | 1 |
-| [[paper-to-galaxy]] | Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate. | draft | 2026-04-30 | 1 |
+| [[cwl-to-galaxy]] | Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction. | draft | 2026-04-30 | 2 |
+| [[nextflow-to-cwl]] | Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set. | draft | 2026-04-30 | 2 |
+| [[nextflow-to-galaxy]] | Direct path from a Nextflow pipeline to a Galaxy gxformat2 workflow. | draft | 2026-04-30 | 2 |
+| [[paper-to-cwl]] | Direct path from a paper to a CWL Workflow + CommandLineTool set. | draft | 2026-04-30 | 2 |
+| [[paper-to-galaxy]] | Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate. | draft | 2026-04-30 | 2 |
 
 ## Molds
 
 | Name | Summary | Status | Revised | Rev |
 | --- | --- | --- | --- | --- |
+| [[cwl-summary-to-galaxy-data-flow]] | Translate a CWL summary into a Galaxy data-flow design brief. | draft | 2026-05-05 | 1 |
+| [[cwl-summary-to-galaxy-interface]] | Map a CWL summary into a Galaxy workflow interface design brief. | draft | 2026-05-05 | 1 |
+| [[nextflow-summary-to-cwl-data-flow]] | Translate a Nextflow summary into a CWL data-flow design brief. | draft | 2026-05-05 | 1 |
+| [[nextflow-summary-to-cwl-interface]] | Map a Nextflow summary into a CWL Workflow interface design brief. | draft | 2026-05-05 | 1 |
+| [[nextflow-summary-to-galaxy-data-flow]] | Translate a Nextflow summary into a Galaxy data-flow design brief. | draft | 2026-05-05 | 1 |
+| [[nextflow-summary-to-galaxy-interface]] | Map a Nextflow summary into a Galaxy workflow interface design brief. | draft | 2026-05-05 | 1 |
 | [[nextflow-test-to-galaxy-test-plan]] | Translate Nextflow test evidence into a Galaxy workflow test plan. | draft | 2026-05-05 | 4 |
+| [[paper-summary-to-cwl-design]] | Translate a paper summary into a CWL workflow design brief. | draft | 2026-05-05 | 1 |
+| [[paper-summary-to-galaxy-design]] | Translate a paper summary into a Galaxy workflow design brief. | draft | 2026-05-05 | 1 |
+| [[summary-to-cwl-template]] | CWL Workflow skeleton with per-step TODOs from source and design handoffs. | draft | 2026-05-05 | 2 |
+| [[summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from source and design handoffs. | draft | 2026-05-05 | 4 |
 | [[discover-shed-tool]] | Search the Tool Shed for an existing wrapper, drill from hit to a pinnable changeset, classify candidates, and recommend or fall through. | draft | 2026-05-04 | 3 |
 | [[implement-galaxy-workflow-test]] | Assemble Galaxy workflow test fixtures and assertions. | draft | 2026-05-04 | 5 |
 | [[run-workflow-test]] | Execute a workflow's tests via Planemo; emit structured pass/fail and outputs. | draft | 2026-05-04 | 3 |
@@ -27,10 +37,8 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[cwl-test-to-galaxy-test-plan]] | Translate CWL test fixtures into a Galaxy workflow test plan. | draft | 2026-05-03 | 2 |
 | [[implement-galaxy-tool-step]] | Convert an abstract step into a concrete gxformat2 step using a tool summary. | draft | 2026-05-03 | 4 |
 | [[nextflow-test-to-cwl-test-plan]] | Translate Nextflow test evidence into a CWL workflow test plan. | draft | 2026-05-03 | 1 |
-| [[summary-to-galaxy-template]] | gxformat2 skeleton with per-step TODOs from a data-flow summary. | draft | 2026-05-03 | 3 |
 | [[validate-galaxy-workflow]] | Run terminal gxwf validation on an assembled Galaxy workflow and classify workflow-level failures. | draft | 2026-05-03 | 3 |
 | [[debug-galaxy-workflow-output]] | Triage failing Galaxy run outputs; classify failure modes; propose fixes. | draft | 2026-05-02 | 3 |
-| [[summary-to-galaxy-data-flow]] | Abstract DAG with Galaxy collection / scatter / branching idioms surfaced. | draft | 2026-05-02 | 2 |
 | [[validate-galaxy-step]] | Run gxwf validation on the just-implemented Galaxy step and route failures back to step implementation. | draft | 2026-05-02 | 2 |
 | [[debug-cwl-workflow-output]] | Triage failing CWL run outputs; classify failure modes; propose fixes. | draft | 2026-04-30 | 1 |
 | [[find-test-data]] | Search IWC fixtures and public sources for test data matching a data-flow shape. | draft | 2026-04-30 | 1 |
@@ -40,8 +48,6 @@ Generated from `dashboard_sections.json` and content frontmatter. Do not edit by
 | [[summarize-cwl]] | Surface CWL Workflow + CommandLineTool inputs, outputs, scatter, conditionals. | draft | 2026-04-30 | 1 |
 | [[summarize-cwl-tool]] | Derive a CommandLineTool description (container, baseCommand, IO) for a CWL target. | draft | 2026-04-30 | 1 |
 | [[summarize-paper]] | Extract methods, tools, sample data, and references from a paper. | draft | 2026-04-30 | 1 |
-| [[summary-to-cwl-data-flow]] | Abstract DAG with CWL scatter / valueFrom / step idioms surfaced. | draft | 2026-04-30 | 1 |
-| [[summary-to-cwl-template]] | CWL Workflow skeleton with per-step TODOs from a data-flow summary. | draft | 2026-04-30 | 1 |
 | [[validate-cwl]] | Run cwltool --validate / schema lint, classify failures, recommend fixes. | draft | 2026-04-30 | 1 |
 
 ## Patterns

@@ -8,18 +8,11 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-03
-revision: 3
+revised: 2026-05-05
+revision: 4
 ai_generated: true
-summary: "gxformat2 skeleton with per-step TODOs from a data-flow summary."
+summary: "gxformat2 skeleton with per-step TODOs from source and design handoffs."
 references:
-  - kind: schema
-    ref: "[[summary-nextflow]]"
-    used_at: runtime
-    load: upfront
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Read source-level process, channel, tool, and test-fixture structure while drafting a Galaxy workflow skeleton."
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"
     used_at: runtime
@@ -36,14 +29,6 @@ references:
     evidence: corpus-observed
     purpose: "Preserve Galaxy collection typing and map-over/reduction semantics in the gxformat2 skeleton."
     trigger: "When creating workflow inputs, outputs, and placeholder connections involving collections."
-  - kind: research
-    ref: "[[nextflow-to-galaxy-channel-shape-mapping]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Choose Galaxy workflow input/output collection shapes from source channel shape evidence."
-    trigger: "When the template needs File/list/paired/list:paired/list:list inputs, outputs, or placeholder connections."
   - kind: research
     ref: "[[galaxy-data-flow-draft-contract]]"
     used_at: runtime
@@ -77,7 +62,15 @@ references:
     evidence: corpus-observed
     purpose: "Use corpus-grounded tabular pattern guidance for unresolved skeleton steps."
     trigger: "When adding TODO steps for tabular filtering, projection, joins, aggregation, text-processing recipes, or tabular-collection bridges."
+related_notes:
+  - "[[nextflow-summary-to-galaxy-interface]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[cwl-summary-to-galaxy-interface]]"
+  - "[[cwl-summary-to-galaxy-data-flow]]"
+  - "[[paper-summary-to-galaxy-design]]"
 ---
 # summary-to-galaxy-template
 
-Stub. Replace with real Mold content per MOLD_SPEC once first walks are done.
+Read the original source artifact, the source summary, and all prior source-target design handoffs from the pipeline run. Emit a gxformat2 skeleton with workflow inputs, workflow outputs, placeholder steps, rough connections, and TODO slots for later implementation Molds.
+
+The interface and data-flow briefs guide the skeleton, but they do not replace source evidence. Treat the prior-step index as the working context: source summary, interface brief, data-flow brief or paper design brief, and any open questions carried forward.

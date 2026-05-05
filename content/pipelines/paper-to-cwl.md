@@ -8,12 +8,12 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-04-30
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Direct path from a paper to a CWL Workflow + CommandLineTool set."
 phases:
   - mold: "[[summarize-paper]]"
-  - mold: "[[summary-to-cwl-data-flow]]"
+  - mold: "[[paper-summary-to-cwl-design]]"
   - mold: "[[summary-to-cwl-template]]"
   - mold: "[[summarize-cwl-tool]]"
     loop: true

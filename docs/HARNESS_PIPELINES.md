@@ -19,7 +19,7 @@ CWL is unofficially positioned as a **low-level, high-structure interchange form
 - Direct paths are simpler to run and debug. Composed paths buy a structured checkpoint (CWL) at the cost of running two harnesses.
 - Whether composition is reliable enough to *prefer* over direct is a longer-term research question. For now: both paths must be possible from the Mold inventory; the harness picks.
 
-**Mold-inventory parity.** Source summarizers emit per-source schemas (paper, NF, CWL each different by design). Data flow is split by **target** (`summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`); each consumes any source summary, with generated skills handling the polymorphism. This pushes complexity into the data-flow Molds rather than into a forced shared summary schema, and keeps direct/composed pipelines using the same Mold catalog.
+**Mold-inventory parity.** Source summarizers emit per-source schemas (paper, NF, CWL each different by design). Interface and data-flow handoffs are source-target Molds that produce reviewable Markdown design briefs rather than rich workflow schemas. This avoids pushing all polymorphism into one target Mold while keeping direct/composed pipelines explicit.
 
 ## Harness-level concerns (not Molds)
 
@@ -51,8 +51,8 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 ### PAPER → GALAXY
 
 1. `summarize-paper` — extract methods, named tools/algorithms, sample data, metrics, references to existing pipelines.
-2. `summary-to-galaxy-data-flow` — abstract DAG with Galaxy-shaped collection / scatter / branching idioms surfaced.
-3. `summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs.
+2. `paper-summary-to-galaxy-design` — combined Galaxy interface and abstract data-flow design brief.
+3. `summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from source evidence and prior handoffs.
 4. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s); flag divergences before sinking effort into per-step authoring.
 5. `[loop]` `[branch]` discover-or-author branch:
    - try `discover-shed-tool`.
@@ -69,8 +69,8 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 ### PAPER → CWL
 
 1. `summarize-paper`
-2. `summary-to-cwl-data-flow`
-3. `summary-to-cwl-template` — CWL Workflow skeleton with per-step TODOs.
+2. `paper-summary-to-cwl-design`
+3. `summary-to-cwl-template` — CWL Workflow skeleton with per-step TODOs from source evidence and prior handoffs.
 4. `[loop]` `summarize-cwl-tool` — derive a `CommandLineTool` description for each candidate (container, baseCommand, inputs/outputs).
 5. `[loop]` `implement-cwl-tool-step` — concrete `CommandLineTool` and Workflow step.
 6. `[loop]` `validate-cwl` — schema-validate the just-implemented step; on red, the harness loops back to (5).
@@ -83,54 +83,57 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 ### NEXTFLOW → CWL
 
 1. `summarize-nextflow` — enumerate processes, channels, conditionals, containers, test data; emit a structured summary (NF-specific schema).
-2. `summary-to-cwl-data-flow`
-3. `summary-to-cwl-template`
-4. `[loop]` `summarize-cwl-tool`
-5. `[loop]` `implement-cwl-tool-step`
-6. `[loop]` `validate-cwl` — inline schema validation per step; loop back on red.
-7. `nextflow-test-to-cwl-test-plan` — translate NF test data and expectations into a CWL workflow test plan.
-8. `validate-cwl` — terminal pass on the assembled workflow.
-9. `run-workflow-test` — execute via Planemo.
-10. `debug-cwl-workflow-output`
+2. `nextflow-summary-to-cwl-interface`
+3. `nextflow-summary-to-cwl-data-flow`
+4. `summary-to-cwl-template`
+5. `[loop]` `summarize-cwl-tool`
+6. `[loop]` `implement-cwl-tool-step`
+7. `[loop]` `validate-cwl` — inline schema validation per step; loop back on red.
+8. `nextflow-test-to-cwl-test-plan` — translate NF test data and expectations into a CWL workflow test plan.
+9. `validate-cwl` — terminal pass on the assembled workflow.
+10. `run-workflow-test` — execute via Planemo.
+11. `debug-cwl-workflow-output`
 
 ### NEXTFLOW → GALAXY
 
 1. `summarize-nextflow`
-2. `summary-to-galaxy-data-flow`
-3. `summary-to-galaxy-template`
-4. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s).
-5. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
-6. `[loop]` `summarize-galaxy-tool`
-7. `[loop]` `implement-galaxy-tool-step`
-8. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
-9. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
-10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
-11. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
-12. `run-workflow-test` — execute via Planemo.
-13. `debug-galaxy-workflow-output`
+2. `nextflow-summary-to-galaxy-interface`
+3. `nextflow-summary-to-galaxy-data-flow`
+4. `summary-to-galaxy-template`
+5. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s).
+6. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
+7. `[loop]` `summarize-galaxy-tool`
+8. `[loop]` `implement-galaxy-tool-step`
+9. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
+10. `nextflow-test-to-galaxy-test-plan` — translate NF test data and expectations into a Galaxy workflow test plan.
+11. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
+12. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
+13. `run-workflow-test` — execute via Planemo.
+14. `debug-galaxy-workflow-output`
 
 ### CWL → GALAXY
 
 CWL is already structured; the upstream extraction work is much lighter.
 
 1. `summarize-cwl` — read CWL Workflow + referenced `CommandLineTool`s, identify inputs/outputs, scatter, conditional logic.
-2. `summary-to-galaxy-data-flow` — re-shape into Galaxy-shaped data-flow idioms (collections, paired-collection semantics) from a CWL summary that's already nearly a DAG.
-3. `summary-to-galaxy-template`
-4. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s).
-5. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
-6. `[loop]` `summarize-galaxy-tool`
-7. `[loop]` `implement-galaxy-tool-step`
-8. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
-9. `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan.
-10. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
-11. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
-12. `run-workflow-test` — execute via Planemo.
-13. `debug-galaxy-workflow-output`
+2. `cwl-summary-to-galaxy-interface` — choose Galaxy workflow interface from CWL inputs/outputs.
+3. `cwl-summary-to-galaxy-data-flow` — re-shape into Galaxy-shaped data-flow idioms from a CWL summary that's already nearly a DAG.
+4. `summary-to-galaxy-template`
+5. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s).
+6. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
+7. `[loop]` `summarize-galaxy-tool`
+8. `[loop]` `implement-galaxy-tool-step`
+9. `[loop]` `validate-galaxy-step` — inline schema validation per step; loop back on red.
+10. `cwl-test-to-galaxy-test-plan` — translate CWL test fixtures into a Galaxy workflow test plan.
+11. `implement-galaxy-workflow-test` — assemble test fixtures and assertions from the translated test plan.
+12. `validate-galaxy-workflow` — terminal pass on the assembled workflow.
+13. `run-workflow-test` — execute via Planemo.
+14. `debug-galaxy-workflow-output`
 
 ## Cross-pipeline observations
 
 - **Source-specific (one per source)**: `summarize-paper`, `summarize-nextflow`, `summarize-cwl`. Each emits its own schema by design.
-- **Target-specific data-flow**: `summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`. Each consumes any source summary; generated skills handle polymorphism.
+- **Source × target interface/data-flow**: `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `cwl-summary-to-galaxy-interface`, `cwl-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, `nextflow-summary-to-cwl-data-flow`, plus combined paper design Molds until paper examples justify a split.
 - **Target-specific (one per target)**:
   - Templates: `summary-to-galaxy-template`, `summary-to-cwl-template`.
   - Per-step (Galaxy): `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`.

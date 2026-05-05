@@ -46,23 +46,29 @@ This isn't a frontmatter schema; it's a mental model for v1 grouping. `tool-spec
 
 ### Source summarization (source-specific, target-agnostic)
 
-Each source emits its **own schema** by design — paper, Nextflow, and CWL are different enough that forcing a shared summary shape would either lose detail or bloat all three. Downstream Molds (data flow, templates) consume any source's summary; generated skills are responsible for handling the polymorphism.
+Each source emits its **own schema** by design — paper, Nextflow, and CWL are different enough that forcing a shared summary shape would either lose detail or bloat all three. Downstream source-target Molds consume each source summary without forcing a shared workflow schema.
 
 - `summarize-paper` — extract methods, tools/algorithms, sample data, metrics, references from a paper.
 - `summarize-nextflow` — enumerate processes, channels, conditionals, containers (biocontainers / Docker / Singularity refs and their bioconda equivalents), test fixtures from an NF source tree. Container-and-env info is structured output, consumed downstream by `author-galaxy-tool-wrapper` when discovery fails.
 - `summarize-cwl` — read CWL Workflow + referenced `CommandLineTool`s; surface inputs/outputs, scatter, conditional logic, and `DockerRequirement` / `SoftwareRequirement` blocks. Container-and-env info structured for downstream consumption analogous to `summarize-nextflow`.
 
-### Data flow (target-specific)
+### Interface and data-flow design (source × target)
 
-Split by target because Galaxy and CWL have different idioms (Galaxy collections / paired collections vs. CWL scatter / valueFrom). Each consumes any source-summarizer output:
+Split by source and target where the handoff shape is specific enough to be useful. These Molds emit reviewable Markdown design briefs, not rich workflow schemas:
 
-- `summary-to-galaxy-data-flow` — abstract DAG with Galaxy-shaped collection / scatter / branching idioms surfaced. Used by all Galaxy-targeting pipelines.
-- `summary-to-cwl-data-flow` — abstract DAG with CWL-shaped scatter / step idioms surfaced. Used by all CWL-targeting pipelines.
+- `nextflow-summary-to-galaxy-interface` — Galaxy workflow inputs, outputs, labels, collection shapes, checkpoint outputs, confidence, and provenance from a Nextflow summary.
+- `nextflow-summary-to-galaxy-data-flow` — Galaxy-facing abstract topology, collection operations, unresolved tool needs, and shape transformations from a Nextflow summary plus interface brief.
+- `cwl-summary-to-galaxy-interface` — Galaxy workflow interface design from a CWL summary.
+- `cwl-summary-to-galaxy-data-flow` — Galaxy-facing abstract topology from a CWL summary plus interface brief.
+- `nextflow-summary-to-cwl-interface` — CWL Workflow interface design from a Nextflow summary.
+- `nextflow-summary-to-cwl-data-flow` — CWL-facing abstract topology, scatter/gather choices, and unresolved CommandLineTool needs from a Nextflow summary plus interface brief.
+- `paper-summary-to-galaxy-design` — combined Galaxy interface and data-flow design brief from a paper summary; split later if paper examples justify it.
+- `paper-summary-to-cwl-design` — combined CWL interface and data-flow design brief from a paper summary; split later if paper examples justify it.
 
 ### Template generation (target-specific)
 
-- `summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs. Wiki-links into Galaxy pattern pages (collection / tabular / conditional / custom-tool).
-- `summary-to-cwl-template` — CWL Workflow skeleton with per-step TODOs.
+- `summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs. Reads the source artifact, source summary, and previous design handoffs.
+- `summary-to-cwl-template` — CWL Workflow skeleton with per-step TODOs. Reads the source artifact, source summary, and previous design handoffs.
 
 ### Per-step tool work (target-specific, runs in `[loop]`)
 
@@ -133,11 +139,11 @@ Excluded from the inventory by design. Naming them keeps the boundary visible.
 
 ## Counts and reuse
 
-- 26 current candidate Molds total in `content/molds/` (Galaxy validation split into step/workflow Molds; `find-test-data` included; corpus Mold renamed/reframed as `compare-against-iwc-exemplar`; `discover-shed-tool` graduated from "Not Molds"; whole-CLI catalogs are reference content, not Molds).
+- 33 current candidate Molds total in `content/molds/` (Galaxy validation split into step/workflow Molds; interface/data-flow design is source-target specific; `find-test-data` included; corpus Mold renamed/reframed as `compare-against-iwc-exemplar`; `discover-shed-tool` graduated from "Not Molds"; whole-CLI catalogs are reference content, not Molds).
 - Source-summarization tier: 3 Molds, each used by exactly the pipelines starting from that source.
-- Data-flow tier: 2 Molds (`summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`). Each consumes any source summary; generated skills handle the polymorphism.
-- Galaxy-target tier: `summary-to-galaxy-data-flow`, `summary-to-galaxy-template`, `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`, `implement-galaxy-workflow-test`, `validate-galaxy-step`, `validate-galaxy-workflow`, `run-workflow-test`, `debug-galaxy-workflow-output`, `compare-against-iwc-exemplar` — used by all 3 Galaxy-targeting pipelines.
-- CWL-target tier: `summary-to-cwl-data-flow`, `summary-to-cwl-template`, `summarize-cwl-tool`, `implement-cwl-tool-step`, `implement-cwl-workflow-test`, `validate-cwl`, `run-workflow-test`, `debug-cwl-workflow-output` — used by 2 CWL-targeting pipelines.
+- Interface/data-flow tier: source-target Markdown design-brief Molds, currently split for Nextflow and CWL Galaxy paths and for Nextflow-to-CWL; paper paths stay combined until examples justify a split.
+- Galaxy-target tier: `summary-to-galaxy-template`, `discover-shed-tool`, `summarize-galaxy-tool`, `author-galaxy-tool-wrapper`, `implement-galaxy-tool-step`, `implement-galaxy-workflow-test`, `validate-galaxy-step`, `validate-galaxy-workflow`, `run-workflow-test`, `debug-galaxy-workflow-output`, `compare-against-iwc-exemplar` — used by all 3 Galaxy-targeting pipelines.
+- CWL-target tier: `summary-to-cwl-template`, `summarize-cwl-tool`, `implement-cwl-tool-step`, `implement-cwl-workflow-test`, `validate-cwl`, `run-workflow-test`, `debug-cwl-workflow-output` — used by 2 CWL-targeting pipelines.
 - CLI command tier: `content/cli/<tool>/<command>.md` — referenced by action Molds through typed references and cast as sidecars when needed.
 
 ## What this list is for
