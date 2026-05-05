@@ -449,7 +449,7 @@ describe("validateDirectory (cross-file)", () => {
         references: [
           { kind: "research", ref: "[[component-x]]", used_at: "runtime", load: "on-demand", mode: "verbatim", evidence: "corpus-observed" },
           { kind: "pattern", ref: "[[pattern-x]]", used_at: "cast-time", load: "upfront", mode: "condense", evidence: "corpus-observed" },
-          { kind: "schema", ref: "content/schemas/x.schema.json", used_at: "both", load: "upfront", mode: "verbatim", evidence: "cast-validated" },
+          { kind: "schema", ref: "[[schema-x]]", used_at: "both", load: "upfront", mode: "verbatim", evidence: "cast-validated" },
         ],
       }),
     });
@@ -459,8 +459,16 @@ describe("validateDirectory (cross-file)", () => {
     writeFm(path.join(dir, "patterns/pattern-x.md"), {
       ...patternRequired({ type: "pattern", tags: ["pattern"], title: "Pattern X" }),
     });
-    mkdirSync(path.join(dir, "schemas"), { recursive: true });
-    writeFileSync(path.join(dir, "schemas/x.schema.json"), "{}");
+    writeFm(path.join(dir, "schemas/schema-x.md"), {
+      ...baseRequired({
+        type: "schema",
+        tags: ["schema"],
+        name: "schema-x",
+        title: "Schema X",
+        package: "@example/schema-x",
+        package_export: "schemaX",
+      }),
+    });
 
     const r = validateDirectory({
       directory: dir,

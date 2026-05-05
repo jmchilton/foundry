@@ -64,6 +64,9 @@ describe("cast-mold (summarize-nextflow integration)", () => {
     const prov = JSON.parse(readFileSync(provPath, "utf8"));
     for (const r of prov.refs) {
       if (r.mode !== "verbatim") continue;
+      // Package-vendored schema refs use a `package://...#export` src marker; the
+      // dst basename derives from the schema note slug, not the export name.
+      if (typeof r.src === "string" && r.src.startsWith("package://")) continue;
       expect(path.basename(r.dst)).toBe(path.basename(r.src));
     }
   });

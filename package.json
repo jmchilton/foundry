@@ -33,6 +33,9 @@
   },
   "devDependencies": {
     "@galaxy-foundry/build-cli": "workspace:*",
+    "@galaxy-foundry/galaxy-tool-discovery-schema": "workspace:*",
+    "@galaxy-foundry/summary-nextflow-schema": "workspace:*",
+    "@galaxy-foundry/tests-format-schema": "workspace:*",
     "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",

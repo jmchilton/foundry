@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 8,
-    "content_hash": "904ba406b81f331bceeacd47b03277080705d1f35bbba70ea06606a43601efa7",
-    "commit": "bb669240188882d4981eb9f7cac640dc830e11b1"
+    "content_hash": "62312afcc56057bea581631b296cc93899618c5ce13318ff8e8b961dfa9d6712",
+    "commit": "8e22fd281b0b9ed461d61262435e27234e3c2b73"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-05T12:08:56.572Z",
+  "cast_at": "2026-05-05T13:14:09.160Z",
   "cast_date": "2026-05-01",
   "cast_revision": 3,
   "cast_history": [
@@ -82,15 +82,15 @@
     {
       "kind": "schema",
       "mode": "verbatim",
-      "ref": "content/schemas/summary-nextflow.schema.json",
-      "src": "content/schemas/summary-nextflow.schema.json",
+      "ref": "[[summary-nextflow]]",
+      "src": "package://@galaxy-foundry/summary-nextflow-schema#summaryNextflowSchema",
       "dst": "references/schemas/summary-nextflow.schema.json",
       "used_at": "both",
       "load": "upfront",
       "evidence": "cast-validated",
       "purpose": "Validate the emitted Nextflow summary JSON and provide downstream consumers the output contract.",
-      "src_hash": "80232a84697c2ea6def00549180a6efb83ee8afaab4b650a349c51a5a5824084",
-      "dst_hash": "80232a84697c2ea6def00549180a6efb83ee8afaab4b650a349c51a5a5824084",
+      "src_hash": "e7c6ba1af050c209b613edef9f7a7657baa1758032ce1499a2142c0a240b0f39",
+      "dst_hash": "e7c6ba1af050c209b613edef9f7a7657baa1758032ce1499a2142c0a240b0f39",
       "source": "deterministic"
     }
   ],
