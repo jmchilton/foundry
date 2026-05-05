@@ -79,7 +79,7 @@ Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structu
 
 This Mold owns **only the read-and-structure step**. Every cross-source-and-target translation lives downstream; this Mold is responsible for surfacing what exists in the NF tree honestly, not for reshaping it toward Galaxy or CWL idioms.
 
-The output schema is per-source by design — see [[GXY_SKETCHES_ALIGNMENT]] for why a forced-shared cross-source summary shape was rejected.
+The output schema is per-source by design — see [[gxy-sketches-alignment]] for why a forced-shared cross-source summary shape was rejected.
 
 ## Inputs
 
@@ -187,7 +187,7 @@ A single JSON document conforming to [[summary-nextflow]] (`packages/summary-nex
 }
 ```
 
-Field-name parity with gxy-sketches (`SketchSource`, `ToolSpec`, `TestDataRef`, `ExpectedOutputRef`) is intentional and load-bearing — see [[GXY_SKETCHES_ALIGNMENT]] §1-3.
+Field-name parity with gxy-sketches (`SketchSource`, `ToolSpec`, `TestDataRef`, `ExpectedOutputRef`) is intentional and load-bearing — see [[gxy-sketches-alignment]] §1-3.
 
 ## Procedure
 
@@ -260,7 +260,7 @@ Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVe
 
 When fixture fetching is enabled, hash each fetched remote file with SHA-1. When a test-data directory is provided, write the samplesheet and every referenced remote file under that directory using a deterministic URL-derived path and record that local filesystem path in `path` while preserving the original `url`.
 
-Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field names verbatim. The `path` vs `url` rules from gxy-sketches' `TestDataRef` carry over, with one extension: `path` may be the local fetched path for a remote URL. The "must be under `test_data/`" constraint does **not** — see [[GXY_SKETCHES_ALIGNMENT]] §1.
+Each entry follows `TestDataRef` (inputs) / `ExpectedOutputRef` (outputs) field names verbatim. The `path` vs `url` rules from gxy-sketches' `TestDataRef` carry over, with one extension: `path` may be the local fetched path for a remote URL. The "must be under `test_data/`" constraint does **not** — see [[gxy-sketches-alignment]] §1.
 
 **`nf_tests[]`** — enumerate every `tests/*.nf.test` file. Real pipelines have one .nf.test per test profile (bacass has 9). For each:
 
