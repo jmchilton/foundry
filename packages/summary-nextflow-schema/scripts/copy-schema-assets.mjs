@@ -8,13 +8,28 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = resolve(__dirname, "..");
+const REPO_ROOT = resolve(PKG_ROOT, "..", "..");
 
-const ASSETS = [["src/summary-nextflow.schema.json", "dist/summary-nextflow.schema.json"]];
+const ASSETS = [
+  [resolve(PKG_ROOT, "src/summary-nextflow.schema.json"), "dist/summary-nextflow.schema.json"],
+  [
+    resolve(REPO_ROOT, "content/schemas/nextflow-parameters-meta.schema.json"),
+    "dist/nextflow-parameters-meta.schema.json",
+  ],
+  [
+    resolve(REPO_ROOT, "content/schemas/nf-core-module-meta.schema.json"),
+    "dist/nf-core-module-meta.schema.json",
+  ],
+  [
+    resolve(REPO_ROOT, "content/schemas/nf-core-subworkflow-meta.schema.json"),
+    "dist/nf-core-subworkflow-meta.schema.json",
+  ],
+];
 
 for (const [src, dst] of ASSETS) {
-  const srcPath = resolve(PKG_ROOT, src);
+  const srcPath = src;
   const dstPath = resolve(PKG_ROOT, dst);
   mkdirSync(dirname(dstPath), { recursive: true });
   copyFileSync(srcPath, dstPath);
-  console.log(`copied ${src} → ${dst}`);
+  console.log(`copied ${srcPath} → ${dst}`);
 }
