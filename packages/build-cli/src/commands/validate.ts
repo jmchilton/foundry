@@ -577,6 +577,30 @@ function validatePipelinePhases(
   return findings;
 }
 
+// Allowlisted top-level entries inside a Mold directory.
+// Files with frontmatter rules apply to top-level .md files only;
+// `refinements/` is the carve-out where journal entries carry frontmatter.
+const MOLD_TOP_FILES = new Set([
+  "index.md",
+  "eval.md",
+  "usage.md",
+  "refinement.md",
+  "casting.md",
+  "cast-skill-verification.md",
+  "changes.md",
+  "README.md",
+]);
+const MOLD_TOP_DIRS = new Set(["examples", "refinements"]);
+
+const REFINEMENT_DECISION_VOCAB = new Set([
+  "keep",
+  "schema-change",
+  "reference-change",
+  "eval-add",
+  "open-question",
+  "other",
+]);
+
 function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
   const moldsRoot = path.join(contentRoot, "molds");
@@ -603,10 +627,34 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
       });
     }
 
+    for (const child of readdirSync(moldDir).sort()) {
+      const childPath = path.join(moldDir, child);
+      const isDir = statSync(childPath).isDirectory();
+      if (isDir) {
+        if (!MOLD_TOP_DIRS.has(child)) {
+          findings.push({
+            path: childPath,
+            severity: "warning",
+            message: `unexpected directory in mold source: ${child}`,
+          });
+        }
+      } else if (!MOLD_TOP_FILES.has(child)) {
+        findings.push({
+          path: childPath,
+          severity: "warning",
+          message: `unexpected file in mold source: ${child}`,
+        });
+      }
+    }
+
     for (const mdPath of listMarkdownFiles(moldDir)) {
       if (path.basename(mdPath) === "index.md") continue;
+      const rel = path.relative(moldDir, mdPath);
+      const inRefinements = rel.split(path.sep)[0] === "refinements";
       const parsed = readMarkdown(mdPath);
-      if (parsed.hasFrontmatter) {
+      if (inRefinements) {
+        validateRefinementEntry(mdPath, parsed, findings);
+      } else if (parsed.hasFrontmatter) {
         findings.push({
           path: mdPath,
           severity: "error",
@@ -642,6 +690,39 @@ function validateMoldSourceLayout(contentRoot: string, moldFiles: FileMeta[]): C
   }
 
   return findings;
+}
+
+function validateRefinementEntry(
+  filePath: string,
+  parsed: { hasFrontmatter: boolean; meta?: Record<string, unknown> },
+  findings: CrossFileFinding[],
+): void {
+  if (!parsed.hasFrontmatter) {
+    findings.push({
+      path: filePath,
+      severity: "warning",
+      message: "refinement journal entry should declare mold/date/intent/decision frontmatter",
+    });
+    return;
+  }
+  const meta = parsed.meta ?? {};
+  for (const key of ["mold", "date", "intent", "decision"]) {
+    if (meta[key] === undefined || meta[key] === null || meta[key] === "") {
+      findings.push({
+        path: filePath,
+        severity: "warning",
+        message: `refinement journal entry missing '${key}' frontmatter`,
+      });
+    }
+  }
+  const decision = meta.decision;
+  if (typeof decision === "string" && !REFINEMENT_DECISION_VOCAB.has(decision)) {
+    findings.push({
+      path: filePath,
+      severity: "warning",
+      message: `refinement journal 'decision' should be one of: ${[...REFINEMENT_DECISION_VOCAB].join(", ")}`,
+    });
+  }
 }
 
 function validateCliCommandDocs(files: FileMeta[]): CrossFileFinding[] {
