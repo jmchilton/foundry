@@ -135,9 +135,35 @@ interface NfTest {
     ignore_files: string[];
     ignore_globs: string[];
     snap_path: string | null;
+    parsed_content: SnapshotContent[];
   } | null;
   prose_assertions: string[];
 }
+
+interface SnapshotContent {
+  name: string;
+  channels: SnapshotChannel[];
+}
+
+interface SnapshotChannel {
+  key: string | null;
+  files: SnapshotFile[];
+  values: unknown[];
+}
+
+interface SnapshotFile {
+  path: string;
+  basename: string;
+  md5: string;
+  stub: boolean;
+}
+
+interface SnapshotParts {
+  files: SnapshotFile[];
+  values: unknown[];
+}
+
+const MAX_SNAPSHOT_SIDECAR_BYTES = 200_000;
 
 export interface ResolveOptions {
   profile: string;
@@ -1115,7 +1141,7 @@ function parseNfTestsInDir(pipelineRoot: string, testsRoot: string): NfTest[] {
         profiles: unique([...parseNfTestProfiles(block.body, block.name), ...fileProfiles]),
         params_overrides: parseParamsOverrides(block.body),
         assert_workflow_success: block.body.includes("workflow.success"),
-        snapshot: parseSnapshot(path, relPath, block.body),
+        snapshot: parseSnapshot(path, relPath, block.body, block.name),
         prose_assertions: parseProseAssertions(block.body),
       }));
     });
@@ -1157,8 +1183,9 @@ function parseParamsOverrides(text: string): Record<string, unknown> {
   return values;
 }
 
-function parseSnapshot(path: string, relPath: string, text: string): NfTest["snapshot"] {
+function parseSnapshot(path: string, relPath: string, text: string, name: string): NfTest["snapshot"] {
   if (!text.includes("snapshot(")) return null;
+  const snapPath = existsSync(`${path}.snap`) ? `${relPath}.snap` : null;
   return {
     captures: parseSnapshotCaptures(text),
     helpers: unique(
@@ -1170,8 +1197,83 @@ function parseSnapshot(path: string, relPath: string, text: string): NfTest["sna
     ignore_globs: [...text.matchAll(/ignore:\s*\[([^\]]+)\]/gu)].flatMap((match) =>
       [...match[1]!.matchAll(/['"]([^'"]+)['"]/gu)].map((inner) => inner[1]!),
     ),
-    snap_path: existsSync(`${path}.snap`) ? `${relPath}.snap` : null,
+    snap_path: snapPath,
+    parsed_content: snapPath === null ? [] : parseSnapshotSidecar(`${path}.snap`, name),
   };
+}
+
+function parseSnapshotSidecar(path: string, name: string): SnapshotContent[] {
+  try {
+    if (statSync(path).size > MAX_SNAPSHOT_SIDECAR_BYTES) return [];
+    const parsed: unknown = JSON.parse(readText(path));
+    if (!isRecord(parsed)) return [];
+    const entries = Object.entries(parsed);
+    const matching = entries.filter(([entryName]) => entryName === name);
+    return (matching.length > 0 ? matching : entries).flatMap(([entryName, entry]) =>
+      parseSnapshotContent(entryName, entry),
+    );
+  } catch {
+    return [];
+  }
+}
+
+function parseSnapshotContent(name: string, entry: unknown): SnapshotContent[] {
+  if (!isRecord(entry)) return [];
+  const content = entry["content"];
+  if (!Array.isArray(content)) return [];
+  return [{ name, channels: content.flatMap(parseSnapshotContentItem) }];
+}
+
+function parseSnapshotContentItem(item: unknown): SnapshotChannel[] {
+  if (Array.isArray(item)) return [snapshotChannel(null, item)];
+  if (typeof item === "string") return [snapshotChannel(null, [item])];
+  if (!isRecord(item)) return [snapshotChannel(null, [item])];
+  return Object.entries(item).map(([key, value]) =>
+    snapshotChannel(key, Array.isArray(value) ? value : [value]),
+  );
+}
+
+function snapshotChannel(key: string | null, values: unknown[]): SnapshotChannel {
+  const parts = values.map(parseSnapshotParts);
+  return {
+    key,
+    files: parts.flatMap((part) => part.files),
+    values: parts.flatMap((part) => part.values),
+  };
+}
+
+function parseSnapshotParts(value: unknown): SnapshotParts {
+  if (typeof value === "string") {
+    const match = /^(.*):md5,([a-fA-F0-9]{32})$/u.exec(value);
+    if (match === null) return { files: [], values: [value] };
+    const path = match[1]!;
+    const md5 = match[2]!;
+    return {
+      files: [
+        {
+          path,
+          basename: path.split(/[\\/]/u).pop() ?? path,
+          md5,
+          stub: md5 === "d41d8cd98f00b204e9800998ecf8427e",
+        },
+      ],
+      values: [],
+    };
+  }
+  if (Array.isArray(value)) {
+    const parts = value.map(parseSnapshotParts);
+    const files = parts.flatMap((part) => part.files);
+    if (files.length === 0) return { files: [], values: [value] };
+    return {
+      files,
+      values: parts.flatMap((part) => part.values),
+    };
+  }
+  return { files: [], values: [value] };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function parseSnapshotCaptures(text: string): string[] {
