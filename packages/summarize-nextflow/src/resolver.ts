@@ -1183,7 +1183,12 @@ function parseParamsOverrides(text: string): Record<string, unknown> {
   return values;
 }
 
-function parseSnapshot(path: string, relPath: string, text: string, name: string): NfTest["snapshot"] {
+function parseSnapshot(
+  path: string,
+  relPath: string,
+  text: string,
+  name: string,
+): NfTest["snapshot"] {
   if (!text.includes("snapshot(")) return null;
   const snapPath = existsSync(`${path}.snap`) ? `${relPath}.snap` : null;
   return {
