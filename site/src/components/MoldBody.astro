@@ -25,11 +25,80 @@ const prompts = resolveAll(data.prompts);
 const axisChip = data.axis;
 const specifier = data.source ?? data.target ?? data.tool ?? null;
 ---
-<div class="mb-6 flex flex-wrap gap-2 items-center">
-  <span class="text-xs px-2 py-1 rounded bg-(--color-galaxy-primary) text-white font-mono">{axisChip}</span>
-  {specifier && <span class="text-xs px-2 py-1 rounded border border-(--color-border) font-mono">{specifier}</span>}
-  <span class="text-xs text-(--color-text-secondary) font-mono">{data.name}</span>
-</div>
+<dl class="mold-strip">
+  <div class="mold-strip-cell mold-strip-cell-axis">
+    <dt>axis</dt>
+    <dd>{axisChip}</dd>
+  </div>
+  {specifier && (
+    <div class="mold-strip-cell">
+      <dt>{data.source ? 'source' : data.target ? 'target' : 'tool'}</dt>
+      <dd>{specifier}</dd>
+    </div>
+  )}
+  <div class="mold-strip-cell mold-strip-cell-name">
+    <dt>name</dt>
+    <dd>{data.name}</dd>
+  </div>
+</dl>
+
+<style>
+  .mold-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.6rem;
+    background: var(--color-surface-raised);
+    overflow: hidden;
+  }
+  .mold-strip-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.55rem 0.95rem;
+    border-right: 1px solid var(--color-border-subtle);
+    min-width: 0;
+  }
+  .mold-strip-cell:last-child { border-right: 0; }
+  .mold-strip-cell dt {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+  .mold-strip-cell dd {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+  }
+  .mold-strip-cell-axis {
+    background: color-mix(in srgb, var(--color-galaxy-primary) 8%, transparent);
+    box-shadow: inset 3px 0 0 var(--color-galaxy-primary);
+  }
+  .mold-strip-cell-axis dd {
+    color: var(--color-link);
+    font-weight: 600;
+  }
+  .mold-strip-cell-name dd {
+    color: var(--color-text-secondary);
+  }
+  @media (max-width: 480px) {
+    .mold-strip-cell {
+      flex-basis: 100%;
+      border-right: 0;
+      border-bottom: 1px solid var(--color-border-subtle);
+    }
+    .mold-strip-cell:last-child { border-bottom: 0; }
+  }
+</style>
 
 <ReferenceContract references={data.references} linkMap={linkMap} />
 

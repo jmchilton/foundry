@@ -85,14 +85,15 @@ const hasAnything =
     <div class="meta-pair">
       <dt>Patterns</dt>
       <dd>
-        {relatedPatterns.map((l, i) => (
-          <>
-            {l.href
-              ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
-              : <span class="dangling">{l.label}</span>}
-            {i < relatedPatterns.length - 1 ? ', ' : ''}
-          </>
-        ))}
+        <ul class="link-chips">
+          {relatedPatterns.map(l => (
+            <li>
+              {l.href
+                ? <a class="link-chip" href={l.href} title={l.summary || undefined}>{l.label}</a>
+                : <span class="link-chip link-chip-dangling">{l.label}</span>}
+            </li>
+          ))}
+        </ul>
       </dd>
     </div>
   )}
@@ -101,14 +102,15 @@ const hasAnything =
     <div class="meta-pair">
       <dt>Implemented By</dt>
       <dd>
-        {implementedByPatterns.map((l, i) => (
-          <>
-            {l.href
-              ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
-              : <span class="dangling">{l.label}</span>}
-            {i < implementedByPatterns.length - 1 ? ', ' : ''}
-          </>
-        ))}
+        <ul class="link-chips">
+          {implementedByPatterns.map(l => (
+            <li>
+              {l.href
+                ? <a class="link-chip" href={l.href} title={l.summary || undefined}>{l.label}</a>
+                : <span class="link-chip link-chip-dangling">{l.label}</span>}
+            </li>
+          ))}
+        </ul>
       </dd>
     </div>
   )}
@@ -128,14 +130,15 @@ const hasAnything =
     <div class="meta-pair">
       <dt>Molds</dt>
       <dd>
-        {relatedMolds.map((l, i) => (
-          <>
-            {l.href
-              ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
-              : <span class="dangling">{l.label}</span>}
-            {i < relatedMolds.length - 1 ? ', ' : ''}
-          </>
-        ))}
+        <ul class="link-chips">
+          {relatedMolds.map(l => (
+            <li>
+              {l.href
+                ? <a class="link-chip" href={l.href} title={l.summary || undefined}>{l.label}</a>
+                : <span class="link-chip link-chip-dangling">{l.label}</span>}
+            </li>
+          ))}
+        </ul>
       </dd>
     </div>
   )}
@@ -144,14 +147,15 @@ const hasAnything =
     <div class="meta-pair">
       <dt>Related</dt>
       <dd>
-        {relatedNotes.map((l, i) => (
-          <>
-            {l.href
-              ? <a href={l.href} title={l.summary || undefined}>{l.label}</a>
-              : <span class="dangling">{l.label}</span>}
-            {i < relatedNotes.length - 1 ? ', ' : ''}
-          </>
-        ))}
+        <ul class="link-chips">
+          {relatedNotes.map(l => (
+            <li>
+              {l.href
+                ? <a class="link-chip" href={l.href} title={l.summary || undefined}>{l.label}</a>
+                : <span class="link-chip link-chip-dangling">{l.label}</span>}
+            </li>
+          ))}
+        </ul>
       </dd>
     </div>
   )}
@@ -215,5 +219,40 @@ const hasAnything =
   .meta-pair a:hover {
     color: var(--color-link-hover);
     border-color: var(--color-accent);
+  }
+  .link-chips {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    vertical-align: middle;
+  }
+  .link-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.6rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.45rem;
+    background: var(--color-surface-raised);
+    color: var(--color-link);
+    font-size: 0.82rem;
+    line-height: 1.25;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  }
+  .meta-pair a.link-chip {
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+  .meta-pair a.link-chip:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-accent);
+    color: var(--color-link-hover);
+    transform: translateY(-1px);
+  }
+  .link-chip-dangling {
+    color: var(--color-text-muted);
+    font-style: italic;
   }
 </style>
