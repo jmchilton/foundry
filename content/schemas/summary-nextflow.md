@@ -16,8 +16,10 @@ revision: 5
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
-  - "[[summary-to-galaxy-data-flow]]"
-  - "[[summary-to-cwl-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-interface]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-cwl-interface]]"
+  - "[[nextflow-summary-to-cwl-data-flow]]"
   - "[[author-galaxy-tool-wrapper]]"
   - "[[nextflow-test-to-galaxy-test-plan]]"
   - "[[nextflow-test-to-cwl-test-plan]]"
@@ -44,7 +46,7 @@ Contrast with [[tests-format]], which is vendored *from* an external npm package
 
 ## Why per-source
 
-Paper, Nextflow, and CWL are different enough that forcing a shared cross-source summary shape would either lose detail or bloat all three (`docs/HARNESS_PIPELINES.md` §"Mold-inventory parity"). Each `summarize-<source>` Mold emits its own schema; downstream Molds (`summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`) consume any source's summary, with the cast skill handling the polymorphism.
+Paper, Nextflow, and CWL are different enough that forcing a shared cross-source summary shape would either lose detail or bloat all three (`docs/HARNESS_PIPELINES.md` §"Mold-inventory parity"). Each `summarize-<source>` Mold emits its own schema; downstream source-target Molds such as `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, and `nextflow-summary-to-cwl-data-flow` consume this summary without pretending every source has one shared shape.
 
 ## Field-name parity with gxy-sketches
 

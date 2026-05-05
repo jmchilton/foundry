@@ -32,7 +32,8 @@ related_patterns:
   - "[[collection-unbox-singleton]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
-  - "[[summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[cwl-summary-to-galaxy-data-flow]]"
 iwc_exemplars:
   - workflow: data-fetching/sra-manifest-to-concatenated-fastqs/sra-manifest-to-concatenated-fastqs
     why: "Splits a manifest to accessions, maps fasterq_dump, then relabels and reshapes paired/single outputs."

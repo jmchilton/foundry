@@ -27,7 +27,8 @@ related_patterns:
   - "[[conditional-gate-on-nonempty-result]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
-  - "[[summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[cwl-summary-to-galaxy-data-flow]]"
 iwc_exemplars:
   - workflow: amplicon/amplicon-mgnify/mgnify-amplicon-pipeline-v5-rrna-prediction/mgnify-amplicon-pipeline-v5-rrna-prediction
     why: "Filters empty mapped BED outputs, syncs sibling collections from cleaned identifiers, then gates Krona and BIOM exports."

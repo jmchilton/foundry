@@ -8,12 +8,13 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-04-30
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Path from a CWL Workflow to a Galaxy gxformat2 workflow. Lighter upstream extraction."
 phases:
   - mold: "[[summarize-cwl]]"
-  - mold: "[[summary-to-galaxy-data-flow]]"
+  - mold: "[[cwl-summary-to-galaxy-interface]]"
+  - mold: "[[cwl-summary-to-galaxy-data-flow]]"
   - mold: "[[summary-to-galaxy-template]]"
   - mold: "[[compare-against-iwc-exemplar]]"
   - branch: discover-or-author
@@ -38,4 +39,4 @@ phases:
 
 Direct path. Lifted from `docs/HARNESS_PIPELINES.md` §"CWL → GALAXY".
 
-CWL is already structured, so the upstream `summarize-cwl → summary-to-galaxy-data-flow` step is much lighter than its `summarize-paper` or `summarize-nextflow` counterparts. The per-step Galaxy authoring tier downstream is identical to the other Galaxy-targeting pipelines.
+CWL is already structured, so the upstream `summarize-cwl → cwl-summary-to-galaxy-interface → cwl-summary-to-galaxy-data-flow` chain is much lighter than its Nextflow counterpart. The per-step Galaxy authoring tier downstream is identical to the other Galaxy-targeting pipelines.

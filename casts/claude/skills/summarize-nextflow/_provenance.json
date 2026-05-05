@@ -5,12 +5,12 @@
     "name": "summarize-nextflow",
     "path": "content/molds/summarize-nextflow/index.md",
     "revision": 9,
-    "content_hash": "cd8228015d40547889ed2d18bee801b1d3fa35b8ad02fe453b8e9a90c2efc0d8",
-    "commit": "2aaf63494911cfdab0360ab905304655fb8de74b"
+    "content_hash": "be773d73efc1d0a9122fb8e259bff62848acf45feafbd7d18d16f605f6879884",
+    "commit": "92cb2309cc10cc8e5b1b288c099b9f831713cffb"
   },
   "cast_method": "hand-cast",
   "cast_agent": "claude (manual transcription, no LLM cast prompt)",
-  "cast_at": "2026-05-05T15:59:47.499Z",
+  "cast_at": "2026-05-05T17:30:32.054Z",
   "cast_date": "2026-05-05",
   "cast_revision": 5,
   "cast_history": [

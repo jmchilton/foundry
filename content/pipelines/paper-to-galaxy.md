@@ -8,12 +8,12 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-04-30
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Direct path from a paper to a Galaxy gxformat2 workflow. No CWL intermediate."
 phases:
   - mold: "[[summarize-paper]]"
-  - mold: "[[summary-to-galaxy-data-flow]]"
+  - mold: "[[paper-summary-to-galaxy-design]]"
   - mold: "[[summary-to-galaxy-template]]"
   - mold: "[[compare-against-iwc-exemplar]]"
   - branch: discover-or-author

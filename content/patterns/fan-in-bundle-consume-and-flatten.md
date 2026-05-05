@@ -28,7 +28,8 @@ related_patterns:
   - "[[tabular-pivot-collection-to-wide]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
-  - "[[summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[cwl-summary-to-galaxy-data-flow]]"
 iwc_exemplars:
   - workflow: microbiome/mags-building/MAGs-generation
     why: "Builds a collection from multiple binner outputs for binette, then flattens nested bins for pooled downstream processing."

@@ -29,7 +29,8 @@ related_patterns:
   - "[[collection-flatten-after-fanout]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
-  - "[[summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[cwl-summary-to-galaxy-data-flow]]"
 iwc_exemplars:
   - workflow: virology/influenza-isolates-consensus-and-subtyping/influenza-consensus-and-subtyping
     why: "Uses Apply Rules, identifier extraction, find-and-replace, relabeling, and another Apply Rules pass before mapped consensus."

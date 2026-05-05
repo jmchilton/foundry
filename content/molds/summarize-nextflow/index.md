@@ -75,7 +75,7 @@ summary: "Read a Nextflow pipeline source tree and emit a structured per-source 
 
 # summarize-nextflow
 
-Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary describing its processes, channels, conditionals, containers, parameters, and test fixtures. Source-specific (Nextflow), target-agnostic. The summary is the input to every downstream Mold in the `NEXTFLOW → GALAXY` and `NEXTFLOW → CWL` pipelines: `summary-to-galaxy-data-flow`, `summary-to-cwl-data-flow`, `author-galaxy-tool-wrapper` (for the container/conda block), `nextflow-test-to-galaxy-test-plan`, and `nextflow-test-to-cwl-test-plan` (for the test-fixture block).
+Read a Nextflow pipeline source tree (nf-core or ad-hoc DSL2) and emit a structured JSON summary describing its processes, channels, conditionals, containers, parameters, and test fixtures. Source-specific (Nextflow), target-agnostic. The summary is the input to every downstream Mold in the `NEXTFLOW → GALAXY` and `NEXTFLOW → CWL` pipelines: `nextflow-summary-to-galaxy-interface`, `nextflow-summary-to-galaxy-data-flow`, `nextflow-summary-to-cwl-interface`, `nextflow-summary-to-cwl-data-flow`, `author-galaxy-tool-wrapper` (for the container/conda block), `nextflow-test-to-galaxy-test-plan`, and `nextflow-test-to-cwl-test-plan` (for the test-fixture block).
 
 This Mold owns **only the read-and-structure step**. Every cross-source-and-target translation lives downstream; this Mold is responsible for surfacing what exists in the NF tree honestly, not for reshaping it toward Galaxy or CWL idioms.
 
@@ -297,7 +297,7 @@ The procedure assumes — and the cast skill must surface in `warnings[]` when r
 ## Non-goals
 
 - **Subset summarization.** Whole-pipeline only. A single-subworkflow summarizer might land later, but the schema and downstream Molds assume the whole-pipeline shape today.
-- **Translation to a target idiom.** This Mold does not produce Galaxy collections, CWL scatter, or any target-shaped data flow. Those live in `[[summary-to-galaxy-data-flow]]` / `[[summary-to-cwl-data-flow]]`.
+- **Translation to a target idiom.** This Mold does not produce Galaxy collections, CWL scatter, or any target-shaped data flow. Those live in `[[nextflow-summary-to-galaxy-interface]]`, `[[nextflow-summary-to-galaxy-data-flow]]`, `[[nextflow-summary-to-cwl-interface]]`, and `[[nextflow-summary-to-cwl-data-flow]]`.
 - **Tool wrapping.** Container/conda info is captured for `[[author-galaxy-tool-wrapper]]` to consume; this Mold never authors a wrapper.
 - **Test execution.** Fixtures are described, not run. `[[run-workflow-test]]` owns execution.
 - **Schema evolution.** The schema at [[summary-nextflow]] is v1, draft. Adding fields requires evaluating against the §"Reference dispatch" exemplars (rnaseq, sarek, one ad-hoc) before merging.

@@ -22,7 +22,7 @@ related_notes:
   - "[[iwc-map-over-lifecycle-survey]]"
   - "[[nextflow-patterns]]"
 related_molds:
-  - "[[summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[implement-galaxy-tool-step]]"
   - "[[debug-galaxy-workflow-output]]"
 sources:
@@ -90,7 +90,7 @@ Galaxy-side evidence:
 
 ## Mold Use
 
-- [[summary-to-galaxy-data-flow]] should use this as the primary operator-translation reference.
+- [[nextflow-summary-to-galaxy-data-flow]] should use this as the primary operator-translation reference.
 - [[implement-galaxy-tool-step]] should use this when operator decisions become concrete Galaxy collection or tabular steps.
 - [[debug-galaxy-workflow-output]] should use this when wrong nesting, missing elements, branch merges, or gather outputs indicate a bad operator translation.
 
