@@ -14,6 +14,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import AjvImport from "ajv";
+import Ajv2020Import from "ajv/dist/2020.js";
 import addFormatsImport from "ajv-formats";
 import yaml from "js-yaml";
 
@@ -21,6 +22,8 @@ import { readMarkdown } from "./lib/frontmatter.js";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Ajv = ((AjvImport as any).default ?? AjvImport) as typeof AjvImport;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Ajv2020 = ((Ajv2020Import as any).default ?? Ajv2020Import) as typeof Ajv2020Import;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addFormats = ((addFormatsImport as any).default ?? addFormatsImport) as typeof addFormatsImport;
 
@@ -60,6 +63,7 @@ interface TargetConfig {
 interface ProvenanceRefEntry {
   kind: string;
   mode: string;
+  ref?: string;
   src: string;
   dst: string;
   used_at: string;
@@ -192,13 +196,20 @@ function main(): void {
   }
 
   // runs/*/summary.json validates against the bundled schema (when present).
-  const schemaRef = (prov.refs ?? []).find((r) => r.kind === "schema");
+  const schemaRef =
+    (prov.refs ?? []).find((r) => r.kind === "schema" && r.ref === "[[summary-nextflow]]") ??
+    (prov.refs ?? []).find((r) => r.kind === "schema");
   if (schemaRef) {
     const schemaAbs = path.join(bundleRoot, schemaRef.dst);
     if (existsSync(schemaAbs)) {
       try {
         const schemaJson = JSON.parse(readFileSync(schemaAbs, "utf8"));
-        const validate = ajv.compile(schemaJson);
+        const schemaUri = typeof schemaJson?.$schema === "string" ? schemaJson.$schema : "";
+        const runAjv = schemaUri.includes("2020-12")
+          ? new Ajv2020({ allErrors: true, strict: false })
+          : new Ajv({ allErrors: true, strict: false });
+        addFormats(runAjv);
+        const validate = runAjv.compile(schemaJson);
         const runsDir = path.join(bundleRoot, "runs");
         if (existsSync(runsDir)) {
           for (const summary of walkAndFind(runsDir, "summary.json")) {

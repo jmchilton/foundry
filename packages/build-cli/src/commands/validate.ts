@@ -609,6 +609,41 @@ function validateArtifactGraph(
   return findings;
 }
 
+function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossFileFinding[] {
+  const findings: CrossFileFinding[] = [];
+  const repoRoot = path.basename(contentRoot) === "content" ? path.dirname(contentRoot) : contentRoot;
+  for (const f of files) {
+    if (f.meta.type !== "schema") continue;
+    const upstream = typeof f.meta.upstream === "string" ? f.meta.upstream : "";
+    if (!upstream || upstream.includes("github.com/jmchilton/foundry/")) continue;
+    if (typeof f.meta.license !== "string") {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: "vendored schema with external upstream must declare license",
+      });
+    }
+    const licenseFile = typeof f.meta.license_file === "string" ? f.meta.license_file : "";
+    if (!licenseFile) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: "vendored schema with external upstream must declare license_file",
+      });
+      continue;
+    }
+    const fullPath = path.join(repoRoot, licenseFile);
+    if (!existsSync(fullPath) || !statSync(fullPath).isFile() || statSync(fullPath).size === 0) {
+      findings.push({
+        path: f.path,
+        severity: "error",
+        message: `license_file: file does not exist or is empty: ${licenseFile}`,
+      });
+    }
+  }
+  return findings;
+}
+
 function validatePipelinePhases(
   files: FileMeta[],
   slugMap: Map<string, string>,
@@ -1042,6 +1077,7 @@ export function validateDirectory(opts: ValidateOptions): {
   crossFindings.push(...validateSourcePatternRefs(validFiles, slugMap, metaByPath));
   crossFindings.push(...validatePipelinePhases(validFiles, slugMap, metaByPath));
   crossFindings.push(...validateArtifactGraph(validFiles, slugMap, metaByPath));
+  crossFindings.push(...validateSchemaVendoring(validFiles, opts.directory));
   crossFindings.push(
     ...validateMoldSourceLayout(
       opts.directory,

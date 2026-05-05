@@ -61,7 +61,7 @@ references:
     ref: "[[component-nextflow-containers-and-envs]]"
     used_at: runtime
     load: on-demand
-    mode: condense
+    mode: verbatim
     evidence: corpus-observed
     purpose: "Resolve container, conda, Wave, and Bioconda/Biocontainers environment evidence."
     trigger: "When extracting tools, versions, containers, conda directives, or environment equivalences."
