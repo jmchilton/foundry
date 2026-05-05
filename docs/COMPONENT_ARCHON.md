@@ -127,7 +127,7 @@ For the Foundry's wish to host **patterns** and **IWC exemplars** in retrievable
 Re-read against Foundry harness requirements:
 
 **What Archon covers off-the-shelf:**
-- **Sequencing the pipeline.** `summarize-nextflow → summary-to-galaxy-data-flow → … → run-workflow-test → debug-galaxy-workflow-output` maps directly onto a `nodes:` list with `depends_on`. Each phase is a `command:` or `prompt:` node calling a generated skill (or wrapping `gxwf`/`planemo` via `bash:` or `script:`).
+- **Sequencing the pipeline.** `summarize-nextflow → nextflow-summary-to-galaxy-interface → nextflow-summary-to-galaxy-data-flow → … → run-workflow-test → debug-galaxy-workflow-output` maps directly onto a `nodes:` list with `depends_on`. Each phase is a `command:` or `prompt:` node calling a generated skill (or wrapping `gxwf`/`planemo` via `bash:` or `script:`).
 - **Approval gates with full autonomy posture.** `approval:` for pure gates, `loop: { interactive: true }` for iterative HITL, plain non-interactive for fully autonomous. The same workflow file can be authored interactive or batch by toggling `interactive:` and removing approval nodes — exactly the autonomy-posture knob you described.
 - **State persistence and resumption.** Run state in DB; `cli workflow resume <id>` skips completed nodes; approval pauses survive restart; per-run `$ARTIFACTS_DIR` is durable; cross-run `<repo>/.archon/state/` is durable.
 - **CLI integration for `gxwf`/`planemo`.** `script:` nodes with `runtime: uv` + `deps:`, or `bash:` nodes. Stdout becomes `$node.output` for downstream nodes. `output_format:` JSON schema for Claude/Codex enforces structured outputs from validators.

@@ -121,7 +121,7 @@ Added `content/molds/summarize-nextflow/eval.md` (14 cases: schema/fidelity/util
 
 **Regression (eval bucket "regression"): FAIL on both committed runs.** demo diff 822 lines, bacass diff 4624 lines. Sampling the head of demo: committed run has hand-curated param descriptions ("Path to a samplesheet CSV.") while the CLI emits the verbatim `nextflow_schema.json` text ("Path to a metadata file containing information about the samples in the experiment."). The committed runs predate the strict-deterministic CLI; they are no longer the right regression baseline. Either re-baseline (commit the new CLI outputs as the canonical run) or drop the regression cases until a "v1 frozen" reference run is established.
 
-**Utility (eval bucket "utility"): not exercised.** Requires running `summary-to-galaxy-data-flow` and `author-galaxy-tool-wrapper` against the new outputs. Open as next step.
+**Utility (eval bucket "utility"): not exercised.** Requires running `nextflow-summary-to-galaxy-data-flow` and `author-galaxy-tool-wrapper` against the new outputs. Open as next step.
 
 Recommended next steps:
 1. Re-baseline `runs/nf-core__{demo,bacass}/summary.json` with the current CLI output, after deciding on the nf_tests scoping question (module-level in or out).

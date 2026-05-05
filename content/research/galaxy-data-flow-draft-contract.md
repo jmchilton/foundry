@@ -16,7 +16,9 @@ related_notes:
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
   - "[[iwc-nearest-exemplar-selection]]"
 related_molds:
-  - "[[summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[cwl-summary-to-galaxy-data-flow]]"
+  - "[[paper-summary-to-galaxy-design]]"
   - "[[summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 sources:
@@ -76,7 +78,7 @@ Do not add these as frontmatter fields yet.
 
 Unresolved tool need:
 
-- [[summary-to-galaxy-data-flow]] emits an abstract node such as `trim FASTQ reads`, input `list:paired fastq`, output `list:paired fastq`, tool need `read trimming`, confidence `medium`.
+- [[nextflow-summary-to-galaxy-data-flow]] emits an abstract node such as `trim FASTQ reads`, input `list:paired fastq`, output `list:paired fastq`, tool need `read trimming`, confidence `medium`.
 - [[summary-to-galaxy-template]] creates a placeholder step with TODOs and collection-shaped connections.
 - The harness routes through tool discovery or wrapper authoring.
 - [[implement-galaxy-tool-step]] fills exact Galaxy tool metadata, parameters, and connections.

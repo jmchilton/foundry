@@ -8,12 +8,13 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-04-30
-revision: 1
+revision: 2
 ai_generated: true
 summary: "Direct path from a Nextflow pipeline to a CWL Workflow + CommandLineTool set."
 phases:
   - mold: "[[summarize-nextflow]]"
-  - mold: "[[summary-to-cwl-data-flow]]"
+  - mold: "[[nextflow-summary-to-cwl-interface]]"
+  - mold: "[[nextflow-summary-to-cwl-data-flow]]"
   - mold: "[[summary-to-cwl-template]]"
   - mold: "[[summarize-cwl-tool]]"
     loop: true

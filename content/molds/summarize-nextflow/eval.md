@@ -157,7 +157,7 @@ Fixtures are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 - check: llm-judged
 - fixture: a `summarize-nextflow` output for a non-trivial pipeline
   (e.g. bacass).
-- expectation: `summary-to-galaxy-data-flow`'s cast skill consumes the JSON
+- expectation: `nextflow-summary-to-galaxy-data-flow`'s cast skill consumes the JSON
   and produces a draft without "field missing" errors. Any field it
   consults that proves underspecified gets logged in `content/log.md`
   under `gap:` and triggers an Open-gaps note update.

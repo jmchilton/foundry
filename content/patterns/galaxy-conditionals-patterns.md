@@ -27,7 +27,8 @@ related_patterns:
   - "[[collection-cleanup-after-mapover-failure]]"
 related_molds:
   - "[[implement-galaxy-tool-step]]"
-  - "[[summary-to-galaxy-data-flow]]"
+  - "[[nextflow-summary-to-galaxy-data-flow]]"
+  - "[[cwl-summary-to-galaxy-data-flow]]"
   - "[[summary-to-galaxy-template]]"
   - "[[compare-against-iwc-exemplar]]"
 ---
