@@ -611,7 +611,8 @@ function validateArtifactGraph(
 
 function validateSchemaVendoring(files: FileMeta[], contentRoot: string): CrossFileFinding[] {
   const findings: CrossFileFinding[] = [];
-  const repoRoot = path.basename(contentRoot) === "content" ? path.dirname(contentRoot) : contentRoot;
+  const repoRoot =
+    path.basename(contentRoot) === "content" ? path.dirname(contentRoot) : contentRoot;
   for (const f of files) {
     if (f.meta.type !== "schema") continue;
     const upstream = typeof f.meta.upstream === "string" ? f.meta.upstream : "";
