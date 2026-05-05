@@ -3,6 +3,7 @@ type: schema
 name: galaxy-tool-summary
 title: Galaxy tool summary manifest
 package: "@galaxy-foundry/galaxy-tool-summary-schema"
+package_export: "galaxyToolSummarySchema"
 upstream: "https://github.com/jmchilton/foundry/blob/main/packages/galaxy-tool-summary-schema/src/galaxy-tool-summary.schema.json"
 tags:
   - schema
