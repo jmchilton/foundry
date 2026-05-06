@@ -9,7 +9,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   description="Why the Galaxy Workflow Foundry uses Molds, casting, static validation, and a public knowledge base."
 >
   <section class="story-hero bg-grain" aria-labelledby="story-heading">
-    <span class="eyebrow mb-4">Foundry Story</span>
+    <div class="story-masthead">
+      <span class="story-masthead-tick" aria-hidden="true"></span>
+      <span class="story-masthead-label font-mono">Foundry / Story</span>
+    </div>
     <h1 id="story-heading">A knowledge base agents can act on.</h1>
     <p>
       Workflow conversion knowledge is too rich, cross-cutting, and tool-shaped to survive as a
@@ -17,28 +20,29 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       then casts focused Molds into portable skills that agents can execute with deterministic rails.
     </p>
   </section>
+  <hr class="story-hero-rule" aria-hidden="true" />
 
   <article class="story-prose">
     <section>
-      <span class="story-kicker font-mono">01 / The Problem</span>
+      <span class="story-kicker font-mono">The Problem</span>
       <h2>Workflow conversion knowledge does not fit in one prompt.</h2>
-      <p>
-        Converting a paper, Nextflow pipeline, or CWL workflow into a validated Galaxy workflow is
-        not one task. It is a chain of tasks: understand the source, reshape its data flow, select or
-        author tools, implement steps, validate the result, assemble tests, run them, and debug the
-        failures that remain. Each step touches different facts and different kinds of authority.
+      <p class="story-lead">
+        <span class="story-opener">Converting a paper, Nextflow pipeline, or CWL workflow</span>
+        into a validated Galaxy workflow is a chain of tasks — understand, reshape, select tools,
+        implement, validate, test, debug — and each step touches different facts and different
+        kinds of authority.
       </p>
       <p>
         A monolithic skill can feel convenient at first, but it tends to become brittle. It mixes
         Galaxy patterns with CLI details, upstream schema contracts, project rationale, examples,
         caveats, and operational procedure. When something changes, there is no clean boundary to
-        update. When an agent uses it, there is no obvious path from the runtime instruction back to
-        the source record that justified it.
+        update. When an agent uses it, there is no obvious path from the runtime instruction back
+        to the source record that justified it.
       </p>
     </section>
 
     <section>
-      <span class="story-kicker font-mono">02 / The Thesis</span>
+      <span class="story-kicker font-mono">The Thesis</span>
       <h2>The Foundry keeps knowledge inspectable, then casts it into action.</h2>
       <p>
         The Foundry separates source knowledge from runtime artifacts. The knowledge base stays
@@ -52,17 +56,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         for a target runtime. A generated skill is smaller and more executable than the full knowledge
         base, while the knowledge base remains the durable source of truth.
       </p>
-      <p>
-        The key design principle is progressive disclosure. The Foundry should not push every
-        pattern, CLI manual, schema, research note, and caveat into an agent's context up front.
-        It should expose the right surface at the right moment: a Pipeline for the journey, a Mold
-        for the current action, a schema for the contract, a CLI doc when a command is needed, and
-        deeper research only when the work crosses that boundary.
-      </p>
     </section>
 
     <section>
-      <span class="story-kicker font-mono">03 / Molds</span>
+      <span class="story-kicker font-mono">Molds</span>
       <h2>A Mold is an action-sized source artifact.</h2>
       <p>
         Molds are not just prose pages. A Mold is a typed reference manifest with a procedural body.
@@ -73,34 +70,36 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </p>
       <p>
         This gives each action a shape the validator and the casting pipeline can reason about.
-        <code>summarize-nextflow</code> emits a structured source summary.
-        <code>implement-galaxy-tool-step</code> turns an abstract step into a concrete
-        <code>gxformat2</code> step. <code>validate-with-gxwf</code> interprets static validation
-        results and loops back to fixes. <code>planemo-cli</code> captures runtime execution
-        reference. These are different actions, so they deserve different Molds.
+        <a href={`${base}/molds/summarize-nextflow/`}><code>summarize-nextflow</code></a> extracts
+        processes, channels, and container references from a source tree.
+        <a href={`${base}/molds/implement-galaxy-tool-step/`}><code>implement-galaxy-tool-step</code></a>
+        turns an abstract step into a concrete <code>gxformat2</code> step.
+        <a href={`${base}/molds/validate-galaxy-step/`}><code>validate-galaxy-step</code></a>
+        interprets <code>gxwf</code> results inside the per-step loop and routes failures back to
+        authoring.
+        <a href={`${base}/molds/discover-shed-tool/`}><code>discover-shed-tool</code></a>
+        searches the Tool Shed before the harness falls through to
+        <a href={`${base}/molds/author-galaxy-tool-wrapper/`}><code>author-galaxy-tool-wrapper</code></a>.
+        <a href={`${base}/molds/run-workflow-test/`}><code>run-workflow-test</code></a>
+        executes assembled tests via Planemo. These are different actions, so they deserve
+        different Molds.
       </p>
     </section>
 
     <section>
-      <span class="story-kicker font-mono">04 / Progressive Disclosure</span>
+      <span class="story-kicker font-mono">Progressive Disclosure</span>
       <h2>The structure decides what loads now and what waits.</h2>
       <p>
         Progressive disclosure is not only a site-navigation idea here. It is part of the runtime
         contract. Mold references can say whether a source is needed at cast time, runtime, or both;
         whether it should load up front or on demand; and whether it should be copied, condensed, or
-        turned into a sidecar. That keeps the generated skill focused without cutting it off from richer
-        knowledge when the task actually needs it.
-      </p>
-      <p>
-        For example, <code>summarize-nextflow</code> loads its output schema up front because every
-        emitted summary must validate against it. But deeper notes about Nextflow pipeline anatomy,
-        containers, environments, and testing can stay on demand. The skill starts small, then opens
-        the drawer that matches the problem it has encountered.
+        turned into a sidecar. That keeps the generated skill focused without cutting it off from
+        richer knowledge when the task actually needs it.
       </p>
     </section>
 
     <section>
-      <span class="story-kicker font-mono">05 / Casting</span>
+      <span class="story-kicker font-mono">Casting</span>
       <h2>Casts are frozen, portable, and traceable.</h2>
       <p>
         A generated skill should not need the whole Foundry at runtime. It should load with the condensed
@@ -109,38 +108,50 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         generic bundles are other possible targets.
       </p>
       <p>
-        The cast is also transparent. Provenance records which Mold and references produced it. A
-        reviewer can ask why a skill says something, then follow the trail back to the Mold, the
-        pattern, the CLI doc, or the schema. Casting is allowed to be LLM-assisted, but its inputs
-        and outputs are explicit enough to diff and inspect.
+        The cast is also traceable. Each generated skill records which Mold and references
+        produced it, so a reviewer can ask why a skill says what it says and follow the trail back
+        to the source. Casting can be LLM-assisted, but its inputs and outputs stay explicit
+        enough to diff.
       </p>
     </section>
 
     <section>
-      <span class="story-kicker font-mono">06 / Deterministic Rails</span>
+      <span class="story-kicker font-mono">Deterministic Rails</span>
       <h2>The Foundry lets tools enforce what tools can enforce.</h2>
       <p>
-        Galaxy workflow authoring has failure modes that should not be handled as folklore. Tool
-        identifiers, revision suffixes, parameter names, workflow-test assertions, collection shapes,
-        and schema-level validity are better checked by deterministic tools than by a paragraph of
-        warnings. The Foundry leans on <code>gxwf</code>, Planemo, JSON Schema, generated indexes,
-        and tests for that work.
+        Galaxy workflow authoring has failure modes that should not be handled as folklore.
+        Parameter names, collection shapes, and workflow-test assertions are better checked by
+        deterministic tools than by a paragraph of warnings. The Foundry leans on
+        <a href={`${base}/cli/gxwf/validate/`}><code>gxwf</code></a>, Planemo, JSON Schema, and
+        tests for that work.
       </p>
       <p>
-        That posture changes the agent loop. The goal is not "author and hope." The loop is author,
-        validate, fix, and validate again. Molds describe how to use those rails, while the rails
-        keep the artifacts honest.
+        That posture pays off harder for Galaxy than for the text-based workflow languages it sits
+        next to. <code>gxwf</code> lifts Galaxy's static checks out of the browser and validates
+        <code>gxformat2</code> workflows against typed parameter schemas for the 10,000+ tools in
+        the Tool Shed — no server required. In milliseconds it catches not just misspelled output
+        names but invalid select options, broken conditional branches, and incompatible
+        collection-type connections: the kind of error that would otherwise surface mid-run, or
+        worse, run silently to a wrong result. Nextflow, Snakemake, and WDL don't validate at this
+        depth without running the workflow.
+      </p>
+      <p>
+        That changes the agent loop. The goal is not "author and hope." The loop is author,
+        validate, fix, validate — and because per-parameter error reports are structured, they
+        replace trial-and-error execution cycles instead of triggering them. Molds describe how
+        to use the rails; the rails keep the artifacts honest.
       </p>
     </section>
 
     <section>
-      <span class="story-kicker font-mono">07 / Pipelines</span>
+      <span class="story-kicker font-mono">Pipelines</span>
       <h2>Pipelines compose Molds into journeys.</h2>
       <p>
         Pipelines are the journey surface of the Foundry. A pipeline such as
-        <code>nextflow-to-galaxy</code> orders the Molds a harness would run: summarize the source,
-        shape the data flow, make a template, compare against IWC exemplars, discover or author
-        tools, implement steps, validate, test, and debug.
+        <a href={`${base}/pipelines/nextflow-to-galaxy/`}><code>nextflow-to-galaxy</code></a>
+        orders the Molds a harness would run: summarize the source, shape the data flow, make a
+        template, compare against IWC exemplars, discover or author tools, implement steps,
+        validate, test, and debug.
       </p>
       <p>
         Some pipeline phases are Molds. Some are harness-level routing, such as the
@@ -151,7 +162,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </section>
 
     <section>
-      <span class="story-kicker font-mono">08 / Source Authority</span>
+      <span class="story-kicker font-mono">Source Authority</span>
       <h2>The Foundry synthesizes; upstream owns the facts.</h2>
       <p>
         IWC owns its workflows. Tool Shed and Galaxy APIs own tool metadata. CLI projects own their
@@ -167,7 +178,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </section>
 
     <section>
-      <span class="story-kicker font-mono">09 / Result</span>
+      <span class="story-kicker font-mono">Result</span>
       <h2>The same source can be read by humans and acted on by agents.</h2>
       <p>
         The landing page gives the abstract. This story page explains the architecture. The rendered
@@ -178,50 +189,68 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     </section>
   </article>
 
-  <section class="story-links" aria-labelledby="story-links-heading">
+  <section class="story-next" aria-labelledby="story-next-heading">
     <div class="section-rule">
-      <h2 id="story-links-heading">Source Record</h2>
-      <span class="section-tail">/ read next</span>
+      <h2 id="story-next-heading">Next</h2>
+      <span class="section-tail">/ try it</span>
     </div>
-    <div class="design-entry">
-      <div>
-        <span class="story-kicker font-mono">Design docs</span>
-        <h3>Read the working record behind the story.</h3>
-        <p>
-          The pages below hold the deeper rationale behind the public Foundry pages: why Molds are
-          action-sized, why casting has deterministic rails, and how progressive disclosure keeps
-          the knowledge base usable.
-        </p>
-      </div>
-      <a href={`${base}/design/`} class="design-entry-link">
-        Browse all design docs
+    <div class="next-actions">
+      <a href={`${base}/molds/`} class="next-action next-action-primary">
+        <span class="next-action-label">Browse Molds</span>
+        <span class="next-action-desc">The action-sized catalog the story is about.</span>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a href={`${base}/usage/`} class="next-action">
+        <span class="next-action-label">Install a cast skill</span>
+        <span class="next-action-desc">Run a cast Mold inside Claude Code.</span>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a href={`${base}/pipelines/`} class="next-action">
+        <span class="next-action-label">Browse Pipelines</span>
+        <span class="next-action-desc">Source-to-target journeys composed of Molds.</span>
         <span aria-hidden="true">→</span>
       </a>
     </div>
+  </section>
+
+  <section class="story-links" aria-labelledby="story-links-heading">
+    <div class="section-rule">
+      <h2 id="story-links-heading">Design docs</h2>
+      <span class="section-tail">/ deeper rationale</span>
+    </div>
+    <p class="story-links-lede">
+      The pages below hold the working record behind the story: why Molds are action-sized, why
+      casting has deterministic rails, and how progressive disclosure keeps the knowledge base
+      usable.
+    </p>
     <div class="link-grid">
+      <a href={`${base}/design/`} class="link-grid-all">
+        <span>All design docs</span>
+        <small>Browse the full index.</small>
+      </a>
       <a href={`${base}/design/guiding-principles/`}>
         <span>Guiding Principles</span>
-        <small>The canonical rationale for source authority, progressive disclosure, validation, and portability.</small>
+        <small>Source authority, progressive disclosure, validation, and portability.</small>
       </a>
       <a href={`${base}/design/architecture/`}>
         <span>Architecture</span>
-        <small>The structural record for content types, validation, rendering, and generated artifacts.</small>
+        <small>Content types, validation, rendering, and generated artifacts.</small>
       </a>
       <a href={`${base}/design/molds/`}>
         <span>Molds</span>
-        <small>The inventory and boundary rules behind the action-sized Mold catalog.</small>
+        <small>Inventory and boundary rules behind the action-sized Mold catalog.</small>
       </a>
       <a href={`${base}/design/casting/`}>
         <span>Casting</span>
-        <small>The compilation procedure that turns typed Mold references into cast artifacts.</small>
+        <small>Compilation procedure that turns typed Mold references into cast artifacts.</small>
       </a>
       <a href={`${base}/design/corpus/`}>
         <span>Corpus Integration</span>
-        <small>The lighter IWC grounding model: cite upstream, avoid mirroring the corpus.</small>
+        <small>Lighter IWC grounding model: cite upstream, avoid mirroring the corpus.</small>
       </a>
       <a href={`${base}/design/harness-pipelines/`}>
         <span>Harness Pipelines</span>
-        <small>The pipeline narrative behind source-to-target journeys and branch phases.</small>
+        <small>Pipeline narrative behind source-to-target journeys and branch phases.</small>
       </a>
     </div>
   </section>
@@ -229,32 +258,75 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 <style>
   .story-hero {
-    padding: 1.5rem 0 1.25rem;
+    padding: 1.5rem 0 1.5rem;
     max-width: 54rem;
   }
+  .story-masthead {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding-top: 0.6rem;
+    margin: 0 0 1.1rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-text-primary) 22%, transparent);
+  }
+  .story-masthead-tick {
+    width: 0.45rem;
+    height: 0.45rem;
+    background: var(--color-accent);
+    flex: 0 0 auto;
+  }
+  .story-masthead-label {
+    color: var(--color-text-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
   .story-hero h1 {
-    margin: 0 0 1rem;
+    margin: 0 0 1.1rem;
     color: var(--color-galaxy-dark);
-    font-size: clamp(2.1rem, 5vw, 4.25rem);
-    line-height: 1.02;
-    letter-spacing: -0.025em;
+    font-size: clamp(2.25rem, 5.2vw, 4.25rem);
+    font-weight: 700;
+    line-height: 1.0;
+    letter-spacing: -0.035em;
     text-wrap: balance;
   }
-  .dark .story-hero h1 {
+  :global(.dark) .story-hero h1 {
     color: var(--color-text-primary);
   }
   .story-hero p {
     margin: 0;
+    max-width: 42rem;
     color: var(--color-text-secondary);
-    font-size: 1.08rem;
-    line-height: 1.72;
+    font-size: 1.1rem;
+    line-height: 1.65;
     text-wrap: pretty;
   }
+  .story-hero-rule {
+    margin: 1.5rem 0 0;
+    border: 0;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      var(--color-accent) 0,
+      var(--color-accent) 4rem,
+      color-mix(in srgb, var(--color-text-primary) 12%, transparent) 4rem,
+      color-mix(in srgb, var(--color-text-primary) 12%, transparent) 100%
+    );
+  }
+  .story-opener {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+
   .story-prose {
     display: grid;
     gap: 1.35rem;
     max-width: 52rem;
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
+  }
+  .story-prose > section:first-child {
+    padding-top: 0;
+    border-top: 0;
   }
   .story-kicker {
     color: var(--color-text-muted);
@@ -281,6 +353,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     line-height: 1.72;
     text-wrap: pretty;
   }
+  .story-lead {
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+  }
   .story-prose code {
     font-family: var(--font-mono);
     font-size: 0.86em;
@@ -288,58 +364,78 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     border-radius: 0.25rem;
     padding: 0.08rem 0.28rem;
   }
+  .story-prose a code {
+    color: var(--color-link);
+  }
+  .story-prose a:hover code {
+    color: var(--color-link-hover);
+  }
+
+  /* Next actions */
+  .next-actions {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 0.75rem;
+  }
+  .next-action {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 0.6rem;
+    row-gap: 0.25rem;
+    align-items: center;
+    padding: 0.95rem 1.1rem;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.45rem;
+    background: var(--color-surface-raised);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+  }
+  .next-action:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+  .next-action-label {
+    grid-column: 1;
+    font-weight: 700;
+    color: var(--color-link);
+  }
+  .next-action-desc {
+    grid-column: 1 / 3;
+    grid-row: 2;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .next-action span[aria-hidden="true"] {
+    grid-column: 2;
+    grid-row: 1;
+    color: var(--color-text-muted);
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+  .next-action:hover span[aria-hidden="true"] {
+    color: var(--color-accent);
+    transform: translateX(3px);
+  }
+  .next-action-primary {
+    border-left: 3px solid var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-raised));
+  }
+
+  /* Design-doc grid */
+  .story-links-lede {
+    margin: 0.25rem 0 1rem;
+    max-width: 48rem;
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
   .link-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75rem;
-  }
-  .design-entry {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding: 1rem;
-    border: 1px solid var(--color-border-subtle);
-    border-left: 3px solid var(--color-accent);
-    border-radius: 0.45rem;
-    background: var(--color-surface-raised);
-  }
-  .design-entry h3 {
-    margin: 0.35rem 0 0.35rem;
-    color: var(--color-text-primary);
-    font-size: 1.2rem;
-    line-height: 1.2;
-  }
-  .design-entry p {
-    margin: 0;
-    color: var(--color-text-secondary);
-    font-size: 0.92rem;
-    line-height: 1.55;
-    text-wrap: pretty;
-  }
-  .design-entry code {
-    font-family: var(--font-mono);
-    background: var(--color-surface-hover);
-    border-radius: 0.25rem;
-    padding: 0.08rem 0.28rem;
-  }
-  .design-entry-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    white-space: nowrap;
-    padding: 0.55rem 0.85rem;
-    color: var(--color-text-on-dark);
-    background: var(--color-galaxy-dark);
-    border-radius: 0.35rem;
-    text-decoration: none;
-    font-weight: 700;
-    transition: background 0.15s ease, transform 0.15s ease;
-  }
-  .design-entry-link:hover {
-    background: var(--color-galaxy-primary);
-    transform: translateX(2px);
   }
   .link-grid a {
     display: grid;
@@ -356,6 +452,9 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     border-color: var(--color-accent);
     transform: translateY(-2px);
   }
+  .link-grid-all {
+    border-left: 3px solid var(--color-accent) !important;
+  }
   .link-grid span {
     color: var(--color-link);
     font-weight: 700;
@@ -365,12 +464,10 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     font-size: 0.82rem;
     line-height: 1.45;
   }
+
   @media (max-width: 920px) {
-    .design-entry {
+    .next-actions {
       grid-template-columns: 1fr;
-    }
-    .design-entry-link {
-      justify-self: start;
     }
     .link-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
