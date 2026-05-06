@@ -6,8 +6,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-03
-revised: 2026-05-03
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 related_notes:
   - "[[iwc-workflow-testability-survey]]"
@@ -16,7 +16,9 @@ related_notes:
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-workflow-test-architecture]]"
   - "[[implement-galaxy-workflow-test]]"
+  - "[[gxformat2-schema]]"
   - "[[gxformat2-workflow-inputs]]"
+  - "[[galaxy-datatypes-conf]]"
 summary: "Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible."
 ---
 
@@ -109,6 +111,23 @@ Evidence:
 - 10x CellPlex job inputs include `fastq PE collection GEX`, `reference genome`, `gtf`, `cellranger_barcodes_3M-february-2018.txt`, `fastq PE collection CMO`, `sample name and CMO sequence collection`, and `Number of expected cells` (`$IWC/workflows/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex-tests.yml:2-75`). The workflow declares matching collection, data, string, boolean, and int inputs (`$IWC_FORMAT2/scRNAseq/fastq-to-matrix-10x/scrna-seq-fastq-to-matrix-10x-cellplex.gxwf.yml:4-72`).
 - HyPhy accepts a `list` collection of unaligned sequences and preserves accession-like fixture identifiers through to output element assertions (`$IWC/workflows/comparative_genomics/hyphy/hyphy-core-tests.yml:7-30`; `$IWC_FORMAT2/comparative_genomics/hyphy/hyphy-core.gxwf.yml:14-25`).
 
+## 6. Know what a gxformat2 output entry contains
+
+Top-level gxformat2 `outputs:` is the public workflow-output surface. It is separate from per-step `out:` declarations and from step post-job actions such as `change_datatype` or `rename`.
+
+Authoring rules:
+
+- Use `label` as the stable public name tests and users will address.
+- Use `outputSource` to point at the producing step output; do not rely on positional output order.
+- Use `doc` for short user-facing context when the label is not self-explanatory.
+- Keep `type` aligned with the exposed value (`data`, `collection`, or scalar vocabulary from [[gxformat2-workflow-inputs]]) when the schema needs it.
+- Apply `change_datatype` at the producing step output when Galaxy needs a stronger datatype than the tool reports; choose values from [[galaxy-datatypes-conf]].
+- Use `rename` only for generated dataset names inside Galaxy histories. It is not a substitute for stable workflow-output `label`.
+- Treat `add_tags` and `remove_tags` as metadata helpers, not as the test API. IWC tests key by labels and collection element identifiers, not tags.
+- Avoid `hide` or `delete_intermediate_datasets` on outputs that are promoted as test checkpoints.
+
+Design inference: a workflow-output promotion decision should pick both the public `outputs:` entry and any producer-side post-job action needed to make that output useful. For example, a synthesized BED checkpoint needs a stable output `label` plus a producer-side `change_datatype: bed`; one without the other is incomplete for a testable workflow.
+
 ## Cross-references
 
 - [[iwc-workflow-testability-survey]] — corpus survey and distribution rationale.
@@ -116,3 +135,5 @@ Evidence:
 - [[planemo-asserts-idioms]] — assertion-family choice after an output is exposed.
 - [[iwc-shortcuts-anti-patterns]] — accepted shortcut vs smell calls for weak assertions and label coupling.
 - [[planemo-workflow-test-architecture]] — Planemo execution, output-problem ambiguity, and structured artifacts.
+- [[gxformat2-schema]] — structural vocabulary for top-level workflow outputs and step post-job actions.
+- [[galaxy-datatypes-conf]] — valid Galaxy datatype extensions for `format` and `change_datatype` choices.

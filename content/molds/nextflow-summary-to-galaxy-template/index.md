@@ -10,8 +10,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 summary: "gxformat2 skeleton with per-step TODOs from a Nextflow summary and prior Galaxy design briefs."
 input_artifacts:
@@ -34,6 +34,13 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Read process, channel, operator, and fixture structure when emitting placeholder steps and TODO context."
+  - kind: research
+    ref: "[[gxformat2-schema]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Use the gxformat2 structural vocabulary for workflow inputs, outputs, steps, and producer-side output actions while emitting the skeleton."
   - kind: research
     ref: "[[galaxy-workflow-testability-design]]"
     used_at: runtime

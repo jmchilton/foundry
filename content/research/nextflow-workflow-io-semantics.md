@@ -8,7 +8,7 @@ tags:
 status: draft
 created: 2026-05-06
 revised: 2026-05-06
-revision: 2
+revision: 3
 ai_generated: true
 related_notes:
   - "[[component-nextflow-pipeline-anatomy]]"
@@ -283,6 +283,6 @@ For [[summarize-nextflow]] and downstream interface Molds, use this order:
 
 - Should `summary-nextflow` distinguish launch parameters from materialized workflow inputs as separate arrays?
 - ~~Should sample-sheet schemas become first-class structured inputs instead of prose inside a parameter entry?~~ **Resolved 2026-05-05 — yes.** Promoted to `Summary.sample_sheets[]` in [[summary-nextflow]] rev 6; resolution rationale and Galaxy-side mapping in [[galaxy-sample-sheet-collections]]; tracking issue jmchilton/foundry#177.
-- How should Galaxy targets expose Nextflow execution-control parameters such as `outdir`, `publish_dir_mode`, email, and `save_*` toggles?
+- ~~How should Galaxy targets expose Nextflow execution-control parameters such as `outdir`, `publish_dir_mode`, email, and `save_*` toggles?~~ **Resolved 2026-05-06 for v1 — classify by effect in [[nextflow-params-to-galaxy-inputs]]: exclude publish/runtime controls by default; keep booleans/enums only when they alter workflow shape, tool choice, or command outputs.**
 - Do workflow output `index` files deserve a target-side Galaxy pattern for preserving sample metadata beside published datasets?
 - How much legacy DSL1 support should the cast skill keep for `file` / `set` pipelines versus flagging them as low-confidence?
