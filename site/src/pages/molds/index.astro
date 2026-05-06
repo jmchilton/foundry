@@ -69,43 +69,69 @@ function healthFor(m: typeof molds[number]): 'ok' | 'warn' | 'error' {
     const list = byAxis.get(axis) ?? [];
     if (list.length === 0) return null;
     return (
-      <section class="mb-8">
-        <h2 class="text-xl font-bold border-b-2 border-(--color-accent)/20 pb-2 mb-3">
-          <span class="text-xs px-2 py-1 rounded bg-(--color-galaxy-primary) text-white font-mono align-middle">{axis}</span>
-          <span class="ml-2 text-sm font-normal text-(--color-text-muted)">({list.length})</span>
-        </h2>
-        <table class="data-table">
-          <thead><tr><th>Name</th><th>Specifier</th><th>Summary</th><th>Status</th><th>Health</th></tr></thead>
-          <tbody>
-            {list.map(m => {
-              const d = m.data as any;
-              const spec = d.source ?? d.target ?? d.tool ?? '—';
-              const health = healthFor(m);
-              return (
-                <tr>
-                  <td><a href={`${base}/${m.id}/`} class="font-mono">{d.name}</a></td>
-                  <td class="font-mono text-sm">{spec}</td>
-                  <td class="text-sm text-(--color-text-muted)">{d.summary}</td>
-                  <td><span class={`badge badge-${d.status}`}>{d.status}</span></td>
-                  <td><span class={`health health-${health}`}>{health}</span></td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <section class="mold-group" aria-labelledby={`molds-${axis}`}>
+        <div class="section-rule">
+          <h2 id={`molds-${axis}`}>
+            <span class="axis-chip font-mono">{axis}</span>
+          </h2>
+          <span class="section-tail">/ {list.length} {list.length === 1 ? 'mold' : 'molds'}</span>
+        </div>
+        <div class="card-grid">
+          {list.map(m => {
+            const d = m.data as any;
+            const spec = d.source ?? d.target ?? d.tool ?? null;
+            const health = healthFor(m);
+            const evalPresent = hasEval(m.id);
+            const subjectTags = (d.tags as string[] ?? []).filter(t => t !== 'mold');
+            return (
+              <article class="card tinted-shadow tinted-shadow-hover">
+                <div class="card-top">
+                  <span class={`badge badge-${d.status}`}>{d.status}</span>
+                  {spec && <span class="card-top-chip">{spec}</span>}
+                </div>
+                <h3 class="card-title">
+                  <a href={`${base}/${m.id}/`} class="font-mono">{d.name}</a>
+                </h3>
+                <p class="card-summary">{d.summary}</p>
+                {subjectTags.length > 0 && (
+                  <div class="card-tags" aria-label="Tags">
+                    {subjectTags.slice(0, 4).map(tag => <span class="tag">{tag}</span>)}
+                  </div>
+                )}
+                <div class="card-meta" aria-label="Mold health">
+                  <span><span class="card-meta-label">health</span><span class={`health health-${health}`}>{health}</span></span>
+                  <span><span class="card-meta-label">eval</span>{evalPresent ? '✓' : '—'}</span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </section>
     );
   })}
 </Base>
 
 <style>
+  .mold-group {
+    margin-bottom: 2rem;
+  }
+  .axis-chip {
+    display: inline-block;
+    padding: 0.18rem 0.55rem;
+    border-radius: 0.3rem;
+    background: var(--color-galaxy-primary);
+    color: white;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+  }
   .health {
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    padding: 0.18rem 0.45rem;
+    padding: 0.05rem 0.4rem;
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     color: white;
   }

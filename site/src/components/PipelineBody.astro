@@ -1,17 +1,14 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import type { WikiLinkTarget } from '../lib/wiki-links';
-import type { ArtifactGraph } from '../lib/artifacts';
 import PhaseGraph from './PhaseGraph.astro';
 
 interface Props {
   entry: CollectionEntry<'content'>;
   linkMap: Map<string, WikiLinkTarget>;
-  artifactGraph?: ArtifactGraph;
-  entryById?: Map<string, CollectionEntry<'content'>>;
 }
 
-const { entry, linkMap, artifactGraph, entryById } = Astro.props;
+const { entry, linkMap } = Astro.props;
 const data = entry.data as any;
 const phaseCount = Array.isArray(data.phases) ? data.phases.length : 0;
 ---
@@ -23,7 +20,7 @@ const phaseCount = Array.isArray(data.phases) ? data.phases.length : 0;
       {phaseCount} {phaseCount === 1 ? 'phase' : 'phases'}
     </span>
   </div>
-  <PhaseGraph phases={data.phases} linkMap={linkMap} pipelineId={entry.id} artifactGraph={artifactGraph} entryById={entryById} />
+  <PhaseGraph phases={data.phases} linkMap={linkMap} />
 </section>
 
 <style>

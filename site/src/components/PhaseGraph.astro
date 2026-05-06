@@ -1,17 +1,12 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import { resolveWikiLink, resolveWikiLinkId, type WikiLinkTarget } from '../lib/wiki-links';
-import { artifactHref, type ArtifactGraph } from '../lib/artifacts';
+import { resolveWikiLink, type WikiLinkTarget } from '../lib/wiki-links';
 
 interface Props {
   phases: any[];
   linkMap: Map<string, WikiLinkTarget>;
-  pipelineId?: string;
-  artifactGraph?: ArtifactGraph;
-  entryById?: Map<string, CollectionEntry<'content'>>;
 }
 
-const { phases, linkMap, pipelineId, artifactGraph, entryById } = Astro.props;
+const { phases, linkMap } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function pad2(n: number): string {
@@ -25,82 +20,6 @@ function resolved(wl: string) {
 function isWikiLink(s: string): boolean {
   return /^\[\[.+\]\]$/.test(s);
 }
-
-interface PhaseArtifacts {
-  produces: { id: string; consumedAt: number[] }[];
-  consumes: { id: string; producedAt: number[]; satisfied: boolean }[];
-}
-
-// For each phase index, collect every Mold's declared artifacts (from phase's Mold ref or branch/chain inner Molds).
-function moldRefsAt(phase: any): string[] {
-  const out: string[] = [];
-  const visit = (n: any) => {
-    if (typeof n === 'string') {
-      if (isWikiLink(n)) out.push(n);
-      return;
-    }
-    if (!n || typeof n !== 'object') return;
-    if (typeof n.mold === 'string') out.push(n.mold);
-    if (typeof n.fallthrough === 'string') out.push(n.fallthrough);
-    if (Array.isArray(n.branches)) n.branches.forEach(visit);
-    if (Array.isArray(n.chain)) n.chain.forEach(visit);
-  };
-  visit(phase);
-  return out;
-}
-
-function declsForPhase(phase: any): { out: any[]; in: any[] } {
-  const out: any[] = [];
-  const inp: any[] = [];
-  if (!entryById) return { out, in: inp };
-  for (const wl of moldRefsAt(phase)) {
-    const id = resolveWikiLinkId(wl, linkMap);
-    if (!id) continue;
-    const e = entryById.get(id);
-    if (!e) continue;
-    const d = e.data as any;
-    if (d.type !== 'mold') continue;
-    if (Array.isArray(d.output_artifacts)) out.push(...d.output_artifacts);
-    if (Array.isArray(d.input_artifacts)) inp.push(...d.input_artifacts);
-  }
-  return { out, in: inp };
-}
-
-const phaseArtifacts: PhaseArtifacts[] = phases.map(() => ({ produces: [], consumes: [] }));
-if (artifactGraph && entryById && pipelineId) {
-  // Build per-phase produces/consumes from declared mold artifacts.
-  const allDecls = phases.map(p => declsForPhase(p));
-  // Build a map from artifact id → list of phase indices that produce it.
-  const producedBy = new Map<string, number[]>();
-  allDecls.forEach((d, i) => {
-    for (const o of d.out) {
-      const list = producedBy.get(o.id) ?? [];
-      if (!list.includes(i + 1)) list.push(i + 1);
-      producedBy.set(o.id, list);
-    }
-  });
-  allDecls.forEach((d, i) => {
-    const phaseNum = i + 1;
-    const seenOut = new Set<string>();
-    for (const o of d.out) {
-      if (seenOut.has(o.id)) continue;
-      seenOut.add(o.id);
-      const allConsumers = (producedBy.get(o.id) ? Array.from((artifactGraph!.get(o.id)?.pipelines.get(pipelineId)?.consumeAt) ?? []) : []);
-      phaseArtifacts[i].produces.push({ id: o.id, consumedAt: allConsumers.filter(c => c !== phaseNum) });
-    }
-    const seenIn = new Set<string>();
-    for (const ip of d.in) {
-      if (seenIn.has(ip.id)) continue;
-      seenIn.add(ip.id);
-      const priorProducers = (producedBy.get(ip.id) ?? []).filter(p => p < phaseNum);
-      phaseArtifacts[i].consumes.push({
-        id: ip.id,
-        producedAt: priorProducers,
-        satisfied: priorProducers.length > 0,
-      });
-    }
-  });
-}
 ---
 
 <ol class="subway not-prose">
@@ -108,7 +27,6 @@ if (artifactGraph && entryById && pipelineId) {
     const num = pad2(idx + 1);
     if (p.mold) {
       const r = resolved(p.mold);
-      const pa = phaseArtifacts[idx];
       return (
         <li class:list={['stop', 'stop-mold', p.loop && 'stop-loop']}>
           <span class="stop-num font-mono" aria-hidden="true">{num}</span>
@@ -118,30 +36,11 @@ if (artifactGraph && entryById && pipelineId) {
               ? <a href={r.href} title={r.summary || undefined} class="stop-link">{r.label}</a>
               : <span class="dangling">{r.label}</span>}
             {p.loop && <span class="stop-tag stop-tag-loop">loop</span>}
-            {(pa.produces.length + pa.consumes.length) > 0 && (
-              <div class="phase-artifacts">
-                {pa.consumes.map(c => (
-                  <span class:list={['art-pill', 'art-in', !c.satisfied && 'art-unsat']}>
-                    <span class="art-arrow">←</span>
-                    <a href={artifactHref(base, c.id)} class="art-id">{c.id}</a>
-                    {c.producedAt.length > 0 && <span class="art-from">@{c.producedAt.map(pad2).join(',')}</span>}
-                    {!c.satisfied && <span class="art-warn" title="no prior phase produces this">unbound</span>}
-                  </span>
-                ))}
-                {pa.produces.map(p => (
-                  <span class="art-pill art-out">
-                    <span class="art-arrow">→</span>
-                    <a href={artifactHref(base, p.id)} class="art-id">{p.id}</a>
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         </li>
       );
     }
     if (p.branch) {
-      const pa = phaseArtifacts[idx];
       return (
         <li class:list={['stop', 'stop-branch', p.loop && 'stop-loop']}>
           <span class="stop-num font-mono" aria-hidden="true">{num}</span>
@@ -182,24 +81,6 @@ if (artifactGraph && entryById && pipelineId) {
                   return null;
                 })}
               </ul>
-            )}
-            {(pa.produces.length + pa.consumes.length) > 0 && (
-              <div class="phase-artifacts">
-                {pa.consumes.map(c => (
-                  <span class:list={['art-pill', 'art-in', !c.satisfied && 'art-unsat']}>
-                    <span class="art-arrow">←</span>
-                    <a href={artifactHref(base, c.id)} class="art-id">{c.id}</a>
-                    {c.producedAt.length > 0 && <span class="art-from">@{c.producedAt.map(pad2).join(',')}</span>}
-                    {!c.satisfied && <span class="art-warn" title="no prior phase produces this">unbound</span>}
-                  </span>
-                ))}
-                {pa.produces.map(prod => (
-                  <span class="art-pill art-out">
-                    <span class="art-arrow">→</span>
-                    <a href={artifactHref(base, prod.id)} class="art-id">{prod.id}</a>
-                  </span>
-                ))}
-              </div>
             )}
             {p.chain && (
               <ol class="branch-chain" aria-label="chain">
@@ -427,47 +308,6 @@ if (artifactGraph && entryById && pipelineId) {
     opacity: 0.6;
   }
 
-  .phase-artifacts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem 0.45rem;
-    margin-top: 0.35rem;
-  }
-  .art-pill {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.25rem;
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    padding: 0.08rem 0.45rem;
-    border-radius: 0.2rem;
-    border: 1px solid var(--color-border);
-    background: var(--color-surface);
-    color: var(--color-text-secondary);
-  }
-  .art-out { border-color: color-mix(in srgb, var(--color-galaxy-primary) 35%, transparent); }
-  .art-in  { border-color: color-mix(in srgb, var(--color-accent) 35%, transparent); }
-  .art-unsat {
-    background: color-mix(in srgb, #d97706 12%, transparent);
-    border-color: #d97706;
-    color: #92400e;
-  }
-  .art-arrow { color: var(--color-text-muted); }
-  .art-id {
-    color: var(--color-link);
-    text-decoration: none;
-  }
-  .art-id:hover { text-decoration: underline; }
-  .art-from {
-    color: var(--color-text-muted);
-    font-size: 0.65rem;
-  }
-  .art-warn {
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.6rem;
-    color: #92400e;
-  }
   @media (max-width: 540px) {
     .stop {
       grid-template-columns: 2rem 1.4rem 1fr;
