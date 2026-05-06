@@ -11,10 +11,11 @@
       "description": "Top-level shape. Every Nextflow summary is exactly this object.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["source", "params", "profiles", "tools", "processes", "subworkflows", "workflow", "test_fixtures", "nf_tests"],
+      "required": ["source", "params", "sample_sheets", "profiles", "tools", "processes", "subworkflows", "workflow", "test_fixtures", "nf_tests"],
       "properties": {
         "source":         { "$ref": "#/$defs/SourceRecord" },
         "params":         { "type": "array", "items": { "$ref": "#/$defs/Param" } },
+        "sample_sheets":  { "type": "array", "items": { "$ref": "#/$defs/SampleSheet" }, "description": "Structured sample-sheet inputs. Each entry binds one `params[]` parameter to a row schema (column names, types, path-vs-meta classification, required flags, enums, patterns). Promoted from prose inside `params[].description` so downstream target translations (Galaxy `sample_sheet*` collections, CWL records-of-arrays) can choose collection variants without re-parsing the source pipeline. Empty array when no sample-sheet idiom is detected. Discovery sources: nf-schema `schema:` references, `samplesheetToList()` calls, and `splitCsv(header: true)` materializations." },
         "profiles":       { "type": "array", "items": { "type": "string" } },
         "tools":          { "type": "array", "items": { "$ref": "#/$defs/Tool" } },
         "processes":      { "type": "array", "items": { "$ref": "#/$defs/Process" } },
@@ -59,6 +60,43 @@
         "description": { "type": "string" },
         "required":    { "type": "boolean" },
         "enum":        { "type": "array", "items": {}, "description": "Allowed values when nextflow_schema.json declares them." }
+      }
+    },
+
+    "SampleSheet": {
+      "title": "SampleSheet",
+      "description": "One sample-sheet-shaped pipeline input. Captures the row schema, path-vs-meta column classification, and discovery provenance so downstream Molds can map onto Galaxy `sample_sheet[:variant]` collections, CWL records-of-arrays, or other target shapes without re-reading the source.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["param", "discovered_via", "columns"],
+      "properties": {
+        "param":          { "type": "string", "description": "Foreign key into `params[].name` — the parameter whose value points at the sample-sheet file." },
+        "schema_path":    { "type": ["string", "null"], "description": "Repo-relative path of the JSON Schema file describing rows (e.g. `assets/schema_input.json`), resolved from the param's nf-schema entry's `schema:` keyword. Null when discovered via `samplesheetToList` without a schema reference, or via `splitCsv(header: true)` ad-hoc parsing." },
+        "discovered_via": { "type": "string", "enum": ["nf-schema", "samplesheetToList", "splitCsv", "ad-hoc"], "description": "How the sample-sheet shape was detected. `nf-schema`: nextflow_schema.json entry has `schema:` keyword. `samplesheetToList`: workflow imports nf-schema's helper and calls it on the param. `splitCsv`: workflow uses `splitCsv(header: true)` on the param's path. `ad-hoc`: pipeline-specific CSV/TSV parsing inferred from script bodies." },
+        "format":         { "type": ["string", "null"], "enum": ["csv", "tsv", "csv-or-tsv", null], "description": "Tabular format declared by the param's `mimetype` or inferred from `samplesheetToList` / `splitCsv` semantics. Null when undeclared." },
+        "header":         { "type": ["boolean", "null"], "description": "Whether the file is expected to have a header row. Null when the discovery source doesn't pin it." },
+        "columns":        { "type": "array", "items": { "$ref": "#/$defs/SampleSheetColumn" }, "description": "Row schema in declaration order. nf-schema's `samplesheetToList` emits columns in property order, not source-column order — preserve property order here so downstream translations match runtime channel item layout." }
+      }
+    },
+
+    "SampleSheetColumn": {
+      "title": "SampleSheetColumn",
+      "description": "One column in a sample-sheet row schema. Type vocabulary is JSON Schema-style scalar; `kind` separates dataset-reference columns from per-row metadata. Validation hints (`pattern`, `enum`, `exists`, `mimetype`) are preserved verbatim — target Molds decide which of them survive translation (e.g. Galaxy's `sample_sheet` validator allowlist is regex/in_range/length).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "kind", "required"],
+      "properties": {
+        "name":        { "type": "string" },
+        "type":        { "type": "string", "enum": ["string", "integer", "number", "boolean"], "description": "JSON Schema-style scalar type. Path columns are typed `string` with a `format: file-path|directory-path|path` qualifier — see `format` and `kind`." },
+        "kind":        { "type": "string", "enum": ["data", "meta"], "description": "`data`: path-typed column whose values are dataset references (becomes element/inner-collection slot in Galaxy `sample_sheet`). `meta`: scalar metadata column (becomes a `column_definitions` entry, populated per row in `columns[]`). Includes the nf-schema `meta:` annotation when present; in its absence inferred from `format` (`file-path`/`directory-path`/`path` → `data`, anything else → `meta`)." },
+        "format":      { "type": ["string", "null"], "description": "JSON Schema `format` keyword. nf-schema vocabulary: `file-path`, `directory-path`, `path`, `file-path-pattern`. Null for scalar metadata columns without a format hint." },
+        "required":    { "type": "boolean" },
+        "default":     { "description": "Default value verbatim from the sample-sheet schema. May be null." },
+        "description": { "type": ["string", "null"] },
+        "enum":        { "type": "array", "items": {}, "description": "Allowed values when the column schema declares an `enum`. Empty array when absent." },
+        "pattern":     { "type": ["string", "null"], "description": "JSON Schema regex `pattern` when present." },
+        "exists":      { "type": ["boolean", "null"], "description": "nf-schema `exists` flag for path columns. True when the parser must verify the file exists." },
+        "mimetype":    { "type": ["string", "null"], "description": "nf-schema `mimetype` keyword (e.g. `text/csv`, `application/gzip`). Useful for target datatypes." }
       }
     },
 

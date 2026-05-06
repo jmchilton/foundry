@@ -2,6 +2,7 @@
 
 Revision history for the `summarize-nextflow` Mold. Maintained alongside `index.md` but never packaged into casts.
 
+- **rev 8 (2026-05-05)** — sample-sheet schemas promoted to a first-class top-level `sample_sheets[]` field with structured `SampleSheet` and `SampleSheetColumn` shapes. New §3.5 procedure step covers resolution from `nf-schema`, `samplesheetToList`, `splitCsv`, and `ad-hoc` discovery branches. Resolves the open question in [[nextflow-workflow-io-semantics]] and jmchilton/foundry#177; downstream variant selection lives in [[nextflow-summary-to-galaxy-interface]] / [[nextflow-summary-to-galaxy-data-flow]] backed by [[galaxy-sample-sheet-collections]]. Schema bumped to rev 6 in lockstep.
 - **rev 7 (2026-05-02)** — CLI package now sweeps `include { X as Y } from ...` statements across workflow and subworkflow files to populate `processes[].aliases`, tested against bacass repeated imports (`MINIMAP2_ALIGN`, `FASTQC`).
 - **rev 6 (2026-05-02)** — CLI package now parses multi-dependency module `environment.yml` files into separate Bioconda-backed `tools[]` entries, tested against bacass modules such as `minimap2/align` and `samtools/sort`.
 - **rev 5 (2026-05-02)** — CLI package hardened against `nf-core/bacass` profile config expressions: resolves `params.pipelines_testdata_base_path + '...'`, fetches samplesheet-referenced remote files, hashes them, and optionally localizes them under `--test-data-dir` while preserving original URLs.
