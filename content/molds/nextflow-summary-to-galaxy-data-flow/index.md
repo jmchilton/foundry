@@ -10,8 +10,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 summary: "Translate a Nextflow summary into a Galaxy data-flow design brief."
 input_artifacts:
@@ -48,6 +48,14 @@ references:
     evidence: corpus-observed
     purpose: "Translate Nextflow channel, tuple, and path shapes into Galaxy dataset and collection shapes."
   - kind: research
+    ref: "[[nextflow-path-glob-to-galaxy-datatype]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Preserve datatype confidence while translating path-like data-flow edges, process output patterns, and published outputs."
+    trigger: "When choosing or reviewing Galaxy datatype extensions for data-flow edges, collection elements, or output datasets."
+  - kind: research
     ref: "[[nextflow-operators-to-galaxy-collection-recipes]]"
     used_at: runtime
     load: upfront
@@ -81,6 +89,8 @@ references:
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
+  - "[[nextflow-params-to-galaxy-inputs]]"
+  - "[[nextflow-path-glob-to-galaxy-datatype]]"
 ---
 # nextflow-summary-to-galaxy-data-flow
 

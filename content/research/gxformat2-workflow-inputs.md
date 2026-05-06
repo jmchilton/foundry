@@ -7,14 +7,16 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 related_notes:
   - "[[gxformat2-schema]]"
   - "[[galaxy-collection-semantics]]"
   - "[[galaxy-datatypes-conf]]"
   - "[[galaxy-workflow-testability-design]]"
+  - "[[nextflow-params-to-galaxy-inputs]]"
+  - "[[nextflow-path-glob-to-galaxy-datatype]]"
 sources:
   - "https://github.com/galaxyproject/gxformat2/blob/main/schema/v19_09/workflow.yml"
   - "https://github.com/galaxyproject/gxformat2/blob/main/schema/v19_09/Process.yml"

@@ -7,13 +7,15 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 related_notes:
   - "[[galaxy-collection-semantics]]"
   - "[[galaxy-collection-tools]]"
   - "[[nextflow-workflow-io-semantics]]"
+  - "[[nextflow-params-to-galaxy-inputs]]"
+  - "[[nextflow-path-glob-to-galaxy-datatype]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
 related_molds:
   - "[[nextflow-summary-to-galaxy-interface]]"
