@@ -12,6 +12,7 @@ revised: 2026-05-02
 revision: 1
 ai_generated: true
 related_notes:
+  - "[[nextflow-workflow-io-semantics]]"
   - "[[galaxy-collection-semantics]]"
   - "[[galaxy-collection-tools]]"
   - "[[galaxy-apply-rules-dsl]]"

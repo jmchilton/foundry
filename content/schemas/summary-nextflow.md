@@ -16,6 +16,7 @@ revision: 5
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
+  - "[[nextflow-workflow-io-semantics]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[nextflow-summary-to-cwl-interface]]"
