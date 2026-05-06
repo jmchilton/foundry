@@ -110,7 +110,9 @@ Corpus-first does not mean copying the corpus wholesale. It means abstractions s
 - Evaluation plans should exercise casts against realistic workflow shapes.
 - New taxonomy should appear after content demands it, not before.
 
-This keeps the Foundry from becoming a speculative ontology. The vocabulary should follow evidence.
+The same posture applies to the research notes Molds reference at runtime. A runtime-reference note should start as a stub — frontmatter, title, primary-source link — and grow paragraph-by-paragraph from gaps observed when the Mold is cast against real targets. Each paragraph earns its place by naming a motivating case: a workflow, a cast run, a log entry where the runtime agent guessed, fell back, or contradicted the schema. Pre-written comprehensive notes are an anti-pattern; they read as plausible, sound authoritative, and quietly propagate the author's prior beliefs into every downstream cast. The runtime agent has no way to tell invented prose from earned prose, so the safer default is to write nothing until contact with the corpus demands it.
+
+This keeps the Foundry from becoming a speculative ontology. The vocabulary should follow evidence, and so should the prose underneath it.
 
 ## How The Principles Connect
 
