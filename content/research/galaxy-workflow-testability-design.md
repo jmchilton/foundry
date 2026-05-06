@@ -16,6 +16,7 @@ related_notes:
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-workflow-test-architecture]]"
   - "[[implement-galaxy-workflow-test]]"
+  - "[[gxformat2-workflow-inputs]]"
 summary: "Design guidance for Galaxy workflow inputs, outputs, and checkpoints that make IWC-style workflow tests possible."
 ---
 
