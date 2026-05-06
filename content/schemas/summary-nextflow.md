@@ -12,7 +12,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-05
-revision: 5
+revision: 6
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
@@ -101,6 +101,18 @@ Snapshot-sidecar parsing landed for module and subworkflow tests whose interesti
 - **`SnapshotFixture.parsed_content: SnapshotContent[]` added.** Each parsed sidecar entry preserves the snapshot name plus channel-keyed `SnapshotChannel` values.
 - **`SnapshotFile` added.** `<path>:md5,<hex>` strings become file digest assertions with `path`, `basename`, `md5`, and a `stub` flag for empty-file md5s.
 - **Non-file values preserved.** Version tuples, counts, and other scalar snapshot values remain in `SnapshotChannel.values` so downstream test-plan Molds do not re-read `.snap` files.
+
+## Revision 6 — 2026-05-05
+
+Sample-sheet schemas became first-class structured inputs. Resolves the open question raised in [[nextflow-workflow-io-semantics]] §"Open questions" and tracked in jmchilton/foundry#177.
+
+- **`Summary.sample_sheets: SampleSheet[]` added** (required; empty array when none). Promotes sample-sheet shape out of `params[].description` prose so downstream target Molds can pick collection variants without re-parsing the source pipeline.
+- **`SampleSheet` shape added.** Binds one `params[]` parameter (`param`) to a row schema (`columns`) plus discovery provenance (`discovered_via`: `nf-schema` | `samplesheetToList` | `splitCsv` | `ad-hoc`), optional `schema_path`, `format`, and `header`.
+- **`SampleSheetColumn` shape added.** Captures `name`, JSON Schema-style scalar `type`, `kind` (`data` for path-typed dataset references vs `meta` for per-row metadata), `format`, `required`, `default`, `enum`, `pattern`, `exists`, `mimetype`, `description`. Validation hints stay verbatim — target Molds decide which survive translation (e.g. Galaxy's `sample_sheet` validator allowlist is regex/in_range/length only; richer nf-schema validation downgrades to prose with confidence note).
+
+Why now: nf-core's `samplesheetToList(params.input, "assets/schema_input.json")` idiom maps almost 1:1 onto Galaxy's `sample_sheet[:paired|:paired_or_unpaired|:record]` collection types (`column_definitions`, typed columns including `element_identifier` cross-row refs, `restrictions[]` for enums, regex validators). Without structured columns the interface Mold cannot pick `sample_sheet:paired` vs `list:paired` vs flat-file principally, and per-row `meta` fields silently fall to parallel parameter inputs. See [[galaxy-sample-sheet-collections]] for the target-side mapping table consumed by [[nextflow-summary-to-galaxy-interface]] and [[nextflow-summary-to-galaxy-data-flow]].
+
+What was *not* changed: `Param.type` still records the param's own type (`string`/`path`) — the sample-sheet relationship is expressed by `sample_sheets[].param` referencing `params[].name`, not by mutating the param entry.
 
 ## Revision 5 — 2026-05-05
 

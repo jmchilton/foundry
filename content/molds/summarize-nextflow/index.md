@@ -9,7 +9,7 @@ tags:
 status: draft
 created: 2026-04-30
 revised: 2026-05-05
-revision: 9
+revision: 10
 ai_generated: true
 output_schemas:
   - "[[summary-nextflow]]"
@@ -116,6 +116,22 @@ A single JSON document conforming to [[summary-nextflow]] (`packages/summary-nex
     { "name": "input", "type": "path", "default": null,
       "description": "Samplesheet CSV", "required": true }
   ],
+  "sample_sheets": [
+    { "param": "input",
+      "schema_path": "assets/schema_input.json",
+      "discovered_via": "nf-schema",
+      "format": "csv", "header": true,
+      "columns": [
+        { "name": "sample",     "type": "string", "kind": "meta", "required": true,
+          "pattern": "^\\S+$" },
+        { "name": "fastq_1",    "type": "string", "kind": "data", "format": "file-path",
+          "required": true,  "exists": true, "pattern": "^\\S+\\.f(ast)?q\\.gz$" },
+        { "name": "fastq_2",    "type": "string", "kind": "data", "format": "file-path",
+          "required": false, "exists": true, "pattern": "^\\S+\\.f(ast)?q\\.gz$" },
+        { "name": "strandedness","type": "string", "kind": "meta", "required": true,
+          "enum": ["forward", "reverse", "unstranded", "auto"] }
+      ] }
+  ],
   "profiles": ["test", "test_full", "docker", "singularity", "conda"],
   "tools": [                                   // mirrors gxy-sketches ToolSpec, augmented
     { "name": "fastp", "version": "0.23.4",
@@ -220,6 +236,23 @@ Populate `source` from `git remote get-url`, `git rev-parse HEAD` (or the user-s
 ### 3. Parse parameters and profiles
 
 Read `nextflow.config` `params { ... }` block for defaults. When `nextflow_schema.json` exists (nf-core), prefer it as the source of truth for `type`, `description`, and `required` — it is real JSON Schema, copy verbatim. Enumerate `profiles { ... }` keys.
+
+### 3.5. Resolve sample-sheet schemas
+
+Sample-sheet inputs are the dominant structured-input idiom in modern nf-core pipelines and the most lossy thing to leave as prose inside `params[].description`. For each candidate sample-sheet parameter, populate one `sample_sheets[]` entry capturing the row schema deterministically. Discovery has three branches, recorded in `discovered_via`:
+
+- `nf-schema`: the param's `nextflow_schema.json` entry has a `schema:` keyword pointing at a sibling JSON Schema file (`assets/schema_*.json`). Read that file. Each property in the row schema maps to one `SampleSheetColumn`. Preserve **property order**, not source-column order — `samplesheetToList()` emits columns in property order, and downstream channel item layout depends on it.
+- `samplesheetToList`: the workflow imports `samplesheetToList` from nf-schema and calls it on the param. When the call cites a schema path, follow it. Without a schema path, emit the entry with `schema_path: null` and infer columns from `splitCsv`-shaped fallback if any; otherwise emit `columns: []` and a `warnings[]` note.
+- `splitCsv`: a `Channel.fromPath(params.X).splitCsv(header: true)` materialization. Header inference only — emit columns by name, leave `type: string`, `kind` inferred from downstream `path()` consumption when traceable, else `meta`. Mark `discovered_via: splitCsv`.
+- `ad-hoc`: pipeline-specific CSV/TSV parsing detected from script bodies (e.g. row-zero/row-one indexing). Emit a minimal entry with `columns: []` plus a `warnings[]` advisory; downstream Molds will need to handle these by hand.
+
+Column field rules:
+
+- `kind`: `data` when nf-schema `format` is `file-path`/`directory-path`/`path` or when the column is annotated `meta:` is **absent** and the value is consumed as a `path()` downstream. `meta` otherwise (including all `meta: true` annotations and all non-path scalars). Nest the nf-schema `meta:` annotation here even when implicit — translation Molds key on it to decide which columns become Galaxy `column_definitions[]` versus element/inner-collection slots.
+- `type`: copy verbatim from the row schema (`string`/`integer`/`number`/`boolean`). Path columns are `string` with a `format` qualifier; do not collapse `path` into a synthetic type.
+- `required`, `default`, `enum`, `pattern`, `exists`, `mimetype`, `description`: copy verbatim when present, leaving null/empty defaults otherwise.
+
+This step does not reshape onto any target idiom (Galaxy `sample_sheet:paired` vs `list:paired` is not decided here). It records what the source pipeline declares; the variant choice belongs to [[nextflow-summary-to-galaxy-interface]] and [[nextflow-summary-to-cwl-interface]].
 
 ### 4. Enumerate processes
 

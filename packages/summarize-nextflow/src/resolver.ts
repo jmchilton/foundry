@@ -4,9 +4,33 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import YAML from "yaml";
 
+interface SampleSheetColumn {
+  name: string;
+  type: "string" | "integer" | "number" | "boolean";
+  kind: "data" | "meta";
+  format: string | null;
+  required: boolean;
+  default?: unknown;
+  description: string | null;
+  enum: unknown[];
+  pattern: string | null;
+  exists: boolean | null;
+  mimetype: string | null;
+}
+
+interface SampleSheet {
+  param: string;
+  schema_path: string | null;
+  discovered_via: "nf-schema" | "samplesheetToList" | "splitCsv" | "ad-hoc";
+  format: "csv" | "tsv" | "csv-or-tsv" | null;
+  header: boolean | null;
+  columns: SampleSheetColumn[];
+}
+
 interface Summary {
   source: Record<string, unknown>;
   params: Param[];
+  sample_sheets: SampleSheet[];
   profiles: string[];
   tools: Tool[];
   processes: Process[];
@@ -221,6 +245,7 @@ export async function resolveNextflowSummary(
       slug: workflowName.replace("/", "-"),
     },
     params: parseParams(pipelineRoot),
+    sample_sheets: parseSampleSheets(pipelineRoot),
     profiles: parseProfiles(config),
     tools,
     processes: processes.map((process) => ({
@@ -370,6 +395,90 @@ function parseParams(pipelineRoot: string): Param[] {
     }
   }
   return [...params.values()];
+}
+
+function parseSampleSheets(pipelineRoot: string): SampleSheet[] {
+  const schemaPath = join(pipelineRoot, "nextflow_schema.json");
+  if (!existsSync(schemaPath)) return [];
+  const schema = JSON.parse(readText(schemaPath)) as {
+    $defs?: Record<string, { properties?: Record<string, Record<string, unknown>> }>;
+  };
+  const sheets: SampleSheet[] = [];
+  for (const section of Object.values(schema.$defs ?? {})) {
+    for (const [paramName, property] of Object.entries(section.properties ?? {})) {
+      const rowSchemaRef = typeof property.schema === "string" ? property.schema : null;
+      if (!rowSchemaRef) continue;
+      const rowSchemaPath = join(pipelineRoot, rowSchemaRef);
+      if (!existsSync(rowSchemaPath)) continue;
+      const mimetype = typeof property.mimetype === "string" ? property.mimetype : null;
+      const format =
+        mimetype === "text/csv" ? "csv" : mimetype === "text/tab-separated-values" ? "tsv" : null;
+      sheets.push({
+        param: paramName,
+        schema_path: rowSchemaRef,
+        discovered_via: "nf-schema",
+        format,
+        header: true,
+        columns: parseSampleSheetColumns(rowSchemaPath),
+      });
+    }
+  }
+  return sheets;
+}
+
+function parseSampleSheetColumns(rowSchemaPath: string): SampleSheetColumn[] {
+  const rowSchema = JSON.parse(readText(rowSchemaPath)) as {
+    items?: { properties?: Record<string, Record<string, unknown>>; required?: string[] };
+  };
+  const items = rowSchema.items ?? {};
+  const required = new Set(items.required ?? []);
+  const columns: SampleSheetColumn[] = [];
+  for (const [name, raw] of Object.entries(items.properties ?? {})) {
+    const property = collapseAnyOf(raw);
+    const declaredType = pickScalarType(property.type);
+    const type: SampleSheetColumn["type"] =
+      declaredType === "integer" || declaredType === "number" || declaredType === "boolean"
+        ? declaredType
+        : "string";
+    const format = typeof property.format === "string" ? property.format : null;
+    const isMeta = Array.isArray(property.meta);
+    const isPathFormat = format === "file-path" || format === "directory-path" || format === "path";
+    const kind: SampleSheetColumn["kind"] = isMeta || !isPathFormat ? "meta" : "data";
+    columns.push({
+      name,
+      type,
+      kind,
+      format,
+      required: required.has(name),
+      default: property.default ?? null,
+      description: typeof property.description === "string" ? property.description : null,
+      enum: Array.isArray(property.enum) ? property.enum : [],
+      pattern: typeof property.pattern === "string" ? property.pattern : null,
+      exists: typeof property.exists === "boolean" ? property.exists : null,
+      mimetype: typeof property.mimetype === "string" ? property.mimetype : null,
+    });
+  }
+  return columns;
+}
+
+function collapseAnyOf(property: Record<string, unknown>): Record<string, unknown> {
+  if (!Array.isArray(property.anyOf)) return property;
+  const merged: Record<string, unknown> = { ...property };
+  for (const branch of property.anyOf as Record<string, unknown>[]) {
+    for (const [key, value] of Object.entries(branch)) {
+      if (merged[key] === undefined && value !== undefined) merged[key] = value;
+    }
+  }
+  return merged;
+}
+
+function pickScalarType(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    const nonNull = value.find((entry) => typeof entry === "string" && entry !== "null");
+    return typeof nonNull === "string" ? nonNull : null;
+  }
+  return null;
 }
 
 function detectPipelineRoot(path: string): { path: string; warnings: string[] } {

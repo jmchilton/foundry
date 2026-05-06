@@ -45,6 +45,14 @@ references:
     evidence: corpus-observed
     purpose: "Choose stable workflow input/output labels and promoted checkpoint outputs that future tests can address."
     trigger: "When deciding labels, public outputs, checkpoint outputs, or fixture-compatible collection inputs."
+  - kind: research
+    ref: "[[galaxy-sample-sheet-collections]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Pick the right sample_sheet variant and translate nf-schema column metadata into Galaxy column_definitions when the source pipeline uses sample-sheet-shaped inputs."
+    trigger: "When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input."
 related_notes:
   - "[[summary-nextflow]]"
 ---

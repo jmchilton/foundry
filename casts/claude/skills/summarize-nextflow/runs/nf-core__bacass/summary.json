@@ -279,6 +279,89 @@
       "required": false
     }
   ],
+  "sample_sheets": [
+    {
+      "param": "input",
+      "schema_path": "assets/schema_input.json",
+      "discovered_via": "nf-schema",
+      "format": "csv",
+      "header": true,
+      "columns": [
+        {
+          "name": "ID",
+          "type": "string",
+          "kind": "meta",
+          "format": null,
+          "required": true,
+          "description": null,
+          "enum": [],
+          "pattern": "^\\S+$",
+          "exists": null,
+          "mimetype": null
+        },
+        {
+          "name": "R1",
+          "type": "string",
+          "kind": "data",
+          "format": "file-path",
+          "required": false,
+          "description": null,
+          "enum": [],
+          "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$",
+          "exists": null,
+          "mimetype": null
+        },
+        {
+          "name": "R2",
+          "type": "string",
+          "kind": "data",
+          "format": "file-path",
+          "required": false,
+          "description": null,
+          "enum": [],
+          "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$",
+          "exists": null,
+          "mimetype": null
+        },
+        {
+          "name": "LongFastQ",
+          "type": "string",
+          "kind": "data",
+          "format": "file-path",
+          "required": false,
+          "description": null,
+          "enum": [],
+          "pattern": "^(\\S+\\.f(ast)?q\\.gz|NA)$",
+          "exists": null,
+          "mimetype": null
+        },
+        {
+          "name": "Fast5",
+          "type": "string",
+          "kind": "data",
+          "format": "directory-path",
+          "required": false,
+          "description": null,
+          "enum": [],
+          "pattern": "^(\\/[\\S\\s]*|NA)$",
+          "exists": null,
+          "mimetype": null
+        },
+        {
+          "name": "GenomeSize",
+          "type": "string",
+          "kind": "meta",
+          "format": null,
+          "required": false,
+          "description": null,
+          "enum": [],
+          "pattern": "(\\b\\d+\\.\\d+m\\b|NA)",
+          "exists": null,
+          "mimetype": null
+        }
+      ]
+    }
+  ],
   "profiles": [
     "debug",
     "conda",

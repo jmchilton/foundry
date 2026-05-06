@@ -70,6 +70,14 @@ references:
     evidence: corpus-observed
     purpose: "Ground tabular bridge and table-operation choices in curated, corpus-observed operation patterns."
     trigger: "When data-flow translation needs filtering, joining, aggregation, pivoting, or tabular-collection bridges."
+  - kind: research
+    ref: "[[galaxy-sample-sheet-collections]]"
+    used_at: runtime
+    load: on-demand
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Preserve per-row metadata on the data-flow side: keep sample_sheet column_definitions wired through identifier-keyed steps instead of dropping into parallel parameter inputs, and re-attach metadata after map-over steps that lose it."
+    trigger: "When the upstream interface brief carries a sample_sheet[:paired|:paired_or_unpaired|:record] input, or when the Nextflow summary shows tuple(meta, path...) channel shape originating from samplesheetToList or splitCsv(header: true)."
 related_notes:
   - "[[summary-nextflow]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
