@@ -24,6 +24,8 @@ function resolveAll(arr: string[] | undefined) {
 const patterns = resolveAll(data.patterns);
 const cliCommands = resolveAll(data.cli_commands);
 const prompts = resolveAll(data.prompts);
+const inputSchemas = resolveAll(data.input_schemas);
+const outputSchemas = resolveAll(data.output_schemas);
 
 const axisChip = data.axis;
 const specifier = data.source ?? data.target ?? data.tool ?? null;
@@ -356,18 +358,36 @@ function producersOf(id: string): { moldId: string; description: string }[] {
   </div>
 )}
 
-{(data.input_schemas || data.output_schemas || data.examples) && (
+{(inputSchemas.length > 0 || outputSchemas.length > 0 || (data.examples && data.examples.length > 0)) && (
   <dl class="meta mb-6 p-3 rounded-lg bg-(--color-surface-raised) text-sm">
-    {data.input_schemas && data.input_schemas.length > 0 && (
+    {inputSchemas.length > 0 && (
       <>
         <dt>Input schemas:</dt>
-        <dd>{data.input_schemas.join(', ')}</dd>
+        <dd>
+          {inputSchemas.map((l, i) => (
+            <>
+              {i > 0 && ', '}
+              {l.href
+                ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
+                : <span class="dangling">{l.label}</span>}
+            </>
+          ))}
+        </dd>
       </>
     )}
-    {data.output_schemas && data.output_schemas.length > 0 && (
+    {outputSchemas.length > 0 && (
       <>
         <dt>Output schemas:</dt>
-        <dd>{data.output_schemas.join(', ')}</dd>
+        <dd>
+          {outputSchemas.map((l, i) => (
+            <>
+              {i > 0 && ', '}
+              {l.href
+                ? <a href={l.href} title={l.summary || undefined} class="text-(--color-link) hover:underline">{l.label}</a>
+                : <span class="dangling">{l.label}</span>}
+            </>
+          ))}
+        </dd>
       </>
     )}
     {data.examples && data.examples.length > 0 && (
