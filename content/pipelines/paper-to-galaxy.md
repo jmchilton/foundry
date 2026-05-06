@@ -14,8 +14,8 @@ summary: "Direct path from a paper to a Galaxy gxformat2 workflow. No CWL interm
 phases:
   - mold: "[[summarize-paper]]"
   - mold: "[[paper-summary-to-galaxy-design]]"
-  - mold: "[[paper-summary-to-galaxy-template]]"
   - mold: "[[compare-against-iwc-exemplar]]"
+  - mold: "[[paper-summary-to-galaxy-template]]"
   - branch: discover-or-author
     loop: true
     branches:

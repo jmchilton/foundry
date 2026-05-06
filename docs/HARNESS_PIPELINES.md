@@ -52,8 +52,8 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 
 1. `summarize-paper` — extract methods, named tools/algorithms, sample data, metrics, references to existing pipelines.
 2. `paper-summary-to-galaxy-design` — combined Galaxy interface and abstract data-flow design brief.
-3. `paper-summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from paper source evidence and prior handoffs.
-4. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s); flag divergences before sinking effort into per-step authoring.
+3. `compare-against-iwc-exemplar` — structural diff of the design brief against nearest IWC exemplar(s); guidance feeds template authoring.
+4. `paper-summary-to-galaxy-template` — `gxformat2` skeleton with per-step TODOs from paper source evidence, the design brief, and exemplar comparison notes.
 5. `[loop]` `[branch]` discover-or-author branch:
    - try `discover-shed-tool`.
    - on fallthrough, `author-galaxy-tool-wrapper`.
@@ -99,8 +99,8 @@ Other inline phase annotations may be coined as needs surface — e.g., `[gate]`
 1. `summarize-nextflow`
 2. `nextflow-summary-to-galaxy-interface`
 3. `nextflow-summary-to-galaxy-data-flow`
-4. `nextflow-summary-to-galaxy-template`
-5. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s).
+4. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
+5. `nextflow-summary-to-galaxy-template`
 6. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
 7. `[loop]` `summarize-galaxy-tool`
 8. `[loop]` `implement-galaxy-tool-step`
@@ -118,8 +118,8 @@ CWL is already structured; the upstream extraction work is much lighter.
 1. `summarize-cwl` — read CWL Workflow + referenced `CommandLineTool`s, identify inputs/outputs, scatter, conditional logic.
 2. `cwl-summary-to-galaxy-interface` — choose Galaxy workflow interface from CWL inputs/outputs.
 3. `cwl-summary-to-galaxy-data-flow` — re-shape into Galaxy-shaped data-flow idioms from a CWL summary that's already nearly a DAG.
-4. `cwl-summary-to-galaxy-template`
-5. `compare-against-iwc-exemplar` — structural diff of the template against nearest IWC exemplar(s).
+4. `compare-against-iwc-exemplar` — structural diff of the design briefs against nearest IWC exemplar(s); guidance feeds template authoring.
+5. `cwl-summary-to-galaxy-template`
 6. `[loop]` `[branch]` discover-or-author branch (`discover-shed-tool` → fallthrough to `author-galaxy-tool-wrapper`).
 7. `[loop]` `summarize-galaxy-tool`
 8. `[loop]` `implement-galaxy-tool-step`
@@ -154,6 +154,6 @@ Custom-Galaxy-tool authoring is split: a **pattern page** (reference and guidanc
 ## Open questions
 
 - Whether to surface `PAPER → CWL → GALAXY` and `NEXTFLOW → CWL → GALAXY` as distinct named harnesses or leave them as runtime compositions of two harnesses. (Either way the Mold inventory is unchanged — both paths reuse existing Molds.)
-- Whether `compare-against-iwc-exemplar` should also fire post-implementation (after the per-step loop) in addition to its post-template position, to catch divergences that only appear at full step granularity.
+- Whether `compare-against-iwc-exemplar` should also fire post-template or post-implementation (after the per-step loop) in addition to its pre-template position, to catch divergences that only appear once draft structure or full step granularity exist.
 - Whether `run-workflow-test` factors cleanly across Galaxy and CWL targets via Planemo, or splits into per-target variants once we hit real test execution.
 - Whether the `<source>-test-to-<target>-tests` Molds factor through a shared intermediate or stay per-pair.
