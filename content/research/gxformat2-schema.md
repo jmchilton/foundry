@@ -7,8 +7,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 related_notes:
   - "[[galaxy-collection-semantics]]"
@@ -40,6 +40,18 @@ Each entry under `inputs` carries:
 - `optional` — boolean.
 - `default` — opaque (`/schemas/unknown`); type-dependent.
 - `label`, `doc`, `id`, `position` — metadata.
+
+## Workflow output vocabulary
+
+Top-level `outputs` can be an array or object map. Each output entry carries:
+
+- `label` — public workflow-output name; tests and users should address this stable label.
+- `outputSource` — producing step output reference.
+- `doc` — optional prose context, string or string array.
+- `id` — optional identifier.
+- `type` — same permissive type vocabulary as inputs, when needed.
+
+Producer-side output actions are separate from top-level `outputs`. Step `out:` entries can carry `change_datatype`, `rename`, `add_tags`, `remove_tags`, `hide`, `delete_intermediate_datasets`, and `set_columns`, or a plain string output name. See [[galaxy-workflow-testability-design]] for authoring posture: `label` is the public API; producer-side actions make the dataset useful.
 
 ## Workflow step vocabulary
 
