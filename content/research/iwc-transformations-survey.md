@@ -17,7 +17,6 @@ related_notes:
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
-  - "[[iwc-nearest-exemplar-selection]]"
   - "[[collection-build-list-paired-with-apply-rules]]"
   - "[[collection-build-named-bundle]]"
   - "[[collection-cleanup-after-mapover-failure]]"

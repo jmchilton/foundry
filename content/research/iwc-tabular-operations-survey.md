@@ -14,7 +14,6 @@ related_notes:
   - "[[iwc-shortcuts-anti-patterns]]"
   - "[[planemo-asserts-idioms]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
-  - "[[iwc-nearest-exemplar-selection]]"
   - "[[galaxy-tabular-patterns]]"
   - "[[harmonize-by-sortlist-from-identifiers]]"
   - "[[manifest-to-mapped-collection-lifecycle]]"
@@ -199,9 +198,9 @@ Effectively the swiss-army knife. Several recurring sub-shapes:
 
 - **Header injection** (constant prefix): `microbiome/mags-building/MAGs-generation.gxwf.yml:1090-1096` —
   ```
-  BEGIN {OFS="\t"; print "genome\tcompleteness\tcontamination"} 
+  BEGIN {OFS="\t"; print "genome\tcompleteness\tcontamination"}
   NR > 1 {
-      if ($1 !~ /\.fasta$/) 
+      if ($1 !~ /\.fasta$/)
           $1 = $1 ".fasta"
       print $1, $2, $3
   }
