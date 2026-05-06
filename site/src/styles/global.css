@@ -384,6 +384,104 @@ a:hover .tag {
               0 16px 32px -10px color-mix(in srgb, var(--color-galaxy-primary) 28%, transparent);
 }
 
+/* --- Shared card grid (patterns, molds, …) --- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1rem;
+}
+.card-grid-wide {
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-height: 13rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 0.65rem;
+  background: var(--color-surface-raised);
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+.card:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+.card-feature {
+  border-color: color-mix(in srgb, var(--color-galaxy-primary) 22%, var(--color-border-subtle));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--color-galaxy-primary) 9%, transparent), transparent 46%),
+    var(--color-surface-raised);
+  border-radius: 0.75rem;
+}
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+}
+.card-top-chip {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.card-title {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.card-title-feature {
+  font-size: 1.35rem;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+.card-title a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+.card-title a:hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+.card-summary {
+  flex: 1;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.6rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--color-border-subtle);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+.card-meta > span {
+  display: inline-flex;
+  align-items: baseline;
+}
+.card-meta-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  opacity: 0.75;
+  margin-right: 0.3rem;
+}
+
 /* --- Vendored MyST blocks --- */
 
 .vendored-myst {
