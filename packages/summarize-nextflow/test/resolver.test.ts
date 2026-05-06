@@ -404,6 +404,117 @@ test("align module") {
     ]);
   });
 
+  test("captures nf-test single-quoted blocks and typed params", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/quoted-tests' }\n");
+    write(root, "main.nf", "workflow QUOTED_TESTS { }\n");
+    write(
+      root,
+      "tests/quoted.nf.test",
+      `profile 'test_full'
+nextflow_pipeline {
+  test('-profile "test,test_full"') {
+    when {
+      params {
+        input = 'samplesheet.csv'
+        skip_multiqc = true
+        min_reads = 25
+        ratio = 0.5
+      }
+    }
+    then { assert workflow.success }
+  }
+}
+`,
+    );
+
+    const summary = await summarize(root);
+    const tests = (
+      summary as SummaryLike & {
+        nf_tests: {
+          name: string;
+          profiles: string[];
+          params_overrides: Record<string, unknown>;
+        }[];
+      }
+    ).nf_tests;
+
+    expect(tests).toEqual([
+      expect.objectContaining({
+        name: '-profile "test,test_full"',
+        profiles: ["test", "test_full"],
+        params_overrides: {
+          input: "samplesheet.csv",
+          skip_multiqc: true,
+          min_reads: 25,
+          ratio: 0.5,
+        },
+      }),
+    ]);
+  });
+
+  test("parses compact nf-test snapshot sidecars", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'nf-core/compact-snapshots' }\n");
+    write(root, "main.nf", "workflow COMPACT_SNAPSHOTS { }\n");
+    write(
+      root,
+      "tests/compact.nf.test",
+      `test("compact snapshot") {
+  then { assert snapshot(workflow.out).match() }
+}
+`,
+    );
+    write(
+      root,
+      "tests/compact.nf.test.snap",
+      JSON.stringify({
+        "compact snapshot": {
+          bam: ["results/sample.bam:md5,11111111111111111111111111111111"],
+          count: 2,
+        },
+      }),
+    );
+
+    const summary = await summarize(root);
+    const snapshot = (
+      summary as SummaryLike & {
+        nf_tests: {
+          snapshot: {
+            parsed_content: {
+              channels: {
+                key: string | null;
+                files: { path: string; basename: string; md5: string; stub: boolean }[];
+                values: unknown[];
+              }[];
+            }[];
+          } | null;
+        }[];
+      }
+    ).nf_tests[0]!.snapshot;
+
+    expect(snapshot?.parsed_content).toEqual([
+      {
+        name: "compact snapshot",
+        channels: [
+          {
+            key: "bam",
+            files: [
+              {
+                path: "results/sample.bam",
+                basename: "sample.bam",
+                md5: "11111111111111111111111111111111",
+                stub: false,
+              },
+            ],
+            values: [],
+          },
+          { key: "count", files: [], values: [2] },
+        ],
+      },
+    ]);
+  });
+
   test("captures same-file utility and wrapper subworkflow calls without choosing wrapper primary", async () => {
     const root = tempPipelineRoot();
     write(root, "nextflow.config", "manifest { name = 'nf-core/wrappers' }\n");
