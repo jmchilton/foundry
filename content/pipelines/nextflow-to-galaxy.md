@@ -15,8 +15,8 @@ phases:
   - mold: "[[summarize-nextflow]]"
   - mold: "[[nextflow-summary-to-galaxy-interface]]"
   - mold: "[[nextflow-summary-to-galaxy-data-flow]]"
-  - mold: "[[nextflow-summary-to-galaxy-template]]"
   - mold: "[[compare-against-iwc-exemplar]]"
+  - mold: "[[nextflow-summary-to-galaxy-template]]"
   - branch: discover-or-author
     loop: true
     branches:

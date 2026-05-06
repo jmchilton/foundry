@@ -21,6 +21,8 @@ input_artifacts:
     description: "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] that pins workflow inputs, outputs, labels."
   - id: cwl-galaxy-data-flow
     description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] that pins abstract operations and collection choices."
+  - id: iwc-comparison-notes
+    description: "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design briefs); steers the skeleton toward IWC-aligned structure before per-step authoring."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml

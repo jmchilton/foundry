@@ -8,18 +8,26 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-04-30
-revised: 2026-05-05
-revision: 5
+revised: 2026-05-06
+revision: 6
 ai_generated: true
-summary: "Find nearest IWC exemplar(s) and surface a structural diff against a draft."
+summary: "Find nearest IWC exemplar(s) and surface a structural diff against the upstream Galaxy design briefs to guide template authoring."
 input_artifacts:
-  - id: galaxy-workflow-draft
-    description: "gxformat2 skeleton from a *-summary-to-galaxy-template Mold; the draft compared against IWC exemplars."
+  - id: nextflow-galaxy-interface
+    description: "Galaxy interface brief from [[nextflow-summary-to-galaxy-interface]] when running the NEXTFLOW → GALAXY pipeline."
+  - id: nextflow-galaxy-data-flow
+    description: "Galaxy data-flow brief from [[nextflow-summary-to-galaxy-data-flow]] when running the NEXTFLOW → GALAXY pipeline."
+  - id: cwl-galaxy-interface
+    description: "Galaxy interface brief from [[cwl-summary-to-galaxy-interface]] when running the CWL → GALAXY pipeline."
+  - id: cwl-galaxy-data-flow
+    description: "Galaxy data-flow brief from [[cwl-summary-to-galaxy-data-flow]] when running the CWL → GALAXY pipeline."
+  - id: paper-galaxy-design
+    description: "Combined Galaxy interface + data-flow design brief from [[paper-summary-to-galaxy-design]] when running the PAPER → GALAXY pipeline."
 output_artifacts:
   - id: iwc-comparison-notes
     kind: markdown
     default_filename: iwc-comparison-notes.md
-    description: "Structural diff against the nearest IWC exemplar(s); guidance for authoring before more concrete step work."
+    description: "Structural diff against the nearest IWC exemplar(s); guidance for the downstream *-summary-to-galaxy-template Mold before per-step authoring."
 cli_commands:
   - "[[convert]]"
 references:
@@ -37,8 +45,8 @@ references:
     load: on-demand
     mode: verbatim
     evidence: hypothesis
-    purpose: "Compare against the draft's abstract intent without turning exemplar comparison into tool resolution."
-    trigger: "When deciding whether to compare abstract data-flow, gxformat2 skeleton structure, or concrete implementation details."
+    purpose: "Compare against the design briefs' abstract intent without turning exemplar comparison into tool resolution."
+    trigger: "When deciding whether to compare abstract data-flow shape, interface structure, or speculative implementation details."
     verification: "Promote after exemplar comparison flags structural issues without resolving concrete tool metadata."
   - kind: pattern
     ref: "[[galaxy-collection-patterns]]"
@@ -46,36 +54,38 @@ references:
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Compare draft collection transformations against curated corpus-observed pattern guidance."
-    trigger: "When the draft workflow contains collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections."
+    purpose: "Compare proposed collection transformations against curated corpus-observed pattern guidance."
+    trigger: "When the data-flow brief proposes collection reshape, cleanup, relabel, synchronization, or collection-tabular bridge sections."
   - kind: pattern
     ref: "[[galaxy-tabular-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Compare draft tabular transformations against curated corpus-observed pattern guidance."
-    trigger: "When the draft workflow contains tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections."
+    purpose: "Compare proposed tabular transformations against curated corpus-observed pattern guidance."
+    trigger: "When the data-flow brief proposes tabular filtering, projection, join, aggregation, SQL, or free-form text-processing sections."
   - kind: research
     ref: "[[iwc-test-data-conventions]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Compare test-data placement and fixture shapes against IWC conventions."
-    trigger: "When exemplar comparison includes workflow tests or input fixture organization."
+    purpose: "Compare proposed test-data placement and fixture shapes against IWC conventions."
+    trigger: "When the design briefs hint at workflow tests or input fixture organization."
   - kind: research
     ref: "[[iwc-shortcuts-anti-patterns]]"
     used_at: runtime
     load: on-demand
     mode: verbatim
     evidence: corpus-observed
-    purpose: "Flag draft shortcuts that are accepted in IWC versus shortcuts that should be treated as smells."
-    trigger: "When reviewing draft tests, assertions, labels, or expected-output comparisons."
+    purpose: "Flag proposed shortcuts that are accepted in IWC versus shortcuts that should be treated as smells."
+    trigger: "When the design briefs propose tests, assertions, labels, or expected-output comparisons."
 ---
 # compare-against-iwc-exemplar
 
-Find the nearest IWC exemplar workflow(s) for a Galaxy draft and emit a structural diff that can guide authoring before more effort is spent on concrete step implementation.
+Find the nearest IWC exemplar workflow(s) for the upstream Galaxy design briefs and emit a structural diff that guides the downstream `*-summary-to-galaxy-template` Mold before per-step authoring effort is spent.
+
+This Mold is the corpus-first check in Galaxy-targeting pipelines. It runs after the source-specific interface and data-flow briefs (or the combined paper design brief) and before the gxformat2 template Mold. Discovery, ranking, and comparison are one action — there is no separate retrieval Mold.
 
 ## Procedure
 
@@ -92,7 +102,7 @@ Find the nearest IWC exemplar workflow(s) for a Galaxy draft and emit a structur
 5. Output types and report shape.
 6. Test style and fixture topology.
 
-Domain comes first so a structurally similar workflow in the wrong science area does not become a misleading exemplar. Topology comes second because collection shape is one of the most important Galaxy-specific design decisions. Test style is useful after a workflow match, but should not drive initial retrieval.
+Domain comes first so a structurally similar workflow in the wrong science area does not become a misleading exemplar. Topology comes second because collection shape is one of the most important Galaxy-specific design decisions. Test style is useful after a workflow match, but should not drive initial retrieval. Briefs with no domain signal should not produce a high-confidence exemplar even if they share generic tools.
 
 ## Confidence Levels
 
@@ -102,6 +112,17 @@ Domain comes first so a structurally similar workflow in the wrong science area 
 | Medium | Same domain and topology, but partial tool-family or output match. Useful exemplar, not canonical. |
 | Low | Cross-domain structural match only. Useful for a pattern comparison, not a nearest domain exemplar. |
 | No nearest exemplar | Candidate lacks domain or topology alignment, or only shares generic tools such as MultiQC. |
+
+## Routing findings forward
+
+Each finding should name the authoring surface most likely to own the fix:
+
+- Template/data-flow issue: missing node, wrong collection shape, wrong branch, placeholder too vague — surfaced for the downstream `*-summary-to-galaxy-template` Mold to apply.
+- Pattern issue: recurring Galaxy idiom should become or update a pattern page.
+- Tool-step issue: exact wrapper or parameterization will be handled later in the per-step loop.
+- Test issue: defer to `*-test-to-galaxy-test-plan` or `implement-galaxy-workflow-test`.
+
+Do not block downstream authoring on low-confidence exemplar mismatches. Report them as review guidance for the template Mold and the user.
 
 ## Non-goals
 

@@ -15,8 +15,8 @@ phases:
   - mold: "[[summarize-cwl]]"
   - mold: "[[cwl-summary-to-galaxy-interface]]"
   - mold: "[[cwl-summary-to-galaxy-data-flow]]"
-  - mold: "[[cwl-summary-to-galaxy-template]]"
   - mold: "[[compare-against-iwc-exemplar]]"
+  - mold: "[[cwl-summary-to-galaxy-template]]"
   - branch: discover-or-author
     loop: true
     branches:

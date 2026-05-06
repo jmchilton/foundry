@@ -128,7 +128,7 @@ CLI command docs live under `content/cli/<tool>/<command>.md`. Action Molds refe
 
 ### Corpus-grounding (Galaxy-specific, generic in source)
 
-- `compare-against-iwc-exemplar` — given a draft template or implemented workflow, find the nearest IWC exemplar(s) and surface a **structural diff** (this branch differs / IWC consistently uses pattern X here / unexpected step ordering / missing common pre-step). Retrieval is part of the comparison — there is no separate retrieval Mold. Galaxy-target only; this is the corpus-first principle delivered at authoring time.
+- `compare-against-iwc-exemplar` — given the upstream Galaxy design briefs (interface + data-flow), find the nearest IWC exemplar(s) and surface a **structural diff** (this branch differs / IWC consistently uses pattern X here / unexpected step ordering / missing common pre-step) to guide template authoring. Retrieval is part of the comparison — there is no separate retrieval Mold. Galaxy-target only; this is the corpus-first principle delivered before per-step effort begins.
 
 ## Not Molds
 
