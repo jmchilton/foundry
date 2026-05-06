@@ -19,6 +19,8 @@ input_artifacts:
     description: "Paper summary emitted by [[summarize-paper]]; consulted while emitting placeholder steps."
   - id: paper-galaxy-design
     description: "Combined Galaxy design brief from [[paper-summary-to-galaxy-design]] that pins interface and data-flow choices."
+  - id: iwc-comparison-notes
+    description: "Structural diff guidance from [[compare-against-iwc-exemplar]] (run on the design brief); steers the skeleton toward IWC-aligned structure before per-step authoring."
 output_artifacts:
   - id: galaxy-workflow-draft
     kind: yaml
