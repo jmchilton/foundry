@@ -1259,10 +1259,10 @@ function parseNfTestFileProfiles(text: string): string[] {
 
 function extractNfTestBlocks(text: string): { name: string; body: string }[] {
   const blocks: { name: string; body: string }[] = [];
-  for (const match of text.matchAll(/\btest\("([^"]+)"\)\s*\{/gu)) {
+  for (const match of text.matchAll(/\btest\(\s*(["'])(.*?)\1\s*\)\s*\{/gu)) {
     const openIndex = match.index + match[0].lastIndexOf("{");
     const body = extractBlockAt(text, openIndex);
-    if (body !== null) blocks.push({ name: match[1]!, body });
+    if (body !== null) blocks.push({ name: match[2]!, body });
   }
   return blocks.length > 0 ? blocks : [{ name: "unnamed", body: text }];
 }
@@ -1270,10 +1270,13 @@ function extractNfTestBlocks(text: string): { name: string; body: string }[] {
 function parseNfTestProfiles(text: string, name: string): string[] {
   const profiles = new Set<string>();
   for (const source of [text, name]) {
-    for (const match of source.matchAll(/-profile\s+([A-Za-z0-9_,]+)/gu)) {
-      for (const profile of match[1]!.split(",")) profiles.add(profile);
+    for (const match of source.matchAll(/-profile\s+(?:["']([^"']+)["']|([A-Za-z0-9_,.-]+))/gu)) {
+      for (const profile of (match[1] ?? match[2]!).split(",")) {
+        const trimmed = profile.trim();
+        if (trimmed) profiles.add(trimmed);
+      }
     }
-    for (const match of source.matchAll(/profile\s+["']([^"']+)["']/gu)) {
+    for (const match of source.matchAll(/(?:^|[^-])\bprofile\s+["']([^"']+)["']/gu)) {
       profiles.add(match[1]!);
     }
   }
@@ -1281,12 +1284,22 @@ function parseNfTestProfiles(text: string, name: string): string[] {
 }
 
 function parseParamsOverrides(text: string): Record<string, unknown> {
-  const block = matchOne(text, /params\s*\{([\s\S]*?)\}/u);
+  const block = extractNamedBlock(text, "params");
   const values: Record<string, unknown> = {};
-  for (const match of block?.matchAll(/([A-Za-z0-9_]+)\s*=\s*"([^"]+)"/gu) ?? []) {
-    values[match[1]!] = match[2]!;
+  for (const match of block?.matchAll(/^\s*([A-Za-z0-9_]+)\s*=\s*(.+?)\s*$/gmu) ?? []) {
+    values[match[1]!] = parseNfTestParamValue(match[2]!);
   }
   return values;
+}
+
+function parseNfTestParamValue(value: string): unknown {
+  const quoted = /^(?:"([^"]*)"|'([^']*)')$/u.exec(value);
+  if (quoted !== null) return quoted[1] ?? quoted[2]!;
+  if (value === "true") return true;
+  if (value === "false") return false;
+  if (value === "null") return null;
+  if (/^-?\d+(?:\.\d+)?$/u.test(value)) return Number(value);
+  return value;
 }
 
 function parseSnapshot(
@@ -1329,10 +1342,10 @@ function parseSnapshotSidecar(path: string, name: string): SnapshotContent[] {
 }
 
 function parseSnapshotContent(name: string, entry: unknown): SnapshotContent[] {
-  if (!isRecord(entry)) return [];
-  const content = entry["content"];
-  if (!Array.isArray(content)) return [];
-  return [{ name, channels: content.flatMap(parseSnapshotContentItem) }];
+  const content = isRecord(entry) && "content" in entry ? entry["content"] : entry;
+  if (content === undefined) return [];
+  const items = Array.isArray(content) ? content : [content];
+  return [{ name, channels: items.flatMap(parseSnapshotContentItem) }];
 }
 
 function parseSnapshotContentItem(item: unknown): SnapshotChannel[] {
