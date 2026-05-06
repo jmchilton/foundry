@@ -17,6 +17,7 @@ revision: 1
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
+  - "[[nextflow-workflow-io-semantics]]"
   - "[[component-nextflow-pipeline-anatomy]]"
   - "[[component-nf-core-tools]]"
 related_molds:

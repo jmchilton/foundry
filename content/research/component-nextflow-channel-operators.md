@@ -18,6 +18,7 @@ sources:
 related_molds:
   - "[[summarize-nextflow]]"
 related_notes:
+  - "[[nextflow-workflow-io-semantics]]"
   - "[[component-nextflow-pipeline-anatomy]]"
 ---
 
