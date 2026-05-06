@@ -8,11 +8,13 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-02
-revised: 2026-05-02
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 related_notes:
   - "[[nextflow-workflow-io-semantics]]"
+  - "[[nextflow-params-to-galaxy-inputs]]"
+  - "[[nextflow-path-glob-to-galaxy-datatype]]"
   - "[[galaxy-collection-semantics]]"
   - "[[galaxy-collection-tools]]"
   - "[[galaxy-apply-rules-dsl]]"

@@ -8,7 +8,7 @@ tags:
 status: draft
 created: 2026-05-06
 revised: 2026-05-06
-revision: 1
+revision: 2
 ai_generated: true
 related_notes:
   - "[[component-nextflow-pipeline-anatomy]]"
@@ -16,6 +16,8 @@ related_notes:
   - "[[nextflow-parameters-meta]]"
   - "[[summary-nextflow]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
+  - "[[nextflow-params-to-galaxy-inputs]]"
+  - "[[nextflow-path-glob-to-galaxy-datatype]]"
 related_molds:
   - "[[summarize-nextflow]]"
   - "[[nextflow-summary-to-galaxy-interface]]"

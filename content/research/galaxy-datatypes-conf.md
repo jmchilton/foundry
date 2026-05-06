@@ -7,12 +7,13 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: false
 related_notes:
   - "[[galaxy-xsd]]"
   - "[[galaxy-collection-semantics]]"
+  - "[[nextflow-path-glob-to-galaxy-datatype]]"
 sources:
   - "https://github.com/galaxyproject/galaxy/blob/7765fae934fbfdee77e3be5f5b235e43735273ae/config/datatypes_conf.xml.sample"
 summary: "Vendored Galaxy datatypes registry sample: extension → datatype class mapping, sniff order, converters, and display applications."

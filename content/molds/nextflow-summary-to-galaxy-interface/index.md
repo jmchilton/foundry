@@ -10,8 +10,8 @@ tags:
   - target/galaxy
 status: draft
 created: 2026-05-05
-revised: 2026-05-05
-revision: 1
+revised: 2026-05-06
+revision: 2
 ai_generated: true
 summary: "Map a Nextflow summary into a Galaxy workflow interface design brief."
 input_artifacts:
@@ -30,6 +30,20 @@ references:
     mode: verbatim
     evidence: corpus-observed
     purpose: "Read source-level channel, parameter, process, and test-fixture evidence before choosing Galaxy workflow inputs and outputs."
+  - kind: research
+    ref: "[[nextflow-params-to-galaxy-inputs]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Translate Nextflow launch params, materialized inputs, sample sheets, and control flags into gxformat2-compatible Galaxy workflow inputs."
+  - kind: research
+    ref: "[[nextflow-path-glob-to-galaxy-datatype]]"
+    used_at: runtime
+    load: upfront
+    mode: verbatim
+    evidence: corpus-observed
+    purpose: "Choose Galaxy datatype extensions and confidence notes for data inputs, collection elements, and exposed outputs."
   - kind: research
     ref: "[[nextflow-to-galaxy-channel-shape-mapping]]"
     used_at: runtime
@@ -55,6 +69,8 @@ references:
     trigger: "When the Nextflow summary reports a samplesheetToList materialization, a parameter whose nf-schema entry sets schema: assets/schema_*.json, or a channel built from splitCsv(header: true) over a tabular params input."
 related_notes:
   - "[[summary-nextflow]]"
+  - "[[nextflow-params-to-galaxy-inputs]]"
+  - "[[nextflow-path-glob-to-galaxy-datatype]]"
 ---
 # nextflow-summary-to-galaxy-interface
 

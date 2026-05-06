@@ -11,12 +11,14 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-05
-revision: 6
+revised: 2026-05-06
+revision: 7
 ai_generated: true
 related_notes:
   - "[[summarize-nextflow]]"
   - "[[nextflow-workflow-io-semantics]]"
+  - "[[nextflow-params-to-galaxy-inputs]]"
+  - "[[nextflow-path-glob-to-galaxy-datatype]]"
   - "[[nextflow-summary-to-galaxy-interface]]"
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[nextflow-summary-to-cwl-interface]]"
