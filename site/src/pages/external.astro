@@ -1,0 +1,248 @@
+---
+import { readFileSync, existsSync } from 'node:fs';
+import path from 'node:path';
+import yaml from 'js-yaml';
+import Base from '../layouts/Base.astro';
+import { loadCommonPaths, parseCitation, citationGithubUrl } from '../lib/common-paths';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const repoRoot = path.resolve('..');
+
+interface VendoredEntry {
+  local: string;
+  source: string;
+  pinned_ref: string;
+  framing?: string;
+  build?: { command: string };
+}
+
+const vendored = yaml.load(
+  readFileSync(path.join(repoRoot, 'vendored_upstreams.yml'), 'utf-8'),
+) as VendoredEntry[];
+
+interface Pipeline {
+  name: string;
+  flavor: string;
+  tier: string;
+  repo: string;
+  tag?: string;
+  sha: string;
+  notes?: string;
+}
+interface FixturesYaml {
+  pipelines: Pipeline[];
+  iwc: { repo: string; ref: string; sha: string; notes?: string };
+}
+const fixtures = yaml.load(
+  readFileSync(path.join(repoRoot, 'workflow-fixtures', 'fixtures.yaml'), 'utf-8'),
+) as FixturesYaml;
+
+const paths = loadCommonPaths(repoRoot);
+
+function ghCommitUrl(repo: string, sha: string): string {
+  // repo is either "owner/name" or a clone URL.
+  const m = repo.match(/github\.com[/:]([^/]+\/[^/.]+)(?:\.git)?/);
+  const slug = m ? m[1] : repo;
+  return `https://github.com/${slug}/tree/${sha}`;
+}
+
+function sourceLink(source: string): { url: string | null; label: string } {
+  const c = parseCitation(source, paths);
+  if (!c) return { url: null, label: source };
+  const url = citationGithubUrl(c);
+  return { url, label: source };
+}
+
+function pinnedRefLink(source: string, ref: string): string | null {
+  const c = parseCitation(source, paths);
+  if (!c?.entry.repo) return null;
+  return `https://github.com/${c.entry.repo}/commit/${ref}`;
+}
+
+function framingHref(framing?: string): string | null {
+  if (!framing) return null;
+  // content/research/foo.md -> ${base}/research/foo/
+  const id = framing.replace(/^content\//, '').replace(/\.md$/, '');
+  return `${base}/${id}/`;
+}
+
+// Common-paths repos (filtered to ones with github metadata).
+const commonPathRepos = Object.entries(paths)
+  .filter(([, e]) => !!e.repo)
+  .map(([name, e]) => ({ name: name.toUpperCase(), ...e }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+const localOverride = existsSync(path.join(repoRoot, 'common_paths.yml'));
+---
+<Base title="External sources">
+  <section class="page-hero bg-grain" aria-labelledby="external-heading">
+    <span class="eyebrow mb-3">External</span>
+    <div class="page-hero-grid">
+      <div>
+        <h1 id="external-heading" class="page-title text-balance">External sources we sync from.</h1>
+        <p class="page-lede text-pretty">
+          The Foundry pulls from a handful of upstream Galaxy / Nextflow projects in a few different
+          ways: vendored file copies pinned by SHA, cloned corpora materialized into
+          <code class="font-mono">workflow-fixtures/</code>, and citation prefixes resolved at build
+          time for permalink rendering. This page lists each mechanism and what it touches.
+        </p>
+      </div>
+      <dl class="page-stats" aria-label="External-source counts">
+        <div><dt>Vendored</dt><dd>{vendored.length}</dd></div>
+        <div><dt>NF pipelines</dt><dd>{fixtures.pipelines.length}</dd></div>
+        <div><dt>Repo prefixes</dt><dd>{commonPathRepos.length}</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="mb-10" aria-labelledby="vendored-heading">
+    <div class="section-rule">
+      <h2 id="vendored-heading">Vendored upstreams</h2>
+      <span class="section-tail">/ vendored_upstreams.yml</span>
+    </div>
+    <p class="mb-3">
+      Each entry copies a single file (or generated artifact) from an upstream repo into
+      <code class="font-mono">content/</code> at a pinned SHA. Refresh with
+      <code class="font-mono">tsx scripts/sync-vendored-upstreams.ts</code>. A <code class="font-mono">build</code>
+      step, when present, runs in the upstream working tree before the copy and is deduped across entries.
+    </p>
+    <ul class="list-none p-0 m-0 grid grid-cols-1 gap-3">
+      {vendored.map(v => {
+        const src = sourceLink(v.source);
+        const pinUrl = pinnedRefLink(v.source, v.pinned_ref);
+        const framing = framingHref(v.framing);
+        return (
+          <li class="p-4 rounded-lg border border-(--color-border)">
+            <div class="font-mono text-sm font-semibold mb-1">{v.local}</div>
+            <dl class="text-sm grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1 m-0">
+              <dt class="text-(--color-text-secondary)">source</dt>
+              <dd class="m-0 font-mono break-all">
+                {src.url
+                  ? <a href={src.url} class="text-(--color-link) hover:underline">{src.label}</a>
+                  : <span>{src.label}</span>}
+              </dd>
+              <dt class="text-(--color-text-secondary)">pinned</dt>
+              <dd class="m-0 font-mono">
+                {pinUrl
+                  ? <a href={pinUrl} class="text-(--color-link) hover:underline">{v.pinned_ref.slice(0, 12)}</a>
+                  : <span>{v.pinned_ref}</span>}
+              </dd>
+              {v.framing && (
+                <>
+                  <dt class="text-(--color-text-secondary)">framing</dt>
+                  <dd class="m-0">
+                    {framing
+                      ? <a href={framing} class="text-(--color-link) hover:underline font-mono">{v.framing}</a>
+                      : <span class="font-mono">{v.framing}</span>}
+                  </dd>
+                </>
+              )}
+              {v.build && (
+                <>
+                  <dt class="text-(--color-text-secondary)">build</dt>
+                  <dd class="m-0">
+                    <pre class="m-0 p-2 rounded bg-(--color-surface-raised) text-xs font-mono overflow-x-auto"><code>{v.build.command.trim()}</code></pre>
+                  </dd>
+                </>
+              )}
+            </dl>
+          </li>
+        );
+      })}
+    </ul>
+  </section>
+
+  <section class="mb-10" aria-labelledby="iwc-heading">
+    <div class="section-rule">
+      <h2 id="iwc-heading">IWC corpus</h2>
+      <span class="section-tail">/ workflow-fixtures/iwc-*</span>
+    </div>
+    <p class="mb-3">
+      <a href="https://github.com/galaxyproject/iwc" class="text-(--color-link) hover:underline">galaxyproject/iwc</a>
+      cloned into <code class="font-mono">workflow-fixtures/iwc-src/</code> at the pinned SHA, then
+      cleaned + converted to <code class="font-mono">gxformat2</code> under
+      <code class="font-mono">iwc-format2/</code> and reduced to topology-only views under
+      <code class="font-mono">iwc-skeletons/</code>. Materialize with
+      <code class="font-mono">make fixtures-iwc fixtures-skeletons</code>. Cited from surveys as
+      <code class="font-mono">$IWC_FORMAT2/...</code> / <code class="font-mono">$IWC_SKELETONS/...</code>.
+      Generated dirs are gitignored; nothing under <code class="font-mono">content/</code> reads from them at build time.
+    </p>
+    <dl class="text-sm grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1 m-0">
+      <dt class="text-(--color-text-secondary)">ref</dt>
+      <dd class="m-0 font-mono">{fixtures.iwc.ref}</dd>
+      <dt class="text-(--color-text-secondary)">sha</dt>
+      <dd class="m-0 font-mono">
+        <a href={ghCommitUrl(fixtures.iwc.repo, fixtures.iwc.sha)} class="text-(--color-link) hover:underline">
+          {fixtures.iwc.sha.slice(0, 12)}
+        </a>
+      </dd>
+    </dl>
+  </section>
+
+  <section class="mb-10" aria-labelledby="nf-heading">
+    <div class="section-rule">
+      <h2 id="nf-heading">Nextflow fixture pipelines</h2>
+      <span class="section-tail">/ workflow-fixtures/fixtures.yaml</span>
+    </div>
+    <p class="mb-3">
+      Pinned Nextflow pipeline clones used as research evidence for the
+      <code class="font-mono">summarize-nextflow</code> Mold and adjacent gxwf skill work.
+      Materialize with <code class="font-mono">make fixtures-nextflow</code>; verify pins with
+      <code class="font-mono">make fixtures-verify</code>. Not used at site build time.
+    </p>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm border-collapse">
+        <thead>
+          <tr class="text-left border-b border-(--color-border)">
+            <th class="py-2 pr-3 font-semibold">Pipeline</th>
+            <th class="py-2 pr-3 font-semibold">Flavor</th>
+            <th class="py-2 pr-3 font-semibold">Tier</th>
+            <th class="py-2 pr-3 font-semibold">Tag</th>
+            <th class="py-2 pr-3 font-semibold">SHA</th>
+          </tr>
+        </thead>
+        <tbody>
+          {fixtures.pipelines.map(p => (
+            <tr class="border-b border-(--color-border)/50 align-top">
+              <td class="py-2 pr-3 font-mono">
+                <a href={p.repo.replace(/\.git$/, '')} class="text-(--color-link) hover:underline">{p.name}</a>
+              </td>
+              <td class="py-2 pr-3 font-mono">{p.flavor}</td>
+              <td class="py-2 pr-3 font-mono">{p.tier}</td>
+              <td class="py-2 pr-3 font-mono">{p.tag ?? '—'}</td>
+              <td class="py-2 pr-3 font-mono">
+                <a href={ghCommitUrl(p.repo, p.sha)} class="text-(--color-link) hover:underline">{p.sha.slice(0, 12)}</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mb-10" aria-labelledby="paths-heading">
+    <div class="section-rule">
+      <h2 id="paths-heading">Citation prefixes</h2>
+      <span class="section-tail">/ common_paths.{localOverride ? 'yml' : 'yml.sample'}</span>
+    </div>
+    <p class="mb-3">
+      Authoring notes cite upstream files inline as <code class="font-mono">$NAME/path/to/file.ext</code>.
+      The site rewrites these into clickable GitHub permalinks at build time using the repo + ref
+      declared in <code class="font-mono">common_paths.yml</code> (gitignored, per-machine; falls back to
+      the committed <code class="font-mono">.sample</code>). Not a sync — a binding.
+    </p>
+    <ul class="list-none p-0 m-0 grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {commonPathRepos.map(p => (
+        <li class="p-3 rounded-lg border border-(--color-border)">
+          <div class="flex items-baseline justify-between gap-2">
+            <span class="font-mono text-sm font-semibold">${p.name}</span>
+            <span class="text-xs text-(--color-text-secondary) font-mono">{p.ref ?? 'main'}</span>
+          </div>
+          <a href={`https://github.com/${p.repo}`} class="text-sm text-(--color-link) hover:underline font-mono break-all">
+            {p.repo}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
