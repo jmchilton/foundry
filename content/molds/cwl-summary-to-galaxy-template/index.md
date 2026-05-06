@@ -52,14 +52,6 @@ references:
     purpose: "Respect the handoff from abstract data-flow draft to gxformat2 skeleton."
     trigger: "When translating abstract nodes, unresolved tool needs, and placeholder transformations into template TODOs."
     verification: "Promote after two worked CWL-to-Galaxy templates preserve the data-flow/template split without schema changes."
-  - kind: research
-    ref: "[[iwc-nearest-exemplar-selection]]"
-    used_at: runtime
-    load: on-demand
-    mode: verbatim
-    evidence: corpus-observed
-    purpose: "Select likely IWC comparison targets once the skeleton has enough domain, topology, and tool-family signal."
-    trigger: "When preparing a draft skeleton for exemplar comparison or citing representative IWC workflows."
   - kind: pattern
     ref: "[[galaxy-collection-patterns]]"
     used_at: runtime

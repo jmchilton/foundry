@@ -11,10 +11,8 @@ revised: 2026-05-03
 revision: 2
 ai_generated: true
 related_notes:
-  - "[[iwc-exemplar-runtime-discovery]]"
   - "[[nextflow-to-galaxy-channel-shape-mapping]]"
   - "[[nextflow-operators-to-galaxy-collection-recipes]]"
-  - "[[iwc-nearest-exemplar-selection]]"
 related_molds:
   - "[[nextflow-summary-to-galaxy-data-flow]]"
   - "[[cwl-summary-to-galaxy-data-flow]]"
@@ -119,7 +117,6 @@ If it is too narrow, the template Mold receives source-summary details without G
 ## Evidence
 
 - [[nextflow-to-galaxy-channel-shape-mapping]] and [[nextflow-operators-to-galaxy-collection-recipes]] show why a Galaxy-shaped abstraction is needed between source summary and `gxformat2` template.
-- [[iwc-nearest-exemplar-selection]] shows exemplar comparison needs abstract topology and intended shapes, not just a rendered skeleton.
 - `content/pipelines/nextflow-to-galaxy.md` places data-flow before template, exemplar comparison, and per-step implementation.
 - `content/molds/summarize-nextflow/index.md` says source summarization should not produce Galaxy data flow.
 - `content/molds/implement-galaxy-tool-step/index.md` owns concrete step implementation.

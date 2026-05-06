@@ -15,7 +15,6 @@ related_notes:
   - "[[planemo-asserts-idioms]]"
   - "[[implement-galaxy-workflow-test]]"
   - "[[tests-format]]"
-  - "[[iwc-nearest-exemplar-selection]]"
   - "[[iwc-tabular-operations-survey]]"
 summary: "How IWC workflows organize and reference test data — Zenodo-first, SHA-1 integrity, collection shapes, CVMFS gotchas."
 ---
