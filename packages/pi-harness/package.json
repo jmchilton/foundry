@@ -1,0 +1,61 @@
+{
+  "name": "@galaxy-foundry/pi-harness",
+  "version": "0.0.0",
+  "description": "Pi-backed isolated worker runner and extension for testing Galaxy Workflow Foundry skills.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./extension": {
+      "types": "./dist/extension.d.ts",
+      "import": "./dist/extension.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/galaxyproject/foundry.git",
+    "directory": "packages/pi-harness"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "pi-package",
+    "galaxy",
+    "foundry",
+    "pi",
+    "agent",
+    "evaluation"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@earendil-works/pi-ai": "0.84.4",
+    "@earendil-works/pi-coding-agent": "0.84.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "pi": {
+    "extensions": [
+      "./dist/extension.js"
+    ]
+  }
+}

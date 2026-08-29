@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-25
-revision: 5
+revised: 2026-08-29
+revision: 6
 summary: "How authored Foundry source is checked, generated, cast, assembled, rendered, and kept current."
 ---
 
@@ -76,6 +76,12 @@ Casting treats source and output as separate lifecycles:
 `foundry-build assemble-pipeline` projects a Pipeline's phase spine into a lightweight `pipeline-<slug>` harness skill. It resolves phase Molds, expands supported branch routing, records `_assembly.json`, and prepares a per-run working-directory contract. When the feedback runtime artifact is registered, the assembly also exposes `--feedback` and the ledger lifecycle derived from the same registry declaration. The output is a test-drive convenience, not the production harness architecture described in [[harness-pipelines]].
 
 `make check-assemble-pipelines` is the drift gate for committed assemblies.
+
+## Agent-skill conformance
+
+`foundry-build test-skill` is the opt-in first layer of the external Pipeline evaluation harness. It invokes one committed cast skill through the pinned Pi RPC runtime with an explicit `/skill:<name>` activation. Every run uses a fresh process, worker directory, and Pi configuration directory; disables session, context-file, extension, prompt-template, and ambient skill discovery; stages only the declared inputs; and retains raw JSONL, stderr, usage, runtime identity, input and artifact hashes, and a versioned `run.json`. The runner applies the cast's `_verify.json` process checks after execution when it contains a validator for an expected artifact.
+
+Local mode provides process and context isolation but is not a security boundary. Container isolation, deterministic Pipeline sequencing, and independent qualitative grading remain staged follow-up in [issue #476](https://github.com/galaxyproject/foundry/issues/476). Pi is exactly pinned by the optional `@galaxy-foundry/pi-harness` tooling; ordinary validation, casting, assembly, and site builds do not start it or require provider credentials.
 
 ## Site build
 

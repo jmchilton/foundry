@@ -43,6 +43,7 @@
     "@galaxy-foundry/kind-schema": "^0.6.0",
     "@galaxy-foundry/license-policy": "^0.8.1",
     "@galaxy-foundry/gxwf-foundry-note-schema": "workspace:*",
+    "@galaxy-foundry/pi-harness": "workspace:*",
     "@galaxy-foundry/planemo-cli-meta": "workspace:*",
     "@galaxy-foundry/tag-registry": "^0.1.1",
     "@galaxy-foundry/wiki-links": "^0.4.0",

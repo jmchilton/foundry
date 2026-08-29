@@ -73,6 +73,7 @@ npm run dashboard         # generate content/Dashboard.md
 npm run index             # generate content/Index.md
 npm run readme            # refresh this file's corpus counts
 npm run cast              # cast a Mold (see above)
+npm run test-skill -- <skill> --prompt <task> --provider <provider> --model <model>
 npm run site:dev          # Astro dev server
 ```
 
