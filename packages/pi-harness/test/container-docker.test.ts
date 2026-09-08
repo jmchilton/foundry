@@ -33,6 +33,10 @@ test.skipIf(!enabled)("the Docker worker cannot see checkout-only resources", ()
   cpSync(skill, stagedSkill, { recursive: true, dereference: true });
 
   const dockerBin = process.env.FOUNDRY_DOCKER_BIN ?? "docker";
+  const user =
+    typeof process.getuid === "function" && typeof process.getgid === "function"
+      ? `${process.getuid()}:${process.getgid()}`
+      : undefined;
   const image = inspectContainerImage(
     process.env.FOUNDRY_SANDBOX_IMAGE ?? DEFAULT_CONTAINER_IMAGE,
     dockerBin,
@@ -58,6 +62,7 @@ test.skipIf(!enabled)("the Docker worker cannot see checkout-only resources", ()
       "--network=none",
       "--cap-drop=ALL",
       "--security-opt=no-new-privileges",
+      ...(user ? [`--user=${user}`] : []),
       "--mount",
       `type=bind,src=${stagedSkill},dst=/skill,readonly,bind-recursive=disabled`,
       "--mount",
