@@ -6,9 +6,9 @@
     "path": "content/molds/report-foundry-run-feedback/index.md",
     "revision": 1,
     "content_hash": "cffa8d8103479a92dd7282c6964cccfb7fb73d95f673f52e53e7743a2cb270da",
-    "commit": "df43ee6cfde47d0be154bb2ff9feabaab77ad9f4"
+    "commit": "351623a6d3e96e9bdee421a3ef61df4306489e32"
   },
-  "cast_at": "2026-09-03T21:21:50.850Z",
+  "cast_at": "2026-09-08T18:03:25.913Z",
   "refs": [],
   "artifacts": {
     "produces": [

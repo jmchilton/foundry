@@ -71,6 +71,19 @@ are pinned in `workflow-fixtures/fixtures.yaml`; materialize with
 - expect: `processes[].aliases[]` contains every `include { X as Y }` rename for
   `MINIMAP2_ALIGN` and `FASTQC`.
 
+## Case: egapx commented duplicate and subworkflow aliases
+
+- fixture: `ncbi/egapx` at
+  `40ec7362576e4b93fa9c5bf0a6c400d9502b8a63`, file
+  `nf/subworkflows/ncbi/gnomon-training-iteration/main.nf`.
+- expect: `gnomon_training_iterations.inputs[0].name == initial_hmm_params`;
+  its inputs include `gnomon_softmask` and exclude the commented
+  `models_file` and `gnomon_softmask_lds2`; `calls[]` contains the four
+  live spellings `gnomon_training_iteration` through
+  `gnomon_training_iteration4`; its emitted expression references
+  `gnomon_training_iteration4`; and the canonical
+  `gnomon_training_iteration.aliases[]` contains aliases 2, 3, and 4.
+
 ## Case: bacass nf-core module metadata and tests
 
 - fixture: `workflow-fixtures/pipelines/nf-core__bacass`.

@@ -127,11 +127,13 @@ A single JSON document conforming to summary-nextflow (`packages/summarize-nextf
     { "name": "FASTQ_TRIM_FASTP_FASTQC",
       "path": "subworkflows/nf-core/fastq_trim_fastp_fastqc/main.nf",
       "kind": "pipeline",
+      "aliases": [],
       "calls": ["FASTP", "FASTQC_RAW", "FASTQC_TRIM"],
       "inputs": [], "outputs": [] },
     { "name": "PIPELINE_INITIALISATION",
       "path": "subworkflows/local/utils_nfcore_<name>_pipeline/main.nf",
       "kind": "utility",                       // composes free functions, no process invocations
+      "aliases": [],
       "calls": [],
       "inputs": [], "outputs": [
         { "name": "samplesheet", "shape": "tuple(meta, path)", "description": "validated --input", "topic": null }
@@ -230,7 +232,7 @@ This step does not reshape onto any target idiom (Galaxy `sample_sheet:paired` v
 For each `process <NAME> { ... }` in `main.nf`, `workflows/`, `modules/**`, `subworkflows/**`:
 - Pull `container`, `conda`, `publishDir`, `when:` directives **verbatim** into `processes[].container` / `processes[].conda`. Modern nf-core directives are ternary expressions (`workflow.containerEngine == 'singularity' ? <sing-uri> : <docker-uri>`) and file references (`${moduleDir}/environment.yml`); keep the directive text intact and resolve into `tools[]` separately (§5).
 - Tokenize the `input:` and `output:` blocks for declared channel names and shapes — typed channels (`tuple val(meta), path(reads)`) become shape strings (`"tuple(meta, [path])"`); arity is preserved as a string, not structured.
-- Sweep `include { ... }` statements across the pipeline (`main.nf`, `workflows/`, `subworkflows/**`) to populate `processes[].aliases`. `include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS }` adds `MINIMAP2_CONSENSUS` to the `MINIMAP2_ALIGN` process's `aliases[]`. The same module can be re-imported under multiple aliases (bacass aliases `MINIMAP2_ALIGN` three times). Edges reference the alias name; the canonical `name` is the FK target.
+- Sweep live `include { ... }` statements across the pipeline (`main.nf`, `workflows/`, `subworkflows/**`) to populate both `processes[].aliases` and `subworkflows[].aliases`. `include { MINIMAP2_ALIGN as MINIMAP2_CONSENSUS }` adds `MINIMAP2_CONSENSUS` to the canonical process; the same rule maps aliased subworkflow calls back to their canonical declaration. Calls and edges retain the alias spelling used by the source. Ignore includes inside line or block comments.
 - Detect `topic: <name>` annotations on outputs (Nextflow 24+ channel topics — nf-core templates emit `tuple(val("${task.process}"), val('toolname'), eval(...)) topic: versions` for version aggregation). Record the topic name in `ChannelIO.topic`.
 - Where `meta.yml` exists, **use it** for `description` and IO documentation rather than parsing the `script:` block.
 - Carry the `script:`/`shell:`/`exec:` body verbatim into `script_excerpt` (dedented, truncated at 4000 characters, `stub:` dropped). For ad-hoc pipelines with no `meta.yml` this is the only evidence of what a process does.
@@ -270,6 +272,8 @@ Workflow-level conditionals (`if (params.skip_alignment) { ... }`) emit `conditi
 Subworkflows split into two kinds:
 - `kind: pipeline` — invokes pipeline processes (data-flow contributor). The `NFCORE_<NAME>` wrapper and any nested `subworkflows/local/` that calls processes.
 - `kind: utility` — composes free-function calls only (`paramsHelp`, `samplesheetToList`, `completionEmail`, `imNotification`). nf-core template subworkflows like `PIPELINE_INITIALISATION` and `PIPELINE_COMPLETION`. `Subworkflow.calls` is empty for utilities; their job is to produce channels (e.g. the validated samplesheet) the primary workflow consumes.
+
+Parse only live `workflow` declarations. Definitions, includes, processes, and calls inside `// ...` or `/* ... */` comments are inert source text and must never contribute to the summary or overwrite a live declaration with the same name. Preserve each live subworkflow's `take:`, `emit:`, and distinct alias call spellings; populate `subworkflows[].aliases` on the canonical declaration.
 
 Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVersionsToYAML`, `methodsDescriptionText`) are not modeled as processes or subworkflows. Their channel outputs flow into the primary workflow's `channels[]`; the function names are nf-core template idiom, not pipeline-specific signal. Operator chains with deeply nested closures may produce edges flagged with low confidence in `notes`.
 

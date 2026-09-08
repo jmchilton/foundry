@@ -76,6 +76,16 @@ whatever a scenario produces. Properties are tagged by bucket:
   `tests[].length` matching its on-disk `*.nf.test` count; local or untested
   subworkflows emit `tests == []`; no snapshot contents are inlined.
 
+## Property: subworkflow topology is source-faithful
+
+- bucket: fidelity
+- check: deterministic
+- assertion: every live named workflow preserves its declared `take:` and
+  `emit:` entries, distinct alias call spellings remain distinct in
+  `calls[]`, and each alias resolves through either `processes[].aliases` or
+  `subworkflows[].aliases`; declarations and calls inside line or block
+  comments contribute nothing.
+
 ## Property: every tool directive resolves or is flagged
 
 - bucket: fidelity
