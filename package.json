@@ -24,7 +24,7 @@
     "cast": "tsx packages/build-cli/src/bin/foundry-build.ts cast --root .",
     "assemble-pipeline": "tsx packages/build-cli/src/bin/foundry-build.ts assemble-pipeline --root .",
     "test-skill": "tsx packages/build-cli/src/bin/foundry-build.ts test-skill --root .",
-    "pi-harness:container-build": "docker build -t galaxy-foundry/pi-harness:pi-0.84.4 packages/pi-harness",
+    "pi-harness:container-build": "docker build -t galaxy-foundry/pi-harness:pi-0.84.4-foundry-0.1.0 packages/pi-harness",
     "pi-harness:container-test": "pnpm --filter @galaxy-foundry/pi-harness test:container",
     "packages-build": "pnpm --filter \"./packages/*\" build",
     "lint:packages": "pnpm --filter \"./packages/*\" exec publint && pnpm --filter \"./packages/*\" exec attw --pack . --profile esm-only --entrypoints .",

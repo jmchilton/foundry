@@ -43,6 +43,7 @@ test.skipIf(!enabled)("the Docker worker cannot see checkout-only resources", ()
     "test ! -e /workspace/.git",
     "test ! -e /content/molds",
     "test ! -e /_emulated-runs",
+    "foundry --help >/dev/null",
     "! touch /skill/forbidden",
     "! touch /inputs/forbidden",
     "printf isolated > /workspace/probe.txt",

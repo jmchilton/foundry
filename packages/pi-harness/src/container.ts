@@ -2,8 +2,10 @@ import { spawnSync } from "node:child_process";
 
 import { VERSION as PI_VERSION } from "@earendil-works/pi-coding-agent";
 
-export const DEFAULT_CONTAINER_IMAGE = `galaxy-foundry/pi-harness:pi-${PI_VERSION}`;
+export const FOUNDRY_CLI_VERSION = "0.1.0";
+export const DEFAULT_CONTAINER_IMAGE = `galaxy-foundry/pi-harness:pi-${PI_VERSION}-foundry-${FOUNDRY_CLI_VERSION}`;
 export const CONTAINER_PI_VERSION_LABEL = "org.galaxyproject.foundry.pi-version";
+export const CONTAINER_FOUNDRY_VERSION_LABEL = "org.galaxyproject.foundry.cli-version";
 export const CONTAINER_RPC_VERSION_LABEL = "org.galaxyproject.foundry.pi-rpc-version";
 export const CONTAINER_RPC_VERSION = "1";
 
@@ -22,6 +24,7 @@ export interface ContainerImageResolution {
   resolved_id: string;
   repo_digests: string[];
   pi_version: string;
+  foundry_cli_version: string;
 }
 
 export interface ContainerLaunchConfig {
@@ -70,11 +73,16 @@ export function inspectContainerImage(
   }
   const labels = record.Config?.Labels ?? {};
   const imagePiVersion = labels?.[CONTAINER_PI_VERSION_LABEL];
+  const foundryCliVersion = labels?.[CONTAINER_FOUNDRY_VERSION_LABEL];
   const rpcVersion = labels?.[CONTAINER_RPC_VERSION_LABEL];
-  if (imagePiVersion !== PI_VERSION || rpcVersion !== CONTAINER_RPC_VERSION) {
+  if (
+    imagePiVersion !== PI_VERSION ||
+    foundryCliVersion !== FOUNDRY_CLI_VERSION ||
+    rpcVersion !== CONTAINER_RPC_VERSION
+  ) {
     throw new Error(
       `Docker image ${image} is not a compatible Foundry Pi worker ` +
-        `(expected Pi ${PI_VERSION} and RPC contract ${CONTAINER_RPC_VERSION})`,
+        `(expected Pi ${PI_VERSION}, Foundry CLI ${FOUNDRY_CLI_VERSION}, and RPC contract ${CONTAINER_RPC_VERSION})`,
     );
   }
   return {
@@ -84,6 +92,7 @@ export function inspectContainerImage(
       ? record.RepoDigests.filter((value): value is string => typeof value === "string")
       : [],
     pi_version: imagePiVersion,
+    foundry_cli_version: foundryCliVersion,
   };
 }
 

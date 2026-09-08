@@ -76,6 +76,11 @@ jobs:
       - name: Test packages
         run: npm run packages-test
 
+      - name: Test Pi clean-room container boundary
+        run: |
+          npm run pi-harness:container-build
+          npm run pi-harness:container-test
+
       - name: Smoke-test package tarballs
         run: npm run smoke:packages
 

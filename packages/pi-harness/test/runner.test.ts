@@ -238,6 +238,7 @@ describe("runPiSkill", () => {
             resolved_id: "sha256:resolved",
             repo_digests: ["example/foundry-pi@sha256:resolved"],
             pi_version: "0.84.4",
+            foundry_cli_version: "0.1.0",
           }),
         },
       );

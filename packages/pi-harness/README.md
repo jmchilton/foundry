@@ -19,7 +19,7 @@ Build the default image from the repository root:
 npm run pi-harness:container-build
 ```
 
-The image pins Pi 0.84.4 and carries compatibility labels checked before every run. A caller may use `--sandbox-image <ref>` for another locally available image with the same labels. The runner resolves the ref to an immutable image ID before launch and records that ID, any repository digests, every mount, the network policy, and the names—not values—of forwarded credential variables.
+The image pins Pi 0.84.4 and the `@galaxy-foundry/gxwf-foundry` CLI 0.1.0 required by the pilot `summarize-nextflow` skill. It carries compatibility labels for both runtimes that are checked before every run. A caller may use `--sandbox-image <ref>` for another locally available image with the same labels. The runner resolves the ref to an immutable image ID before launch and records that ID, any repository digests, every mount, the network policy, and the names—not values—of forwarded credential variables.
 
 Container provider access is explicit. Use `--sandbox-network bridge` and repeat `--credential-env <NAME>` for only the variables the provider needs. Use `--sandbox-network none` for credential-free probes. Run the Docker boundary test with `npm run pi-harness:container-test`.
 
