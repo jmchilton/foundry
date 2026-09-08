@@ -12,4 +12,16 @@ export {
   type SandboxMode,
   type StagedInput,
 } from "./runner.js";
+export {
+  buildDockerRunArgs,
+  CONTAINER_PI_VERSION_LABEL,
+  CONTAINER_RPC_VERSION,
+  CONTAINER_RPC_VERSION_LABEL,
+  DEFAULT_CONTAINER_IMAGE,
+  inspectContainerImage,
+  type ContainerImageResolution,
+  type ContainerLaunchConfig,
+  type ContainerMount,
+  type ContainerNetworkPolicy,
+} from "./container.js";
 export { resolveDeclaredInput, resolveInstalledSkill } from "./skill-resolution.js";

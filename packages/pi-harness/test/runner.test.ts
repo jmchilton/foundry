@@ -1,12 +1,4 @@
-import {
-  chmodSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -170,7 +162,7 @@ describe("runPiSkill", () => {
       "--no-prompt-templates",
       "--no-skills",
       "--skill",
-      realpathSync(skillDir),
+      path.join(runDir, "skill"),
       "--tools",
       "read,write,edit,bash,grep,find,ls",
       "--thinking",
@@ -181,6 +173,10 @@ describe("runPiSkill", () => {
     expect(readFileSync(path.join(runDir, "trace.jsonl"), "utf8")).toContain("agent_start");
     expect(statSync(path.join(runDir, "workspace", "inputs", "source-pipeline")).mode & 0o777).toBe(
       0o555,
+    );
+    expect(statSync(path.join(runDir, "skill")).mode & 0o777).toBe(0o555);
+    expect(readFileSync(path.join(runDir, "skill", "SKILL.md"), "utf8")).toContain(
+      "name: example-skill",
     );
     expect(JSON.parse(readFileSync(path.join(runDir, "run.json"), "utf8"))).toEqual(record);
     expect(readFileSync(path.join(runDir, "stderr.log"), "utf8")).toBe("diagnostic stderr");
@@ -202,6 +198,99 @@ describe("runPiSkill", () => {
     expect(record.status).toBe("failed");
     expect(record.failure_kind).toBe("skill");
     expect(record.artifacts[0]?.status).toBe("missing");
+  });
+
+  test("container mode exposes only the selected skill, declared inputs, and output mount", async () => {
+    const root = fixtureRoot();
+    const checkout = path.join(root, "checkout");
+    const skillDir = makeSkill(checkout);
+    const inputDir = path.join(checkout, "fixture");
+    mkdirSync(inputDir);
+    writeFileSync(path.join(inputDir, "main.nf"), "workflow { }\n");
+    mkdirSync(path.join(checkout, ".git"));
+    mkdirSync(path.join(checkout, "content", "molds"), { recursive: true });
+    mkdirSync(path.join(checkout, "_emulated-runs"));
+    mkdirSync(path.join(checkout, "skills", "unrelated-skill"));
+    const runDir = path.join(root, "runs", "container-run");
+    const capture: { options?: RpcClientOptions; prompt?: string } = {};
+    const secretName = "FOUNDRY_TEST_PROVIDER_KEY";
+    process.env[secretName] = "test-secret";
+
+    try {
+      const record = await runPiSkill(
+        {
+          skillDir,
+          prompt: "Summarize the declared pipeline.",
+          inputPaths: [inputDir],
+          runDir,
+          provider: "test-provider",
+          model: "requested-model",
+          sandbox: "container",
+          sandboxImage: "example/foundry-pi@sha256:requested",
+          credentialEnv: [secretName],
+        },
+        {
+          ...fakeDependencies((_prompt, options) => {
+            writeFileSync(path.join(options.cwd!, "output.json"), '{"ok":true}\n');
+          }, capture),
+          inspectContainerImage: (requested) => ({
+            requested,
+            resolved_id: "sha256:resolved",
+            repo_digests: ["example/foundry-pi@sha256:resolved"],
+            pi_version: "0.84.4",
+          }),
+        },
+      );
+
+      expect(record.status).toBe("passed");
+      expect(record.sandbox).toEqual(
+        expect.objectContaining({
+          mode: "container",
+          security_boundary: true,
+          network_policy: "bridge",
+          credential_policy: "allowlisted-environment",
+          credential_env: [secretName],
+          workdir: "/workspace",
+          agent_config_dir: "/pi-agent",
+          image: expect.objectContaining({ resolved_id: "sha256:resolved" }),
+        }),
+      );
+      if (record.sandbox.mode !== "container") throw new Error("expected container record");
+      const bindMounts = record.sandbox.mounts.filter((mount) => mount.type === "bind");
+      expect(bindMounts).toEqual([
+        expect.objectContaining({
+          source: path.join(runDir, "skill"),
+          target: "/skill",
+          read_only: true,
+        }),
+        expect.objectContaining({
+          source: path.join(runDir, "inputs"),
+          target: "/inputs",
+          read_only: true,
+        }),
+        expect.objectContaining({
+          source: path.join(runDir, "workspace"),
+          target: "/workspace",
+          read_only: false,
+        }),
+      ]);
+      const manifest = JSON.stringify(record.sandbox.mounts);
+      expect(manifest).not.toContain(checkout);
+      expect(manifest).not.toContain("/.git");
+      expect(manifest).not.toContain("/content/molds");
+      expect(manifest).not.toContain("/_emulated-runs");
+      expect(manifest).not.toContain("unrelated-skill");
+      expect(capture.prompt).toContain("/inputs/fixture");
+      expect(capture.options?.args).toContain("/skill");
+      const launch = JSON.parse(
+        capture.options?.env?.FOUNDRY_CONTAINER_LAUNCH_CONFIG ?? "null",
+      ) as { image_id?: string; credential_env?: string[] };
+      expect(launch.image_id).toBe("sha256:resolved");
+      expect(launch.credential_env).toEqual([secretName]);
+      expect(capture.options?.env).not.toHaveProperty(secretName);
+    } finally {
+      delete process.env[secretName];
+    }
   });
 
   test("enforces a wall timeout and aborts the worker", async () => {

@@ -15,6 +15,7 @@
   },
   "files": [
     "dist",
+    "Dockerfile",
     "README.md",
     "LICENSE"
   ],
@@ -30,6 +31,7 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:container": "pnpm build && FOUNDRY_TEST_CONTAINER=1 vitest run test/container-docker.test.ts",
     "test:watch": "vitest"
   },
   "keywords": [

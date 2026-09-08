@@ -6,7 +6,8 @@ import path from "node:path";
 import { Type } from "@earendil-works/pi-ai";
 import { defineTool, type ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-import { runPiSkill, type ExpectedArtifact } from "./runner.js";
+import { runPiSkill, type SandboxMode } from "./runner.js";
+import type { ContainerNetworkPolicy } from "./container.js";
 import { resolveDeclaredInput, resolveInstalledSkill } from "./skill-resolution.js";
 
 const FoundrySubagentParams = Type.Object({
@@ -15,16 +16,33 @@ const FoundrySubagentParams = Type.Object({
   inputs: Type.Optional(
     Type.Array(Type.String(), { description: "Declared input paths relative to the Pipeline run" }),
   ),
-  expected_artifacts: Type.Optional(
-    Type.Array(
-      Type.Object({
-        id: Type.String({ description: "Published artifact id" }),
-        path: Type.String({ description: "Expected output path relative to the worker" }),
-      }),
-      { description: "Expected published artifact contracts; defaults to cast provenance" },
-    ),
-  ),
 });
+
+function sandboxConfiguration(): {
+  sandbox: SandboxMode;
+  sandboxImage?: string;
+  sandboxNetwork: ContainerNetworkPolicy;
+  credentialEnv: string[];
+} {
+  const sandbox = process.env.FOUNDRY_SANDBOX ?? "local";
+  if (sandbox !== "local" && sandbox !== "container") {
+    throw new Error("FOUNDRY_SANDBOX must be local or container");
+  }
+  const sandboxNetwork = process.env.FOUNDRY_SANDBOX_NETWORK ?? "bridge";
+  if (sandboxNetwork !== "bridge" && sandboxNetwork !== "none") {
+    throw new Error("FOUNDRY_SANDBOX_NETWORK must be bridge or none");
+  }
+  const credentialEnv = (process.env.FOUNDRY_SANDBOX_CREDENTIAL_ENV ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  return {
+    sandbox,
+    sandboxImage: process.env.FOUNDRY_SANDBOX_IMAGE,
+    sandboxNetwork,
+    credentialEnv,
+  };
+}
 
 const foundrySubagent = defineTool({
   name: "foundry_subagent",
@@ -43,16 +61,10 @@ const foundrySubagent = defineTool({
         details: null,
       };
     }
-    if ((process.env.FOUNDRY_SANDBOX ?? "local") !== "local") {
-      return {
-        content: [{ type: "text", text: "Only the local sandbox backend is implemented." }],
-        details: null,
-      };
-    }
     try {
+      const sandbox = sandboxConfiguration();
       const skillDir = resolveInstalledSkill(skillsRoot, params.skill);
       const inputPaths = (params.inputs ?? []).map((input) => resolveDeclaredInput(ctx.cwd, input));
-      const expectedArtifacts: ExpectedArtifact[] | undefined = params.expected_artifacts;
       const runsRoot = path.resolve(
         process.env.FOUNDRY_RUNS_DIR ?? path.join(tmpdir(), "foundry-pi-runs"),
       );
@@ -65,12 +77,12 @@ const foundrySubagent = defineTool({
         skillDir,
         prompt: params.task,
         inputPaths,
-        expectedArtifacts,
         runDir,
         provider: model.provider,
         model: model.id,
         thinking: ctx.thinkingLevel,
         timeoutMs: Number(process.env.FOUNDRY_WORKER_TIMEOUT_MS ?? 600_000),
+        ...sandbox,
         signal,
         onEvent: (event) => {
           eventCount += 1;

@@ -23,12 +23,21 @@ import {
   type SessionStats,
 } from "@earendil-works/pi-coding-agent";
 
+import {
+  DEFAULT_CONTAINER_IMAGE,
+  inspectContainerImage,
+  type ContainerImageResolution,
+  type ContainerLaunchConfig,
+  type ContainerMount,
+  type ContainerNetworkPolicy,
+} from "./container.js";
+
 const DEFAULT_TOOLS = ["read", "write", "edit", "bash", "grep", "find", "ls"];
 const SUPPORTED_TOOLS = new Set([...DEFAULT_TOOLS, "powershell"]);
 const SKILL_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ARTIFACT_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export type SandboxMode = "local";
+export type SandboxMode = "local" | "container";
 export type RunStatus = "passed" | "failed" | "error" | "timed_out" | "cancelled";
 export type PiThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
 
@@ -86,14 +95,27 @@ export interface PiSkillRunRecord {
     timeout_ms: number;
     ambient_discovery_disabled: true;
   };
-  sandbox: {
-    mode: SandboxMode;
-    security_boundary: false;
-    network_policy: "host";
-    credential_policy: "environment";
-    workdir: string;
-    agent_config_dir: string;
-  };
+  sandbox:
+    | {
+        mode: "local";
+        security_boundary: false;
+        network_policy: "host";
+        credential_policy: "ambient-environment";
+        workdir: string;
+        agent_config_dir: string;
+      }
+    | {
+        mode: "container";
+        security_boundary: true;
+        network_policy: ContainerNetworkPolicy;
+        credential_policy: "allowlisted-environment" | "none";
+        credential_env: string[];
+        workdir: "/workspace";
+        agent_config_dir: "/pi-agent";
+        image: ContainerImageResolution;
+        mounts: ContainerMount[];
+        container_name: string;
+      };
   inputs: StagedInput[];
   artifacts: ArtifactResult[];
   usage?: {
@@ -123,6 +145,10 @@ export interface RunPiSkillOptions {
   timeoutMs?: number;
   tools?: string[];
   sandbox?: SandboxMode;
+  sandboxImage?: string;
+  sandboxNetwork?: ContainerNetworkPolicy;
+  credentialEnv?: string[];
+  dockerBin?: string;
   signal?: AbortSignal;
   onEvent?: (event: JsonAgentSessionEvent) => void;
 }
@@ -145,6 +171,7 @@ interface PiClient {
 
 export interface PiRunnerDependencies {
   createClient?: (options: RpcClientOptions) => PiClient;
+  inspectContainerImage?: (image: string, dockerBin: string) => ContainerImageResolution;
   now?: () => Date;
   id?: () => string;
 }
@@ -238,9 +265,12 @@ function makeReadOnly(filePath: string): void {
   }
 }
 
-function stageInputs(inputPaths: string[], workspace: string): StagedInput[] {
+function stageInputs(
+  inputPaths: string[],
+  inputsDir: string,
+  stagedPrefix: "inputs" | "/inputs",
+): StagedInput[] {
   if (inputPaths.length === 0) return [];
-  const inputsDir = path.join(workspace, "inputs");
   mkdirSync(inputsDir);
   const names = new Set<string>();
   return inputPaths.map((inputPath) => {
@@ -253,7 +283,7 @@ function stageInputs(inputPaths: string[], workspace: string): StagedInput[] {
     makeReadOnly(destination);
     return {
       source,
-      staged_path: path.relative(workspace, destination).split(path.sep).join("/"),
+      staged_path: `${stagedPrefix}/${name}`,
       sha256: sha256Path(source),
     };
   });
@@ -333,19 +363,86 @@ function invocationPrompt(skill: string, prompt: string, inputs: StagedInput[]):
   return `/skill:${skill}\n\n${prompt}${inputNote}`;
 }
 
-function prepareRunDirectory(runDir: string): { workspace: string; agentDir: string } {
+function prepareRunDirectory(
+  runDir: string,
+  sandbox: SandboxMode,
+): { workspace: string; agentDir?: string; inputsDir: string } {
   if (existsSync(runDir)) throw new Error(`run directory already exists: ${runDir}`);
   mkdirSync(path.dirname(runDir), { recursive: true });
-  mkdirSync(runDir);
+  mkdirSync(runDir, { mode: 0o700 });
   const workspace = path.join(runDir, "workspace");
-  const agentDir = path.join(runDir, "pi-agent");
   mkdirSync(workspace);
+  const inputsDir =
+    sandbox === "local" ? path.join(workspace, "inputs") : path.join(runDir, "inputs");
+  if (sandbox === "container") return { workspace, inputsDir };
+  const agentDir = path.join(runDir, "pi-agent");
   mkdirSync(agentDir);
-  return { workspace, agentDir };
+  return { workspace, agentDir, inputsDir };
 }
 
 function writeRecord(runDir: string, record: PiSkillRunRecord): void {
   writeFileSync(path.join(runDir, "run.json"), `${JSON.stringify(record, null, 2)}\n`);
+}
+
+const ENVIRONMENT_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+function resolveCredentialEnv(names: string[]): string[] {
+  const unique = [...new Set(names)];
+  for (const name of unique) {
+    if (!ENVIRONMENT_NAME.test(name))
+      throw new Error(`invalid credential environment name: ${name}`);
+    if (process.env[name] === undefined) {
+      throw new Error(`credential environment variable is not set: ${name}`);
+    }
+  }
+  return unique.sort();
+}
+
+function containerMounts(
+  skillDir: string,
+  inputsDir: string,
+  workspace: string,
+  hasInputs: boolean,
+): ContainerMount[] {
+  return [
+    {
+      type: "bind",
+      source: skillDir,
+      target: "/skill",
+      read_only: true,
+      purpose: "skill",
+    },
+    ...(hasInputs
+      ? [
+          {
+            type: "bind" as const,
+            source: inputsDir,
+            target: "/inputs",
+            read_only: true,
+            purpose: "inputs" as const,
+          },
+        ]
+      : []),
+    {
+      type: "bind",
+      source: workspace,
+      target: "/workspace",
+      read_only: false,
+      purpose: "output",
+    },
+    {
+      type: "tmpfs",
+      target: "/pi-agent",
+      read_only: false,
+      purpose: "agent-config",
+    },
+    {
+      type: "tmpfs",
+      target: "/tmp",
+      read_only: false,
+      purpose: "temporary-files",
+    },
+  ];
 }
 
 export function expectedArtifactsFromSkill(skillDir: string): ExpectedArtifact[] {
@@ -370,8 +467,19 @@ export async function runPiSkill(
   const runDir = path.resolve(options.runDir);
   const skillDir = realpathSync(options.skillDir);
   const sandbox = options.sandbox ?? "local";
+  const dockerBin = options.dockerBin ?? "docker";
+  const sandboxNetwork = options.sandboxNetwork ?? "bridge";
   const timeoutMs = options.timeoutMs ?? 10 * 60 * 1000;
   const tools = [...(options.tools ?? DEFAULT_TOOLS)];
+  if (sandbox !== "local" && sandbox !== "container") {
+    throw new Error(`unsupported sandbox mode: ${String(sandbox)}`);
+  }
+  if (sandboxNetwork !== "bridge" && sandboxNetwork !== "none") {
+    throw new Error(`unsupported container network policy: ${String(sandboxNetwork)}`);
+  }
+  if (sandbox === "local" && (options.sandboxImage || options.credentialEnv?.length)) {
+    throw new Error("container image and credential options require sandbox=container");
+  }
   if (!options.provider.trim() || !options.model.trim()) {
     throw new Error("provider and model are required");
   }
@@ -381,15 +489,32 @@ export async function runPiSkill(
   if (tools.length === 0 || tools.some((tool) => !SUPPORTED_TOOLS.has(tool))) {
     throw new Error(`tools must be a non-empty subset of: ${[...SUPPORTED_TOOLS].join(", ")}`);
   }
+  const credentialEnv =
+    sandbox === "container" ? resolveCredentialEnv(options.credentialEnv ?? []) : [];
+  const image =
+    sandbox === "container"
+      ? (dependencies.inspectContainerImage ?? inspectContainerImage)(
+          options.sandboxImage ?? DEFAULT_CONTAINER_IMAGE,
+          dockerBin,
+        )
+      : undefined;
   const skill = readSkillName(skillDir);
   const expectedArtifacts = options.expectedArtifacts ?? expectedArtifactsFromSkill(skillDir);
   loadVerifyEntries(skillDir);
-  const { workspace, agentDir } = prepareRunDirectory(runDir);
+  const { workspace, agentDir, inputsDir } = prepareRunDirectory(runDir, sandbox);
+  const workerSkillDir = path.join(runDir, "skill");
+  cpSync(skillDir, workerSkillDir, {
+    recursive: true,
+    dereference: true,
+    force: false,
+  });
+  makeReadOnly(workerSkillDir);
   for (const artifact of expectedArtifacts) {
     if (!ARTIFACT_ID.test(artifact.id)) throw new Error(`invalid artifact id: ${artifact.id}`);
     resolveWorkspacePath(workspace, artifact.path);
   }
-  const inputs = stageInputs(options.inputPaths ?? [], workspace);
+  const inputPaths = options.inputPaths ?? [];
+  const inputs = stageInputs(inputPaths, inputsDir, sandbox === "container" ? "/inputs" : "inputs");
   const prompt = invocationPrompt(skill, options.prompt, inputs);
   const tracePath = path.join(runDir, "trace.jsonl");
   const stderrPath = path.join(runDir, "stderr.log");
@@ -397,6 +522,11 @@ export async function runPiSkill(
   writeFileSync(stderrPath, "");
 
   const provenancePath = path.join(skillDir, "_provenance.json");
+  const mounts =
+    sandbox === "container"
+      ? containerMounts(workerSkillDir, inputsDir, workspace, inputPaths.length > 0)
+      : undefined;
+  const containerName = `foundry-pi-${runId.toLowerCase()}`;
   const baseRecord = {
     run_schema_version: 1 as const,
     run_id: runId,
@@ -419,24 +549,61 @@ export async function runPiSkill(
       timeout_ms: timeoutMs,
       ambient_discovery_disabled: true as const,
     },
-    sandbox: {
-      mode: sandbox,
-      security_boundary: false as const,
-      network_policy: "host" as const,
-      credential_policy: "environment" as const,
-      workdir: relativeRecordPath(runDir, workspace),
-      agent_config_dir: relativeRecordPath(runDir, agentDir),
-    },
+    sandbox:
+      sandbox === "container"
+        ? {
+            mode: "container" as const,
+            security_boundary: true as const,
+            network_policy: sandboxNetwork,
+            credential_policy: credentialEnv.length
+              ? ("allowlisted-environment" as const)
+              : ("none" as const),
+            credential_env: credentialEnv,
+            workdir: "/workspace" as const,
+            agent_config_dir: "/pi-agent" as const,
+            image: image!,
+            mounts: mounts!,
+            container_name: containerName,
+          }
+        : {
+            mode: "local" as const,
+            security_boundary: false as const,
+            network_policy: "host" as const,
+            credential_policy: "ambient-environment" as const,
+            workdir: relativeRecordPath(runDir, workspace),
+            agent_config_dir: relativeRecordPath(runDir, agentDir!),
+          },
     inputs,
     trace_path: relativeRecordPath(runDir, tracePath),
     stderr_path: relativeRecordPath(runDir, stderrPath),
   };
 
-  const cliPath = fileURLToPath(import.meta.resolve("@earendil-works/pi-coding-agent/rpc-entry"));
+  const cliPath =
+    sandbox === "container"
+      ? fileURLToPath(new URL("./container-rpc-entry.js", import.meta.url))
+      : fileURLToPath(import.meta.resolve("@earendil-works/pi-coding-agent/rpc-entry"));
+  const launchConfig: ContainerLaunchConfig | undefined =
+    sandbox === "container"
+      ? {
+          docker_bin: dockerBin,
+          container_name: containerName,
+          image_id: image!.resolved_id,
+          network: sandboxNetwork,
+          credential_env: credentialEnv,
+          user:
+            typeof process.getuid === "function" && typeof process.getgid === "function"
+              ? `${process.getuid()}:${process.getgid()}`
+              : undefined,
+          mounts: mounts!,
+        }
+      : undefined;
   const clientOptions: RpcClientOptions = {
     cliPath,
     cwd: workspace,
-    env: { PI_CODING_AGENT_DIR: agentDir },
+    env:
+      sandbox === "container"
+        ? { FOUNDRY_CONTAINER_LAUNCH_CONFIG: JSON.stringify(launchConfig) }
+        : { PI_CODING_AGENT_DIR: agentDir! },
     provider: options.provider,
     model: options.model,
     args: [
@@ -446,7 +613,7 @@ export async function runPiSkill(
       "--no-prompt-templates",
       "--no-skills",
       "--skill",
-      skillDir,
+      sandbox === "container" ? "/skill" : workerSkillDir,
       "--tools",
       tools.join(","),
       ...(options.thinking ? ["--thinking", options.thinking] : []),

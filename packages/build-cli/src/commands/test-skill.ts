@@ -1,12 +1,16 @@
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
 
 import {
   expectedArtifactsFromSkill,
   runPiSkill,
+  type ContainerNetworkPolicy,
   type ExpectedArtifact,
   type PiThinkingLevel,
+  type SandboxMode,
 } from "@galaxy-foundry/pi-harness";
 
 interface Args {
@@ -21,7 +25,10 @@ interface Args {
   thinking?: PiThinkingLevel;
   timeoutMs: number;
   tools?: string[];
-  sandbox: "local";
+  sandbox: SandboxMode;
+  sandboxImage?: string;
+  sandboxNetwork: ContainerNetworkPolicy;
+  credentialEnv: string[];
 }
 
 const THINKING_LEVELS = new Set<PiThinkingLevel>([
@@ -68,7 +75,10 @@ function parseArgs(argv: string[]): Args {
   let thinking: PiThinkingLevel | undefined;
   let timeoutMs = 10 * 60 * 1000;
   let tools: string[] | undefined;
-  const sandbox = "local" as const;
+  let sandbox: SandboxMode = "local";
+  let sandboxImage: string | undefined;
+  let sandboxNetwork: ContainerNetworkPolicy = "bridge";
+  const credentialEnv: string[] = [];
 
   for (let i = 0; i < argv.length; i++) {
     const value = argv[i]!;
@@ -104,10 +114,36 @@ function parseArgs(argv: string[]): Args {
       tools = value.slice("--tools=".length).split(",").filter(Boolean);
     } else if (value === "--sandbox") {
       const requested = takeValue(argv, i++, value);
-      if (requested !== "local") throw new Error("only --sandbox local is implemented");
+      if (requested !== "local" && requested !== "container") {
+        throw new Error("--sandbox must be local or container");
+      }
+      sandbox = requested;
     } else if (value.startsWith("--sandbox=")) {
       const requested = value.slice("--sandbox=".length);
-      if (requested !== "local") throw new Error("only --sandbox local is implemented");
+      if (requested !== "local" && requested !== "container") {
+        throw new Error("--sandbox must be local or container");
+      }
+      sandbox = requested;
+    } else if (value === "--sandbox-image") {
+      sandboxImage = takeValue(argv, i++, value);
+    } else if (value.startsWith("--sandbox-image=")) {
+      sandboxImage = value.slice("--sandbox-image=".length);
+    } else if (value === "--sandbox-network") {
+      const requested = takeValue(argv, i++, value);
+      if (requested !== "bridge" && requested !== "none") {
+        throw new Error("--sandbox-network must be bridge or none");
+      }
+      sandboxNetwork = requested;
+    } else if (value.startsWith("--sandbox-network=")) {
+      const requested = value.slice("--sandbox-network=".length);
+      if (requested !== "bridge" && requested !== "none") {
+        throw new Error("--sandbox-network must be bridge or none");
+      }
+      sandboxNetwork = requested;
+    } else if (value === "--credential-env") {
+      credentialEnv.push(takeValue(argv, i++, value));
+    } else if (value.startsWith("--credential-env=")) {
+      credentialEnv.push(value.slice("--credential-env=".length));
     } else if (!value.startsWith("--")) positional.push(value);
     else throw new Error(`unknown flag: ${value}`);
   }
@@ -125,6 +161,9 @@ function parseArgs(argv: string[]): Args {
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
     throw new Error("--timeout-seconds must be a positive number");
   }
+  if (sandbox === "local" && (sandboxImage || credentialEnv.length)) {
+    throw new Error("--sandbox-image and --credential-env require --sandbox container");
+  }
   return {
     skill: positional[0]!,
     root,
@@ -138,12 +177,15 @@ function parseArgs(argv: string[]): Args {
     timeoutMs,
     tools,
     sandbox,
+    sandboxImage,
+    sandboxNetwork,
+    credentialEnv,
   };
 }
 
-function defaultRunDir(skill: string): string {
-  const stamp = new Date().toISOString().replaceAll(":", "-").replaceAll(".", "-");
-  return path.join(".foundry-runs", `${skill}-${stamp}`);
+export function defaultTestSkillRunDir(skill: string, now = new Date(), id = randomUUID()): string {
+  const stamp = now.toISOString().replaceAll(":", "-").replaceAll(".", "-");
+  return path.join(tmpdir(), `foundry-pi-run-${skill}-${stamp}-${id}`);
 }
 
 export async function runTestSkillCommand(argv = process.argv.slice(2)): Promise<void> {
@@ -158,13 +200,16 @@ export async function runTestSkillCommand(argv = process.argv.slice(2)): Promise
     prompt: args.prompt,
     inputPaths: args.inputs.map((input) => path.resolve(input)),
     expectedArtifacts: args.expected ?? expectedArtifactsFromSkill(skillDir),
-    runDir: path.resolve(args.runDir ?? defaultRunDir(args.skill)),
+    runDir: path.resolve(args.runDir ?? defaultTestSkillRunDir(args.skill)),
     provider: args.provider,
     model: args.model,
     thinking: args.thinking,
     timeoutMs: args.timeoutMs,
     tools: args.tools,
     sandbox: args.sandbox,
+    sandboxImage: args.sandboxImage,
+    sandboxNetwork: args.sandboxNetwork,
+    credentialEnv: args.credentialEnv,
   });
   process.stdout.write(`${JSON.stringify(record, null, 2)}\n`);
   if (record.status !== "passed") process.exitCode = 1;
