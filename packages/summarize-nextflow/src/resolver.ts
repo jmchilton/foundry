@@ -60,6 +60,7 @@ interface Subworkflow {
   name: string;
   path: string;
   kind: "pipeline" | "utility";
+  aliases: string[];
   calls: string[];
   inputs?: ChannelIO[];
   outputs?: ChannelIO[];
@@ -296,7 +297,7 @@ export async function resolveNextflowSummary(
   const workflowName = parseWorkflowName(config);
   const processFiles = discoverProcessFiles(pipelineRoot);
   const processes = processFiles.flatMap((path) => parseProcessFile(pipelineRoot, path));
-  const aliases = discoverProcessAliases(pipelineRoot);
+  const aliases = discoverAliases(pipelineRoot);
   const warnings =
     options.mulledIndexPath && !existsSync(options.mulledIndexPath)
       ? [`mulled index path not found: ${options.mulledIndexPath}`]
@@ -310,10 +311,12 @@ export async function resolveNextflowSummary(
   const workflows = parseWorkflows(
     pipelineRoot,
     processes.map((process) => process.name),
+    aliases,
   );
   const primaryWorkflow = selectPrimaryWorkflow(
     workflows,
     processes.map((process) => process.name),
+    aliases,
   );
   warnings.push(...buildWarnings(processes, workflows));
 
@@ -412,6 +415,93 @@ function buildWarnings(processes: Process[], workflows: ParsedWorkflow[]): strin
 
 function readText(path: string): string {
   return readFileSync(path, "utf8");
+}
+
+/**
+ * Replace comments with spaces while preserving string contents, byte offsets,
+ * and line breaks. Structural parsers can then safely run their existing
+ * regular expressions without discovering declarations inside comments.
+ *
+ * Workflow IO parsing intentionally retains trailing `// descriptions`; its
+ * caller requests `preserveInlineLineComments` while still removing block and
+ * standalone line comments.
+ */
+function maskNextflowComments(text: string, preserveInlineLineComments = false): string {
+  const chars = [...text];
+  let quote: "'" | '"' | "'''" | '"""' | null = null;
+  let lineStart = 0;
+
+  const mask = (index: number): void => {
+    if (chars[index] !== "\n" && chars[index] !== "\r") chars[index] = " ";
+  };
+
+  for (let index = 0; index < chars.length; index += 1) {
+    const char = chars[index]!;
+    const next = chars[index + 1];
+    const nextTwo = chars[index + 2];
+
+    if (quote) {
+      if ((quote === "'" || quote === '"') && char === "\\") {
+        index += 1;
+        continue;
+      }
+      if (quote.length === 3) {
+        if (char === quote[0] && next === quote[0] && nextTwo === quote[0]) {
+          quote = null;
+          index += 2;
+        }
+      } else if (char === quote) {
+        quote = null;
+      }
+      if (char === "\n") lineStart = index + 1;
+      continue;
+    }
+
+    if ((char === "'" || char === '"') && next === char && nextTwo === char) {
+      quote = char === "'" ? "'''" : '"""';
+      index += 2;
+      continue;
+    }
+    if (char === "'" || char === '"') {
+      quote = char;
+      continue;
+    }
+
+    if (char === "/" && next === "*") {
+      mask(index);
+      mask(index + 1);
+      index += 2;
+      while (index < chars.length) {
+        const blockChar = chars[index]!;
+        if (blockChar === "*" && chars[index + 1] === "/") {
+          mask(index);
+          mask(index + 1);
+          index += 1;
+          break;
+        }
+        mask(index);
+        if (blockChar === "\n") lineStart = index + 1;
+        index += 1;
+      }
+      continue;
+    }
+
+    if (char === "/" && next === "/") {
+      const standalone = chars.slice(lineStart, index).every((item) => /\s/u.test(item));
+      if (!preserveInlineLineComments || standalone) {
+        while (index < chars.length && chars[index] !== "\n") {
+          mask(index);
+          index += 1;
+        }
+        lineStart = index + 1;
+      }
+      continue;
+    }
+
+    if (char === "\n") lineStart = index + 1;
+  }
+
+  return chars.join("");
 }
 
 function gitOutput(cwd: string, args: string[]): string | null {
@@ -725,7 +815,7 @@ function detectPipelineRoot(path: string): { path: string; warnings: string[] } 
 function discoverProcessFiles(pipelineRoot: string): string[] {
   return walk(pipelineRoot)
     .filter(isNextflowSourceFile)
-    .filter((path) => /\bprocess\s+[A-Za-z0-9_]+\s*\{/u.test(readText(path)));
+    .filter((path) => /\bprocess\s+[A-Za-z0-9_]+\s*\{/u.test(maskNextflowComments(readText(path))));
 }
 
 function walk(root: string, options: { maxDepth?: number } = {}, depth = 0): string[] {
@@ -761,7 +851,7 @@ function isNextflowSourceFile(path: string): boolean {
 }
 
 function parseProcessFile(pipelineRoot: string, path: string): Process[] {
-  const text = readText(path);
+  const text = maskNextflowComments(readText(path));
   return [...text.matchAll(/\bprocess\s+([A-Za-z0-9_]+)\s*\{/gu)].flatMap((match) => {
     const openIndex = match.index + match[0].lastIndexOf("{");
     const body = extractBlockAt(text, openIndex);
@@ -873,7 +963,7 @@ function compareEntrypointCandidates(root: string, left: string, right: string):
   );
 }
 
-function discoverProcessAliases(pipelineRoot: string): Map<string, string[]> {
+function discoverAliases(pipelineRoot: string): Map<string, string[]> {
   const aliases = new Map<string, Set<string>>();
   for (const path of walk(pipelineRoot).filter((candidate) => candidate.endsWith(".nf"))) {
     for (const include of parseIncludeItems(readText(path))) {
@@ -886,7 +976,11 @@ function discoverProcessAliases(pipelineRoot: string): Map<string, string[]> {
   return new Map([...aliases.entries()].map(([name, values]) => [name, [...values].sort()]));
 }
 
-function parseWorkflows(pipelineRoot: string, processNames: string[]): ParsedWorkflow[] {
+function parseWorkflows(
+  pipelineRoot: string,
+  processNames: string[],
+  aliases: Map<string, string[]>,
+): ParsedWorkflow[] {
   const workflows = new Map<string, ParsedWorkflow>();
   const knownProcesses = new Set(processNames);
   for (const path of walk(pipelineRoot).filter((candidate) => candidate.endsWith(".nf"))) {
@@ -906,6 +1000,7 @@ function parseWorkflows(pipelineRoot: string, processNames: string[]): ParsedWor
         name: block.name,
         path: relative(pipelineRoot, path),
         kind: calls.length > 0 ? "pipeline" : "utility",
+        aliases: aliases.get(block.name) ?? [],
         calls,
         inputs: parseWorkflowIoBlock(block.body, "take"),
         outputs: parseWorkflowIoBlock(block.body, "emit"),
@@ -920,19 +1015,28 @@ function parseWorkflows(pipelineRoot: string, processNames: string[]): ParsedWor
 function selectPrimaryWorkflow(
   workflows: ParsedWorkflow[],
   processNames: string[],
+  aliases: Map<string, string[]>,
 ): ParsedWorkflow | null {
   if (workflows.length === 0) return null;
   const knownProcesses = new Set(processNames);
-  const byName = new Map(workflows.map((workflow) => [workflow.name, workflow]));
+  for (const processName of processNames) {
+    for (const alias of aliases.get(processName) ?? []) knownProcesses.add(alias);
+  }
+  const byName = new Map<string, ParsedWorkflow>();
+  for (const workflow of workflows) {
+    byName.set(workflow.name, workflow);
+    for (const alias of workflow.aliases) byName.set(alias, workflow);
+  }
   const reach = new Map<string, Set<string>>();
 
   function transitiveReach(name: string, visiting: Set<string>): Set<string> {
-    const cached = reach.get(name);
-    if (cached) return cached;
-    if (visiting.has(name)) return new Set();
-    visiting.add(name);
-    const result = new Set<string>();
     const workflow = byName.get(name);
+    const canonicalName = workflow?.name ?? name;
+    const cached = reach.get(canonicalName);
+    if (cached) return cached;
+    if (visiting.has(canonicalName)) return new Set();
+    visiting.add(canonicalName);
+    const result = new Set<string>();
     if (workflow) {
       for (const call of workflow.calls) {
         if (knownProcesses.has(call)) {
@@ -942,8 +1046,8 @@ function selectPrimaryWorkflow(
         }
       }
     }
-    visiting.delete(name);
-    reach.set(name, result);
+    visiting.delete(canonicalName);
+    reach.set(canonicalName, result);
     return result;
   }
 
@@ -973,7 +1077,11 @@ function selectPrimaryWorkflow(
   const candidates = workflowsPrefixed.length > 0 ? workflowsPrefixed : reachCandidates;
   const candidateNames = new Set(candidates.map((candidate) => candidate.name));
   const terminal = candidates.filter(
-    (candidate) => !candidate.calls.some((call) => candidateNames.has(call)),
+    (candidate) =>
+      !candidate.calls.some((call) => {
+        const calledWorkflow = byName.get(call);
+        return calledWorkflow ? candidateNames.has(calledWorkflow.name) : false;
+      }),
   );
   const finalists = terminal.length > 0 ? terminal : candidates;
   return [...finalists].sort(tiebreak)[0] ?? null;
@@ -985,6 +1093,7 @@ function stripWorkflowBody(workflow: ParsedWorkflow): Subworkflow {
 }
 
 function extractWorkflowBlocks(text: string): { name: string | null; body: string }[] {
+  text = maskNextflowComments(text, true);
   const blocks: { name: string | null; body: string }[] = [];
   const regex = /\bworkflow(?:\s+([A-Za-z0-9_]+))?\s*\{/gu;
   for (const match of text.matchAll(regex)) {
@@ -996,6 +1105,7 @@ function extractWorkflowBlocks(text: string): { name: string | null; body: strin
 }
 
 function parseWorkflowCalls(body: string, knownNames: Set<string>): string[] {
+  body = maskNextflowComments(body);
   const calls = new Set<string>();
   // Match call positions anywhere on a line (not just line-start) so that tuple
   // destructures like `(a, b) = setup(reads)` register `setup` as a call. The
@@ -1609,7 +1719,11 @@ function buildSubworkflowInvocations(
   workflows: ParsedWorkflow[],
 ): Map<string, SubworkflowInvocation[]> {
   const result = new Map<string, SubworkflowInvocation[]>();
-  const calleesByName = new Map(workflows.map((workflow) => [workflow.name, workflow]));
+  const calleesByName = new Map<string, ParsedWorkflow>();
+  for (const workflow of workflows) {
+    calleesByName.set(workflow.name, workflow);
+    for (const alias of workflow.aliases) calleesByName.set(alias, workflow);
+  }
   for (const caller of workflows) {
     const mainBlock = extractMainBlock(caller.body);
     for (const invocation of extractCallInvocations(mainBlock)) {
@@ -1695,6 +1809,7 @@ function parseWorkflowIoBlock(text: string, blockName: "take" | "emit"): Channel
 }
 
 function parseIncludeItems(text: string): { name: string; alias: string | null }[] {
+  text = maskNextflowComments(text);
   const items: { name: string; alias: string | null }[] = [];
   for (const match of text.matchAll(/include\s*\{([^}]+)\}\s*from\s*['"][^'"]+['"]/gu)) {
     for (const item of match[1]!.split(";")) {

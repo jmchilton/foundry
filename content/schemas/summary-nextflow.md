@@ -15,8 +15,8 @@ tags:
   - source/nextflow
 status: draft
 created: 2026-04-30
-revised: 2026-05-06
-revision: 10
+revised: 2026-09-08
+revision: 11
 related_notes:
   - "[[summarize-nextflow]]"
   - "[[nextflow-workflow-io-semantics]]"
@@ -74,6 +74,19 @@ Per `content/meta/casting.md`'s per-kind dispatch, this schema is referenced by 
 - **Structured channel typing.** `processes[].inputs[].shape` is a string (`"tuple(meta, [path,path])"`), not a structured type. NF channel typing is a research project; a string is enough for downstream Molds to reason about and an LLM to emit.
 - **Operator-chain semantics.** `Edge.via` records the literal operator chain (`["map", "join", "groupTuple"]`). Reconciling what the chain *does* to channel shapes is left to the LLM step that fills `Edge.notes` when confidence is low.
 - **Multi-tool processes outside decomposed mulled-v2 containers.** A process can run multiple tools (a shell pipeline of two binaries). `Process.tool` is nullable; multi-tool processes set it null and surface tool details in `script_excerpt` and `container`. A `tools[]` foreign-key array on `Process` would be cleaner; deferred until downstream use forces it.
+
+## Revision 11 — 2026-09-08
+
+Subworkflow topology fidelity from the pinned egapx fixture. Resolves
+galaxyproject/foundry#485.
+
+- **`Subworkflow.aliases: string[]` added.** Repeated
+  `include { workflow as alias }` imports now map each call-site spelling back
+  to the canonical subworkflow without collapsing the distinct calls.
+- Resolver structure extraction now ignores line and block comments. A
+  commented future implementation with the same workflow name can no longer
+  overwrite the live definition or leak its `take:`, `emit:`, and calls into
+  the summary.
 
 ## Revision 2 — 2026-05-01
 

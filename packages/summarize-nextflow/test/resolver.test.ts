@@ -49,7 +49,10 @@ interface SummaryLike {
     name: string;
     path: string;
     kind: "pipeline" | "utility";
+    aliases: string[];
     calls: string[];
+    inputs?: { name: string; shape: string; topic: string | null }[];
+    outputs?: { name: string; shape: string; topic: string | null }[];
     tests: { name: string; path: string }[];
   }[];
   workflow: { name: string };
@@ -559,6 +562,118 @@ nextflow_pipeline {
     );
     expect(summary.subworkflows.map((workflow) => workflow.name)).not.toContain("ANALYSIS");
     expect(summary.workflow.name).toBe("ANALYSIS");
+  });
+
+  test("ignores commented declarations and preserves aliased subworkflow calls", async () => {
+    const root = tempPipelineRoot();
+    write(root, "nextflow.config", "manifest { name = 'ncbi/egapx-shape' }\n");
+    write(
+      root,
+      "modules/train/main.nf",
+      `process TRAIN {
+  script:
+  'train'
+}
+`,
+    );
+    write(
+      root,
+      "subworkflows/training/utilities.nf",
+      `include { TRAIN } from '../../modules/train'
+workflow gnomon_training_iteration {
+  take:
+  hmm_params
+  main:
+  TRAIN()
+  emit:
+  hmm_params_file = TRAIN.out
+}
+`,
+    );
+    write(
+      root,
+      "subworkflows/training/main.nf",
+      `include { gnomon_training_iteration; gnomon_training_iteration as gnomon_training_iteration2; gnomon_training_iteration as gnomon_training_iteration3; gnomon_training_iteration as gnomon_training_iteration4 } from './utilities'
+workflow gnomon_training_iterations {
+  take:
+  initial_hmm_params
+  alignments
+  gnomon_softmask
+  main:
+  gnomon_training_iteration(initial_hmm_params)
+  gnomon_training_iteration2(gnomon_training_iteration.out.hmm_params_file)
+  gnomon_training_iteration3(gnomon_training_iteration2.out.hmm_params_file)
+  gnomon_training_iteration4(gnomon_training_iteration3.out.hmm_params_file)
+  emit:
+  hmm_params_file = gnomon_training_iteration4.out.hmm_params_file
+}
+
+/* Future recursive implementation; it must not replace the live workflow above.
+workflow gnomon_training_iterations {
+  take:
+  models_file
+  alignments
+  gnomon_softmask_lds2
+  main:
+  gnomon_training_iteration.recurse(models_file).times(4)
+  emit:
+  hmm_params_file = gnomon_training_iteration.out.hmm_params_file
+}
+*/
+// include { COMMENTED_ALIAS as NOT_LIVE } from './commented'
+`,
+    );
+    write(
+      root,
+      "workflows/egapx.nf",
+      `include { gnomon_training_iterations } from '../subworkflows/training/main'
+workflow EGAPX {
+  main:
+  gnomon_training_iterations(Channel.of('hmm'), Channel.of('alignments'), Channel.of('mask'))
+}
+// process COMMENTED_PROCESS { script: 'false' }
+`,
+    );
+
+    const summary = await summarize(root);
+
+    expect(summary.processes.map((process) => process.name)).toEqual(["TRAIN"]);
+    const iterations = summary.subworkflows.find(
+      (workflow) => workflow.name === "gnomon_training_iterations",
+    );
+    expect(iterations).toEqual(
+      expect.objectContaining({
+        calls: [
+          "gnomon_training_iteration",
+          "gnomon_training_iteration2",
+          "gnomon_training_iteration3",
+          "gnomon_training_iteration4",
+        ],
+        inputs: [
+          { name: "initial_hmm_params", shape: "initial_hmm_params", topic: null },
+          { name: "alignments", shape: "alignments", topic: null },
+          { name: "gnomon_softmask", shape: "gnomon_softmask", topic: null },
+        ],
+        outputs: [
+          {
+            name: "hmm_params_file",
+            shape: "hmm_params_file = gnomon_training_iteration4.out.hmm_params_file",
+            topic: null,
+          },
+        ],
+      }),
+    );
+    expect(iterations?.inputs?.map((input) => input.name)).not.toContain("models_file");
+    expect(iterations?.inputs?.map((input) => input.name)).not.toContain("gnomon_softmask_lds2");
+
+    const iteration = summary.subworkflows.find(
+      (workflow) => workflow.name === "gnomon_training_iteration",
+    );
+    expect(iteration?.aliases).toEqual([
+      "gnomon_training_iteration2",
+      "gnomon_training_iteration3",
+      "gnomon_training_iteration4",
+    ]);
   });
 
   test("decomposes mulled-v2 containers from a cached multi-package TSV", async () => {
