@@ -11,7 +11,7 @@ import {
   type ExpectedArtifact,
   type PiThinkingLevel,
   type SandboxMode,
-} from "@galaxy-foundry/pi-harness";
+} from "@galaxy-foundry/gxwf-pi-harness";
 
 interface Args {
   skill: string;

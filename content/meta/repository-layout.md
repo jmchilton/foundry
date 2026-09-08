@@ -60,7 +60,7 @@ The content root follows the Astro idiom and tells a contributor that these file
 - `note-schema/` — instance note kinds, collections, and schema composition.
 - `build-cli/` — repository authoring, validation, generation, casting, and assembly.
 - `foundry/` — runtime CLI and orphan Mold IO schemas.
-- `pi-harness/` — optional Pi worker runner, normalized evaluation records, and constrained Foundry subagent extension.
+- `gxwf-pi-harness/` — optional Pi worker runner, normalized evaluation records, and constrained Foundry subagent extension.
 - `summarize-nextflow/` — Nextflow summarization plus producer-owned schemas.
 - `planemo-cli-meta/` and `planemo-test-report-schema/` — pinned generated Planemo interfaces.
 

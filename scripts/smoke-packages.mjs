@@ -126,9 +126,9 @@ const smokeScripts = {
       throw new Error("raw report provenance differs from typed export");
     }
   `,
-  "@galaxy-foundry/pi-harness": `
-    import extension from "@galaxy-foundry/pi-harness/extension";
-    import { runPiSkill } from "@galaxy-foundry/pi-harness";
+  "@galaxy-foundry/gxwf-pi-harness": `
+    import extension from "@galaxy-foundry/gxwf-pi-harness/extension";
+    import { runPiSkill } from "@galaxy-foundry/gxwf-pi-harness";
     if (typeof extension !== "function" || typeof runPiSkill !== "function") {
       throw new Error("pi-harness exports missing");
     }

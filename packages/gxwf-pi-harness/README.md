@@ -1,11 +1,11 @@
-# @galaxy-foundry/pi-harness
+# @galaxy-foundry/gxwf-pi-harness
 
 Pi-backed worker isolation for evaluating published Galaxy Workflow Foundry skills.
 
 The package has two surfaces:
 
 - `runPiSkill()` starts one ephemeral Pi RPC worker with one explicitly loaded skill, a fresh configuration directory, staged declared inputs, and ambient resource discovery disabled.
-- `@galaxy-foundry/pi-harness/extension` registers the constrained `foundry_subagent` tool used by a top-level Pipeline skill.
+- `@galaxy-foundry/gxwf-pi-harness/extension` registers the constrained `foundry_subagent` tool used by a top-level Pipeline skill.
 
 The extension derives the worker's expected artifacts exclusively from the selected published cast's `_provenance.json`. The parent agent can choose the skill, task, and declared inputs, but cannot replace or suppress that artifact contract.
 
@@ -16,12 +16,12 @@ Container mode runs the whole Pi RPC worker inside a disposable Docker container
 Build the default image from the repository root:
 
 ```sh
-npm run pi-harness:container-build
+npm run gxwf-pi-harness:container-build
 ```
 
 The image pins Pi 0.84.4 and the `@galaxy-foundry/gxwf-foundry` CLI 0.1.0 required by the pilot `summarize-nextflow` skill. It carries compatibility labels for both runtimes that are checked before every run. A caller may use `--sandbox-image <ref>` for another locally available image with the same labels. The runner resolves the ref to an immutable image ID before launch and records that ID, any repository digests, every mount, the network policy, and the names—not values—of forwarded credential variables.
 
-Container provider access is explicit. Use `--sandbox-network bridge` and repeat `--credential-env <NAME>` for only the variables the provider needs. Use `--sandbox-network none` for credential-free probes. Run the Docker boundary test with `npm run pi-harness:container-test`.
+Container provider access is explicit. Use `--sandbox-network bridge` and repeat `--credential-env <NAME>` for only the variables the provider needs. Use `--sandbox-network none` for credential-free probes. Run the Docker boundary test with `npm run gxwf-pi-harness:container-test`.
 
 ## Extension configuration
 

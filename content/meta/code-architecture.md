@@ -22,7 +22,7 @@ This record answers one question: **how is the implementation divided, and which
                  build-cli (authoring)
                  │        │          │
                  ▼        ▼          ▼
-          note-schema  pi-harness  foundry CLI
+          note-schema  gxwf-pi-harness  foundry CLI
                  │        │          │
                  ▼        ▼          ▼
   shared substrate        Pi     summarize-nextflow
@@ -71,7 +71,7 @@ The runtime-facing CLI and schema bundle. It owns validation commands for struct
 
 A domain runtime package that summarizes Nextflow source and owns the schemas produced by that operation. Producer-owned schemas remain with their producer; `@galaxy-foundry/gxwf-foundry` holds the orphan schemas with no independent in-repository producer.
 
-### `@galaxy-foundry/pi-harness`
+### `@galaxy-foundry/gxwf-pi-harness`
 
 The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker, normalized run records, declared-input staging, artifact verification, and the `foundry_subagent` Pi extension. `foundry-build test-skill` supplies the repository-facing command, but both trace-mode callers and the extension use this package's one runner. The package accepts a published skill bundle; it does not read authored Molds, select Pipeline phases, or grade qualitative properties.
 
@@ -98,7 +98,7 @@ Composition happens at narrow adapters such as the schema context, registries, a
 
 ## External tool boundary
 
-gxwf, Planemo, and Pi are not implementation layers in this repository. Molds describe when to use gxwf and Planemo, CLI notes document their exact commands, and generated skills invoke them. The optional `pi-harness` adapter invokes pinned Pi as an evaluation worker. Repository validation does not require any of these tools to run; their execution remains a design-time, cast-runtime, or opt-in evaluation concern.
+gxwf, Planemo, and Pi are not implementation layers in this repository. Molds describe when to use gxwf and Planemo, CLI notes document their exact commands, and generated skills invoke them. The optional `gxwf-pi-harness` adapter invokes pinned Pi as an evaluation worker. Repository validation does not require any of these tools to run; their execution remains a design-time, cast-runtime, or opt-in evaluation concern.
 
 ## Cross-component contracts
 
@@ -119,7 +119,7 @@ gxwf, Planemo, and Pi are not implementation layers in this repository. Molds de
 | repository validation | `packages/build-cli/src/commands/validate.ts` |
 | what this Foundry contributes to a cast | `packages/build-cli/src/commands/cast-mold.ts` |
 | pipeline assembly | `packages/build-cli/src/commands/assemble-pipeline.ts` |
-| Pi skill evaluation | `packages/pi-harness/src/` and `packages/build-cli/src/commands/test-skill.ts` |
+| Pi skill evaluation | `packages/gxwf-pi-harness/src/` and `packages/build-cli/src/commands/test-skill.ts` |
 | runtime artifact validation | `packages/gxwf-foundry/src/` |
 | Nextflow summarization | `packages/summarize-nextflow/src/` |
 | site collection wiring | `site/src/content.config.ts` |
