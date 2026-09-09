@@ -5,6 +5,7 @@ import path from "node:path";
 import process from "node:process";
 
 import {
+  defaultPiTestAuthDir,
   expectedArtifactsFromSkill,
   runPiSkill,
   type ContainerNetworkPolicy,
@@ -29,6 +30,7 @@ interface Args {
   sandboxImage?: string;
   sandboxNetwork: ContainerNetworkPolicy;
   credentialEnv: string[];
+  piTestAuth: boolean;
 }
 
 const THINKING_LEVELS = new Set<PiThinkingLevel>([
@@ -79,6 +81,7 @@ function parseArgs(argv: string[]): Args {
   let sandboxImage: string | undefined;
   let sandboxNetwork: ContainerNetworkPolicy = "bridge";
   const credentialEnv: string[] = [];
+  let piTestAuth = false;
 
   for (let i = 0; i < argv.length; i++) {
     const value = argv[i]!;
@@ -144,6 +147,8 @@ function parseArgs(argv: string[]): Args {
       credentialEnv.push(takeValue(argv, i++, value));
     } else if (value.startsWith("--credential-env=")) {
       credentialEnv.push(value.slice("--credential-env=".length));
+    } else if (value === "--pi-test-auth") {
+      piTestAuth = true;
     } else if (!value.startsWith("--")) positional.push(value);
     else throw new Error(`unknown flag: ${value}`);
   }
@@ -164,6 +169,12 @@ function parseArgs(argv: string[]): Args {
   if (sandbox === "local" && (sandboxImage || credentialEnv.length)) {
     throw new Error("--sandbox-image and --credential-env require --sandbox container");
   }
+  if (piTestAuth && sandbox !== "local") {
+    throw new Error("--pi-test-auth requires --sandbox local");
+  }
+  if (piTestAuth && provider !== "openai-codex") {
+    throw new Error("--pi-test-auth requires --provider openai-codex");
+  }
   return {
     skill: positional[0]!,
     root,
@@ -180,6 +191,7 @@ function parseArgs(argv: string[]): Args {
     sandboxImage,
     sandboxNetwork,
     credentialEnv,
+    piTestAuth,
   };
 }
 
@@ -210,6 +222,7 @@ export async function runTestSkillCommand(argv = process.argv.slice(2)): Promise
     sandboxImage: args.sandboxImage,
     sandboxNetwork: args.sandboxNetwork,
     credentialEnv: args.credentialEnv,
+    piTestAuthDir: args.piTestAuth ? defaultPiTestAuthDir() : undefined,
   });
   process.stdout.write(`${JSON.stringify(record, null, 2)}\n`);
   if (record.status !== "passed") process.exitCode = 1;
