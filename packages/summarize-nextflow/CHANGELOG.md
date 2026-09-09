@@ -1,5 +1,11 @@
 # @galaxy-foundry/summarize-nextflow
 
+## 0.2.0
+
+### Minor Changes
+
+- [#486](https://github.com/galaxyproject/foundry/pull/486) [`0457a1b`](https://github.com/galaxyproject/foundry/commit/0457a1ba2933a64882515523cfcf6496130fc546) Thanks [@jmchilton](https://github.com/jmchilton)! - Ignore commented Nextflow declarations and expose subworkflow aliases so summaries preserve the live workflow topology.
+
 ## 0.1.0
 
 ### Minor Changes
