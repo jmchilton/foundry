@@ -9,6 +9,8 @@ import {
   readFileSync,
   readdirSync,
   realpathSync,
+  symlinkSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
@@ -31,6 +33,7 @@ import {
   type ContainerMount,
   type ContainerNetworkPolicy,
 } from "./container.js";
+import { inspectPiTestAuth, PI_TEST_AUTH_PROVIDER, piTestAuthPath } from "./pi-test-auth.js";
 
 const DEFAULT_TOOLS = ["read", "write", "edit", "bash", "grep", "find", "ls"];
 const SUPPORTED_TOOLS = new Set([...DEFAULT_TOOLS, "powershell"]);
@@ -101,6 +104,7 @@ export interface PiSkillRunRecord {
         security_boundary: false;
         network_policy: "host";
         credential_policy: "ambient-environment";
+        credential_auth_store: "pi-test-auth" | "none";
         workdir: string;
         agent_config_dir: string;
       }
@@ -148,6 +152,7 @@ export interface RunPiSkillOptions {
   sandboxImage?: string;
   sandboxNetwork?: ContainerNetworkPolicy;
   credentialEnv?: string[];
+  piTestAuthDir?: string;
   dockerBin?: string;
   signal?: AbortSignal;
   onEvent?: (event: JsonAgentSessionEvent) => void;
@@ -480,6 +485,17 @@ export async function runPiSkill(
   if (sandbox === "local" && (options.sandboxImage || options.credentialEnv?.length)) {
     throw new Error("container image and credential options require sandbox=container");
   }
+  if (options.piTestAuthDir && sandbox === "container") {
+    throw new Error(
+      "pi-test-auth requires the local sandbox until host-side tool isolation is available",
+    );
+  }
+  if (options.piTestAuthDir && options.provider !== PI_TEST_AUTH_PROVIDER) {
+    throw new Error(`pi-test-auth requires provider=${PI_TEST_AUTH_PROVIDER}`);
+  }
+  if (options.piTestAuthDir && !inspectPiTestAuth(options.piTestAuthDir).configured) {
+    throw new Error(`pi-test-auth is not configured; run foundry-build pi-test-auth login first`);
+  }
   if (!options.provider.trim() || !options.model.trim()) {
     throw new Error("provider and model are required");
   }
@@ -502,6 +518,8 @@ export async function runPiSkill(
   const expectedArtifacts = options.expectedArtifacts ?? expectedArtifactsFromSkill(skillDir);
   loadVerifyEntries(skillDir);
   const { workspace, agentDir, inputsDir } = prepareRunDirectory(runDir, sandbox);
+  const authLinkPath =
+    options.piTestAuthDir && agentDir ? path.join(agentDir, "auth.json") : undefined;
   const workerSkillDir = path.join(runDir, "skill");
   cpSync(skillDir, workerSkillDir, {
     recursive: true,
@@ -570,6 +588,9 @@ export async function runPiSkill(
             security_boundary: false as const,
             network_policy: "host" as const,
             credential_policy: "ambient-environment" as const,
+            credential_auth_store: options.piTestAuthDir
+              ? ("pi-test-auth" as const)
+              : ("none" as const),
             workdir: relativeRecordPath(runDir, workspace),
             agent_config_dir: relativeRecordPath(runDir, agentDir!),
           },
@@ -619,7 +640,14 @@ export async function runPiSkill(
       ...(options.thinking ? ["--thinking", options.thinking] : []),
     ],
   };
-  const client = (dependencies.createClient ?? ((value) => new RpcClient(value)))(clientOptions);
+  let client: PiClient;
+  try {
+    if (authLinkPath) symlinkSync(piTestAuthPath(options.piTestAuthDir!), authLinkPath);
+    client = (dependencies.createClient ?? ((value) => new RpcClient(value)))(clientOptions);
+  } catch (error) {
+    if (authLinkPath && existsSync(authLinkPath)) unlinkSync(authLinkPath);
+    throw error;
+  }
   const events: JsonAgentSessionEvent[] = [];
   let state: RpcSessionState | undefined;
   let stats: SessionStats | undefined;
@@ -717,5 +745,6 @@ export async function runPiSkill(
     unsubscribe();
     await client.stop().catch(() => undefined);
     writeFileSync(stderrPath, client.getStderr());
+    if (authLinkPath && existsSync(authLinkPath)) unlinkSync(authLinkPath);
   }
 }

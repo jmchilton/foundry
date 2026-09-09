@@ -104,6 +104,7 @@ function fakeRecord(options: RunPiSkillOptions, skill: string): PiSkillRunRecord
       security_boundary: false,
       network_policy: "host",
       credential_policy: "ambient-environment",
+      credential_auth_store: options.piTestAuthDir ? "pi-test-auth" : "none",
       workdir: "workspace",
       agent_config_dir: "pi-agent",
     },
@@ -146,12 +147,13 @@ test("runs a linear prefix in fresh workers with declared artifact handoffs", as
       through: "2",
       trials: 2,
       runDir,
-      provider: "test-provider",
+      provider: "openai-codex",
       model: "test-model",
       sandbox: "local",
       timeoutMs: 1000,
       credentialEnv: [],
       sandboxNetwork: "none",
+      piTestAuthDir: "/test/pi-test-auth",
     },
     {
       runSkill: async (options) => {
@@ -182,6 +184,8 @@ test("runs a linear prefix in fresh workers with declared artifact handoffs", as
     }),
   ]);
   expect(calls).toHaveLength(4);
+  expect(calls.every((call) => call.piTestAuthDir === "/test/pi-test-auth")).toBe(true);
+  expect(record.sandbox.credential_auth_store).toBe("pi-test-auth");
   expect(calls[0]?.inputPaths).toEqual([path.join(root, "workflow-fixtures", "pipelines", "tiny")]);
   expect(calls[1]?.inputPaths).toEqual([
     path.join(runDir, "trial-001", "phase-001-summarize", "workspace", "summary.json"),

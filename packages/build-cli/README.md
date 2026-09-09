@@ -23,6 +23,12 @@ foundry-build test-pipeline nextflow-to-galaxy --root . \
   --scenario "nf-core/demo end to end" --through 2 \
   --engine pi --sandbox container \
   --provider anthropic --model MODEL_ID --credential-env ANTHROPIC_API_KEY
+
+# Use an OpenAI subscription for an explicitly local diagnostic run.
+foundry-build pi-test-auth login
+foundry-build test-pipeline nextflow-to-galaxy --root . \
+  --scenario "nf-core/demo end to end" --engine pi --sandbox local \
+  --provider openai-codex --model MODEL_ID --pi-test-auth
 ```
 
 ## Commands
@@ -33,6 +39,9 @@ foundry-build test-pipeline nextflow-to-galaxy --root . \
 - `generate-dashboard` — write or check `content/Dashboard.md` from `dashboard_sections.json`.
 - `test-skill` — run one cast skill in a fresh Pi worker and retain its trace and validated artifacts.
 - `test-pipeline` — run a linear prefix of an assembled Pipeline with one fresh Pi worker per phase. It resolves a named Pipeline scenario, carries forward only artifact IDs declared by the next skill, supports `--through <phase-or-skill>` and `--trials N`, and writes an aggregate `run.json` beside each phase's worker record and raw trace. Branches and loops are rejected during preflight until their controller-owned predicates are implemented.
+- `pi-test-auth` — manage an isolated OpenAI/Codex OAuth credential for local diagnostic test runs. Supports `login`, `status`, and `logout`; `login --method device-code --no-open` works on a headless host. Status output contains metadata only.
+
+`--pi-test-auth` is opt-in and valid only with `--sandbox local`, `--provider openai-codex`. Local mode is not a security boundary: the Pi process keeps the credential on the host while its enabled tools also execute on the host. The container sandbox deliberately does not accept this OAuth store; continue to pass narrowly allowlisted API-key environment variables to container runs until host-side tool sandboxing is implemented.
 
 ## License
 

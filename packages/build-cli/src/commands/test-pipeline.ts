@@ -5,6 +5,7 @@ import path from "node:path";
 import process from "node:process";
 
 import {
+  defaultPiTestAuthDir,
   expectedArtifactsFromSkill,
   runPiSkill,
   sha256Path,
@@ -69,6 +70,7 @@ export interface TestPipelineOptions {
   sandboxImage?: string;
   sandboxNetwork: ContainerNetworkPolicy;
   credentialEnv: string[];
+  piTestAuthDir?: string;
 }
 
 interface ResolvedScenario {
@@ -138,6 +140,7 @@ export interface PipelineRunRecord {
     image?: string;
     network_policy: ContainerNetworkPolicy | "host";
     credential_env: string[];
+    credential_auth_store: "pi-test-auth" | "none";
   };
   trials: PipelineTrialRunRecord[];
   usage: {
@@ -200,6 +203,7 @@ function parseArgs(argv: string[]): CliArgs {
   let sandboxImage: string | undefined;
   let sandboxNetwork: ContainerNetworkPolicy = "bridge";
   const credentialEnv: string[] = [];
+  let piTestAuth = false;
 
   for (let i = 0; i < argv.length; i++) {
     const value = argv[i]!;
@@ -269,6 +273,8 @@ function parseArgs(argv: string[]): CliArgs {
       credentialEnv.push(takeValue(argv, i++, value));
     } else if (value.startsWith("--credential-env=")) {
       credentialEnv.push(value.slice("--credential-env=".length));
+    } else if (value === "--pi-test-auth") {
+      piTestAuth = true;
     } else if (!value.startsWith("--")) positional.push(value);
     else throw new Error(`unknown flag: ${value}`);
   }
@@ -287,6 +293,12 @@ function parseArgs(argv: string[]): CliArgs {
   if (sandbox === "local" && (sandboxImage || credentialEnv.length)) {
     throw new Error("--sandbox-image and --credential-env require --sandbox container");
   }
+  if (piTestAuth && sandbox !== "local") {
+    throw new Error("--pi-test-auth requires --sandbox local");
+  }
+  if (piTestAuth && provider !== "openai-codex") {
+    throw new Error("--pi-test-auth requires --provider openai-codex");
+  }
   return {
     root,
     pipeline: positional[0]!,
@@ -303,6 +315,7 @@ function parseArgs(argv: string[]): CliArgs {
     sandboxImage,
     sandboxNetwork,
     credentialEnv,
+    piTestAuthDir: piTestAuth ? defaultPiTestAuthDir() : undefined,
   };
 }
 
@@ -519,6 +532,12 @@ export async function runLinearPipeline(
   if (options.sandbox === "local" && (options.sandboxImage || options.credentialEnv.length)) {
     throw new Error("container image and credential options require sandbox=container");
   }
+  if (options.piTestAuthDir && options.sandbox !== "local") {
+    throw new Error("pi-test-auth requires sandbox=local");
+  }
+  if (options.piTestAuthDir && options.provider !== "openai-codex") {
+    throw new Error("pi-test-auth requires provider=openai-codex");
+  }
 
   const assembly = loadAssembly(repoRoot, options.pipeline);
   const assemblyPath = path.join(
@@ -568,6 +587,7 @@ export async function runLinearPipeline(
       image: options.sandboxImage,
       network_policy: options.sandbox === "container" ? options.sandboxNetwork : "host",
       credential_env: [...options.credentialEnv].sort(),
+      credential_auth_store: options.piTestAuthDir ? "pi-test-auth" : "none",
     },
     trials: [],
     usage: emptyUsage(),
@@ -625,6 +645,7 @@ export async function runLinearPipeline(
           sandboxImage: options.sandboxImage,
           sandboxNetwork: options.sandboxNetwork,
           credentialEnv: options.credentialEnv,
+          piTestAuthDir: options.piTestAuthDir,
         });
       } catch (caught) {
         const message = caught instanceof Error ? caught.message : String(caught);
