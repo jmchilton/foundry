@@ -21,6 +21,7 @@ const COMMANDS = [
   "cast-all",
   "assemble-pipeline",
   "validate-artifact",
+  "test-skill",
 ] as const;
 
 async function main(argv = process.argv.slice(2)): Promise<void> {
@@ -39,7 +40,10 @@ async function main(argv = process.argv.slice(2)): Promise<void> {
   else if (command === "cast-all") await runCastSweepCommand(rest);
   else if (command === "assemble-pipeline") await runAssemblePipelineCommand(rest);
   else if (command === "validate-artifact") runValidateArtifactCommand(rest);
-  else {
+  else if (command === "test-skill") {
+    const { runTestSkillCommand } = await import("../commands/test-skill.js");
+    await runTestSkillCommand(rest);
+  } else {
     process.stderr.write(`unknown command: ${command}\n\n`);
     printHelp();
     process.exit(2);

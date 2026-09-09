@@ -126,6 +126,13 @@ const smokeScripts = {
       throw new Error("raw report provenance differs from typed export");
     }
   `,
+  "@galaxy-foundry/gxwf-pi-harness": `
+    import extension from "@galaxy-foundry/gxwf-pi-harness/extension";
+    import { runPiSkill } from "@galaxy-foundry/gxwf-pi-harness";
+    if (typeof extension !== "function" || typeof runPiSkill !== "function") {
+      throw new Error("pi-harness exports missing");
+    }
+  `,
   "@galaxy-foundry/summarize-nextflow": `
     import { readFileSync } from "node:fs";
     import {

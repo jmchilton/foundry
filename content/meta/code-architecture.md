@@ -7,8 +7,8 @@ tags:
   - meta
 status: reviewed
 created: 2026-08-02
-revised: 2026-08-25
-revision: 2
+revised: 2026-08-29
+revision: 3
 summary: "Implementation components, dependency direction, entry points, and contracts across the Foundry codebase."
 ---
 
@@ -20,12 +20,12 @@ This record answers one question: **how is the implementation divided, and which
                     site (Astro)
                          │
                  build-cli (authoring)
-                    │          │
-                    ▼          ▼
-             note-schema     foundry CLI
-                    │          │
-                    ▼          ▼
-       shared substrate     summarize-nextflow
+                 │        │          │
+                 ▼        ▼          ▼
+          note-schema  gxwf-pi-harness  foundry CLI
+                 │        │          │
+                 ▼        ▼          ▼
+  shared substrate        Pi     summarize-nextflow
 
 shared substrate = cast, kind-schema, kind-manifest, tag-registry,
 reference-contract, wiki-links, content-reader, and license-policy packages
@@ -71,6 +71,10 @@ The runtime-facing CLI and schema bundle. It owns validation commands for struct
 
 A domain runtime package that summarizes Nextflow source and owns the schemas produced by that operation. Producer-owned schemas remain with their producer; `@galaxy-foundry/gxwf-foundry` holds the orphan schemas with no independent in-repository producer.
 
+### `@galaxy-foundry/gxwf-pi-harness`
+
+The optional evaluation-runtime adapter. It owns the single-skill Pi RPC worker, normalized run records, declared-input staging, artifact verification, and the `foundry_subagent` Pi extension. `foundry-build test-skill` supplies the repository-facing command, but both trace-mode callers and the extension use this package's one runner. The package accepts a published skill bundle; it does not read authored Molds, select Pipeline phases, or grade qualitative properties.
+
 ### Metadata packages
 
 `@galaxy-foundry/planemo-cli-meta` and `@galaxy-foundry/planemo-test-report-schema` are generated, version-pinned views of Planemo interfaces. Normal validation consumes the checked-in artifacts without requiring Planemo to be installed.
@@ -94,7 +98,7 @@ Composition happens at narrow adapters such as the schema context, registries, a
 
 ## External tool boundary
 
-gxwf and Planemo are not implementation layers in this repository. Molds describe when to use them, CLI notes document exact commands, and generated skills invoke them. Repository validation may inspect their vendored metadata, but tool execution remains a design-time or cast-runtime concern.
+gxwf, Planemo, and Pi are not implementation layers in this repository. Molds describe when to use gxwf and Planemo, CLI notes document their exact commands, and generated skills invoke them. The optional `gxwf-pi-harness` adapter invokes pinned Pi as an evaluation worker. Repository validation does not require any of these tools to run; their execution remains a design-time, cast-runtime, or opt-in evaluation concern.
 
 ## Cross-component contracts
 
@@ -115,6 +119,7 @@ gxwf and Planemo are not implementation layers in this repository. Molds describ
 | repository validation | `packages/build-cli/src/commands/validate.ts` |
 | what this Foundry contributes to a cast | `packages/build-cli/src/commands/cast-mold.ts` |
 | pipeline assembly | `packages/build-cli/src/commands/assemble-pipeline.ts` |
+| Pi skill evaluation | `packages/gxwf-pi-harness/src/` and `packages/build-cli/src/commands/test-skill.ts` |
 | runtime artifact validation | `packages/gxwf-foundry/src/` |
 | Nextflow summarization | `packages/summarize-nextflow/src/` |
 | site collection wiring | `site/src/content.config.ts` |

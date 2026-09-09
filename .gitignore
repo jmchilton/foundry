@@ -9,6 +9,7 @@ site/dist/
 .cache/
 coverage/
 .tmp-test-vault*/
+.foundry-runs/
 .playwright-mcp/
 /*.png
 common_paths.yml
