@@ -89,6 +89,15 @@ whatever a scenario produces. Properties are tagged by bucket:
   `subworkflows[].aliases`; declarations and calls inside line or block
   comments contribute nothing.
 
+## Property: reference assets and rebuilds are recorded
+
+- bucket: fidelity
+- check: llm-judged
+- assertion: every reference-data param has a `reference_assets[]` row, and
+  every build-or-download-if-unset branch has a `reference_rebuilds[]` row
+  whose `guard` names the unset condition; hardcoded download URLs stay
+  verbatim in `evidence`, with unpinned ones flagged.
+
 ## Property: every tool directive resolves or is flagged
 
 - bucket: fidelity

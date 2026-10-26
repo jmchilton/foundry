@@ -7,8 +7,8 @@ tags:
   - source/nextflow
 status: reviewed
 created: 2026-04-30
-revised: 2026-09-15
-revision: 18
+revised: 2026-10-26
+revision: 19
 output_artifacts:
   - id: summary-nextflow
     kind: json
@@ -360,6 +360,10 @@ Subworkflows split into two kinds:
 Parse only live `workflow` declarations. Definitions, includes, processes, and calls inside `// ...` or `/* ... */` comments are inert source text and must never contribute to the summary or overwrite a live declaration with the same name. Preserve each live subworkflow's `take:`, `emit:`, and distinct alias call spellings; populate `subworkflows[].aliases` on the canonical declaration.
 
 Free-function calls in the workflow body itself (`paramsSummaryMap`, `softwareVersionsToYAML`, `methodsDescriptionText`) are not modeled as processes or subworkflows. Their channel outputs flow into the primary workflow's `channels[]`; the function names are nf-core template idiom, not pipeline-specific signal. Operator chains with deeply nested closures may produce edges flagged with low confidence in `notes`.
+
+### 6.5. Record reference assets and rebuilds
+
+Emit one `reference_assets[]` row per param that supplies reference data (genome, index, annotation, database, model file), whether or not it is required. Emit one `reference_rebuilds[]` row per branch that builds or downloads that asset when the param is unset. For an `if (param) { use } else { build }` shape, write `guard` as the negation of the user-path condition (e.g. `params.x_db == null`). For a builder that fetches a URL hardcoded in the source rather than a param, keep the literal URL in `evidence` and flag an unpinned one (`latest`, a branch name). A multi-way branch gets one rebuild row per builder.
 
 ### 7. Enumerate and select whole-pipeline test candidates
 
