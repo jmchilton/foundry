@@ -4,11 +4,11 @@
   "mold": {
     "name": "implement-galaxy-tool-step",
     "path": "content/molds/implement-galaxy-tool-step/index.md",
-    "revision": 11,
-    "content_hash": "a814dce91c3b0df482d4a28e5e4cd8bd3165ba203eb71aa6b418cedbb47365f8",
-    "commit": "7cbb53a2107d14c2458218eb9799c9f34949ef7d"
+    "revision": 12,
+    "content_hash": "249336bfc24d3502e525a75c04856ac753f42d7638296e404954b6423cf97ab1",
+    "commit": "79f5dfb6036026b174c9c52b02d0c6db1c83d185"
   },
-  "cast_at": "2026-10-23T22:57:06.804Z",
+  "cast_at": "2026-10-26T02:47:37.258Z",
   "refs": [
     {
       "kind": "cli-command",
