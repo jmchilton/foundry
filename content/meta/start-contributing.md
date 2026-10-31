@@ -28,8 +28,6 @@ Each track ends by filing what you saw with `report-foundry-run-feedback`.
 ## Contribute content
 
 - **Turn a failed run into a Mold eval example.** TODO
-- **Write a pattern from the IWC corpus.** [[pattern-authorship]]. TODO
-- **Fix a CLI manual page.** TODO
 
 ## Pick up an issue
 
