@@ -16,19 +16,14 @@ TODO: one-paragraph intro.
 
 ## Set up
 
-TODO: install the skills plugin (see the README), or clone and run `make check`.
+Install the skills plugin per [Usage](https://galaxyproject.github.io/foundry/usage/), or clone the repository and run `make check`.
 
 ## Try a pipeline
 
 Each track ends by filing what you saw with `report-foundry-run-feedback`.
 
 - **Convert a Nextflow workflow.** [[nextflow-to-galaxy]]. TODO
-- **Build a workflow from scratch.** [[interview-to-galaxy]]. TODO
 - **Build a workflow from a paper.** [[paper-to-galaxy]]. TODO
-- **Convert a CWL workflow.** [[cwl-to-galaxy]]. TODO
-- **Change an existing workflow.** [[update-interview-to-galaxy]]. TODO
-- **Review or mature a workflow.** [[galaxy-workflow-review]], [[galaxy-workflow-maturation]]. TODO
-- **Race the IWC.** Rebuild an IWC workflow from its paper or Nextflow source without looking, then compare. TODO
 
 ## Contribute content
 
