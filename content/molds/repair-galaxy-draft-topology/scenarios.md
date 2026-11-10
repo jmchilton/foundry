@@ -69,7 +69,8 @@ No committed fixture yet.
   `_plan_state` blocks select `refGenomeSource.geneSource: history`. Both steps
   stay identity-pinned, with no `state` added. No step is added for the index,
   and no `kind: dropped` entry is appended. The resolve note quotes the
-  `geneSource` option. `gxwf draft-validate` exits 0.
+  `geneSource` option. A `decisions` entry records that each alignment job
+  builds its own index. `gxwf draft-validate` exits 0.
 
 ## Case: value must vary per run
 
