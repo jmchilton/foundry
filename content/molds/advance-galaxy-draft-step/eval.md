@@ -129,6 +129,16 @@ Properties are tagged by bucket:
   with no new search. An entry holding only Tool Shed misses or a tool version
   missing from a cache goes through wrapper resolution first.
 
+## Property: a wrapper's missing parameter is a recorded drop
+
+- bucket: routing
+- check: llm-judged
+- assertion: when no wrapper that runs the step's work has a parameter the plan
+  sets, the setting is dropped with a `kind: dropped` entry naming it in `units`
+  and quoting the wrapper's parameters in `because`. A declared output the wrapper
+  can't produce gets a blocking entry naming the wrapper, never only a
+  non-blocking one.
+
 ## Property: open blocking entries reach repair before extract
 
 - bucket: routing
