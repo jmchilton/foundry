@@ -7,7 +7,7 @@
 
 ## Case: runtime failure ownership hint
 
-- fixture: concrete step implementation with a plausible mismatch between expected source behavior and Galaxy wrapper inputs, outputs, datatype, or collection support.
+- fixture: concrete step implementation whose wrapper carries what the plan needs, with a plausible runtime mismatch between expected source behavior and the wrapper's datatype, parameter, or collection support.
 - expect: records whether a later failure should be investigated as tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue.
 
 ## Case: wrapper runs the work but has no index output

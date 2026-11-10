@@ -10,7 +10,7 @@ This file is the **abstract oracle**: properties any run of `implement-galaxy-to
 ## Property: runtime failure ownership hint
 
 - check: llm-judged
-- assertion: records whether a later failure should be investigated as tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue.
+- assertion: when the wrapper carries what the plan needs but a datatype, parameter or collection shape could still fail at runtime, records whether a later failure should be investigated as tool/job failure, data-flow mistake, template wiring mistake, wrapper mismatch, or test/assertion issue.
 
 ## Property: a wrapper's limit becomes a blocking entry, not a workaround
 
