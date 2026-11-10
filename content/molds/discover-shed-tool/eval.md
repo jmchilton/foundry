@@ -23,7 +23,8 @@ need it ran on. Concrete fixtures and their expected pins live in
 ## Property: a wrapper that runs the named executable is never a miss
 
 - check: llm-judged
-- assertion: when a wrapper runs the executable or operation the need names,
+- assertion: when a wrapper outside a data manager runs the executable or
+  operation the need names,
   the result is `hit` or `weak` with that wrapper as `candidate`, even when the
   rationale doubts it fits the step. A `miss` that lists such a wrapper under
   `alternates` is a failure.

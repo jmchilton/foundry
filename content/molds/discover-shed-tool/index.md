@@ -104,9 +104,9 @@ A structured recommendation object, JSON-shaped:
 `status` semantics:
 - `hit` — recommend pinning. Caller should cache and proceed.
 - `weak` — candidate exists but the cast skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller confirms the candidate before pinning; it never falls through to authoring.
-- `miss` — no wrapper runs the executable or operation the need names. Caller falls through to [[author-galaxy-tool-wrapper]].
+- `miss` — no wrapper outside a data manager runs the executable or operation the need names. Caller falls through to [[author-galaxy-tool-wrapper]].
 
-Classify on what a wrapper runs, not on fit. Fit depends on the step's ports, which discovery doesn't see, and [[implement-galaxy-tool-step]] checks it after summarize. A wrapper that runs the named executable is never a `miss`.
+Classify on what a wrapper runs, not on fit. Fit depends on the step's ports, which discovery doesn't see, and [[implement-galaxy-tool-step]] checks it after summarize. A wrapper outside a data manager that runs the named executable is never a `miss`.
 
 ## Procedure
 
@@ -159,7 +159,7 @@ Prefer `--latest` so the newest changeset publishing that version wins (tool ver
 Combine the scored hit and the resolved pin into the recommendation object above:
 - One dominant hit + clean version+changeset resolution → `hit`.
 - Multiple plausible hits, ambiguous owner, deprecated suspicion, or only-help-text match → `weak` with the leading candidate plus alternates.
-- No wrapper runs what the need names → `miss`.
+- No wrapper outside a data manager runs what the need names → `miss`.
 
 Validate the recommendation with `validate-galaxy-tool-discovery` before returning it. Do not rely on prose-only shape checks; downstream phases branch on this contract.
 
