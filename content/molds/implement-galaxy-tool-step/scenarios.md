@@ -12,8 +12,8 @@
 
 ## Case: wrapper runs the work but has no index output
 
-- fixture: a draft whose Deferred `STAR genome index` step feeds an index to two STAR alignment steps, and the [[galaxy-tool-summary]] for `iuc/rgrnastar/rna_star` `2.7.11b+galaxy1`. That wrapper has no index output: with `geneSource: history` it builds a temporary index inside the alignment job.
-- expect: no index port is bound. One open blocking entry with `step` set to the index step names `rna_star` `2.7.11b+galaxy1` in `missing` and quotes its outputs and the `geneSource` option. Nothing asks for a new STAR wrapper.
+- fixture: `../repair-galaxy-draft-topology/examples/star-index-fold/galaxy-workflow-draft.gxwf.yml`, step `star_genome_index`, with the [[galaxy-tool-summary]] from `galaxy-tool-cache summarize toolshed.g2.bx.psu.edu/repos/iuc/rgrnastar/rna_star --tool-version 2.7.11b+galaxy1`. That wrapper has no index output: with `geneSource: history` it builds a temporary index inside the alignment job.
+- expect: `TODO_index` stays unbound. One open blocking entry with `step: star_genome_index` names `rna_star` `2.7.11b+galaxy1` in `missing` and quotes its outputs and the `geneSource` option, as in `open-requirements.ledger.yml` beside the draft. Nothing asks for a new STAR wrapper.
 
 ## Case: step bound to an authored user-defined tool
 

@@ -96,3 +96,11 @@ the round-trip oracle. See that directory's `README.md`.
   and `open-requirements.ledger.yml` beside it.
 - expect: the call that picks `M19_dupradar`, once `M18_markdup` is realized, goes
   straight to [[repair-galaxy-draft-topology]] with no new search.
+
+## Case: entry that records a found wrapper that can't serve the step
+
+- fixture: `../repair-galaxy-draft-topology/examples/star-index-fold/galaxy-workflow-draft.gxwf.yml`
+  and `open-requirements.ledger.yml` beside it.
+- expect: the call that picks `star_genome_index` goes straight to
+  [[repair-galaxy-draft-topology]] with no [[discover-shed-tool]] or
+  [[author-galaxy-tool-wrapper]] call.

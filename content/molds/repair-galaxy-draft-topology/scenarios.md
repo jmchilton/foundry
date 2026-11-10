@@ -58,19 +58,23 @@
 
 ## Case: a consumer's wrapper builds the index
 
-No committed fixture yet.
-
-- fixture: a draft whose drafty `STAR genome index` step feeds an index to two
-  `rna_star` steps identity-pinned with `tool_version: TODO`, and the blocking
-  entry [[implement-galaxy-tool-step]] raised on it, naming `rna_star`
-  `2.7.11b+galaxy1` as having no index output.
-- expect: the entry ends `resolved`. The index step is gone, its genome FASTA is
-  wired to `refGenomeSource|genomeFastaFiles` on both `rna_star` steps, and both
+- fixture: `examples/star-index-fold/galaxy-workflow-draft.gxwf.yml` and
+  `open-requirements.ledger.yml` beside it.
+- expect: `star-index-wrapper-no-index-output` ends `resolved`. The emitted draft
+  matches `examples/star-index-fold/folded.gxwf.yml` up to `_plan_state` wording:
+  `star_genome_index` is gone, `genome` is wired to
+  `refGenomeSource|genomeFastaFiles` on both `rna_star` steps, and both
   `_plan_state` blocks select `refGenomeSource.geneSource: history`. Both steps
   stay identity-pinned, with no `state` added. No step is added for the index,
   and no `kind: dropped` entry is appended. The resolve note quotes the
   `geneSource` option. A `decisions` entry records that each alignment job
   builds its own index. `gxwf draft-validate` exits 0.
+
+## Case: folded draft re-enters the loop
+
+- fixture: `examples/star-index-fold/folded.gxwf.yml`
+- command: `gxwf draft-next-step folded.gxwf.yml`
+- expect: `draft: true`; `step` equals `["star_paired"]`.
 
 ## Case: value must vary per run
 

@@ -1,0 +1,16 @@
+topology_repair:
+  escalations: 0
+  cap: 5
+  open_history: []
+entries:
+  - id: star-index-wrapper-no-index-output
+    status: open
+    kind: gap
+    blocking: true
+    raised_by: implement-galaxy-tool-step
+    step: star_genome_index
+    unmet: "Produce the STAR genome index `star_paired` and `star_single` read."
+    missing: "`iuc/rgrnastar/rna_star` `2.7.11b+galaxy1` runs STAR but has no index output. Its outputs are `output_log`, `chimeric_junctions`, `splice_junctions`, `mapped_reads`, `transcriptome_mapped_reads`, `reads_per_gene` and four `signal_*` coverage files. Its `refGenomeSource.geneSource` option `history` is \"Use reference genome from history and create temporary index\", reading the genome from `refGenomeSource|genomeFastaFiles`."
+    resolved_by: null
+    supersedes: null
+    note: "`TODO_index` is left unbound."
