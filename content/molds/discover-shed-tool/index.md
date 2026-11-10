@@ -106,7 +106,7 @@ A structured recommendation object, JSON-shaped:
 - `weak` — candidate exists but the cast skill is not confident (e.g. only help-text matched, multiple owners with similar tools, deprecated repo, stale-index suspicion). Caller confirms the candidate before pinning; it never falls through to authoring.
 - `miss` — no wrapper outside a data manager runs the executable or operation the need names. Caller falls through to [[author-galaxy-tool-wrapper]].
 
-Classify on what a wrapper runs, not on fit. Fit depends on the step's ports, which discovery doesn't see, and [[implement-galaxy-tool-step]] checks it after summarize. A wrapper outside a data manager that runs the named executable is never a `miss`.
+Classify on what a wrapper runs, not on fit. A wrapper outside a data manager that runs the named executable is never a `miss`.
 
 ## Procedure
 
@@ -132,7 +132,7 @@ For each hit, score on:
 - **Recency.** Recent `last_updated` strengthens a hit; very old wrappers can still be valid but warrant the `weak` classification.
 - **Duplicates across repos.** Two owners can publish wrappers with the same XML id. Either pick the maintained one or downgrade to `weak` and surface the choice.
 
-Drop data-manager hits (usually `data_manager_*` repos): they're admin-only and write a tool data table, not a dataset a step can consume. Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see [[component-tool-shed-search]] §6.
+Drop data-manager hits (usually `data_manager_*` repos). Drop hits from deprecated repos when detectable. Note: deprecated repos can still appear in shed search results until the next index rebuild — see [[component-tool-shed-search]] §6.
 
 ### 3. Resolve to a pinnable version
 
