@@ -67,8 +67,9 @@ No committed fixture yet.
 - expect: the entry ends `resolved`. The index step is gone, its genome FASTA is
   wired to `refGenomeSource|genomeFastaFiles` on both `rna_star` steps, and both
   `_plan_state` blocks select `refGenomeSource.geneSource: history`. Both steps
-  stay identity-pinned, with no `state` added. No step is added for the index.
-  `gxwf draft-validate` exits 0.
+  stay identity-pinned, with no `state` added. No step is added for the index,
+  and no `kind: dropped` entry is appended. The resolve note quotes the
+  `geneSource` option. `gxwf draft-validate` exits 0.
 
 ## Case: value must vary per run
 

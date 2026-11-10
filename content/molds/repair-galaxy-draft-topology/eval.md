@@ -31,7 +31,8 @@
   `kind: dropped` entry from this repair, with `units` and a `because` that quotes
   a primary artifact. A `because` that only names the blocking entry, rests on a
   tool version missing from a local cache, or needs an uncited claim for the
-  removal to follow, fails.
+  removal to follow, fails. A fold is not a narrowing and has no `kind: dropped`
+  entry.
 
 ## Property: a removal needs standing
 
@@ -39,7 +40,18 @@
 - assertion: no step is removed when a consumer truly needs its output, when the
   step is realized, or when the removal doesn't follow from what the repair can
   quote. The entry stays `open` with a note saying what's unproven, and no
-  `kind: dropped` entry is appended for it.
+  `kind: dropped` entry is appended for it. A fold has standing when the entry
+  quotes the consumer wrapper's option that does the removed step's work.
+
+## Property: a fold moves the work into the consumers
+
+- check: llm-judged
+- assertion: when the entry quotes a consumer's wrapper option that does the
+  step's work, the repair removes the step, rewires its inputs to every consumer,
+  and selects that option on each, in `state` if realized and `_plan_state` if
+  drafty. The resolve note quotes the option. Adding a producer for the same work,
+  leaving a consumer on a mode that still reads the removed output, or folding into
+  a consumer not pinned to the quoted wrapper fails.
 
 ## Property: a removal leaves nothing dead or stale
 
